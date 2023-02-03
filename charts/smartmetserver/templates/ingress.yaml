@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+ name: smartmetserver-ingress
+ namespace: smartmet
+ annotations:
+   cert-manager.io/cluster-issuer: letsencrypt
+spec:
+ tls:
+ - hosts:
+   - data.lab.rauhalat.org
+   secretName: smartmetserver-ingress-tls
+ rules:
+ - host: data.lab.rauhalat.org
+   http:
+     paths:
+     - backend:
+         service:
+           name: smartmetserver
+           port:
+             number: 8080
+       path: /
+       pathType: Prefix

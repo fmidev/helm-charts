@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "smartmetserver.fullname" . }}-test-connection"
+  labels:
+    {{- include "smartmetserver.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "smartmetserver.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never
