@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.opmet.name }}
+  labels:
+    app: {{ .Values.opmet.name }}
+spec:
+  replicas: {{ .Values.opmet.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.opmet.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.opmet.name }}
+      annotations:
+        eks.amazonaws.com/compute-type: ec2
+    spec:
+      containers:
+      - name: {{ .Values.opmet.name }}
+        image: {{ .Values.opmet.registry }}:{{ .Values.versions.opmet }}
+        ports:
+        - containerPort: {{ .Values.opmet.env.OPMET_BACKEND_PORT_HTTP }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Values.opmet.name }}
+        command: ["/bin/sh"]
+        #args: ["-c", "sleep 10 ; uvicorn opmet_backend.main:app --reload --host 0.0.0.0 --port 8000"]
+        args: ["-c", "sleep 10 ; gunicorn --bind 0.0.0.0:8000 -k uvicorn.workers.UvicornWorker opmet_backend.main:app"]
+      - name: {{ .Values.opmet.messageconverter.name }}
+        image: {{ .Values.opmet.messageconverter.registry }}:{{ .Values.opmet.messageconverter.version }}
+        ports:
+        - containerPort: {{ .Values.opmet.messageconverter.port }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Values.opmet.name }}
+      - name: {{ .Values.opmet.nginx.name }}
+        image: {{ .Values.opmet.nginx.registry }}:{{ .Values.versions.opmet }}
+        ports:
+        - containerPort: {{ .Values.opmet.nginx.NGINX_PORT_HTTP }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Values.opmet.nginx.name }}

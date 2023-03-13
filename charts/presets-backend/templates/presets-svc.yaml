@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.presets.name }}
+spec:
+  selector:
+    app: {{ .Values.presets.name }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.presets.svcPort }}
+      targetPort: {{ .Values.presets.nginx.NGINX_PORT_HTTP }}
