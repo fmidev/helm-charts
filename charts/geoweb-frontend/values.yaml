@@ -14,6 +14,7 @@ frontend:
     GW_INFRA_BASE_URL: https://api.opengeoweb.com
     GW_GITLAB_PRESETS_BASE_URL: https://gitlab.com/api/v4/projects
     GW_GITLAB_PRESETS_API_PATH: /{project_id}/repository/files/{presets_path}{preset_filename}/raw?ref={branch}
+    GW_GITLAB_PROJECT_ID: "24089222"
     GW_GITLAB_BRANCH: master
     GW_INITIAL_PRESETS_FILENAME: initialPresets.json
     GW_SCREEN_PRESETS_FILENAME: screenPresets.json
