@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.ingress.name }}-{{ .Values.cap.name }}
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "DELETE, PUT, GET, POST, OPTIONS, PATCH, HEAD"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: {{ .Values.cap.url }}
+      http:
+        paths:
+          - path: {{ .Values.cap.path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.cap.name }}
+                port:
+                  number: {{ .Values.cap.svcPort }}

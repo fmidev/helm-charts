@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.opmet.name }}
+data:
+  ENV_STATE: {{ .Values.opmet.env.ENV_STATE | quote }}
+  SQLALCHEMY_DATABASE_URL: {{ .Values.opmet.env.SQLALCHEMY_DATABASE_URL | quote }}
+  TEST_SQLALCHEMY_DATABASE_URL: {{ .Values.opmet.env.TEST_SQLALCHEMY_DATABASE_URL | quote }}
+  TEST_MESSAGECONVERTER_URL: {{ .Values.opmet.env.TEST_MESSAGECONVERTER_URL | quote }}
+  TEST_TEST_FIELD: {{ .Values.opmet.env.TEST_TEST_FIELD | quote }}
+  TEST_MWO_CCCC: {{ .Values.opmet.env.TEST_MWO_CCCC | quote }}
+  TEST_SIGMET_HEADER__VA_CLD: {{ .Values.opmet.env.TEST_SIGMET_HEADER__VA_CLD | quote }}
+  TEST_SIGMET_HEADER__TC: {{ .Values.opmet.env.TEST_SIGMET_HEADER__TC | quote }}
+  TEST_SIGMET_HEADER__DEFAULT: {{ .Values.opmet.env.TEST_SIGMET_HEADER__DEFAULT | quote }}
+  TEST_IWXXM_SIGMET_HEADER__VA_CLD: {{ .Values.opmet.env.TEST_IWXXM_SIGMET_HEADER__VA_CLD | quote }}
+  TEST_IWXXM_SIGMET_HEADER__TC: {{ .Values.opmet.env.TEST_IWXXM_SIGMET_HEADER__TC | quote }}
+  TEST_IWXXM_SIGMET_HEADER__DEFAULT: {{ .Values.opmet.env.TEST_IWXXM_SIGMET_HEADER__DEFAULT | quote }}
+  OAUTH2_USERINFO: {{ .Values.opmet.env.OAUTH2_USERINFO | quote }}
+  OPMET_BACKEND_PORT_HTTP: {{ .Values.opmet.env.OPMET_BACKEND_PORT_HTTP | quote }}
+  EXTERNALADDRESSES: {{ .Values.opmet.env.EXTERNALADDRESSES | quote }}
+  OPMET_ENABLE_SSL: {{ .Values.opmet.env.OPMET_ENABLE_SSL | quote }}
+  FORWARDED_ALLOW_IPS: {{ .Values.opmet.env.FORWARDED_ALLOW_IPS | quote }}

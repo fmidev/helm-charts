@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.cap.name }}
+  labels:
+    app: {{ .Values.cap.name }}
+spec:
+  replicas: {{ .Values.cap.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.cap.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.cap.name }}
+      annotations:
+        eks.amazonaws.com/compute-type: ec2
+    spec:
+      containers:
+      - name: {{ .Values.cap.name }}
+        image: {{ .Values.cap.registry }}:{{ .Values.versions.cap }}
+        ports:
+        - containerPort: {{ .Values.cap.containerPort}}

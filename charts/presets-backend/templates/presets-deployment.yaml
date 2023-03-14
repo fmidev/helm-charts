@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.presets.name }}
+  labels:
+    app: {{ .Values.presets.name }}
+spec:
+  replicas: {{ .Values.presets.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.presets.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.presets.name }}
+      annotations:
+        eks.amazonaws.com/compute-type: ec2
+    spec:
+      containers:
+      - name: {{ .Values.presets.name }}
+        image: {{ .Values.presets.registry }}:{{ .Values.versions.presets }}
+        lifecycle:
+          postStart:
+            exec:
+              command: ["/bin/sh", "-c", "python cli.py enable-alembic; alembic upgrade 06a95cbbd0ed"]
+        ports:
+        - containerPort: {{ .Values.presets.PRESETS_PORT_HTTP }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Values.presets.name }}
+      - name: {{ .Values.presets.nginx.name }}
+        image: {{ .Values.presets.nginx.registry }}:{{ .Values.versions.presets }}
+        ports:
+        - containerPort: {{ .Values.presets.nginx.NGINX_PORT_HTTP }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Values.presets.nginx.name }}

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.opmet.nginx.name }}
+data:
+  OPMET_ENABLE_SSL: {{ .Values.opmet.nginx.OPMET_ENABLE_SSL | quote }}
+  EXTERNAL_HOSTNAME: {{ .Values.opmet.nginx.EXTERNAL_HOSTNAME | quote }}
+  OAUTH2_USERINFO: {{ .Values.opmet.nginx.OAUTH2_USERINFO | quote }}
+  OPMET_BACKEND_HOST: {{ .Values.opmet.nginx.OPMET_BACKEND_HOST | quote }}
+  NGINX_PORT_HTTP: {{ .Values.opmet.nginx.NGINX_PORT_HTTP | quote }}

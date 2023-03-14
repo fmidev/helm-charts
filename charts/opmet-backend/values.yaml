@@ -1,0 +1,41 @@
+versions:
+  opmet: "v0.0.1"
+
+opmet:
+  name: opmet
+  registry: registry.gitlab.com/opengeoweb/backend-services/opmet-backend/opmet-backend
+  path: /opmet/(.*)
+  svcPort: 80
+  replicas: 1
+  env:
+    ENV_STATE: TEST
+    TEST_MESSAGECONVERTER_URL: "http://localhost:8080/getsigmettac"
+    TEST_TEST_FIELD: "A"
+    TEST_MWO_CCCC: "EHDB"
+    TEST_SIGMET_HEADER__VA_CLD: "WVNL31"
+    TEST_SIGMET_HEADER__TC: "WCNL31"
+    TEST_SIGMET_HEADER__DEFAULT: "WSNL31"
+    TEST_IWXXM_SIGMET_HEADER__VA_CLD: "LVNL31"
+    TEST_IWXXM_SIGMET_HEADER__TC: "LYNL31"
+    TEST_IWXXM_SIGMET_HEADER__DEFAULT: "LSNL31"
+    OAUTH2_USERINFO: https://gitlab.com/oauth/userinfo"
+    OPMET_BACKEND_PORT_HTTP: 8000
+    EXTERNALADDRESSES: 0.0.0.0:80
+    OPMET_ENABLE_SSL: "FALSE"
+    FORWARDED_ALLOW_IPS: "*"
+  messageconverter:
+    name: opmet-messageconverter
+    registry: registry.gitlab.com/opengeoweb/avi-msgconverter/geoweb-knmi-avi-messageservices
+    version: "0.1.1"
+    port: 8080
+  nginx:
+    name: opmet-nginx
+    registry: registry.gitlab.com/opengeoweb/backend-services/opmet-backend/nginx-opmet-backend
+    OPMET_ENABLE_SSL: "FALSE"
+    OAUTH2_USERINFO: https://gitlab.com/oauth/userinfo
+    NGINX_PORT_HTTP: 80
+    EXTERNAL_HOSTNAME: localhost:80
+    OPMET_BACKEND_HOST: localhost:8000
+
+ingress:
+  name: nginx-ingress-controller # Sync with nginx-ingress-controller/values.yaml

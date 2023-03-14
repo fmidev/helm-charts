@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-attributes: load_balancing.cross_zone.enabled=true
+    service.beta.kubernetes.io/aws-load-balancer-type: {{ .Values.loadBalancerType }}
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: {{ .Values.certificateARN }}
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: https
+  name: {{ .Values.ingress.name }}
+spec:
+  externalTrafficPolicy: Local
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - appProtocol: https
+    name: https
+    port: 443
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app.kubernetes.io/name: {{ .Values.ingress.name }}
+  type: LoadBalancer

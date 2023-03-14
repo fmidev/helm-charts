@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.cap.name }}
+spec:
+  selector:
+    app: {{ .Values.cap.name }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.cap.svcPort }}
+      targetPort: {{ .Values.cap.containerPort }}
