@@ -28,5 +28,6 @@ data:
   {{ if .Values.frontend.env.GW_FEATURE_MENU_FEEDBACK }}GW_FEATURE_MENU_FEEDBACK: {{ .Values.frontend.env.GW_FEATURE_MENU_FEEDBACK | quote }}{{ end }}
   {{ if .Values.frontend.env.GW_FEATURE_MENU_INFO }}GW_FEATURE_MENU_INFO: {{ .Values.frontend.env.GW_FEATURE_MENU_INFO | quote }}{{ end }}
   {{ if .Values.frontend.env.GW_FEATURE_MENU_VERSION }}GW_FEATURE_MENU_VERSION: {{ .Values.frontend.env.GW_FEATURE_MENU_VERSION | quote }}{{ end }}
+  {{ if .Values.frontend.env.GW_FEATURE_MENU_FE_VERSION }}GW_FEATURE_MENU_FE_VERSION: {{ .Values.frontend.env.GW_FEATURE_MENU_FE_VERSION | quote }}{{ end }}
   {{ if .Values.frontend.env.GW_PRESET_BACKEND_URL }}GW_PRESET_BACKEND_URL: {{ .Values.frontend.env.GW_PRESET_BACKEND_URL | quote }}{{ end }}
   {{ if .Values.frontend.env.GW_FEATURE_MENU_USER_DOCUMENTATION_URL }}GW_FEATURE_MENU_USER_DOCUMENTATION_URL: {{ .Values.frontend.env.GW_FEATURE_MENU_USER_DOCUMENTATION_URL | quote }}{{ end }}

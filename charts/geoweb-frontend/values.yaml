@@ -1,5 +1,5 @@
 versions:
-  frontend: "v4.11.0"
+  frontend: "v4.14.1"
 
 frontend:
   name: geoweb
@@ -27,6 +27,7 @@ frontend:
     GW_FEATURE_MENU_FEEDBACK: false
     GW_FEATURE_MENU_INFO: true
     GW_FEATURE_MENU_VERSION: false
+    GW_FEATURE_MENU_FE_VERSION: true
 
 ingress:
   name: nginx-ingress-controller # Sync with nginx-ingress-controller/values.yaml
