@@ -1,0 +1,33 @@
+versions:
+  frontend: "v4.14.1"
+
+frontend:
+  name: geoweb
+  registry: registry.gitlab.com/opengeoweb/opengeoweb
+  svcPort: 80
+  containerPort: 8080
+  replicas: 1
+  env:
+    GW_AUTH_LOGOUT_URL: "{app_url}"
+    GW_AUTH_TOKEN_URL: https://gitlab.com/oauth/token
+    GW_AUTH_LOGIN_URL: https://gitlab.com/oauth/authorize?client_id={client_id}&response_type=code&scope=email+openid+read_repository+read_api&redirect_uri={app_url}/code&state={state}&code_challenge={code_challenge}&code_challenge_method=S256
+    GW_INFRA_BASE_URL: https://api.opengeoweb.com
+    GW_GITLAB_PRESETS_BASE_URL: https://gitlab.com/api/v4/projects
+    GW_GITLAB_PRESETS_API_PATH: /{project_id}/repository/files/{presets_path}{preset_filename}/raw?ref={branch}
+    GW_GITLAB_PROJECT_ID: "24089222"
+    GW_GITLAB_BRANCH: master
+    GW_INITIAL_PRESETS_FILENAME: initialPresets.json
+    GW_SCREEN_PRESETS_FILENAME: screenPresets.json
+    GW_FEATURE_FORCE_AUTHENTICATION: false
+    GW_FEATURE_MODULE_SPACE_WEATHER: false
+    GW_FEATURE_MODULE_TAF: false
+    GW_FEATURE_MODULE_SIGMET: false
+    GW_FEATURE_MODULE_AIRMET: false
+    GW_FEATURE_MENU_SATCOMP: false
+    GW_FEATURE_MENU_FEEDBACK: false
+    GW_FEATURE_MENU_INFO: true
+    GW_FEATURE_MENU_VERSION: false
+    GW_FEATURE_MENU_FE_VERSION: true
+
+ingress:
+  name: nginx-ingress-controller # Sync with nginx-ingress-controller/values.yaml

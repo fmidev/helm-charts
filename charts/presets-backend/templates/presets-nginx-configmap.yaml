@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.presets.nginx.name }}
+data:
+  PRESETS_ENABLE_SSL: {{ .Values.presets.nginx.PRESETS_ENABLE_SSL | quote }}
+  OAUTH2_USERINFO: {{ .Values.presets.nginx.OAUTH2_USERINFO | quote }}
+  PRESETS_BACKEND_HOST: {{ .Values.presets.nginx.PRESETS_BACKEND_HOST | quote }}
+  NGINX_PORT_HTTP: {{ .Values.presets.nginx.NGINX_PORT_HTTP | quote }}
+  VERSION: {{ .Values.versions.presets | quote }}
