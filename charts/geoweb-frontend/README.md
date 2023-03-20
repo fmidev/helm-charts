@@ -15,8 +15,9 @@ Create values.yaml file for required variables:
 frontend:
   url: geoweb.example.com
   auth: <namespace>/<secret-name> or <secret-name>
+  db_secret: secretName # Secret should contain client id for login
+  iamRoleARN: arn:aws:iam::123456789012:role/example-iam-role-with-permissions-to-secret
   env:
-    GW_AUTH_CLIENT_ID: <Application ID>
     GW_CAP_BASE_URL: https://geoweb.example.com/cap
     GW_APP_URL: https://geoweb.example.com
     GW_GITLAB_PRESETS_PATH: <path-to-presets>
@@ -63,7 +64,8 @@ The following table lists the configurable parameters of the CAP backend chart a
 | `frontend.svcPort` | Port used for service | `80` |
 | `frontend.containerPort` | Port used for container | `8080` |
 | `frontend.replicas` | Amount of replicas deployed | `1` |
-| `frontend.env.GW_AUTH_CLIENT_ID` | OAuth2 Provider Client ID | |
+| `frontend.db_secret` | Secret containing OAuth2 Provider Client ID | |
+| `frontend.iamRoleARN` | IAM Role with permissions to access db_secret secret | |
 | `frontend.env.GW_CAP_BASE_URL` | Url which the application uses to connect to CAP backend | |
 | `frontend.env.GW_APP_URL` | Url which the application can be accessed | |
 | `frontend.env.GW_GITLAB_PRESETS_PATH` | Path in repository to fetch screen presets | |

@@ -16,6 +16,7 @@ spec:
       annotations:
         eks.amazonaws.com/compute-type: ec2
     spec:
+      serviceAccountName: {{ .Values.presets.secretServiceAccount }}
       containers:
       - name: {{ .Values.presets.name }}
         image: {{ .Values.presets.registry }}:{{ .Values.versions.presets }}
@@ -28,6 +29,16 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Values.presets.name }}
+        env:
+        - name: PRESETS_BACKEND_DB
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.presets.secretName }}
+              key: PRESETS_BACKEND_DB
+        volumeMounts:
+        - name: secrets-store-inline
+          mountPath: "/mnt/secrets-store"
+          readOnly: true
       - name: {{ .Values.presets.nginx.name }}
         image: {{ .Values.presets.nginx.registry }}:{{ .Values.versions.presets }}
         ports:
@@ -35,3 +46,10 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Values.presets.nginx.name }}
+      volumes:
+      - name: secrets-store-inline
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: {{ .Values.presets.spcName | quote }}

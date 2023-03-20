@@ -16,6 +16,7 @@ spec:
       annotations:
         eks.amazonaws.com/compute-type: ec2
     spec:
+      serviceAccountName: {{ .Values.frontend.secretServiceAccount }}
       containers:
       - name: {{ .Values.frontend.name }}
         image: {{ .Values.frontend.registry }}:{{ .Values.versions.frontend }}
@@ -24,3 +25,20 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Values.frontend.name }}
+        env:
+        - name: GW_AUTH_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.frontend.secretName }}
+              key: GW_AUTH_CLIENT_ID
+        volumeMounts:
+        - name: secrets-store-inline
+          mountPath: "/mnt/secrets-store"
+          readOnly: true
+      volumes:
+      - name: secrets-store-inline
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: {{ .Values.frontend.spcName | quote }}

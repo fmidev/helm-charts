@@ -4,8 +4,6 @@ metadata:
   name: {{ .Values.opmet.name }}
 data:
   ENV_STATE: {{ .Values.opmet.env.ENV_STATE | quote }}
-  SQLALCHEMY_DATABASE_URL: {{ .Values.opmet.env.SQLALCHEMY_DATABASE_URL | quote }}
-  TEST_SQLALCHEMY_DATABASE_URL: {{ .Values.opmet.env.TEST_SQLALCHEMY_DATABASE_URL | quote }}
   TEST_MESSAGECONVERTER_URL: {{ .Values.opmet.env.TEST_MESSAGECONVERTER_URL | quote }}
   TEST_TEST_FIELD: {{ .Values.opmet.env.TEST_TEST_FIELD | quote }}
   TEST_MWO_CCCC: {{ .Values.opmet.env.TEST_MWO_CCCC | quote }}

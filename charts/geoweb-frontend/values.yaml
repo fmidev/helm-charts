@@ -7,6 +7,9 @@ frontend:
   svcPort: 80
   containerPort: 8080
   replicas: 1
+  secretName: geoweb-client-id
+  spcName: geoweb-spc
+  secretServiceAccount: geoweb-service-account
   env:
     GW_AUTH_LOGOUT_URL: "{app_url}"
     GW_AUTH_TOKEN_URL: https://gitlab.com/oauth/token

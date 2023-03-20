@@ -3,7 +3,6 @@ kind: ConfigMap
 metadata:
   name: {{ .Values.presets.name }}
 data:
-  PRESETS_BACKEND_DB: {{ .Values.presets.PRESETS_BACKEND_DB | quote }}
   VERSION: {{ .Values.versions.presets | quote }}
   EXTERNALADDRESS: {{ .Values.presets.EXTERNALADDRESS | quote }}
   PRESETS_PORT_HTTP: {{ .Values.presets.PRESETS_PORT_HTTP | quote }}

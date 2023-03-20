@@ -11,9 +11,8 @@ Create values.yaml file for required variables:
 ```yaml
 opmet:
   url: geoweb.example.com
-  env:
-    SQLALCHEMY_DATABASE_URL: "postgresql://[user[:password]@][netloc][:port][/dbname]"
-    TEST_SQLALCHEMY_DATABASE_URL: "postgresql://[user[:password]@][netloc][:port][/dbname]"
+  db_secret: secretName # Secret should contain postgresql database connection string
+  iamRoleARN: arn:aws:iam::123456789012:role/example-iam-role-with-permissions-to-secret
 ```
 
 # Testing the Chart
@@ -53,8 +52,8 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.path` | Path suffix added to url | `/opmet/(.*)` |
 | `opmet.svcPort` | Port used for service | `80` |
 | `opmet.replicas` | Amount of replicas deployed | `1` |
-| `opmet.env.SQLALCHEMY_DATABASE_URL` | Postgresql database connection string | |
-| `opmet.env.TEST_SQLALCHEMY_DATABASE_URL` | Postgresql database connection string | |
+| `opmet.db_secret` | Secret containing Postgresql database connection string | |
+| `opmet.iamRoleARN` | IAM Role with permissions to access db_secret secret | |
 | `opmet.env.BACKEND_OPMET_PORT_HTTP` | Port used for container | `8000` |
 | `opmet.env.EXTERNALADDRESSES` | - | `0.0.0.0:80` |
 | `opmet.env.ENV_STATE` | - | `TEST` |

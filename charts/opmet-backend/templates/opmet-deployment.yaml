@@ -16,6 +16,7 @@ spec:
       annotations:
         eks.amazonaws.com/compute-type: ec2
     spec:
+      serviceAccountName: {{ .Values.opmet.secretServiceAccount }}
       containers:
       - name: {{ .Values.opmet.name }}
         image: {{ .Values.opmet.registry }}:{{ .Values.versions.opmet }}
@@ -24,6 +25,21 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Values.opmet.name }}
+        env:
+        - name: SQLALCHEMY_DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.opmet.secretName }}
+              key: OPMET_BACKEND_DB
+        - name: TEST_SQLALCHEMY_DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.opmet.secretName }}
+              key: OPMET_BACKEND_DB
+        volumeMounts:
+        - name: secrets-store-inline
+          mountPath: "/mnt/secrets-store"
+          readOnly: true
         command: ["/bin/sh"]
         #args: ["-c", "sleep 10 ; uvicorn opmet_backend.main:app --reload --host 0.0.0.0 --port 8000"]
         args: ["-c", "sleep 10 ; gunicorn --bind 0.0.0.0:8000 -k uvicorn.workers.UvicornWorker opmet_backend.main:app"]
@@ -41,3 +57,10 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Values.opmet.nginx.name }}
+      volumes:
+      - name: secrets-store-inline
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: {{ .Values.opmet.spcName | quote }}
