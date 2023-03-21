@@ -9,6 +9,9 @@ presets:
   replicas: 1
   EXTERNALADDRESS: 0.0.0.0:80
   PRESETS_PORT_HTTP: 8080
+  secretName: presets-db
+  spcName: presets-spc
+  secretServiceAccount: presets-service-account
   nginx:
     name: nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/presets-backend/nginx-presets-backend

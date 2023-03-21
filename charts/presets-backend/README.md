@@ -11,7 +11,8 @@ Create values.yaml file for required variables:
 ```yaml
 presets:
   url: geoweb.example.com
-  PRESETS_BACKEND_DB: postgresql://[user[:password]@][netloc][:port][/dbname]
+  db_secret: secretName # Secret should contain postgresql database connection string
+  iamRoleARN: arn:aws:iam::123456789012:role/example-iam-role-with-permissions-to-secret
 ```
 
 # Testing the Chart
@@ -53,7 +54,8 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.PRESETS_PORT_HTTP` | Port used for container | `8080` |
 | `presets.replicas` | Amount of replicas deployed | `1` |
 | `presets.EXTERNALADDRESSES` | - | `0.0.0.0:80` |
-| `presets.PRESETS_BACKEND_DB` | Postgresql database connection string | |
+| `presets.db_secret` | Secret containing Postgresql database connection string | |
+| `presets.iamRoleARN` | IAM Role with permissions to access db_secret secret | |
 | `presets.nginx.name` | Name of nginx container | `nginx` |
 | `presets.nginx.registry` | Registry to fetch nginx image | `registry.gitlab.com/opengeoweb/backend-services/presets-backend/nginx-presets-backend` |
 | `presets.nginx.PRESETS_ENABLE_SSL` | Toggle SSL termination | `"FALSE"` |
