@@ -87,6 +87,16 @@ entries:
   nginx-ingress-controller:
   - apiVersion: v2
     appVersion: 1.5.1
+    created: "2023-03-29T12:10:22.703899267Z"
+    description: A Helm chart for nginx-ingress-controller to serve GeoWeb application
+    digest: 190470d1b97f9ef1a32c08cdc425124def9d921e2786a7b81af06ece06fc19dc
+    name: nginx-ingress-controller
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/nginx-ingress-controller-1.1.0/nginx-ingress-controller-1.1.0.tgz
+    version: 1.1.0
+  - apiVersion: v2
+    appVersion: 1.5.1
     created: "2023-03-14T12:03:02.484472927Z"
     description: A Helm chart for nginx-ingress-controller to serve GeoWeb application
     digest: 4f79674f5744e571c5b19750e7c788191b8f1f50a24c9bed3bd9831e7d6df560
@@ -127,4 +137,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/smartmetserver-0.1.0/smartmetserver-0.1.0.tgz
     version: 0.1.0
-generated: "2023-03-21T10:54:57.758296751Z"
+generated: "2023-03-29T12:10:22.703913867Z"
