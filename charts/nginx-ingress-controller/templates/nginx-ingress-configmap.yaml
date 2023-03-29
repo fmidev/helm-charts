@@ -1,6 +1,12 @@
 apiVersion: v1
 data:
   allow-snippet-annotations: "true"
+  http-snippet: |
+    server {
+      listen 2443;
+      return 308 https://$host$request_uri;
+    }
+  use-forwarded-headers: "true"
 kind: ConfigMap
 metadata:
   name: {{ .Values.ingress.name }}
