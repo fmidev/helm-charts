@@ -107,6 +107,16 @@ entries:
     version: 1.0.0
   secrets:
   - apiVersion: v2
+    appVersion: 1.0.r2-46-gf2a8f35-2023.03.21.21.55
+    created: "2023-04-04T11:24:48.058642325Z"
+    description: A Helm chart for handling secrets used by GeoWeb application
+    digest: c2b6205ad9bc75566e8841d93d2f2e908a31d0c3ef788607cffda427aeaa8a4a
+    name: secrets
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/secrets-1.2.0/secrets-1.2.0.tgz
+    version: 1.2.0
+  - apiVersion: v2
     appVersion: 1.3.0
     created: "2023-03-21T10:54:57.75828065Z"
     description: A Helm chart for handling secrets used by GeoWeb application
@@ -137,4 +147,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/smartmetserver-0.1.0/smartmetserver-0.1.0.tgz
     version: 0.1.0
-generated: "2023-03-29T12:10:22.703913867Z"
+generated: "2023-04-04T11:24:48.058672826Z"
