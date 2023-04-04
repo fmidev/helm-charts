@@ -20,7 +20,7 @@ secrets:
 Execute the following for testing the chart:
 
 ```bash
-helm upgrade secrets fmi/geoweb-secrets-provider-aws --dry-run --install --debug -n geoweb --values=./values.yaml
+helm install secrets fmi/geoweb-secrets-provider-aws --dry-run --debug -n geoweb --values=./values.yaml
 ```
 
 # Installing the Chart
