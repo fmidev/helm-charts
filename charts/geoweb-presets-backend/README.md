@@ -48,6 +48,8 @@ The following table lists the configurable parameters of the Presets backend cha
 | `versions.presets` | Possibility to override application version | `1.4.1` |
 | `presets.name` | Name of backend | `presets` |
 | `presets.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/presets-backend` |
+| `presets.commitHash` | Adds commitHash annotation to the deployment | |
+| `presets.imagePullPolicy` | Adds option to modify imagePullPolicy | |
 | `presets.url` | Url which the application can be accessed | |
 | `presets.path` | Path suffix added to url | `/presets/(.*)` |
 | `presets.svcPort` | Port used for service | `80` |

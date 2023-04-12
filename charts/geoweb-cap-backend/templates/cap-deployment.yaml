@@ -15,9 +15,11 @@ spec:
         app: {{ .Values.cap.name }}
       annotations:
         eks.amazonaws.com/compute-type: ec2
+        {{ if .Values.cap.commitHash }}commitHash: {{ .Values.cap.commitHash }}{{ end }}
     spec:
       containers:
       - name: {{ .Values.cap.name }}
         image: {{ .Values.cap.registry }}:{{ .Values.versions.cap }}
+        {{ if .Values.cap.imagePullPolicy }}imagePullPolicy: {{ .Values.cap.imagePullPolicy }}{{ end }}
         ports:
         - containerPort: {{ .Values.cap.containerPort}}

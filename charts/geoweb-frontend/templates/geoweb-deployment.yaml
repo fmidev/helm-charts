@@ -15,11 +15,13 @@ spec:
         app: {{ .Values.frontend.name }}
       annotations:
         eks.amazonaws.com/compute-type: ec2
+        {{ if .Values.frontend.commitHash }}commitHash: {{ .Values.frontend.commitHash }}{{ end }}
     spec:
       serviceAccountName: {{ .Values.frontend.secretServiceAccount }}
       containers:
       - name: {{ .Values.frontend.name }}
         image: {{ .Values.frontend.registry }}:{{ .Values.versions.frontend }}
+        {{ if .Values.frontend.imagePullPolicy }}imagePullPolicy: {{ .Values.frontend.imagePullPolicy }}{{ end }}
         ports:
         - containerPort: {{ .Values.frontend.containerPort }}
         envFrom:
