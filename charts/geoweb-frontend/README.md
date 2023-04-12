@@ -52,7 +52,7 @@ kubectl delete namespace geoweb
 ```
 
 # Chart Configuration
-The following table lists the configurable parameters of the CAP backend chart and their default values.
+The following table lists the configurable parameters of the GeoWeb frontend chart and their default values.
 
 | Parameter | Description | Default |
 | - | - | - |
