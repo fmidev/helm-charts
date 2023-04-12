@@ -15,11 +15,13 @@ spec:
         app: {{ .Values.presets.name }}
       annotations:
         eks.amazonaws.com/compute-type: ec2
+        {{ if .Values.presets.commitHash }}commitHash: {{ .Values.presets.commitHash }}{{ end }}
     spec:
       serviceAccountName: {{ .Values.presets.secretServiceAccount }}
       containers:
       - name: {{ .Values.presets.name }}
         image: {{ .Values.presets.registry }}:{{ .Values.versions.presets }}
+        {{ if .Values.presets.imagePullPolicy }}imagePullPolicy: {{ .Values.presets.imagePullPolicy }}{{ end }}
         lifecycle:
           postStart:
             exec:
@@ -41,6 +43,7 @@ spec:
           readOnly: true
       - name: {{ .Values.presets.nginx.name }}
         image: {{ .Values.presets.nginx.registry }}:{{ .Values.versions.presets }}
+        {{ if .Values.presets.imagePullPolicy }}imagePullPolicy: {{ .Values.presets.imagePullPolicy }}{{ end }}
         ports:
         - containerPort: {{ .Values.presets.nginx.NGINX_PORT_HTTP }}
         envFrom:
