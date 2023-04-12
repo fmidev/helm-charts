@@ -48,6 +48,8 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `versions.opmet` | Possibility to override application version | `v0.0.1` |
 | `opmet.name` | Name of backend | `opmet` |
 | `opmet.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/opmet-backend` |
+| `opmet.commitHash` | Adds commitHash annotation to the deployment | |
+| `opmet.imagePullPolicy` | Adds option to modify imagePullPolicy | |
 | `opmet.url` | Url which the application can be accessed | |
 | `opmet.path` | Path suffix added to url | `/opmet/(.*)` |
 | `opmet.svcPort` | Port used for service | `80` |

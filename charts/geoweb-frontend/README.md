@@ -59,6 +59,8 @@ The following table lists the configurable parameters of the CAP backend chart a
 | `versions.frontend` | Possibility to override application version | `v4.14.1` |
 | `frontend.name` | Name of frontend | `geoweb` |
 | `frontend.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/opengeoweb` |
+| `frontend.commitHash` | Adds commitHash annotation to the deployment | |
+| `frontend.imagePullPolicy` | Adds option to modify imagePullPolicy | |
 | `frontend.url` | Url which the application can be accessed | |
 | `frontend.auth` | Basic auth secret | |
 | `frontend.svcPort` | Port used for service | `80` |

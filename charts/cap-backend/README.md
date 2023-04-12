@@ -46,6 +46,8 @@ The following table lists the configurable parameters of the CAP backend chart a
 | `versions.cap` | Possibility to override application version | `v0.3.0` |
 | `cap.name` | Name of backend | `cap` |
 | `cap.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/cap-backend` |
+| `cap.commitHash` | Adds commitHash annotation to the deployment | |
+| `cap.imagePullPolicy` | Adds option to modify imagePullPolicy | |
 | `cap.url` | Url which the application can be accessed | |
 | `cap.path` | Path suffix added to url | `/cap/(.*)` |
 | `cap.svcPort` | Port used for service | `80` |
