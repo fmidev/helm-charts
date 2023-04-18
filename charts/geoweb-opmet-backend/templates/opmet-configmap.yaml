@@ -13,6 +13,8 @@ data:
   TEST_IWXXM_SIGMET_HEADER__VA_CLD: {{ .Values.opmet.env.TEST_IWXXM_SIGMET_HEADER__VA_CLD | quote }}
   TEST_IWXXM_SIGMET_HEADER__TC: {{ .Values.opmet.env.TEST_IWXXM_SIGMET_HEADER__TC | quote }}
   TEST_IWXXM_SIGMET_HEADER__DEFAULT: {{ .Values.opmet.env.TEST_IWXXM_SIGMET_HEADER__DEFAULT | quote }}
+  TEST_AIRMET_HEADER: {{ .Values.opmet.env.TEST_AIRMET_HEADER | quote }}
+  TEST_IWXXM_AIRMET_HEADER: {{ .Values.opmet.env.TEST_IWXXM_AIRMET_HEADER | quote }}
   OAUTH2_USERINFO: {{ .Values.opmet.env.OAUTH2_USERINFO | quote }}
   OPMET_BACKEND_PORT_HTTP: {{ .Values.opmet.env.OPMET_BACKEND_PORT_HTTP | quote }}
   EXTERNALADDRESSES: {{ .Values.opmet.env.EXTERNALADDRESSES | quote }}

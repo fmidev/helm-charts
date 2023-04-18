@@ -1,5 +1,5 @@
 versions:
-  opmet: "v0.0.2"
+  opmet: "v0.0.3"
 
 opmet:
   name: opmet
@@ -21,6 +21,8 @@ opmet:
     TEST_IWXXM_SIGMET_HEADER__VA_CLD: "LVNL31"
     TEST_IWXXM_SIGMET_HEADER__TC: "LYNL31"
     TEST_IWXXM_SIGMET_HEADER__DEFAULT: "LSNL31"
+    TEST_AIRMET_HEADER: "WANL31"
+    TEST_IWXXM_AIRMET_HEADER: "LWNL31"
     OAUTH2_USERINFO: https://gitlab.com/oauth/userinfo"
     OPMET_BACKEND_PORT_HTTP: 8000
     EXTERNALADDRESSES: 0.0.0.0:80
