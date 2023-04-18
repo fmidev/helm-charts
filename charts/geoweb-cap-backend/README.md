@@ -43,7 +43,7 @@ The following table lists the configurable parameters of the CAP backend chart a
 
 | Parameter | Description | Default |
 | - | - | - |
-| `versions.cap` | Possibility to override application version | `v0.3.0` |
+| `versions.cap` | Possibility to override application version | `v0.4.0` |
 | `cap.name` | Name of backend | `cap` |
 | `cap.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/cap-backend` |
 | `cap.commitHash` | Adds commitHash annotation to the deployment | |
