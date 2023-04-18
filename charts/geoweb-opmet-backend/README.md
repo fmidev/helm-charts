@@ -45,7 +45,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 
 | Parameter | Description | Default |
 | - | - | - |
-| `versions.opmet` | Possibility to override application version | `v0.0.1` |
+| `versions.opmet` | Possibility to override application version | `v0.0.3` |
 | `opmet.name` | Name of backend | `opmet` |
 | `opmet.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/opmet-backend` |
 | `opmet.commitHash` | Adds commitHash annotation to the deployment | |
@@ -68,6 +68,8 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.env.TEST_IWXXM_SIGMET_HEADER__VA_CLD` | - | `"LVNL31"` |
 | `opmet.env.TEST_IWXXM_SIGMET_HEADER__TC` | - | `"LYNL31"` |
 | `opmet.env.TEST_IWXXM_SIGMET_HEADER__DEFAULT` | - | `"LSNL31"` |
+| `opmet.env.TEST_AIRMET_HEADER` | - | `"WANL31"` |
+| `opmet.env.TEST_IWXXM_AIRMET_HEADER` | - | `"LWNL31"` |
 | `opmet.env.OAUTH2_USERINFO` | - | `https://gitlab.com/oauth/userinfo` |
 | `opmet.env.OPMET_ENABLE_SSL` | Toggle SSL termination | `"FALSE"` |
 | `opmet.env.FORWARDED_ALLOW_IPS` | - | `"*"` |
