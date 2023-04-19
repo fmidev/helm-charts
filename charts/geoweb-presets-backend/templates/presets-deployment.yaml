@@ -25,7 +25,7 @@ spec:
         lifecycle:
           postStart:
             exec:
-              command: ["/bin/sh", "-c", "python cli.py enable-alembic; alembic upgrade 06a95cbbd0ed"]
+              command: ["/bin/sh", "-c", "python cli.py enable-alembic; alembic upgrade head"]
         ports:
         - containerPort: {{ .Values.presets.PRESETS_PORT_HTTP }}
         envFrom:
