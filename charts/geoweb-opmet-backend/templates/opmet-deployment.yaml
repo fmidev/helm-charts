@@ -44,7 +44,7 @@ spec:
           readOnly: true
         command: ["/bin/sh"]
         #args: ["-c", "sleep 10 ; uvicorn opmet_backend.main:app --reload --host 0.0.0.0 --port 8000"]
-        args: ["-c", "sleep 10 ; gunicorn --bind 0.0.0.0:8000 -k uvicorn.workers.UvicornWorker opmet_backend.main:app"]
+        args: ["-c", "sleep 10 ; gunicorn --bind 0.0.0.0:8000 -k uvicorn.workers.UvicornWorker --log-config opmet_logging.conf opmet_backend.main:app"]
       - name: {{ .Values.opmet.messageconverter.name }}
         image: {{ .Values.opmet.messageconverter.registry }}:{{ .Values.opmet.messageconverter.version }}
         {{ if .Values.opmet.imagePullPolicy }}imagePullPolicy: {{ .Values.opmet.imagePullPolicy }}{{ end }}

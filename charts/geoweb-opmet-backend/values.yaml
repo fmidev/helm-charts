@@ -12,7 +12,7 @@ opmet:
   secretServiceAccount: opmet-service-account
   env:
     ENV_STATE: TEST
-    TEST_MESSAGECONVERTER_URL: "http://localhost:8080/getsigmettac"
+    TEST_MESSAGECONVERTER_URL: "http://localhost:8080"
     TEST_TEST_FIELD: "A"
     TEST_MWO_CCCC: "EHDB"
     TEST_SIGMET_HEADER__VA_CLD: "WVNL31"
