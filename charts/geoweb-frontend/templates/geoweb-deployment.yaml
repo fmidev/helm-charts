@@ -31,7 +31,7 @@ spec:
         - name: GW_AUTH_CLIENT_ID
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.frontend.secretName }}
+              name: {{ .Values.frontend.idSecretName }}
               key: GW_AUTH_CLIENT_ID
         volumeMounts:
         - name: secrets-store-inline

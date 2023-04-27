@@ -14,8 +14,8 @@ Create values.yaml file for required variables:
 
 frontend:
   url: geoweb.example.com
-  auth: <namespace>/<secret-name> or <secret-name>
-  db_secret: secretName # Secret should contain client id for login
+  auth_secret: authSecretName
+  client_id_secret: idSecretName # Secret should contain client id for login
   iamRoleARN: arn:aws:iam::123456789012:role/example-iam-role-with-permissions-to-secret
   env:
     GW_CAP_BASE_URL: https://geoweb.example.com/cap
@@ -62,11 +62,11 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.commitHash` | Adds commitHash annotation to the deployment | |
 | `frontend.imagePullPolicy` | Adds option to modify imagePullPolicy | |
 | `frontend.url` | Url which the application can be accessed | |
-| `frontend.auth` | Basic auth secret | |
+| `frontend.auth_secret` | Basic auth secret | |
 | `frontend.svcPort` | Port used for service | `80` |
 | `frontend.containerPort` | Port used for container | `8080` |
 | `frontend.replicas` | Amount of replicas deployed | `1` |
-| `frontend.db_secret` | Secret containing OAuth2 Provider Client ID | |
+| `frontend.client_id_secret` | Secret containing OAuth2 Provider Client ID | |
 | `frontend.iamRoleARN` | IAM Role with permissions to access db_secret secret | |
 | `frontend.env.GW_CAP_BASE_URL` | Url which the application uses to connect to CAP backend | |
 | `frontend.env.GW_APP_URL` | Url which the application can be accessed | |

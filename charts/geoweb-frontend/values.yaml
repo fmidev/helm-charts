@@ -7,7 +7,7 @@ frontend:
   svcPort: 80
   containerPort: 8080
   replicas: 1
-  secretName: geoweb-client-id
+  idSecretName: geoweb-client-id
   spcName: geoweb-spc
   secretServiceAccount: geoweb-service-account
   env:
