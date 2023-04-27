@@ -1,5 +1,5 @@
 versions:
-  frontend: "v4.17.0"
+  frontend: "v4.18.0"
 
 frontend:
   name: geoweb
