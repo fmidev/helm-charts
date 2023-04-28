@@ -56,6 +56,8 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.replicas` | Amount of replicas deployed | `1` |
 | `opmet.db_secret` | Secret containing Postgresql database connection string | |
 | `opmet.iamRoleARN` | IAM Role with permissions to access db_secret secret | |
+| `opmet.secretServiceAccount` | Service Account created for handling secrets | |
+| `opmet.useSecretProvider` | Option to use only Kubernetes secrets | `true` |
 | `opmet.env.BACKEND_OPMET_PORT_HTTP` | Port used for container | `8000` |
 | `opmet.env.EXTERNALADDRESSES` | - | `0.0.0.0:80` |
 | `opmet.env.ENV_STATE` | - | `TEST` |

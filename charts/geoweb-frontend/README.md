@@ -67,7 +67,9 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.containerPort` | Port used for container | `8080` |
 | `frontend.replicas` | Amount of replicas deployed | `1` |
 | `frontend.client_id_secret` | Secret containing OAuth2 Provider Client ID | |
-| `frontend.iamRoleARN` | IAM Role with permissions to access db_secret secret | |
+| `frontend.iamRoleARN` | IAM Role with permissions to access secrets | |
+| `frontend.secretServiceAccount` | Service Account created for handling secrets | |
+| `frontend.useSecretProvider` | Option to use only Kubernetes secrets | `true` |
 | `frontend.env.GW_CAP_BASE_URL` | Url which the application uses to connect to CAP backend | |
 | `frontend.env.GW_APP_URL` | Url which the application can be accessed | |
 | `frontend.env.GW_GITLAB_PRESETS_PATH` | Path in repository to fetch screen presets | |

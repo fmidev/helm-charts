@@ -3,34 +3,96 @@ kind: ConfigMap
 metadata:
   name: {{ .Values.frontend.name }}
 data:
-  {{ if .Values.frontend.env.GW_AUTH_LOGOUT_URL }}GW_AUTH_LOGOUT_URL: {{ .Values.frontend.env.GW_AUTH_LOGOUT_URL | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_AUTH_TOKEN_URL }}GW_AUTH_TOKEN_URL: {{ .Values.frontend.env.GW_AUTH_TOKEN_URL | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_AUTH_LOGIN_URL }}GW_AUTH_LOGIN_URL: {{ .Values.frontend.env.GW_AUTH_LOGIN_URL | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_INFRA_BASE_URL }}GW_INFRA_BASE_URL: {{ .Values.frontend.env.GW_INFRA_BASE_URL | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_CAP_BASE_URL }}GW_CAP_BASE_URL: {{ .Values.frontend.env.GW_CAP_BASE_URL | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_APP_URL }}GW_APP_URL: {{ .Values.frontend.env.GW_APP_URL | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_GITLAB_PRESETS_BASE_URL }}GW_GITLAB_PRESETS_BASE_URL: {{ .Values.frontend.env.GW_GITLAB_PRESETS_BASE_URL | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_GITLAB_PRESETS_API_PATH }}GW_GITLAB_PRESETS_API_PATH: {{ .Values.frontend.env.GW_GITLAB_PRESETS_API_PATH | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_GITLAB_PROJECT_ID }}GW_GITLAB_PROJECT_ID: {{ .Values.frontend.env.GW_GITLAB_PROJECT_ID | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_GITLAB_PRESETS_PATH }}GW_GITLAB_PRESETS_PATH: {{ .Values.frontend.env.GW_GITLAB_PRESETS_PATH | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_GITLAB_BRANCH }}GW_GITLAB_BRANCH: {{ .Values.frontend.env.GW_GITLAB_BRANCH | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_INITIAL_PRESETS_FILENAME }}GW_INITIAL_PRESETS_FILENAME: {{ .Values.frontend.env.GW_INITIAL_PRESETS_FILENAME | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_SCREEN_PRESETS_FILENAME }}GW_SCREEN_PRESETS_FILENAME: {{ .Values.frontend.env.GW_SCREEN_PRESETS_FILENAME | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_DEFAULT_THEME }}GW_DEFAULT_THEME: {{ .Values.frontend.env.GW_DEFAULT_THEME | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_FEATURE_APP_TITLE }}GW_FEATURE_APP_TITLE: {{ .Values.frontend.env.GW_FEATURE_APP_TITLE | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_FEATURE_FORCE_AUTHENTICATION }}GW_FEATURE_FORCE_AUTHENTICATION: {{ .Values.frontend.env.GW_FEATURE_FORCE_AUTHENTICATION | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_FEATURE_MODULE_SPACE_WEATHER }}GW_FEATURE_MODULE_SPACE_WEATHER: {{ .Values.frontend.env.GW_FEATURE_MODULE_SPACE_WEATHER | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_FEATURE_MODULE_TAF }}GW_FEATURE_MODULE_TAF: {{ .Values.frontend.env.GW_FEATURE_MODULE_TAF | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_FEATURE_MODULE_SIGMET }}GW_FEATURE_MODULE_SIGMET: {{ .Values.frontend.env.GW_FEATURE_MODULE_SIGMET | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_FEATURE_MODULE_AIRMET }}GW_FEATURE_MODULE_AIRMET: {{ .Values.frontend.env.GW_FEATURE_MODULE_AIRMET | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_FEATURE_MENU_SATCOMP }}GW_FEATURE_MENU_SATCOMP: {{ .Values.frontend.env.GW_FEATURE_MENU_SATCOMP | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_FEATURE_MENU_FEEDBACK }}GW_FEATURE_MENU_FEEDBACK: {{ .Values.frontend.env.GW_FEATURE_MENU_FEEDBACK | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_FEATURE_MENU_INFO }}GW_FEATURE_MENU_INFO: {{ .Values.frontend.env.GW_FEATURE_MENU_INFO | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_FEATURE_MENU_VERSION }}GW_FEATURE_MENU_VERSION: {{ .Values.frontend.env.GW_FEATURE_MENU_VERSION | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_FEATURE_MENU_FE_VERSION }}GW_FEATURE_MENU_FE_VERSION: {{ .Values.frontend.env.GW_FEATURE_MENU_FE_VERSION | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_PRESET_BACKEND_URL }}GW_PRESET_BACKEND_URL: {{ .Values.frontend.env.GW_PRESET_BACKEND_URL | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_FEATURE_MENU_USER_DOCUMENTATION_URL }}GW_FEATURE_MENU_USER_DOCUMENTATION_URL: {{ .Values.frontend.env.GW_FEATURE_MENU_USER_DOCUMENTATION_URL | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_SIGMET_BASE_URL }}GW_SIGMET_BASE_URL: {{ .Values.frontend.env.GW_SIGMET_BASE_URL | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_AIRMET_BASE_URL }}GW_AIRMET_BASE_URL: {{ .Values.frontend.env.GW_AIRMET_BASE_URL | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_FEATURE_MODULE_SIGMET_CONFIGURATION }}GW_FEATURE_MODULE_SIGMET_CONFIGURATION: {{ .Values.frontend.env.GW_FEATURE_MODULE_SIGMET_CONFIGURATION | quote }}{{ end }}
-  {{ if .Values.frontend.env.GW_FEATURE_MODULE_AIRMET_CONFIGURATION }}GW_FEATURE_MODULE_AIRMET_CONFIGURATION: {{ .Values.frontend.env.GW_FEATURE_MODULE_AIRMET_CONFIGURATION | quote }}{{ end }}
+  {{- if .Values.frontend.env.GW_AUTH_LOGOUT_URL }}
+  GW_AUTH_LOGOUT_URL: {{ .Values.frontend.env.GW_AUTH_LOGOUT_URL | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_AUTH_TOKEN_URL }}
+  GW_AUTH_TOKEN_URL: {{ .Values.frontend.env.GW_AUTH_TOKEN_URL | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_AUTH_LOGIN_URL }}
+  GW_AUTH_LOGIN_URL: {{ .Values.frontend.env.GW_AUTH_LOGIN_URL | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_INFRA_BASE_URL }}
+  GW_INFRA_BASE_URL: {{ .Values.frontend.env.GW_INFRA_BASE_URL | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_CAP_BASE_URL }}
+  GW_CAP_BASE_URL: {{ .Values.frontend.env.GW_CAP_BASE_URL | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_APP_URL }}
+  GW_APP_URL: {{ .Values.frontend.env.GW_APP_URL | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_GITLAB_PRESETS_BASE_URL }}
+  GW_GITLAB_PRESETS_BASE_URL: {{ .Values.frontend.env.GW_GITLAB_PRESETS_BASE_URL | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_GITLAB_PRESETS_API_PATH }}
+  GW_GITLAB_PRESETS_API_PATH: {{ .Values.frontend.env.GW_GITLAB_PRESETS_API_PATH | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_GITLAB_PROJECT_ID }}
+  GW_GITLAB_PROJECT_ID: {{ .Values.frontend.env.GW_GITLAB_PROJECT_ID | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_GITLAB_PRESETS_PATH }}
+  GW_GITLAB_PRESETS_PATH: {{ .Values.frontend.env.GW_GITLAB_PRESETS_PATH | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_GITLAB_BRANCH }}
+  GW_GITLAB_BRANCH: {{ .Values.frontend.env.GW_GITLAB_BRANCH | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_INITIAL_PRESETS_FILENAME }}
+  GW_INITIAL_PRESETS_FILENAME: {{ .Values.frontend.env.GW_INITIAL_PRESETS_FILENAME | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_SCREEN_PRESETS_FILENAME }}
+  GW_SCREEN_PRESETS_FILENAME: {{ .Values.frontend.env.GW_SCREEN_PRESETS_FILENAME | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_DEFAULT_THEME }}
+  GW_DEFAULT_THEME: {{ .Values.frontend.env.GW_DEFAULT_THEME | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_FEATURE_APP_TITLE }}
+  GW_FEATURE_APP_TITLE: {{ .Values.frontend.env.GW_FEATURE_APP_TITLE | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_FEATURE_FORCE_AUTHENTICATION }}
+  GW_FEATURE_FORCE_AUTHENTICATION: {{ .Values.frontend.env.GW_FEATURE_FORCE_AUTHENTICATION | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_FEATURE_MODULE_SPACE_WEATHER }}
+  GW_FEATURE_MODULE_SPACE_WEATHER: {{ .Values.frontend.env.GW_FEATURE_MODULE_SPACE_WEATHER | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_FEATURE_MODULE_TAF }}
+  GW_FEATURE_MODULE_TAF: {{ .Values.frontend.env.GW_FEATURE_MODULE_TAF | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_FEATURE_MODULE_SIGMET }}
+  GW_FEATURE_MODULE_SIGMET: {{ .Values.frontend.env.GW_FEATURE_MODULE_SIGMET | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_FEATURE_MODULE_AIRMET }}
+  GW_FEATURE_MODULE_AIRMET: {{ .Values.frontend.env.GW_FEATURE_MODULE_AIRMET | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_FEATURE_MENU_SATCOMP }}
+  GW_FEATURE_MENU_SATCOMP: {{ .Values.frontend.env.GW_FEATURE_MENU_SATCOMP | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_FEATURE_MENU_FEEDBACK }}
+  GW_FEATURE_MENU_FEEDBACK: {{ .Values.frontend.env.GW_FEATURE_MENU_FEEDBACK | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_FEATURE_MENU_INFO }}
+  GW_FEATURE_MENU_INFO: {{ .Values.frontend.env.GW_FEATURE_MENU_INFO | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_FEATURE_MENU_VERSION }}
+  GW_FEATURE_MENU_VERSION: {{ .Values.frontend.env.GW_FEATURE_MENU_VERSION | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_FEATURE_MENU_FE_VERSION }}
+  GW_FEATURE_MENU_FE_VERSION: {{ .Values.frontend.env.GW_FEATURE_MENU_FE_VERSION | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_PRESET_BACKEND_URL }}
+  GW_PRESET_BACKEND_URL: {{ .Values.frontend.env.GW_PRESET_BACKEND_URL | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_FEATURE_MENU_USER_DOCUMENTATION_URL }}
+  GW_FEATURE_MENU_USER_DOCUMENTATION_URL: {{ .Values.frontend.env.GW_FEATURE_MENU_USER_DOCUMENTATION_URL | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_SIGMET_BASE_URL }}
+  GW_SIGMET_BASE_URL: {{ .Values.frontend.env.GW_SIGMET_BASE_URL | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_AIRMET_BASE_URL }}
+  GW_AIRMET_BASE_URL: {{ .Values.frontend.env.GW_AIRMET_BASE_URL | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_FEATURE_MODULE_SIGMET_CONFIGURATION }}
+  GW_FEATURE_MODULE_SIGMET_CONFIGURATION: {{ .Values.frontend.env.GW_FEATURE_MODULE_SIGMET_CONFIGURATION | quote }}
+  {{- end }}
+  {{- if .Values.frontend.env.GW_FEATURE_MODULE_AIRMET_CONFIGURATION }}
+  GW_FEATURE_MODULE_AIRMET_CONFIGURATION: {{ .Values.frontend.env.GW_FEATURE_MODULE_AIRMET_CONFIGURATION | quote }}
+  {{- end }}

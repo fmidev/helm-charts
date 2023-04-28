@@ -15,13 +15,19 @@ spec:
         app: {{ .Values.presets.name }}
       annotations:
         eks.amazonaws.com/compute-type: ec2
-        {{ if .Values.presets.commitHash }}commitHash: {{ .Values.presets.commitHash }}{{ end }}
+{{- if .Values.presets.commitHash }}
+        commitHash: {{ .Values.presets.commitHash }}
+{{- end }}
     spec:
+{{- if .Values.presets.useSecretProvider }}
       serviceAccountName: {{ .Values.presets.secretServiceAccount }}
+{{- end }}
       containers:
       - name: {{ .Values.presets.name }}
         image: {{ .Values.presets.registry }}:{{ .Values.versions.presets }}
-        {{ if .Values.presets.imagePullPolicy }}imagePullPolicy: {{ .Values.presets.imagePullPolicy }}{{ end }}
+{{- if .Values.presets.imagePullPolicy }}
+        imagePullPolicy: {{ .Values.presets.imagePullPolicy }}
+{{- end }}
         lifecycle:
           postStart:
             exec:
@@ -43,7 +49,9 @@ spec:
           readOnly: true
       - name: {{ .Values.presets.nginx.name }}
         image: {{ .Values.presets.nginx.registry }}:{{ .Values.versions.presets }}
-        {{ if .Values.presets.imagePullPolicy }}imagePullPolicy: {{ .Values.presets.imagePullPolicy }}{{ end }}
+{{- if .Values.presets.imagePullPolicy }}
+        imagePullPolicy: {{ .Values.presets.imagePullPolicy }}
+{{- end }}
         ports:
         - containerPort: {{ .Values.presets.nginx.NGINX_PORT_HTTP }}
         envFrom:
@@ -51,8 +59,13 @@ spec:
             name: {{ .Values.presets.nginx.name }}
       volumes:
       - name: secrets-store-inline
+{{- if .Values.presets.useSecretProvider }}
         csi:
           driver: secrets-store.csi.k8s.io
           readOnly: true
           volumeAttributes:
             secretProviderClass: {{ .Values.presets.spcName | quote }}
+{{- else }}
+        secret:
+          secretName: {{ .Values.presets.secretName | quote }}
+{{- end }}

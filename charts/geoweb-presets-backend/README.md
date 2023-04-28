@@ -58,6 +58,8 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.EXTERNALADDRESSES` | - | `0.0.0.0:80` |
 | `presets.db_secret` | Secret containing Postgresql database connection string | |
 | `presets.iamRoleARN` | IAM Role with permissions to access db_secret secret | |
+| `presets.secretServiceAccount` | Service Account created for handling secrets | |
+| `presets.useSecretProvider` | Option to use only Kubernetes secrets | `true` |
 | `presets.nginx.name` | Name of nginx container | `nginx` |
 | `presets.nginx.registry` | Registry to fetch nginx image | `registry.gitlab.com/opengeoweb/backend-services/presets-backend/nginx-presets-backend` |
 | `presets.nginx.PRESETS_ENABLE_SSL` | Toggle SSL termination | `"FALSE"` |
