@@ -3,8 +3,8 @@ kind: Ingress
 metadata:
   name: {{ .Values.ingress.name }}-{{ .Values.frontend.name }}
   annotations:
-    {{ if .Values.frontend.auth }}nginx.ingress.kubernetes.io/auth-type: basic{{ end }}
-    {{ if .Values.frontend.auth }}nginx.ingress.kubernetes.io/auth-secret: {{ .Values.frontend.auth }}{{ end }}
+    {{ if .Values.frontend.auth_secret }}nginx.ingress.kubernetes.io/auth-type: basic{{ end }}
+    {{ if .Values.frontend.auth_secret }}nginx.ingress.kubernetes.io/auth-secret: {{ .Values.frontend.auth_secret }}{{ end }}
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
     nginx.ingress.kubernetes.io/rewrite-target: /
