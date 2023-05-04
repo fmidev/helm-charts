@@ -7,7 +7,7 @@ opmet:
   path: /opmet/(.*)
   svcPort: 80
   replicas: 1
-  secretName: opmet-db
+  db_secretName: opmet-db
   spcName: opmet-spc
   secretServiceAccount: opmet-service-account
   useSecretProvider: true

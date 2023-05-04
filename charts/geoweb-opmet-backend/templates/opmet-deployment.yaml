@@ -19,7 +19,7 @@ spec:
         commitHash: {{ .Values.opmet.commitHash }}
         {{- end }}
     spec:
-      {{- if .Values.opmet.useSecretProvider }}
+      {{- if .Values.opmet.secretProvider }}
       serviceAccountName: {{ .Values.opmet.secretServiceAccount }}
       {{- end }}
       containers:
@@ -37,12 +37,12 @@ spec:
         - name: SQLALCHEMY_DATABASE_URL
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.opmet.secretName }}
+              name: {{ .Values.opmet.db_secretName }}
               key: OPMET_BACKEND_DB
         - name: TEST_SQLALCHEMY_DATABASE_URL
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.opmet.secretName }}
+              name: {{ .Values.opmet.db_secretName }}
               key: OPMET_BACKEND_DB
         volumeMounts:
         - name: secrets-store-inline
@@ -72,7 +72,7 @@ spec:
             name: {{ .Values.opmet.nginx.name }}
       volumes:
       - name: secrets-store-inline
-        {{- if .Values.opmet.useSecretProvider }}
+        {{- if .Values.opmet.secretProvider }}
         csi:
           driver: secrets-store.csi.k8s.io
           readOnly: true
@@ -80,5 +80,5 @@ spec:
             secretProviderClass: {{ .Values.opmet.spcName | quote }}
         {{- else }}
         secret:
-          secretName: {{ .Values.opmet.secretName | quote }}
+          secretName: {{ .Values.opmet.db_secretName | quote }}
         {{- end }}

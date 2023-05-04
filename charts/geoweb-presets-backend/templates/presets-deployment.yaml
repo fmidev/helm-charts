@@ -41,7 +41,7 @@ spec:
         - name: PRESETS_BACKEND_DB
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.presets.secretName }}
+              name: {{ .Values.presets.db_secretName }}
               key: PRESETS_BACKEND_DB
         volumeMounts:
         - name: secrets-store-inline
@@ -67,5 +67,5 @@ spec:
             secretProviderClass: {{ .Values.presets.spcName | quote }}
 {{- else }}
         secret:
-          secretName: {{ .Values.presets.secretName | quote }}
+          secretName: {{ .Values.presets.db_secretName | quote }}
 {{- end }}
