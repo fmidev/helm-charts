@@ -15,19 +15,19 @@ spec:
         app: {{ .Values.opmet.name }}
       annotations:
         eks.amazonaws.com/compute-type: ec2
-        {{- if .Values.opmet.commitHash }}
+      {{- if .Values.opmet.commitHash }}
         commitHash: {{ .Values.opmet.commitHash }}
-        {{- end }}
-    spec:
-      {{- if .Values.opmet.secretProvider }}
-      serviceAccountName: {{ .Values.opmet.secretServiceAccount }}
       {{- end }}
+    spec:
+    {{- if .Values.opmet.secretProvider }}
+      serviceAccountName: {{ .Values.opmet.secretServiceAccount }}
+    {{- end }}
       containers:
       - name: {{ .Values.opmet.name }}
         image: {{ .Values.opmet.registry }}:{{ .Values.versions.opmet }}
-        {{- if .Values.opmet.imagePullPolicy }}
+      {{- if .Values.opmet.imagePullPolicy }}
         imagePullPolicy: {{ .Values.opmet.imagePullPolicy }}
-        {{- end }}
+      {{- end }}
         ports:
         - containerPort: {{ .Values.opmet.env.OPMET_BACKEND_PORT_HTTP }}
         envFrom:
@@ -52,9 +52,9 @@ spec:
         args: ["-c", "sleep 10 ; gunicorn --bind 0.0.0.0:8000 -k uvicorn.workers.UvicornWorker --log-config opmet_logging.conf opmet_backend.main:app"]
       - name: {{ .Values.opmet.messageconverter.name }}
         image: {{ .Values.opmet.messageconverter.registry }}:{{ .Values.opmet.messageconverter.version }}
-        {{- if .Values.opmet.imagePullPolicy }}
+      {{- if .Values.opmet.imagePullPolicy }}
         imagePullPolicy: {{ .Values.opmet.imagePullPolicy }}
-        {{- end }}
+      {{- end }}
         ports:
         - containerPort: {{ .Values.opmet.messageconverter.port }}
         envFrom:
@@ -62,9 +62,9 @@ spec:
             name: {{ .Values.opmet.name }}
       - name: {{ .Values.opmet.nginx.name }}
         image: {{ .Values.opmet.nginx.registry }}:{{ .Values.versions.opmet }}
-        {{- if .Values.opmet.imagePullPolicy }}
+      {{- if .Values.opmet.imagePullPolicy }}
         imagePullPolicy: {{ .Values.opmet.imagePullPolicy }}
-        {{- end }}
+      {{- end }}
         ports:
         - containerPort: {{ .Values.opmet.nginx.NGINX_PORT_HTTP }}
         envFrom:
@@ -72,13 +72,13 @@ spec:
             name: {{ .Values.opmet.nginx.name }}
       volumes:
       - name: secrets-store-inline
-        {{- if .Values.opmet.secretProvider }}
+      {{- if .Values.opmet.secretProvider }}
         csi:
           driver: secrets-store.csi.k8s.io
           readOnly: true
           volumeAttributes:
             secretProviderClass: {{ .Values.opmet.spcName | quote }}
-        {{- else }}
+      {{- else }}
         secret:
           secretName: {{ .Values.opmet.db_secretName | quote }}
-        {{- end }}
+      {{- end }}

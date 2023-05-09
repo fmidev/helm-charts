@@ -1,5 +1,5 @@
 versions:
-  presets: "1.4.1"
+  presets: "3.0.0"
 
 presets:
   name: presets
@@ -12,7 +12,6 @@ presets:
   db_secretName: presets-db
   spcName: presets-spc
   secretServiceAccount: presets-service-account
-  useSecretProvider: false
   nginx:
     name: nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/presets-backend/nginx-presets-backend

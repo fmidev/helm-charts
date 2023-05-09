@@ -8,11 +8,20 @@ helm repo update
 # Create requried dependencies
 
 Create values.yaml file for required variables:
+* Using aws as the secret provider
+```yaml
+opmet: 
+  url: geoweb.example.com
+  secretProvider: aws
+  db_secret: secretName # Secret should contain postgresql database connection string
+  iamRoleARN: arn:aws:iam::123456789012:role/example-iam-role-with-permissions-to-secret
+```
+
+* Using base64 encoded secret
 ```yaml
 opmet:
   url: geoweb.example.com
-  db_secret: secretName # Secret should contain postgresql database connection string
-  iamRoleARN: arn:aws:iam::123456789012:role/example-iam-role-with-permissions-to-secret
+  db_secret: base64_encoded_postgresql_connection_string
 ```
 
 # Testing the Chart
@@ -54,10 +63,10 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.path` | Path suffix added to url | `/opmet/(.*)` |
 | `opmet.svcPort` | Port used for service | `80` |
 | `opmet.replicas` | Amount of replicas deployed | `1` |
-| `opmet.db_secret` | Secret containing Postgresql database connection string | |
+| `opmet.db_secret` | Secret containing base64 encoded Postgresql database connection string | |
 | `opmet.iamRoleARN` | IAM Role with permissions to access db_secret secret | |
-| `opmet.secretServiceAccount` | Service Account created for handling secrets | |
-| `opmet.useSecretProvider` | Option to use only Kubernetes secrets | `true` |
+| `opmet.secretServiceAccount` | Service Account created for handling secrets | `opmet-service-account` |
+| `opmet.secretProvider` | Option to use secret provider instead of passing base64 encoded database connection string as opmet.db_secret *(aws\|azure\|gcp\|vault)* | |
 | `opmet.env.BACKEND_OPMET_PORT_HTTP` | Port used for container | `8000` |
 | `opmet.env.EXTERNALADDRESSES` | - | `0.0.0.0:80` |
 | `opmet.env.ENV_STATE` | - | `TEST` |
