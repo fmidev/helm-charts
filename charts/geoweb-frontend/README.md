@@ -56,7 +56,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 
 | Parameter | Description | Default |
 | - | - | - |
-| `versions.frontend` | Possibility to override application version | `v4.18.0` |
+| `versions.frontend` | Possibility to override application version | `v4.19.0` |
 | `frontend.name` | Name of frontend | `geoweb` |
 | `frontend.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/opengeoweb` |
 | `frontend.commitHash` | Adds commitHash annotation to the deployment | |
@@ -66,10 +66,11 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.svcPort` | Port used for service | `80` |
 | `frontend.containerPort` | Port used for container | `8080` |
 | `frontend.replicas` | Amount of replicas deployed | `1` |
-| `frontend.client_id_secret` | Secret containing OAuth2 Provider Client ID | |
+| `frontend.client_id_secret` | Secret containing base64 encoded OAuth2 Provider Client ID | |
+| `frontend.id_secretName` | Name of id secret | `geoweb-client-id` |
 | `frontend.iamRoleARN` | IAM Role with permissions to access secrets | |
-| `frontend.secretServiceAccount` | Service Account created for handling secrets | |
-| `frontend.useSecretProvider` | Option to use only Kubernetes secrets | `true` |
+| `frontend.secretServiceAccount` | Service Account created for handling secrets | `geoweb-service-account` |
+| `frontend.secretProvider` | Option to use secret provider instead of passing base64 encoded Client ID as opmet.db_secret *(aws\|azure\|gcp\|vault)* | |
 | `frontend.env.GW_CAP_BASE_URL` | Url which the application uses to connect to CAP backend | |
 | `frontend.env.GW_APP_URL` | Url which the application can be accessed | |
 | `frontend.env.GW_GITLAB_PRESETS_PATH` | Path in repository to fetch screen presets | |

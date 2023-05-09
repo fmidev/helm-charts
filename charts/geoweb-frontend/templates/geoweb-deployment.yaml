@@ -15,19 +15,19 @@ spec:
         app: {{ .Values.frontend.name }}
       annotations:
         eks.amazonaws.com/compute-type: ec2
-{{- if .Values.frontend.commitHash }}
+      {{- if .Values.frontend.commitHash }}
         commitHash: {{ .Values.frontend.commitHash }}
-{{- end }}
+      {{- end }}
     spec:
-{{- if .Values.frontend.useSecretProvider }}
+    {{- if .Values.frontend.secretProvider }}
       serviceAccountName: {{ .Values.frontend.secretServiceAccount }}
-{{- end }}
+    {{- end }}
       containers:
       - name: {{ .Values.frontend.name }}
         image: {{ .Values.frontend.registry }}:{{ .Values.versions.frontend }}
-{{- if .Values.frontend.imagePullPolicy }}
+      {{- if .Values.frontend.imagePullPolicy }}
         imagePullPolicy: {{ .Values.frontend.imagePullPolicy }}
-{{- end }}
+      {{- end }}
         ports:
         - containerPort: {{ .Values.frontend.containerPort }}
         envFrom:
@@ -45,13 +45,13 @@ spec:
           readOnly: true
       volumes:
       - name: secrets-store-inline
-{{- if .Values.frontend.useSecretProvider }}
+      {{- if .Values.frontend.secretProvider }}
         csi:
           driver: secrets-store.csi.k8s.io
           readOnly: true
           volumeAttributes:
             secretProviderClass: {{ .Values.frontend.spcName | quote }}
-{{ else }}
+      {{ else }}
         secret:
-          secretName: {{ .Values.frontend.idSecretName | quote }}
-{{- end }}
+          secretName: {{ .Values.frontend.id_secretName | quote }}
+      {{- end }}
