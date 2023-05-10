@@ -72,7 +72,8 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.db_secretKey` | Key of db secret | |
 | `presets.iamRoleARN` | IAM Role with permissions to access db_secret secret | |
 | `presets.secretServiceAccount` | Service Account created for handling secrets | `presets-service-account` |
-| `presets.secretProvider` | Option to use secret provider instead of passing base64 encoded database connection string as presets.db_secret *(aws\|azure\|gcp\|vault)* | |
+| `secretProvider` | Option to use secret provider instead of passing base64 encoded database connection string as presets.db_secret *(aws\|azure\|gcp\|vault)* | |
+| `secretProviderParameters` | Option to add custom parameters to the secretProvider, for example with aws you can specify region | |
 | `presets.nginx.name` | Name of nginx container | `nginx` |
 | `presets.nginx.registry` | Registry to fetch nginx image | `registry.gitlab.com/opengeoweb/backend-services/presets-backend/nginx-presets-backend` |
 | `presets.nginx.PRESETS_ENABLE_SSL` | Toggle SSL termination | `"FALSE"` |

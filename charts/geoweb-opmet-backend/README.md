@@ -70,7 +70,8 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.db_secretKey` | Key of db secret | |
 | `opmet.iamRoleARN` | IAM Role with permissions to access db_secret secret | |
 | `opmet.secretServiceAccount` | Service Account created for handling secrets | `opmet-service-account` |
-| `opmet.secretProvider` | Option to use secret provider instead of passing base64 encoded database connection string as opmet.db_secret *(aws\|azure\|gcp\|vault)* | |
+| `secretProvider` | Option to use secret provider instead of passing base64 encoded database connection string as opmet.db_secret *(aws\|azure\|gcp\|vault)* | |
+| `secretProviderParameters` | Option to add custom parameters to the secretProvider, for example with aws you can specify region | |
 | `opmet.env.BACKEND_OPMET_PORT_HTTP` | Port used for container | `8000` |
 | `opmet.env.EXTERNALADDRESSES` | - | `0.0.0.0:80` |
 | `opmet.env.ENV_STATE` | - | `TEST` |

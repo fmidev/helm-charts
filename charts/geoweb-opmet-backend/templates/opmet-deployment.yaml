@@ -19,7 +19,7 @@ spec:
         commitHash: {{ .Values.opmet.commitHash }}
       {{- end }}
     spec:
-    {{- if .Values.opmet.secretProvider }}
+    {{- if .Values.secretProvider }}
       serviceAccountName: {{ .Values.opmet.secretServiceAccount }}
     {{- end }}
       containers:
@@ -72,7 +72,7 @@ spec:
             name: {{ .Values.opmet.nginx.name }}
       volumes:
       - name: secrets-store-inline
-      {{- if .Values.opmet.secretProvider }}
+      {{- if .Values.secretProvider }}
         csi:
           driver: secrets-store.csi.k8s.io
           readOnly: true

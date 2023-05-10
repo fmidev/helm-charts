@@ -19,7 +19,7 @@ spec:
         commitHash: {{ .Values.frontend.commitHash }}
       {{- end }}
     spec:
-    {{- if .Values.frontend.secretProvider }}
+    {{- if .Values.secretProvider }}
       serviceAccountName: {{ .Values.frontend.secretServiceAccount }}
     {{- end }}
       containers:
@@ -45,7 +45,7 @@ spec:
           readOnly: true
       volumes:
       - name: secrets-store-inline
-      {{- if .Values.frontend.secretProvider }}
+      {{- if .Values.secretProvider }}
         csi:
           driver: secrets-store.csi.k8s.io
           readOnly: true
