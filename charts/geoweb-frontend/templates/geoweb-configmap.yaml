@@ -3,8 +3,8 @@ kind: ConfigMap
 metadata:
   name: {{ .Values.frontend.name }}
   annotations:
-  {{- if .Values.opmet.commitHash }}
-    commitHash: {{ .Values.opmet.commitHash }}
+  {{- if .Values.frontend.commitHash }}
+    commitHash: {{ .Values.frontend.commitHash }}
   {{- end }}
 data:
 {{- if .Values.frontend.env.GW_AUTH_LOGOUT_URL }}

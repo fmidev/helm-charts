@@ -33,11 +33,12 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Values.frontend.name }}
+    {{- if .Values.frontend.client_id_secret }}
         env:
         - name: GW_AUTH_CLIENT_ID
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.frontend.idSecretName }}
+              name: {{ .Values.frontend.client_id_secretName }}
               key: GW_AUTH_CLIENT_ID
         volumeMounts:
         - name: secrets-store-inline
@@ -55,3 +56,4 @@ spec:
         secret:
           secretName: {{ .Values.frontend.client_id_secretName | quote }}
       {{- end }}
+    {{- end }}

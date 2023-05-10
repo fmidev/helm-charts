@@ -8,14 +8,22 @@ helm repo update
 # Create requried dependencies
 
 Create values.yaml file for required variables:
+
+* Minimal setup
+```yaml
+frontend:
+  url: geoweb.example.com
+```
+
+* Using aws as the secret provider
 ```yaml
 # Example envs: https://gitlab.com/opengeoweb/opengeoweb/-/blob/master/apps/geoweb/src/assets/config.example.json
 # Secret creation docs: https://kubernetes.github.io/ingress-nginx/examples/auth/basic/
 
 frontend:
   url: geoweb.example.com
-  auth_secret: authSecretName
-  client_id_secret: idSecretName # Secret should contain client id for login
+  auth_secret: reference_to_auth_secret
+  client_id_secret: reference_to_client_id_secret
   iamRoleARN: arn:aws:iam::123456789012:role/example-iam-role-with-permissions-to-secret
   env:
     GW_CAP_BASE_URL: https://geoweb.example.com/cap
@@ -24,6 +32,26 @@ frontend:
     GW_DEFAULT_THEME: darkTheme | lightTheme
     GW_FEATURE_APP_TITLE: <Geoweb Title>
     GW_PRESET_BACKEND_URL: https://geoweb.example.com/presets
+
+secretProvider: aws
+secretProviderParameters:
+  region: your-region
+```
+
+* Using base64 encoded secrets
+```yaml
+frontend:
+  url: geoweb.example.com
+  auth_secret: base64_encoded_basic_auth
+  client_id_secret: base64_encoded_client_id_secret
+  env:
+    GW_CAP_BASE_URL: https://geoweb.example.com/cap
+    GW_APP_URL: https://geoweb.example.com
+    GW_GITLAB_PRESETS_PATH: <path-to-presets>
+    GW_DEFAULT_THEME: darkTheme | lightTheme
+    GW_FEATURE_APP_TITLE: <Geoweb Title>
+    GW_PRESET_BACKEND_URL: https://geoweb.example.com/presets
+
 ```
 
 # Testing the Chart

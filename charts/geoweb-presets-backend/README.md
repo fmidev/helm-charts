@@ -12,9 +12,12 @@ Create values.yaml file for required variables:
 ```yaml
 presets: 
   url: geoweb.example.com
-  secretProvider: aws
   db_secret: secretName # Secret should contain postgresql database connection string
   iamRoleARN: arn:aws:iam::123456789012:role/example-iam-role-with-permissions-to-secret
+
+secretProvider: aws
+secretProviderParameters:
+  region: your-region
 ```
 
 * Using base64 encoded secret
