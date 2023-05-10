@@ -67,6 +67,9 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.EXTERNALADDRESSES` | - | `0.0.0.0:80` |
 | `presets.db_secret` | Secret containing base64 encoded Postgresql database connection string | |
 | `presets.db_secretName` | Name of db secret | `presets-db` |
+| `presets.db_secretType` | Type to db secret | `secretsmanager` |
+| `presets.db_secretPath` | Path to db secret | |
+| `presets.db_secretKey` | Key of db secret | |
 | `presets.iamRoleARN` | IAM Role with permissions to access db_secret secret | |
 | `presets.secretServiceAccount` | Service Account created for handling secrets | `presets-service-account` |
 | `presets.secretProvider` | Option to use secret provider instead of passing base64 encoded database connection string as presets.db_secret *(aws\|azure\|gcp\|vault)* | |

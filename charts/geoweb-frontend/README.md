@@ -56,18 +56,25 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 
 | Parameter | Description | Default |
 | - | - | - |
-| `versions.frontend` | Possibility to override application version | `v4.19.0` |
+| `versions.frontend` | Possibility to override application version | `v4.19.1` |
 | `frontend.name` | Name of frontend | `geoweb` |
 | `frontend.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/opengeoweb` |
 | `frontend.commitHash` | Adds commitHash annotation to the deployment | |
 | `frontend.imagePullPolicy` | Adds option to modify imagePullPolicy | |
 | `frontend.url` | Url which the application can be accessed | |
-| `frontend.auth_secret` | Basic auth secret | |
+| `frontend.auth_secret` | Secret containing base64 encoded Basic auth secret | |
+| `frontend.auth_secretName` | Name of auth secret | `geoweb-auth` |
+| `frontend.auth_secretType` | Type of auth secret | `secretsmanager` |
+| `frontend.auth_secretPath` | Path to auth secret | |
+| `frontend.auth_secretKey` | Key of auth secret | |
 | `frontend.svcPort` | Port used for service | `80` |
 | `frontend.containerPort` | Port used for container | `8080` |
 | `frontend.replicas` | Amount of replicas deployed | `1` |
 | `frontend.client_id_secret` | Secret containing base64 encoded OAuth2 Provider Client ID | |
-| `frontend.id_secretName` | Name of id secret | `geoweb-client-id` |
+| `frontend.client_id_secretName` | Name of id secret | `geoweb-client-id` |
+| `frontend.client_id_secretType` | Type to id secret | `secretsmanager` |
+| `frontend.client_id_secretPath` | Path to id secret | |
+| `frontend.client_id_secretKey` | Key of id secret | |
 | `frontend.iamRoleARN` | IAM Role with permissions to access secrets | |
 | `frontend.secretServiceAccount` | Service Account created for handling secrets | `geoweb-service-account` |
 | `frontend.secretProvider` | Option to use secret provider instead of passing base64 encoded Client ID as opmet.db_secret *(aws\|azure\|gcp\|vault)* | |

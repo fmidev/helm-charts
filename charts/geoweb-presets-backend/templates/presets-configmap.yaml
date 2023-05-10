@@ -2,6 +2,10 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .Values.presets.name }}
+  annotations:
+  {{- if .Values.opmet.commitHash }}
+    commitHash: {{ .Values.opmet.commitHash }}
+  {{- end }}
 data:
   VERSION: {{ .Values.versions.presets | quote }}
   EXTERNALADDRESS: {{ .Values.presets.EXTERNALADDRESS | quote }}

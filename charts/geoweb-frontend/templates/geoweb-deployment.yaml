@@ -53,5 +53,5 @@ spec:
             secretProviderClass: {{ .Values.frontend.spcName | quote }}
       {{ else }}
         secret:
-          secretName: {{ .Values.frontend.id_secretName | quote }}
+          secretName: {{ .Values.frontend.client_id_secretName | quote }}
       {{- end }}

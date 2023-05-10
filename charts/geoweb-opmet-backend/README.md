@@ -65,6 +65,9 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.replicas` | Amount of replicas deployed | `1` |
 | `opmet.db_secret` | Secret containing base64 encoded Postgresql database connection string | |
 | `opmet.db_secretName` | Name of db secret | `opmet-db` |
+| `opmet.db_secretType` | Type to db secret | `secretsmanager` |
+| `opmet.db_secretPath` | Path to db secret | |
+| `opmet.db_secretKey` | Key of db secret | |
 | `opmet.iamRoleARN` | IAM Role with permissions to access db_secret secret | |
 | `opmet.secretServiceAccount` | Service Account created for handling secrets | `opmet-service-account` |
 | `opmet.secretProvider` | Option to use secret provider instead of passing base64 encoded database connection string as opmet.db_secret *(aws\|azure\|gcp\|vault)* | |
