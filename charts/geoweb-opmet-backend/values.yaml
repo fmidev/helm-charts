@@ -8,6 +8,7 @@ opmet:
   svcPort: 80
   replicas: 1
   db_secretName: opmet-db
+  db_secretType: secretsmanager
   spcName: opmet-spc
   secretServiceAccount: opmet-service-account
   env:
