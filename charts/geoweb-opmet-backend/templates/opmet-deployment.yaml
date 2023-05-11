@@ -19,7 +19,7 @@ spec:
         commitHash: {{ .Values.opmet.commitHash }}
       {{- end }}
     spec:
-    {{- if .Values.secretProvider }}
+    {{- if eq .Values.secretProvider "aws" }}
       serviceAccountName: {{ .Values.opmet.secretServiceAccount }}
     {{- end }}
       containers:

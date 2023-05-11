@@ -19,7 +19,7 @@ spec:
         commitHash: {{ .Values.presets.commitHash }}
       {{- end }}
     spec:
-    {{- if .Values.secretProvider }}
+    {{- if eq .Values.secretProvider "aws" }}
       serviceAccountName: {{ .Values.presets.secretServiceAccount }}
     {{- end }}
       containers:
