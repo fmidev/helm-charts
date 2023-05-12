@@ -8,11 +8,23 @@ helm repo update
 # Create requried dependencies
 
 Create values.yaml file for required variables:
+* Using aws as the secret provider
 ```yaml
-presets:
+presets: 
   url: geoweb.example.com
   db_secret: secretName # Secret should contain postgresql database connection string
   iamRoleARN: arn:aws:iam::123456789012:role/example-iam-role-with-permissions-to-secret
+
+secretProvider: aws
+secretProviderParameters:
+  region: your-region
+```
+
+* Using base64 encoded secret
+```yaml
+presets:
+  url: geoweb.example.com
+  db_secret: base64_encoded_postgresql_connection_string
 ```
 
 # Testing the Chart
@@ -56,8 +68,15 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.PRESETS_PORT_HTTP` | Port used for container | `8080` |
 | `presets.replicas` | Amount of replicas deployed | `1` |
 | `presets.EXTERNALADDRESSES` | - | `0.0.0.0:80` |
-| `presets.db_secret` | Secret containing Postgresql database connection string | |
+| `presets.db_secret` | Secret containing base64 encoded Postgresql database connection string | |
+| `presets.db_secretName` | Name of db secret | `presets-db` |
+| `presets.db_secretType` | Type to db secret | `secretsmanager` |
+| `presets.db_secretPath` | Path to db secret | |
+| `presets.db_secretKey` | Key of db secret | |
 | `presets.iamRoleARN` | IAM Role with permissions to access db_secret secret | |
+| `presets.secretServiceAccount` | Service Account created for handling secrets | `presets-service-account` |
+| `secretProvider` | Option to use secret provider instead of passing base64 encoded database connection string as presets.db_secret *(aws\|azure\|gcp\|vault)* | |
+| `secretProviderParameters` | Option to add custom parameters to the secretProvider, for example with aws you can specify region | |
 | `presets.nginx.name` | Name of nginx container | `nginx` |
 | `presets.nginx.registry` | Registry to fetch nginx image | `registry.gitlab.com/opengeoweb/backend-services/presets-backend/nginx-presets-backend` |
 | `presets.nginx.PRESETS_ENABLE_SSL` | Toggle SSL termination | `"FALSE"` |

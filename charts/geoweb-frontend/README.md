@@ -8,14 +8,22 @@ helm repo update
 # Create requried dependencies
 
 Create values.yaml file for required variables:
+
+* Minimal setup
+```yaml
+frontend:
+  url: geoweb.example.com
+```
+
+* Using aws as the secret provider
 ```yaml
 # Example envs: https://gitlab.com/opengeoweb/opengeoweb/-/blob/master/apps/geoweb/src/assets/config.example.json
 # Secret creation docs: https://kubernetes.github.io/ingress-nginx/examples/auth/basic/
 
 frontend:
   url: geoweb.example.com
-  auth_secret: authSecretName
-  client_id_secret: idSecretName # Secret should contain client id for login
+  auth_secret: reference_to_auth_secret
+  client_id_secret: reference_to_client_id_secret
   iamRoleARN: arn:aws:iam::123456789012:role/example-iam-role-with-permissions-to-secret
   env:
     GW_CAP_BASE_URL: https://geoweb.example.com/cap
@@ -24,6 +32,26 @@ frontend:
     GW_DEFAULT_THEME: darkTheme | lightTheme
     GW_FEATURE_APP_TITLE: <Geoweb Title>
     GW_PRESET_BACKEND_URL: https://geoweb.example.com/presets
+
+secretProvider: aws
+secretProviderParameters:
+  region: your-region
+```
+
+* Using base64 encoded secrets
+```yaml
+frontend:
+  url: geoweb.example.com
+  auth_secret: base64_encoded_basic_auth
+  client_id_secret: base64_encoded_client_id_secret
+  env:
+    GW_CAP_BASE_URL: https://geoweb.example.com/cap
+    GW_APP_URL: https://geoweb.example.com
+    GW_GITLAB_PRESETS_PATH: <path-to-presets>
+    GW_DEFAULT_THEME: darkTheme | lightTheme
+    GW_FEATURE_APP_TITLE: <Geoweb Title>
+    GW_PRESET_BACKEND_URL: https://geoweb.example.com/presets
+
 ```
 
 # Testing the Chart
@@ -56,18 +84,29 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 
 | Parameter | Description | Default |
 | - | - | - |
-| `versions.frontend` | Possibility to override application version | `v4.18.0` |
+| `versions.frontend` | Possibility to override application version | `v4.19.1` |
 | `frontend.name` | Name of frontend | `geoweb` |
 | `frontend.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/opengeoweb` |
 | `frontend.commitHash` | Adds commitHash annotation to the deployment | |
 | `frontend.imagePullPolicy` | Adds option to modify imagePullPolicy | |
 | `frontend.url` | Url which the application can be accessed | |
-| `frontend.auth_secret` | Basic auth secret | |
 | `frontend.svcPort` | Port used for service | `80` |
 | `frontend.containerPort` | Port used for container | `8080` |
 | `frontend.replicas` | Amount of replicas deployed | `1` |
-| `frontend.client_id_secret` | Secret containing OAuth2 Provider Client ID | |
-| `frontend.iamRoleARN` | IAM Role with permissions to access db_secret secret | |
+| `frontend.auth_secret` | Secret containing base64 encoded Basic auth secret | |
+| `frontend.auth_secretName` | Name of auth secret | `geoweb-auth` |
+| `frontend.auth_secretType` | Type of auth secret | `secretsmanager` |
+| `frontend.auth_secretPath` | Path to auth secret | |
+| `frontend.auth_secretKey` | Key of auth secret | |
+| `frontend.client_id_secret` | Secret containing base64 encoded OAuth2 Provider Client ID | |
+| `frontend.client_id_secretName` | Name of id secret | `geoweb-client-id` |
+| `frontend.client_id_secretType` | Type to id secret | `secretsmanager` |
+| `frontend.client_id_secretPath` | Path to id secret | |
+| `frontend.client_id_secretKey` | Key of id secret | |
+| `frontend.iamRoleARN` | IAM Role with permissions to access secrets | |
+| `frontend.secretServiceAccount` | Service Account created for handling secrets | `geoweb-service-account` |
+| `secretProvider` | Option to use secret provider instead of passing base64 encoded Client ID as opmet.db_secret *(aws\|azure\|gcp\|vault)* | |
+| `secretProviderParameters` | Option to add custom parameters to the secretProvider, for example with aws you can specify region | |
 | `frontend.env.GW_CAP_BASE_URL` | Url which the application uses to connect to CAP backend | |
 | `frontend.env.GW_APP_URL` | Url which the application can be accessed | |
 | `frontend.env.GW_GITLAB_PRESETS_PATH` | Path in repository to fetch screen presets | |

@@ -1,5 +1,5 @@
 versions:
-  presets: "1.4.1"
+  presets: "3.0.0"
 
 presets:
   name: presets
@@ -9,7 +9,8 @@ presets:
   replicas: 1
   EXTERNALADDRESS: 0.0.0.0:80
   PRESETS_PORT_HTTP: 8080
-  secretName: presets-db
+  db_secretName: presets-db
+  db_secretType: secretsmanager
   spcName: presets-spc
   secretServiceAccount: presets-service-account
   nginx:

@@ -15,23 +15,30 @@ spec:
         app: {{ .Values.frontend.name }}
       annotations:
         eks.amazonaws.com/compute-type: ec2
-        {{ if .Values.frontend.commitHash }}commitHash: {{ .Values.frontend.commitHash }}{{ end }}
+      {{- if .Values.frontend.commitHash }}
+        commitHash: {{ .Values.frontend.commitHash }}
+      {{- end }}
     spec:
+    {{- if eq .Values.secretProvider "aws" }}
       serviceAccountName: {{ .Values.frontend.secretServiceAccount }}
+    {{- end }}
       containers:
       - name: {{ .Values.frontend.name }}
         image: {{ .Values.frontend.registry }}:{{ .Values.versions.frontend }}
-        {{ if .Values.frontend.imagePullPolicy }}imagePullPolicy: {{ .Values.frontend.imagePullPolicy }}{{ end }}
+      {{- if .Values.frontend.imagePullPolicy }}
+        imagePullPolicy: {{ .Values.frontend.imagePullPolicy }}
+      {{- end }}
         ports:
         - containerPort: {{ .Values.frontend.containerPort }}
         envFrom:
         - configMapRef:
             name: {{ .Values.frontend.name }}
+    {{- if .Values.frontend.client_id_secret }}
         env:
         - name: GW_AUTH_CLIENT_ID
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.frontend.idSecretName }}
+              name: {{ .Values.frontend.client_id_secretName }}
               key: GW_AUTH_CLIENT_ID
         volumeMounts:
         - name: secrets-store-inline
@@ -39,8 +46,14 @@ spec:
           readOnly: true
       volumes:
       - name: secrets-store-inline
+      {{- if .Values.secretProvider }}
         csi:
           driver: secrets-store.csi.k8s.io
           readOnly: true
           volumeAttributes:
             secretProviderClass: {{ .Values.frontend.spcName | quote }}
+      {{ else }}
+        secret:
+          secretName: {{ .Values.frontend.client_id_secretName | quote }}
+      {{- end }}
+    {{- end }}

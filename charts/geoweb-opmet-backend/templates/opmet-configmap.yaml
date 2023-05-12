@@ -2,6 +2,10 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .Values.opmet.name }}
+  annotations:
+  {{- if .Values.opmet.commitHash }}
+    commitHash: {{ .Values.opmet.commitHash }}
+  {{- end }}
 data:
   ENV_STATE: {{ .Values.opmet.env.ENV_STATE | quote }}
   TEST_MESSAGECONVERTER_URL: {{ .Values.opmet.env.TEST_MESSAGECONVERTER_URL | quote }}

@@ -1,5 +1,5 @@
 versions:
-  frontend: "v4.18.0"
+  frontend: "v4.19.1"
 
 frontend:
   name: geoweb
@@ -7,7 +7,10 @@ frontend:
   svcPort: 80
   containerPort: 8080
   replicas: 1
-  idSecretName: geoweb-client-id
+  auth_secretName: geoweb-auth
+  auth_secretType: secretsmanager
+  client_id_secretName: geoweb-client-id
+  client_id_secretType: secretsmanager
   spcName: geoweb-spc
   secretServiceAccount: geoweb-service-account
   env:
