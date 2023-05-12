@@ -57,7 +57,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 
 | Parameter | Description | Default |
 | - | - | - |
-| `versions.opmet` | Possibility to override application version | `v0.0.3` |
+| `versions.opmet` | Possibility to override application version | `v1.0.0` |
 | `opmet.name` | Name of backend | `opmet` |
 | `opmet.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/opmet-backend` |
 | `opmet.commitHash` | Adds commitHash annotation to the deployment | |
@@ -78,17 +78,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.env.BACKEND_OPMET_PORT_HTTP` | Port used for container | `8000` |
 | `opmet.env.EXTERNALADDRESSES` | - | `0.0.0.0:80` |
 | `opmet.env.ENV_STATE` | - | `TEST` |
-| `opmet.env.TEST_MESSAGECONVERTER_URL` | - | `"http://localhost:8080/getsigmettac"` |
-| `opmet.env.TEST_TEST_FIELD` | - | `"A"` |
-| `opmet.env.TEST_MWO_CCCC` | - | `"EHDB"` |
-| `opmet.env.TEST_SIGMET_HEADER__VA_CLD` | - | `"WVNL31"` |
-| `opmet.env.TEST_SIGMET_HEADER__TC` | - | `"WCNL31"` |
-| `opmet.env.TEST_SIGMET_HEADER__DEFAULT` | - | `"WSNL31"` |
-| `opmet.env.TEST_IWXXM_SIGMET_HEADER__VA_CLD` | - | `"LVNL31"` |
-| `opmet.env.TEST_IWXXM_SIGMET_HEADER__TC` | - | `"LYNL31"` |
-| `opmet.env.TEST_IWXXM_SIGMET_HEADER__DEFAULT` | - | `"LSNL31"` |
-| `opmet.env.TEST_AIRMET_HEADER` | - | `"WANL31"` |
-| `opmet.env.TEST_IWXXM_AIRMET_HEADER` | - | `"LWNL31"` |
+| `opmet.env.MESSAGECONVERTER_URL` | - | `"http://localhost:8080/getsigmettac"` |
 | `opmet.env.OAUTH2_USERINFO` | - | `https://gitlab.com/oauth/userinfo` |
 | `opmet.env.OPMET_ENABLE_SSL` | Toggle SSL termination | `"FALSE"` |
 | `opmet.env.FORWARDED_ALLOW_IPS` | - | `"*"` |
