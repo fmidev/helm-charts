@@ -12,7 +12,6 @@ opmet:
   spcName: opmet-spc
   secretServiceAccount: opmet-service-account
   env:
-    ENV_STATE: TEST
     MESSAGECONVERTER_URL: "http://localhost:8080"
     OAUTH2_USERINFO: https://gitlab.com/oauth/userinfo"
     OPMET_BACKEND_PORT_HTTP: 8000

@@ -77,7 +77,6 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `secretProviderParameters` | Option to add custom parameters to the secretProvider, for example with aws you can specify region | |
 | `opmet.env.BACKEND_OPMET_PORT_HTTP` | Port used for container | `8000` |
 | `opmet.env.EXTERNALADDRESSES` | - | `0.0.0.0:80` |
-| `opmet.env.ENV_STATE` | - | `TEST` |
 | `opmet.env.MESSAGECONVERTER_URL` | - | `"http://localhost:8080/getsigmettac"` |
 | `opmet.env.OAUTH2_USERINFO` | - | `https://gitlab.com/oauth/userinfo` |
 | `opmet.env.OPMET_ENABLE_SSL` | Toggle SSL termination | `"FALSE"` |
