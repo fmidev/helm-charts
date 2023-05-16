@@ -83,4 +83,11 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.nginx.OAUTH2_USERINFO` | - | `https://gitlab.com/oauth/userinfo` |
 | `presets.nginx.PRESETS_BACKEND_HOST` | Address where nginx accesses the backend | `0.0.0.0:8080` |
 | `presets.nginx.NGINX_PORT_HTTP` | Port used for nginx | `80` |
+| `presets.useCustomWorkspacePresets` | Use PersistentVolume to provide custom presets to the application | `false` |
+| `presets.volumeAccessMode` | Permissions of the application for the custom presets PersistentVolume used | `ReadOnlyMany` |
+| `presets.volumeSize` | Size of the custom presets PersistentVolume | `100Mi` |
+| `presets.volumeType` | Type of the PersistentVolume used, supporting hostPath and [csi-s3](https://github.com/yandex-cloud/k8s-csi-s3) | `hostPath` |
+| `presets.volumePath` | Path which you mount your custom presets from (`bucket-name/path` when using csi-s3) | `/mnt/presets` |
+| `presets.csiNamespace` | Namespace where csi-s3 driver is running | `kube-system` |
+| `presets.csiSecretName` | Secret created by csi-s3 driver | `csi-s3-secret` |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |

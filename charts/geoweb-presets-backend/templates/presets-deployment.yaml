@@ -47,6 +47,10 @@ spec:
         - name: secrets-store-inline
           mountPath: "/mnt/secrets-store"
           readOnly: true
+      {{- if .Values.presets.useCustomWorkspacePresets }}
+        - mountPath: "/app/staticpresets"
+          name: {{ .Values.presets.name }}-pv
+      {{- end }}
       - name: {{ .Values.presets.nginx.name }}
         image: {{ .Values.presets.nginx.registry }}:{{ .Values.versions.presets }}
       {{- if .Values.presets.imagePullPolicy }}
@@ -58,6 +62,11 @@ spec:
         - configMapRef:
             name: {{ .Values.presets.nginx.name }}
       volumes:
+      {{- if .Values.presets.useCustomWorkspacePresets }}
+      - name: {{ .Values.presets.name }}-pv
+        persistentVolumeClaim:
+          claimName: {{ .Values.presets.name }}-pvc
+      {{- end }}
       - name: secrets-store-inline
       {{- if .Values.secretProvider }}
         csi:
