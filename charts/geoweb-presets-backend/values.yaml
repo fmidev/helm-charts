@@ -21,12 +21,9 @@ presets:
     PRESETS_BACKEND_HOST: 0.0.0.0:8080
     NGINX_PORT_HTTP: 80
   useCustomWorkspacePresets: false
+  customWorkspacePresetLocation: local
   volumeAccessMode: ReadOnlyMany
   volumeSize: 100Mi
-  volumeType: hostPath
-  volumePath: /mnt/presets
-  csiNamespace: kube-system
-  csiSecretName: csi-s3-secret
 
 ingress:
   name: nginx-ingress-controller # Sync with nginx-ingress-controller/values.yaml

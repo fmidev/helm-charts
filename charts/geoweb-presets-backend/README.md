@@ -27,6 +27,27 @@ presets:
   db_secret: base64_encoded_postgresql_connection_string
 ```
 
+* Using custom presets stored locally
+```yaml
+presets:
+  url: geoweb.example.com
+  useCustomWorkspacePresets: true
+  customPresetsFolderPath: /example/path/ # NOTE: Don't include the preset file
+```
+
+* Using custom presets stored in AWS S3
+```yaml
+presets:
+  url: geoweb.example.com
+  useCustomWorkspacePresets: true
+  customWorkspacePresetLocation: s3
+  s3bucketName: example-bucket
+  customPresetsFile: example-path/customPresets.json
+  awsAccessKeyId: <AWS_ACCESS_KEY_ID>
+  awsAccessKeySecret: <AWS_SECRET_ACCESS_KEY>
+  awsDefaultRegion: <AWS_DEFAULT_REGION>
+```
+
 # Testing the Chart
 Execute the following for testing the chart:
 
@@ -83,11 +104,14 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.nginx.OAUTH2_USERINFO` | - | `https://gitlab.com/oauth/userinfo` |
 | `presets.nginx.PRESETS_BACKEND_HOST` | Address where nginx accesses the backend | `0.0.0.0:8080` |
 | `presets.nginx.NGINX_PORT_HTTP` | Port used for nginx | `80` |
-| `presets.useCustomWorkspacePresets` | Use PersistentVolume to provide custom presets to the application | `false` |
+| `presets.useCustomWorkspacePresets` | Use custom presets | `false` |
+| `presets.customWorkspacePresetLocation` | Where custom presets are located *(local\|s3)* | `local` |
 | `presets.volumeAccessMode` | Permissions of the application for the custom presets PersistentVolume used | `ReadOnlyMany` |
 | `presets.volumeSize` | Size of the custom presets PersistentVolume | `100Mi` |
-| `presets.volumeType` | Type of the PersistentVolume used, supporting hostPath and [csi-s3](https://github.com/yandex-cloud/k8s-csi-s3) | `hostPath` |
-| `presets.volumePath` | Path which you mount your custom presets from (`bucket-name/path` when using csi-s3) | `/mnt/presets` |
-| `presets.csiNamespace` | Namespace where csi-s3 driver is running | `kube-system` |
-| `presets.csiSecretName` | Secret created by csi-s3 driver | `csi-s3-secret` |
+| `presets.customPresetsFolderPath` | Path to the folder which contains custom presets (used locally) | |
+| `presets.s3bucketName` | Name of the S3 bucket where custom presets are stored | |
+| `presets.customPresetsFile` | ile which contains custom presets including path to it (used with s3) | |
+| `presets.awsAccessKeyId` | AWS_ACCESS_KEY_ID for authenticating to S3 | |
+| `presets.awsAccessKeySecret` | AWS_SECRET_ACCESS_KEY for authenticating to S3 | |
+| `presets.awsDefaultRegion` | Region where your S3 bucket is located | |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |

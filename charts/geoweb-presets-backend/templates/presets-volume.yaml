@@ -1,8 +1,8 @@
-{{- if .Values.presets.useCustomWorkspacePresets }}
+{{- if and .Values.presets.useCustomWorkspacePresets (eq .Values.presets.customWorkspacePresetLocation "local")}}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Values.presets.name }}-pvc
+  name: {{ .Values.presets.name }}-claim
 spec:
   storageClassName: ""
   accessModes:
@@ -14,38 +14,16 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ .Values.presets.name }}-pv
+  name: {{ .Values.presets.name }}-volume
 spec:
-{{- if eq .Values.presets.volumeType "hostPath" }}
   storageClassName: manual
-{{- else if eq .Values.presets.volumeType "csi-s3" }}
-  storageClassName: csi-s3
-{{- end }}
   capacity:
     storage: {{ .Values.presets.volumeSize }}
   accessModes:
     - {{ .Values.presets.volumeAccessMode }}
   claimRef:
     namespace: {{ .Release.Namespace }}
-    name: {{ .Values.presets.name }}-pvc
-{{- if eq .Values.presets.volumeType "hostPath" }}
+    name: {{ .Values.presets.name }}-claim
   hostPath:
-    path: {{ .Values.presets.volumePath | quote }}
-{{- else if eq .Values.presets.volumeType "csi-s3" }}
-  csi:
-    driver: ru.yandex.s3.csi
-    controllerPublishSecretRef:
-      name: {{ .Values.presets.csiSecretName }}
-      namespace: {{ .Values.presets.csiNamespace }}
-    nodePublishSecretRef:
-      name: {{ .Values.presets.csiSecretName }}
-      namespace: {{ .Values.presets.csiNamespace }}
-    nodeStageSecretRef:
-      name: {{ .Values.presets.csiSecretName }}
-      namespace: {{ .Values.presets.csiNamespace }}
-    volumeAttributes:
-      capacity: {{ .Values.presets.volumeSize }}
-      mounter: geesefs
-    volumeHandle: {{ .Values.presets.volumePath }}
-{{- end }}
+    path: {{ .Values.presets.customPresetsFolderPath | quote }}
 {{- end }}
