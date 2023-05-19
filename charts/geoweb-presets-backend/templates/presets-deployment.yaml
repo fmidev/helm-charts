@@ -33,7 +33,7 @@ spec:
             export AWS_ACCESS_KEY_ID={{ .Values.presets.awsAccessKeyId }};
             export AWS_SECRET_ACCESS_KEY={{ .Values.presets.awsAccessKeySecret }};
             AWS_DEFAULT_REGION={{ .Values.presets.awsDefaultRegion }};
-            aws s3 cp s3://{{ .Values.presets.s3bucketName }}/{{ .Values.presets.customPresetsFile }} /presets;
+            aws s3 cp --recursive s3://{{ .Values.presets.s3bucketName }}{{ .Values.presets.customPresetsPath }} /presets;
         volumeMounts:
         - mountPath: "/presets/"
           name: {{ .Values.presets.name }}-volume

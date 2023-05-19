@@ -32,7 +32,7 @@ presets:
 presets:
   url: geoweb.example.com
   useCustomWorkspacePresets: true
-  customPresetsFolderPath: /example/path/ # NOTE: Don't include the preset file
+  customPresetsPath: /example/path/
 ```
 
 * Using custom presets stored in AWS S3
@@ -42,7 +42,7 @@ presets:
   useCustomWorkspacePresets: true
   customWorkspacePresetLocation: s3
   s3bucketName: example-bucket
-  customPresetsFile: example-path/customPresets.json
+  customPresetsPath: /example/path/
   awsAccessKeyId: <AWS_ACCESS_KEY_ID>
   awsAccessKeySecret: <AWS_SECRET_ACCESS_KEY>
   awsDefaultRegion: <AWS_DEFAULT_REGION>
@@ -108,9 +108,8 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.customWorkspacePresetLocation` | Where custom presets are located *(local\|s3)* | `local` |
 | `presets.volumeAccessMode` | Permissions of the application for the custom presets PersistentVolume used | `ReadOnlyMany` |
 | `presets.volumeSize` | Size of the custom presets PersistentVolume | `100Mi` |
-| `presets.customPresetsFolderPath` | Path to the folder which contains custom presets (used locally) | |
+| `presets.customPresetsPath` | Path to the folder which contains custom presets | |
 | `presets.s3bucketName` | Name of the S3 bucket where custom presets are stored | |
-| `presets.customPresetsFile` | ile which contains custom presets including path to it (used with s3) | |
 | `presets.awsAccessKeyId` | AWS_ACCESS_KEY_ID for authenticating to S3 | |
 | `presets.awsAccessKeySecret` | AWS_SECRET_ACCESS_KEY for authenticating to S3 | |
 | `presets.awsDefaultRegion` | Region where your S3 bucket is located | |
