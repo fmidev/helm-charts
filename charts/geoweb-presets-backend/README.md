@@ -27,6 +27,27 @@ presets:
   db_secret: base64_encoded_postgresql_connection_string
 ```
 
+* Using custom presets stored locally
+```yaml
+presets:
+  url: geoweb.example.com
+  useCustomWorkspacePresets: true
+  customPresetsPath: /example/path/
+```
+
+* Using custom presets stored in AWS S3
+```yaml
+presets:
+  url: geoweb.example.com
+  useCustomWorkspacePresets: true
+  customWorkspacePresetLocation: s3
+  s3bucketName: example-bucket
+  customPresetsPath: /example/path/
+  awsAccessKeyId: <AWS_ACCESS_KEY_ID>
+  awsAccessKeySecret: <AWS_SECRET_ACCESS_KEY>
+  awsDefaultRegion: <AWS_DEFAULT_REGION>
+```
+
 # Testing the Chart
 Execute the following for testing the chart:
 
@@ -83,4 +104,13 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.nginx.OAUTH2_USERINFO` | - | `https://gitlab.com/oauth/userinfo` |
 | `presets.nginx.PRESETS_BACKEND_HOST` | Address where nginx accesses the backend | `0.0.0.0:8080` |
 | `presets.nginx.NGINX_PORT_HTTP` | Port used for nginx | `80` |
+| `presets.useCustomWorkspacePresets` | Use custom presets | `false` |
+| `presets.customWorkspacePresetLocation` | Where custom presets are located *(local\|s3)* | `local` |
+| `presets.volumeAccessMode` | Permissions of the application for the custom presets PersistentVolume used | `ReadOnlyMany` |
+| `presets.volumeSize` | Size of the custom presets PersistentVolume | `100Mi` |
+| `presets.customPresetsPath` | Path to the folder which contains custom presets | |
+| `presets.s3bucketName` | Name of the S3 bucket where custom presets are stored | |
+| `presets.awsAccessKeyId` | AWS_ACCESS_KEY_ID for authenticating to S3 | |
+| `presets.awsAccessKeySecret` | AWS_SECRET_ACCESS_KEY for authenticating to S3 | |
+| `presets.awsDefaultRegion` | Region where your S3 bucket is located | |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |

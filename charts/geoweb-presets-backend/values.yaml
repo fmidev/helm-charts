@@ -20,5 +20,10 @@ presets:
     OAUTH2_USERINFO: https://gitlab.com/oauth/userinfo
     PRESETS_BACKEND_HOST: 0.0.0.0:8080
     NGINX_PORT_HTTP: 80
+  useCustomWorkspacePresets: false
+  customWorkspacePresetLocation: local
+  volumeAccessMode: ReadOnlyMany
+  volumeSize: 100Mi
+
 ingress:
   name: nginx-ingress-controller # Sync with nginx-ingress-controller/values.yaml
