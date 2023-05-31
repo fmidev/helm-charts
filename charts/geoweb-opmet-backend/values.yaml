@@ -29,10 +29,6 @@ opmet:
     registry: registry.gitlab.com/opengeoweb/backend-services/opmet-backend/opmet-backend-publisher-local
     port: 8090
     DESTINATION: /app/output
-    volumeOptions:
-      emptyDir:
-    #  hostPath:
-    #    path: /app/output
   nginx:
     name: opmet-nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/opmet-backend/nginx-opmet-backend

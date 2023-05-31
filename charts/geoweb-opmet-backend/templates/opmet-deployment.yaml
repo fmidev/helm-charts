@@ -91,4 +91,8 @@ spec:
           secretName: {{ .Values.opmet.db_secretName | quote }}
       {{- end }}
       - name: publisher-volume
+      {{- if .Values.opmet.publisher.volumeOptions }}
         {{- toYaml .Values.opmet.publisher.volumeOptions | nindent 8 }}
+      {{- else }}
+        emptyDir:
+      {{- end }}
