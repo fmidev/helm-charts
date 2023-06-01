@@ -55,6 +55,19 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Values.opmet.name }}
+      - name: {{ .Values.opmet.publisher.name }}
+        image: {{ .Values.opmet.publisher.registry }}:{{ .Values.versions.opmet }}
+      {{- if .Values.opmet.imagePullPolicy }}
+        imagePullPolicy: {{ .Values.opmet.imagePullPolicy }}
+      {{- end }}
+        ports:
+        - containerPort: {{ .Values.opmet.publisher.port }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Values.opmet.publisher.name }}
+        volumeMounts:
+        - name: publisher-volume
+          mountPath: {{ .Values.opmet.publisher.DESTINATION | quote }}
       - name: {{ .Values.opmet.nginx.name }}
         image: {{ .Values.opmet.nginx.registry }}:{{ .Values.versions.opmet }}
       {{- if .Values.opmet.imagePullPolicy }}
@@ -76,4 +89,10 @@ spec:
       {{- else }}
         secret:
           secretName: {{ .Values.opmet.db_secretName | quote }}
+      {{- end }}
+      - name: publisher-volume
+      {{- if .Values.opmet.publisher.volumeOptions }}
+        {{- toYaml .Values.opmet.publisher.volumeOptions | nindent 8 }}
+      {{- else }}
+        emptyDir:
       {{- end }}

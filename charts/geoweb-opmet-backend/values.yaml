@@ -1,5 +1,5 @@
 versions:
-  opmet: "v0.1.0"
+  opmet: "v1.0.0"
 
 opmet:
   name: opmet
@@ -18,11 +18,17 @@ opmet:
     EXTERNALADDRESSES: 0.0.0.0:80
     OPMET_ENABLE_SSL: "FALSE"
     FORWARDED_ALLOW_IPS: "*"
+    PUBLISHER_URL: "http://localhost:8090/publish"
   messageconverter:
     name: opmet-messageconverter
     registry: registry.gitlab.com/opengeoweb/avi-msgconverter/geoweb-knmi-avi-messageservices
     version: "0.1.1"
     port: 8080
+  publisher:
+    name: opmet-publisher
+    registry: registry.gitlab.com/opengeoweb/backend-services/opmet-backend/opmet-backend-publisher-local
+    port: 8090
+    DESTINATION: /app/output
   nginx:
     name: opmet-nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/opmet-backend/nginx-opmet-backend

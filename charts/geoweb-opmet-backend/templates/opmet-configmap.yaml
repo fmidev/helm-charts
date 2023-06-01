@@ -13,3 +13,4 @@ data:
   EXTERNALADDRESSES: {{ .Values.opmet.env.EXTERNALADDRESSES | quote }}
   OPMET_ENABLE_SSL: {{ .Values.opmet.env.OPMET_ENABLE_SSL | quote }}
   FORWARDED_ALLOW_IPS: {{ .Values.opmet.env.FORWARDED_ALLOW_IPS | quote }}
+  PUBLISHER_URL: {{ .Values.opmet.env.PUBLISHER_URL | quote }}

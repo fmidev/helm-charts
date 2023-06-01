@@ -57,7 +57,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 
 | Parameter | Description | Default |
 | - | - | - |
-| `versions.opmet` | Possibility to override application version | `v0.1.0` |
+| `versions.opmet` | Possibility to override application version | `v1.0.0` |
 | `opmet.name` | Name of backend | `opmet` |
 | `opmet.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/opmet-backend` |
 | `opmet.commitHash` | Adds commitHash annotation to the deployment | |
@@ -77,10 +77,11 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `secretProviderParameters` | Option to add custom parameters to the secretProvider, for example with aws you can specify region | |
 | `opmet.env.BACKEND_OPMET_PORT_HTTP` | Port used for container | `8000` |
 | `opmet.env.EXTERNALADDRESSES` | - | `0.0.0.0:80` |
-| `opmet.env.MESSAGECONVERTER_URL` | - | `"http://localhost:8080/getsigmettac"` |
+| `opmet.env.MESSAGECONVERTER_URL` | - | `"http://localhost:8080"` |
 | `opmet.env.OAUTH2_USERINFO` | - | `https://gitlab.com/oauth/userinfo` |
 | `opmet.env.OPMET_ENABLE_SSL` | Toggle SSL termination | `"FALSE"` |
 | `opmet.env.FORWARDED_ALLOW_IPS` | - | `"*"` |
+| `opmet.env.PUBLISHER_URL` | - | `"http://localhost:8090/publish"` |
 | `opmet.messageconverter.name` | Name of messageconverter container | `opmet-messageconverter` |
 | `opmet.messageconverter.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/avi-msgconverter/geoweb-knmi-avi-messageservices` |
 | `opmet.messageconverter.version` | Possibility to override application version | `"0.1.1"` |
@@ -92,4 +93,9 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.nginx.NGINX_PORT_HTTP` | Port used for nginx | `80` |
 | `opmet.nginx.EXTERNAL_HOSTNAME` | - | `localhost:80` |
 | `opmet.nginx.OPMET_BACKEND_HOST` | Address where nginx accesses the backend | `localhost:8080` |
+| `opmet.publisher.name` | Name of publisher container  | `opmet-publisher` |
+| `opmet.publisher.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/opmet-backend/opmet-backend-publisher-local` |
+| `opmet.publisher.port` | Port used for publisher | `8090`|
+| `opmet.publisher.DESTINATION` | Folder inside publisher container where TACs are stored | `/app/output` |
+| `opmet.publisher.volumeOptions` | yaml including the definition of the volume where TACs are published to, for example: <pre>hostPath:<br>&nbsp;&nbsp; path: /test/path</pre> or <pre>emptyDir:<br>&nbsp;&nbsp;</pre>| `emptyDir:` |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |

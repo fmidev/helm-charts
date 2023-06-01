@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.opmet.publisher.name }}
+  annotations:
+  {{- if .Values.opmet.commitHash }}
+    commitHash: {{ .Values.opmet.commitHash }}
+  {{- end }}
+data:
+  DESTINATION: {{ .Values.opmet.publisher.DESTINATION | quote }}
