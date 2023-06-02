@@ -44,10 +44,12 @@ spec:
       {{- if .Values.presets.imagePullPolicy }}
         imagePullPolicy: {{ .Values.presets.imagePullPolicy }}
       {{- end }}
+      {{- if .Values.presets.postStartCommand }}
         lifecycle:
           postStart:
             exec:
-              command: ["/bin/sh", "-c", "python cli.py enable-alembic; alembic upgrade head"]
+              command: ["/bin/sh", "-c", {{ .Values.presets.postStartCommand | quote }}]
+      {{- end }}
         ports:
         - containerPort: {{ .Values.presets.PRESETS_PORT_HTTP }}
         envFrom:

@@ -78,7 +78,7 @@ The following table lists the configurable parameters of the Presets backend cha
 
 | Parameter | Description | Default |
 | - | - | - |
-| `versions.presets` | Possibility to override application version | `3.0.0` |
+| `versions.presets` | Possibility to override application version | `3.1.0` |
 | `presets.name` | Name of backend | `presets` |
 | `presets.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/presets-backend` |
 | `presets.commitHash` | Adds commitHash annotation to the deployment | |
@@ -89,6 +89,8 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.PRESETS_PORT_HTTP` | Port used for container | `8080` |
 | `presets.replicas` | Amount of replicas deployed | `1` |
 | `presets.EXTERNALADDRESSES` | - | `0.0.0.0:80` |
+| `presets.DEPLOY_ENVIRONMENT` | Environment which presets should be seeded to the database  | `open` |
+| `presets.postStartCommand` | Command to run after presets-backend is started | `bin/admin.sh` |
 | `presets.db_secret` | Secret containing base64 encoded Postgresql database connection string | |
 | `presets.db_secretName` | Name of db secret | `presets-db` |
 | `presets.db_secretType` | Type to db secret | `secretsmanager` |

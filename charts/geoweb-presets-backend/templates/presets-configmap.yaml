@@ -10,3 +10,4 @@ data:
   VERSION: {{ .Values.versions.presets | quote }}
   EXTERNALADDRESS: {{ .Values.presets.EXTERNALADDRESS | quote }}
   PRESETS_PORT_HTTP: {{ .Values.presets.PRESETS_PORT_HTTP | quote }}
+  DEPLOY_ENVIRONMENT: {{ .Values.presets.DEPLOY_ENVIRONMENT | quote }}
