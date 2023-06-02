@@ -1,5 +1,5 @@
 versions:
-  presets: "3.0.0"
+  presets: "3.2.0"
 
 presets:
   name: presets
@@ -9,6 +9,8 @@ presets:
   replicas: 1
   EXTERNALADDRESS: 0.0.0.0:80
   PRESETS_PORT_HTTP: 8080
+  DEPLOY_ENVIRONMENT: open
+  postStartCommand: bin/admin.sh
   db_secretName: presets-db
   db_secretType: secretsmanager
   spcName: presets-spc
