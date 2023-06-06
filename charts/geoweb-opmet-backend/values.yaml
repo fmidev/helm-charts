@@ -1,5 +1,5 @@
 versions:
-  opmet: "v1.0.0"
+  opmet: "v1.0.1"
 
 opmet:
   name: opmet
@@ -13,7 +13,6 @@ opmet:
   secretServiceAccount: opmet-service-account
   env:
     MESSAGECONVERTER_URL: "http://localhost:8080"
-    OAUTH2_USERINFO: https://gitlab.com/oauth/userinfo"
     OPMET_BACKEND_PORT_HTTP: 8000
     EXTERNALADDRESSES: 0.0.0.0:80
     OPMET_ENABLE_SSL: "FALSE"
@@ -33,7 +32,6 @@ opmet:
     name: opmet-nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/opmet-backend/nginx-opmet-backend
     OPMET_ENABLE_SSL: "FALSE"
-    OAUTH2_USERINFO: https://gitlab.com/oauth/userinfo
     NGINX_PORT_HTTP: 80
     EXTERNAL_HOSTNAME: localhost:80
     OPMET_BACKEND_HOST: localhost:8000

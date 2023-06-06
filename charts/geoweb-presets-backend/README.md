@@ -103,7 +103,7 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.nginx.name` | Name of nginx container | `nginx` |
 | `presets.nginx.registry` | Registry to fetch nginx image | `registry.gitlab.com/opengeoweb/backend-services/presets-backend/nginx-presets-backend` |
 | `presets.nginx.PRESETS_ENABLE_SSL` | Toggle SSL termination | `"FALSE"` |
-| `presets.nginx.OAUTH2_USERINFO` | - | `https://gitlab.com/oauth/userinfo` |
+| `presets.nginx.OAUTH2_USERINFO` | Userinfo endpoint to retrieve consented claims, or assertions, about the logged in end-user | - |
 | `presets.nginx.PRESETS_BACKEND_HOST` | Address where nginx accesses the backend | `0.0.0.0:8080` |
 | `presets.nginx.NGINX_PORT_HTTP` | Port used for nginx | `80` |
 | `presets.useCustomWorkspacePresets` | Use custom presets | `false` |
