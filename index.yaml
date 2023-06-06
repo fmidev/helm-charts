@@ -145,6 +145,16 @@ entries:
   geoweb-opmet-backend:
   - apiVersion: v2
     appVersion: v1.0.0
+    created: "2023-06-06T11:06:52.612063767Z"
+    description: A Helm chart for geoweb opmet backend resources in Kubernetes
+    digest: 5f2a2c30092a721297ae26a2a7212b189d923f7f6bf84488dd7c90ef414fc92b
+    name: geoweb-opmet-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-opmet-backend-2.2.1/geoweb-opmet-backend-2.2.1.tgz
+    version: 2.2.1
+  - apiVersion: v2
+    appVersion: v1.0.0
     created: "2023-06-06T10:55:26.745865719Z"
     description: A Helm chart for geoweb opmet backend resources in Kubernetes
     digest: acb6d2e7f43cc9b51d76fe1ea9703d4b6e5ae6b25be521b4c334822b6ea5b0c8
@@ -244,6 +254,16 @@ entries:
     - https://github.com/fmidev/helm-charts/releases/download/geoweb-opmet-backend-0.1.0/geoweb-opmet-backend-0.1.0.tgz
     version: 0.1.0
   geoweb-presets-backend:
+  - apiVersion: v2
+    appVersion: 3.2.0
+    created: "2023-06-06T11:06:52.758638465Z"
+    description: A Helm chart for geoweb presets backend resources in Kubernetes
+    digest: d7091488d28c5d96db50c252e4186046bf61267ba094d896eef992117f672426
+    name: geoweb-presets-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-presets-backend-2.3.1/geoweb-presets-backend-2.3.1.tgz
+    version: 2.3.1
   - apiVersion: v2
     appVersion: 3.2.0
     created: "2023-06-06T10:55:26.981844812Z"
@@ -408,4 +428,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/smartmetserver-0.1.0/smartmetserver-0.1.0.tgz
     version: 0.1.0
-generated: "2023-06-06T10:55:26.981975313Z"
+generated: "2023-06-06T11:06:52.758999166Z"
