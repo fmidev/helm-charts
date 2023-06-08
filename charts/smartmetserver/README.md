@@ -30,7 +30,7 @@ kubectl delete namespace smartmetserver
 ```
 
 # Chart Configuration
-The following table lists the configurable parameters of the GeoWeb frontend chart and their default values.
+The following table lists the configurable parameters of the Smartmetserver chart and their default values.
 
 *The parameters will be keep updating.*
 
