@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.smartmetserver.name }}
-  namespace: {{ .Values.namespace.name }}
   labels:
     app: {{ .Values.smartmetserver.name }}
 spec:
@@ -18,19 +17,35 @@ spec:
       containers:
       - name: {{.Values.smartmetserver.name }}
         image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
-      {{- if .Values.image.pullPolicy }}
+        {{- if .Values.image.pullPolicy }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-      {{- end }}
+        {{- end }}
         ports:
         - containerPort: {{ .Values.smartmetserver.containerPort }}
         volumeMounts:
         - mountPath: "/smartmet/data"
           name: smartmetserver-volume
+        livenessProbe:
+          httpGet:
+            path: /admin?what=qengine
+            port: {{ .Values.smartmetserver.containerPort }}
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /admin?what=qengine
+            port: {{ .Values.smartmetserver.containerPort }}
+          periodSeconds: 10
+        startupProbe:
+          httpGet:
+            path: /admin?what=qengine
+            port: {{ .Values.smartmetserver.containerPort }}
+          failureThreshold: 3
+          periodSeconds: 10
       volumes:
       - name: smartmetserver-volume
       {{- if .Values.pvc }}
         persistentVolumeClaim:
           claimName: {{ .Values.smartmetserver.name }}-{{ .Values.pvc.name }}
-      {{- else}}
+      {{- else }}
         emptyDir: {}
       {{- end }}

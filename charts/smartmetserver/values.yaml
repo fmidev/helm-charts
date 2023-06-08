@@ -9,13 +9,8 @@ smartmetserver:
   svcPort: 8080
   replicas: 2
 
-
 ingress:
   name: nginx-ingress
-
-
-namespace:
-  name: smartmet
 
 pvc:
   name: pvc
