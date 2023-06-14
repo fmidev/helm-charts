@@ -1,0 +1,29 @@
+{{- if and .Values.frontend.useCustomConfigurationFiles (eq .Values.frontend.customConfigurationFileLocation "local")}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.frontend.name }}-claim
+spec:
+  storageClassName: ""
+  accessModes:
+    - {{ .Values.frontend.volumeAccessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.frontend.volumeSize }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.frontend.name }}-volume
+spec:
+  storageClassName: manual
+  capacity:
+    storage: {{ .Values.frontend.volumeSize }}
+  accessModes:
+    - {{ .Values.frontend.volumeAccessMode }}
+  claimRef:
+    namespace: {{ .Release.Namespace }}
+    name: {{ .Values.frontend.name }}-claim
+  hostPath:
+    path: {{ .Values.frontend.customConfigurationFilePath | quote }}
+{{- end }}

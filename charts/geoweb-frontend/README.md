@@ -54,11 +54,32 @@ frontend:
 
 ```
 
+* Using custom configuration files stored locally
+```yaml
+frontend:
+  url: geoweb.example.com
+  useCustomConfigurationFiles: true
+  customConfigurationFilePath: /example/path/
+```
+
+* Using custom configuration files stored in AWS S3
+```yaml
+frontend:
+  url: geoweb.example.com
+  useCustomConfigurationFiles: true
+  customConfigurationFileLocation: s3
+  s3bucketName: example-bucket
+  customConfigurationFilePath: /example/path/
+  awsAccessKeyId: <AWS_ACCESS_KEY_ID>
+  awsAccessKeySecret: <AWS_SECRET_ACCESS_KEY>
+  awsDefaultRegion: <AWS_DEFAULT_REGION>
+```
+
 # Testing the Chart
 Execute the following for testing the chart:
 
 ```bash
-helm install geoweb-frontend fmi/geoweb-frontend --dry-run --debug -n geoweb --values=./values.yaml
+helm upgrade --install --create-namespace geoweb-frontend fmi/geoweb-frontend --dry-run --debug -n geoweb --values=./values.yaml
 ```
 
 # Installing the Chart
@@ -66,7 +87,7 @@ helm install geoweb-frontend fmi/geoweb-frontend --dry-run --debug -n geoweb --v
 Execute the following for installing the chart:
 
 ```bash
-helm install geoweb-frontend fmi/geoweb-frontend -n geoweb --values=./values.yaml
+helm upgrade --install --create-namespace geoweb-frontend fmi/geoweb-frontend -n geoweb --values=./values.yaml
 ```
 
 # Deleting the Chart
@@ -122,13 +143,8 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.env.GW_GITLAB_PROJECT_ID` | Project id of gitlab project to fetch screen presets | `"24089222"` |
 | `frontend.env.GW_GITLAB_BRANCH` | Branch to fetch screen presets | `master` |
 | `frontend.env.GW_INITIAL_PRESETS_FILENAME` | Filename to fetch initial presets | `initialPresets.json` |
-| `frontend.env.GW_SCREEN_PRESETS_FILENAME` | Filename to fetch screen presets | `screenPresets.json` |
 | `frontend.env.GW_FEATURE_FORCE_AUTHENTICATION` | Force authentication (block Guest access) | `false` |
 | `frontend.env.GW_FEATURE_MODULE_SPACE_WEATHER` | Enable Space Weather module | `false` |
-| `frontend.env.GW_FEATURE_MODULE_TAF` | Enable TAF module | `false` |
-| `frontend.env.GW_FEATURE_MODULE_SIGMET` | Enable SIGMET module | `false` |
-| `frontend.env.GW_FEATURE_MODULE_AIRMET` | Enable AIRMET module | `false` |
-| `frontend.env.GW_FEATURE_MENU_SATCOMP` | Enable SATCOMP menu option | `false` |
 | `frontend.env.GW_FEATURE_MENU_FEEDBACK` | Enable Feedback menu option | `false` |
 | `frontend.env.GW_FEATURE_MENU_INFO` | Enable Info menu option | `true` |
 | `frontend.env.GW_FEATURE_MENU_VERSION` | Enable Version menu option | `false` |
@@ -137,4 +153,13 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.env.GW_AIRMET_BASE_URL` | Url which the application uses to connect to AIRMET backend | |
 | `frontend.env.GW_FEATURE_MODULE_SIGMET_CONFIGURATION` | Configuration used by SIGMET module | |
 | `frontend.env.GW_FEATURE_MODULE_AIRMET_CONFIGURATION` | Configuration used by AIRMET module | |
+| `frontend.useCustomConfigurationFiles` | Use custom presets | `false` |
+| `frontend.customConfigurationFileLocation` | Where custom presets are located *(local\|s3)* | `local` |
+| `frontend.volumeAccessMode` | Permissions of the application for the custom presets PersistentVolume used | `ReadOnlyMany` |
+| `frontend.volumeSize` | Size of the custom presets PersistentVolume | `100Mi` |
+| `frontend.customConfigurationFilePath` | Path to the folder which contains custom presets | |
+| `frontend.s3bucketName` | Name of the S3 bucket where custom presets are stored | |
+| `frontend.awsAccessKeyId` | AWS_ACCESS_KEY_ID for authenticating to S3 | |
+| `frontend.awsAccessKeySecret` | AWS_SECRET_ACCESS_KEY for authenticating to S3 | |
+| `frontend.awsDefaultRegion` | Region where your S3 bucket is located | |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |

@@ -1,5 +1,5 @@
 versions:
-  frontend: "v4.19.1"
+  frontend: "v4.20.0"
 
 frontend:
   name: geoweb
@@ -23,17 +23,16 @@ frontend:
     GW_GITLAB_PROJECT_ID: "24089222"
     GW_GITLAB_BRANCH: master
     GW_INITIAL_PRESETS_FILENAME: initialPresets.json
-    GW_SCREEN_PRESETS_FILENAME: screenPresets.json
     GW_FEATURE_FORCE_AUTHENTICATION: false
     GW_FEATURE_MODULE_SPACE_WEATHER: false
-    GW_FEATURE_MODULE_TAF: false
-    GW_FEATURE_MODULE_SIGMET: false
-    GW_FEATURE_MODULE_AIRMET: false
-    GW_FEATURE_MENU_SATCOMP: false
     GW_FEATURE_MENU_FEEDBACK: false
     GW_FEATURE_MENU_INFO: true
     GW_FEATURE_MENU_VERSION: false
     GW_FEATURE_MENU_FE_VERSION: true
+  useCustomConfigurationFiles: false
+  customConfigurationFileLocation: local
+  volumeAccessMode: ReadOnlyMany
+  volumeSize: 100Mi
 
 ingress:
   name: nginx-ingress-controller # Sync with nginx-ingress-controller/values.yaml
