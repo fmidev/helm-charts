@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.smartmetDataGfs.name }}-{{ .Values.pvc.name }}
+  labels:
+    app: {{ .Values.smartmetDataGfs.name }}
+spec:
+  accessModes:
+    - {{ .Values.pvc.accessModes }}
+  resources:
+    requests:
+      storage: {{ .Values.pvc.storageRequest | quote }}
+  storageClassName: {{ .Values.pvc.storageClass | quote }}
