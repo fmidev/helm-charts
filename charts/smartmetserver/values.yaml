@@ -11,6 +11,7 @@ smartmetserver:
 
 ingress:
   name: nginx-ingress
+  ingressClassName: ""
 
 pvc:
   name: pvc

@@ -10,4 +10,4 @@ spec:
   resources:
     requests:
       storage: {{ .Values.pvc.storage }}
-{{ end }}
+{{- end }}

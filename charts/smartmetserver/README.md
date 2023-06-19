@@ -36,14 +36,15 @@ The following table lists the configurable parameters of the Smartmetserver char
 
 | Parameter | Description | Default |
 | - | - | - |
-| `image.repository` | Portainer Docker Hub repository | `fmidev/smartmetserver` |
-| `image.tag` | Tag for the Portainer image | `latest` |
-| `image.pullPolicy` | Portainer image pulling policy | `IfNotPresent` |
+| `image.repository` | Docker Hub repository | `fmidev/smartmetserver` |
+| `image.tag` | Tag for the smartmetserver image | `latest` |
+| `image.pullPolicy` | Adds option to modify imagePullPolicy | `IfNotPresent` |
 | `smartmetserver.name` | Name of server | `smartmetserver` |
 | `smartmetserver.containerPort` | Port used for container | `8080` |
 | `smartmetserver.svcPort` | Port used for service | `8080` |
 | `smartmetserver.replicas` | Amount of replicas deployed | `2` |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress` |
+| `ingress.ingressClassName` | Configure ingressClassName if needed | `""` |
 | `pvc.name` | Name of the persistent volume claim in use | `pvc` |
 | `pvc.storageClassName` | Name of storageClassName of volume pvc is tryoing to bound to | `local` |
 | `pvc.accessModes` | Type of access modes persistent volume claim supports  | `ReadWriteOnce` |
