@@ -7,7 +7,6 @@ spec:
   storageClassName: {{ .Values.pvc.storageClassName }}
   capacity:
     storage: {{ .Values.pvc.storage }}
-  volumeMode: Filesystem
   accessModes:
     - {{ .Values.pvc.accessModes }}
   claimRef:
