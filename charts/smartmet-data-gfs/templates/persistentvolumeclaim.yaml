@@ -5,9 +5,9 @@ metadata:
   labels:
     app: {{ .Values.smartmetDataGfs.name }}
 spec:
+  storageClassName: {{ .Values.pvc.storageClass }}
   accessModes:
     - {{ .Values.pvc.accessModes }}
   resources:
     requests:
-      storage: {{ .Values.pvc.storageRequest | quote }}
-  storageClassName: {{ .Values.pvc.storageClass | quote }}
+      storage: {{ .Values.pvc.storage }}

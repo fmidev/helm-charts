@@ -5,11 +5,16 @@ smartmetDataGfs:
     tag: latest
     imagePullPolicy: IfNotPresent
 
+pv:
+  enable: true
+  name: pv
+  path: /tmp/smartmet-data
+
 pvc:
   name: pvc
   accessModes: ReadWriteOnce
-  storageClass: local
-  storageRequest: 1Gi
+  storageClass: hostpath-smartmet-data-gfs
+  storage: 1Gi
 
 cronJob:
   name: cronjob
