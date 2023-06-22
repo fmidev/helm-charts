@@ -43,9 +43,5 @@ spec:
           periodSeconds: 10
       volumes:
       - name: smartmetserver-volume
-      {{- if .Values.pvc }}
         persistentVolumeClaim:
           claimName: {{ .Values.smartmetserver.name }}-{{ .Values.pvc.name }}
-      {{- else }}
-        emptyDir: {}
-      {{- end }}

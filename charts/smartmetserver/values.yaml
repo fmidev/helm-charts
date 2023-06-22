@@ -13,8 +13,13 @@ ingress:
   name: nginx-ingress
   ingressClassName: ""
 
+pv:
+  enable: true
+  name: pv
+  path: /tmp/smartmet-data
+
 pvc:
   name: pvc
-  storageClassName: local
+  storageClassName: hostpath-smartmet
   accessModes: ReadWriteOnce
   storage: 1Gi
