@@ -28,7 +28,6 @@ frontend:
   env:
     GW_CAP_BASE_URL: https://geoweb.example.com/cap
     GW_APP_URL: https://geoweb.example.com
-    GW_GITLAB_PRESETS_PATH: <path-to-presets>
     GW_DEFAULT_THEME: darkTheme | lightTheme
     GW_FEATURE_APP_TITLE: <Geoweb Title>
     GW_PRESET_BACKEND_URL: https://geoweb.example.com/presets
@@ -47,7 +46,6 @@ frontend:
   env:
     GW_CAP_BASE_URL: https://geoweb.example.com/cap
     GW_APP_URL: https://geoweb.example.com
-    GW_GITLAB_PRESETS_PATH: <path-to-presets>
     GW_DEFAULT_THEME: darkTheme | lightTheme
     GW_FEATURE_APP_TITLE: <Geoweb Title>
     GW_PRESET_BACKEND_URL: https://geoweb.example.com/presets
