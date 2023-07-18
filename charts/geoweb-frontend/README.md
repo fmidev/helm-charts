@@ -54,6 +54,27 @@ frontend:
 
 ```
 
+* Using custom configuration files stored locally
+```yaml
+frontend:
+  url: geoweb.example.com
+  useCustomConfigurationFiles: true
+  customConfigurationFolderPath: /example/path/
+```
+
+* Using custom configuration files stored in AWS S3
+```yaml
+frontend:
+  url: geoweb.example.com
+  useCustomConfigurationFiles: true
+  customConfigurationLocation: s3
+  s3bucketName: example-bucket
+  customConfigurationFolderPath: /example/path/
+  awsAccessKeyId: <AWS_ACCESS_KEY_ID>
+  awsAccessKeySecret: <AWS_SECRET_ACCESS_KEY>
+  awsDefaultRegion: <AWS_DEFAULT_REGION>
+```
+
 # Testing the Chart
 Execute the following for testing the chart:
 
@@ -84,7 +105,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 
 | Parameter | Description | Default |
 | - | - | - |
-| `versions.frontend` | Possibility to override application version | `v4.19.1` |
+| `versions.frontend` | Possibility to override application version | `v5.0.1` |
 | `frontend.name` | Name of frontend | `geoweb` |
 | `frontend.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/opengeoweb` |
 | `frontend.commitHash` | Adds commitHash annotation to the deployment | |
@@ -109,7 +130,6 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `secretProviderParameters` | Option to add custom parameters to the secretProvider, for example with aws you can specify region | |
 | `frontend.env.GW_CAP_BASE_URL` | Url which the application uses to connect to CAP backend | |
 | `frontend.env.GW_APP_URL` | Url which the application can be accessed | |
-| `frontend.env.GW_GITLAB_PRESETS_PATH` | Path in repository to fetch screen presets | |
 | `frontend.env.GW_DEFAULT_THEME` | Default theme: lightMode or darkMode | |
 | `frontend.env.GW_FEATURE_APP_TITLE` | Application title | |
 | `frontend.env.GW_PRESET_BACKEND_URL` | Url which the application uses to connect to Presets backend | |
@@ -117,11 +137,9 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.env.GW_AUTH_TOKEN_URL` | - | `https://gitlab.com/oauth/token` |
 | `frontend.env.GW_AUTH_LOGIN_URL` | Url to redirect when logging in | `https://gitlab.com/oauth/authorize?client_id={client_id}&response_type=code&scope=email+openid+read_repository+read_api&redirect_uri={app_url}/code&state={state}&code_challenge={code_challenge}&code_challenge_method=S256` |
 | `frontend.env.GW_INFRA_BASE_URL` | - | `https://api.opengeoweb.com` |
-| `frontend.env.GW_GITLAB_PRESETS_BASE_URL` | Base url to fetch screen presets | `https://gitlab.com/api/v4/projects` |
-| `frontend.env.GW_GITLAB_PRESETS_API_PATH` | Path in gitlab to fetch screen presets | `/{project_id}/repository/files/{presets_path}{preset_filename}/raw?ref={branch}` |
-| `frontend.env.GW_GITLAB_PROJECT_ID` | Project id of gitlab project to fetch screen presets | `"24089222"` |
-| `frontend.env.GW_GITLAB_BRANCH` | Branch to fetch screen presets | `master` |
 | `frontend.env.GW_INITIAL_PRESETS_FILENAME` | Filename to fetch initial presets | `initialPresets.json` |
+| `frontend.env.GW_CAP_CONFIGURATION_FILENAME` | Filename to fetch CAP Warnings configured feeds | `capWarningPresets.json` |
+| `frontend.env.GW_TIMESERIES_CONFIGURATION_FILENAME` | Filename to fetch TimeSeries preset locations | `timeSeriesPresetLocations.json` |
 | `frontend.env.GW_SCREEN_PRESETS_FILENAME` | Filename to fetch screen presets | `screenPresets.json` |
 | `frontend.env.GW_FEATURE_FORCE_AUTHENTICATION` | Force authentication (block Guest access) | `false` |
 | `frontend.env.GW_FEATURE_MODULE_SPACE_WEATHER` | Enable Space Weather module | `false` |
@@ -137,4 +155,13 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.env.GW_AIRMET_BASE_URL` | Url which the application uses to connect to AIRMET backend | |
 | `frontend.env.GW_FEATURE_MODULE_SIGMET_CONFIGURATION` | Configuration used by SIGMET module | |
 | `frontend.env.GW_FEATURE_MODULE_AIRMET_CONFIGURATION` | Configuration used by AIRMET module | |
+| `frontend.useCustomConfigurationFiles` | Use custom configurations | `false` |
+| `frontend.customConfigurationLocation` | Where custom configurations are located *(local\|s3)* | `local` |
+| `frontend.volumeAccessMode` | Permissions of the application for the custom configurations PersistentVolume used | `ReadOnlyMany` |
+| `frontend.volumeSize` | Size of the custom configurations PersistentVolume | `100Mi` |
+| `frontend.customConfigurationFolderPath` | Path to the folder which contains custom configurations | |
+| `frontend.s3bucketName` | Name of the S3 bucket where custom configurations are stored | |
+| `frontend.awsAccessKeyId` | AWS_ACCESS_KEY_ID for authenticating to S3 | |
+| `frontend.awsAccessKeySecret` | AWS_SECRET_ACCESS_KEY for authenticating to S3 | |
+| `frontend.awsDefaultRegion` | Region where your S3 bucket is located | |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |

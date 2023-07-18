@@ -25,26 +25,17 @@ data:
 {{- if .Values.frontend.env.GW_APP_URL }}
   GW_APP_URL: {{ .Values.frontend.env.GW_APP_URL | quote }}
 {{- end }}
-{{- if .Values.frontend.env.GW_GITLAB_PRESETS_BASE_URL }}
-  GW_GITLAB_PRESETS_BASE_URL: {{ .Values.frontend.env.GW_GITLAB_PRESETS_BASE_URL | quote }}
-{{- end }}
-{{- if .Values.frontend.env.GW_GITLAB_PRESETS_API_PATH }}
-  GW_GITLAB_PRESETS_API_PATH: {{ .Values.frontend.env.GW_GITLAB_PRESETS_API_PATH | quote }}
-{{- end }}
-{{- if .Values.frontend.env.GW_GITLAB_PROJECT_ID }}
-  GW_GITLAB_PROJECT_ID: {{ .Values.frontend.env.GW_GITLAB_PROJECT_ID | quote }}
-{{- end }}
-{{- if .Values.frontend.env.GW_GITLAB_PRESETS_PATH }}
-  GW_GITLAB_PRESETS_PATH: {{ .Values.frontend.env.GW_GITLAB_PRESETS_PATH | quote }}
-{{- end }}
-{{- if .Values.frontend.env.GW_GITLAB_BRANCH }}
-  GW_GITLAB_BRANCH: {{ .Values.frontend.env.GW_GITLAB_BRANCH | quote }}
-{{- end }}
 {{- if .Values.frontend.env.GW_INITIAL_PRESETS_FILENAME }}
   GW_INITIAL_PRESETS_FILENAME: {{ .Values.frontend.env.GW_INITIAL_PRESETS_FILENAME | quote }}
 {{- end }}
 {{- if .Values.frontend.env.GW_SCREEN_PRESETS_FILENAME }}
   GW_SCREEN_PRESETS_FILENAME: {{ .Values.frontend.env.GW_SCREEN_PRESETS_FILENAME | quote }}
+{{- end }}
+{{- if .Values.frontend.env.GW_CAP_CONFIGURATION_FILENAME }}
+  GW_CAP_CONFIGURATION_FILENAME: {{ .Values.frontend.env.GW_CAP_CONFIGURATION_FILENAME | quote }}
+{{- end }}
+{{- if .Values.frontend.env.GW_TIMESERIES_CONFIGURATION_FILENAME }}
+  GW_TIMESERIES_CONFIGURATION_FILENAME: {{ .Values.frontend.env.GW_TIMESERIES_CONFIGURATION_FILENAME | quote }}
 {{- end }}
 {{- if .Values.frontend.env.GW_DEFAULT_THEME }}
   GW_DEFAULT_THEME: {{ .Values.frontend.env.GW_DEFAULT_THEME | quote }}
