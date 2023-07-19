@@ -22,6 +22,22 @@ spec:
     {{- if eq .Values.secretProvider "aws" }}
       serviceAccountName: {{ .Values.frontend.secretServiceAccount }}
     {{- end }}
+    {{- if and .Values.frontend.useCustomConfigurationFiles (eq .Values.frontend.customConfigurationLocation "s3")}}
+      initContainers:
+      - name: init
+        image: amazon/aws-cli
+        command: ["/bin/sh"]
+        args:
+          - -c
+          - |
+            export AWS_ACCESS_KEY_ID={{ .Values.frontend.awsAccessKeyId }};
+            export AWS_SECRET_ACCESS_KEY={{ .Values.frontend.awsAccessKeySecret }};
+            AWS_DEFAULT_REGION={{ .Values.frontend.awsDefaultRegion }};
+            aws s3 cp --recursive s3://{{ .Values.frontend.s3bucketName }}{{ .Values.frontend.customConfigurationFolderPath }} /frontend;
+        volumeMounts:
+        - mountPath: "/frontend/"
+          name: {{ .Values.frontend.name }}-volume
+    {{- end }}
       containers:
       - name: {{ .Values.frontend.name }}
         image: {{ .Values.frontend.registry }}:{{ .Values.versions.frontend }}
@@ -33,18 +49,34 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Values.frontend.name }}
-    {{- if .Values.frontend.client_id_secret }}
+      {{- if .Values.frontend.client_id_secret }}
         env:
         - name: GW_AUTH_CLIENT_ID
           valueFrom:
             secretKeyRef:
               name: {{ .Values.frontend.client_id_secretName }}
               key: GW_AUTH_CLIENT_ID
+      {{- end }}
         volumeMounts:
+      {{- if .Values.secretProvider }}
         - name: secrets-store-inline
           mountPath: "/mnt/secrets-store"
           readOnly: true
+      {{- end }}
+      {{- if and .Values.frontend.useCustomConfigurationFiles }}
+        - mountPath: "/usr/share/nginx/html/assets/custom"
+          name: {{ .Values.frontend.name }}-volume
+      {{- end }}
       volumes:
+    {{- if .Values.frontend.useCustomConfigurationFiles }}
+      - name: {{ .Values.frontend.name }}-volume
+      {{- if eq .Values.frontend.customConfigurationLocation "s3"}}
+        emptyDir: {}
+      {{- else if eq .Values.frontend.customConfigurationLocation "local"}}
+        persistentVolumeClaim:
+          claimName: {{ .Values.frontend.name }}-claim
+      {{- end }}
+    {{- end }}
       - name: secrets-store-inline
       {{- if .Values.secretProvider }}
         csi:
@@ -56,4 +88,3 @@ spec:
         secret:
           secretName: {{ .Values.frontend.client_id_secretName | quote }}
       {{- end }}
-    {{- end }}
