@@ -28,9 +28,6 @@ data:
 {{- if .Values.frontend.env.GW_INITIAL_PRESETS_FILENAME }}
   GW_INITIAL_PRESETS_FILENAME: {{ .Values.frontend.env.GW_INITIAL_PRESETS_FILENAME | quote }}
 {{- end }}
-{{- if .Values.frontend.env.GW_SCREEN_PRESETS_FILENAME }}
-  GW_SCREEN_PRESETS_FILENAME: {{ .Values.frontend.env.GW_SCREEN_PRESETS_FILENAME | quote }}
-{{- end }}
 {{- if .Values.frontend.env.GW_CAP_CONFIGURATION_FILENAME }}
   GW_CAP_CONFIGURATION_FILENAME: {{ .Values.frontend.env.GW_CAP_CONFIGURATION_FILENAME | quote }}
 {{- end }}
