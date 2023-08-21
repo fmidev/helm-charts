@@ -1,5 +1,5 @@
 versions:
-  presets: "3.4.0"
+  presets: "3.5.2"
 
 presets:
   name: presets
