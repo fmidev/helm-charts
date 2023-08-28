@@ -54,3 +54,4 @@ The following table lists the configurable parameters of the CAP backend chart a
 | `cap.containerPort` | Port used for container | `8080` |
 | `cap.replicas` | Amount of replicas deployed | `1` |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |
+| `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | `nginx` |

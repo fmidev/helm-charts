@@ -27,4 +27,5 @@ presets:
   volumeSize: 100Mi
 
 ingress:
-  name: nginx-ingress-controller # Sync with nginx-ingress-controller/values.yaml
+  name: nginx-ingress-controller
+  ingressClassName: nginx

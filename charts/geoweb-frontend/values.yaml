@@ -30,4 +30,5 @@ frontend:
     GW_FEATURE_MENU_FE_VERSION: true
 
 ingress:
-  name: nginx-ingress-controller # Sync with nginx-ingress-controller/values.yaml
+  name: nginx-ingress-controller
+  ingressClassName: nginx
