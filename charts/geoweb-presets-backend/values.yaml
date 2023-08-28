@@ -28,4 +28,3 @@ presets:
 
 ingress:
   name: nginx-ingress-controller
-  ingressClassName: nginx
