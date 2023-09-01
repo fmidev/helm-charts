@@ -127,6 +127,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `secretProvider` | Option to use secret provider instead of passing base64 encoded Client ID as opmet.db_secret *(aws\|azure\|gcp\|vault)* | |
 | `secretProviderParameters` | Option to add custom parameters to the secretProvider, for example with aws you can specify region | |
 | `frontend.env.GW_CAP_BASE_URL` | Url which the application uses to connect to CAP backend | |
+| `frontend.env.GW_DRAWINGS_BASE_URL` | Url which the application uses to connect to Drawings backend | |
 | `frontend.env.GW_APP_URL` | Url which the application can be accessed | |
 | `frontend.env.GW_DEFAULT_THEME` | Default theme: lightMode or darkMode | |
 | `frontend.env.GW_FEATURE_APP_TITLE` | Application title | |
