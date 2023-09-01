@@ -103,7 +103,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 
 | Parameter | Description | Default |
 | - | - | - |
-| `versions.frontend` | Possibility to override application version | `v6.0.1` |
+| `versions.frontend` | Possibility to override application version | `v6.0.4` |
 | `frontend.name` | Name of frontend | `geoweb` |
 | `frontend.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/opengeoweb` |
 | `frontend.commitHash` | Adds commitHash annotation to the deployment | |
@@ -127,6 +127,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `secretProvider` | Option to use secret provider instead of passing base64 encoded Client ID as opmet.db_secret *(aws\|azure\|gcp\|vault)* | |
 | `secretProviderParameters` | Option to add custom parameters to the secretProvider, for example with aws you can specify region | |
 | `frontend.env.GW_CAP_BASE_URL` | Url which the application uses to connect to CAP backend | |
+| `frontend.env.GW_DRAWINGS_BASE_URL` | Url which the application uses to connect to Drawings backend | |
 | `frontend.env.GW_APP_URL` | Url which the application can be accessed | |
 | `frontend.env.GW_DEFAULT_THEME` | Default theme: lightMode or darkMode | |
 | `frontend.env.GW_FEATURE_APP_TITLE` | Application title | |
