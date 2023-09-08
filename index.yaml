@@ -445,6 +445,17 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/geoweb-secrets-provider-aws-1.3.0/geoweb-secrets-provider-aws-1.3.0.tgz
     version: 1.3.0
+  geoweb-warnings-backend:
+  - apiVersion: v2
+    appVersion: 0.0.3
+    created: "2023-09-08T10:00:36.338734092Z"
+    description: A Helm chart for geoweb warnings backend resources in Kubernetes
+    digest: abbdfa68115ef4bc2a2ced75c1ca66bb37734eb9494a2cb4b1731d04f3dfb5d3
+    name: geoweb-warnings-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-warnings-backend-0.0.1/geoweb-warnings-backend-0.0.1.tgz
+    version: 0.0.1
   nginx-ingress-controller:
   - apiVersion: v2
     appVersion: 1.5.1
@@ -508,4 +519,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/smartmetserver-0.1.0/smartmetserver-0.1.0.tgz
     version: 0.1.0
-generated: "2023-09-08T06:20:45.89232374Z"
+generated: "2023-09-08T10:00:36.339067398Z"
