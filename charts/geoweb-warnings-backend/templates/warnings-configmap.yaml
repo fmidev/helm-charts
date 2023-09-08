@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.warnings.name }}
+  annotations:
+  {{- if .Values.warnings.commitHash }}
+    commitHash: {{ .Values.warnings.commitHash }}
+  {{- end }}
+data:
+  VERSION: {{ .Values.versions.warnings | quote }}
+  WARNINGS_PORT_HTTP: {{ .Values.warnings.WARNINGS_PORT_HTTP | quote }}

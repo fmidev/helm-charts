@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.warnings.name }}
+  labels:
+    app: {{ .Values.warnings.name }}
+spec:
+  replicas: {{ .Values.warnings.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.warnings.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.warnings.name }}
+      annotations:
+        eks.amazonaws.com/compute-type: ec2
+      {{- if .Values.warnings.commitHash }}
+        commitHash: {{ .Values.warnings.commitHash }}
+      {{- end }}
+    spec:
+    {{- if eq .Values.secretProvider "aws" }}
+      serviceAccountName: {{ .Values.warnings.secretServiceAccount }}
+    {{- end }}
+      containers:
+      - name: {{ .Values.warnings.name }}
+        image: {{ .Values.warnings.registry }}:{{ .Values.versions.warnings }}
+      {{- if .Values.warnings.imagePullPolicy }}
+        imagePullPolicy: {{ .Values.warnings.imagePullPolicy }}
+      {{- end }}
+      {{- if .Values.warnings.postStartCommand }}
+        lifecycle:
+          postStart:
+            exec:
+              command: ["/bin/sh", "-c", {{ .Values.warnings.postStartCommand | quote }}]
+      {{- end }}
+        ports:
+        - containerPort: {{ .Values.warnings.WARNINGS_PORT_HTTP }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Values.warnings.name }}
+        env:
+        - name: WARNINGS_BACKEND_DB
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.warnings.db_secretName }}
+              key: WARNINGS_BACKEND_DB
+        volumeMounts:
+        - name: secrets-store-inline
+          mountPath: "/mnt/secrets-store"
+          readOnly: true
+      - name: {{ .Values.warnings.nginx.name }}
+        image: {{ .Values.warnings.nginx.registry }}:{{ .Values.versions.warnings }}
+      {{- if .Values.warnings.imagePullPolicy }}
+        imagePullPolicy: {{ .Values.warnings.imagePullPolicy }}
+      {{- end }}
+        ports:
+        - containerPort: {{ .Values.warnings.nginx.NGINX_PORT_HTTP }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Values.warnings.nginx.name }}
+      volumes:
+      - name: secrets-store-inline
+      {{- if .Values.secretProvider }}
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: {{ .Values.warnings.spcName | quote }}
+      {{- else }}
+        secret:
+          secretName: {{ .Values.warnings.db_secretName | quote }}
+      {{- end }}
