@@ -103,7 +103,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 
 | Parameter | Description | Default |
 | - | - | - |
-| `versions.frontend` | Possibility to override application version | `v6.0.4` |
+| `versions.frontend` | Possibility to override application version | `v6.1.1` |
 | `frontend.name` | Name of frontend | `geoweb` |
 | `frontend.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/opengeoweb` |
 | `frontend.commitHash` | Adds commitHash annotation to the deployment | |
