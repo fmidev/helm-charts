@@ -30,4 +30,11 @@ frontend:
     GW_FEATURE_MENU_FE_VERSION: true
 
 ingress:
-  name: nginx-ingress-controller # Sync with nginx-ingress-controller/values.yaml
+  name: nginx-ingress-controller
+  rules: |
+    if ($request_uri ~* \.(json)) {
+      add_header Cache-Control "no-cache";
+    }
+    if ($request_uri ~* \.(woff2|svg|webmanifest)) {
+      add_header Cache-Control "max-age=604800";
+    }

@@ -163,3 +163,4 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.awsAccessKeySecret` | AWS_SECRET_ACCESS_KEY for authenticating to S3 | |
 | `frontend.awsDefaultRegion` | Region where your S3 bucket is located | |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |
+| `ingress.rules` | Extra nginx configuration rules, like cache headers | See reference in `values.yaml` |
