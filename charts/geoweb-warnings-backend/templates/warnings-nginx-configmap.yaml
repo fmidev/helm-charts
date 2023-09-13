@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.warnings.nginx.name }}
+data:
+  WARNINGS_ENABLE_SSL: {{ .Values.warnings.nginx.WARNINGS_ENABLE_SSL | quote }}
+  OAUTH2_USERINFO: {{ .Values.warnings.nginx.OAUTH2_USERINFO | quote }}
+  WARNINGS_BACKEND_HOST: {{ .Values.warnings.nginx.WARNINGS_BACKEND_HOST | quote }}
+  NGINX_PORT_HTTP: {{ .Values.warnings.nginx.NGINX_PORT_HTTP | quote }}
+  VERSION: {{ .Values.versions.warnings | quote }}

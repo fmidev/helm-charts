@@ -1,0 +1,25 @@
+versions:
+  warnings: "0.0.4"
+
+warnings:
+  name: warnings
+  registry: registry.gitlab.com/opengeoweb/backend-services/warnings-backend/warnings-backend
+  path: /warnings/(.*)
+  svcPort: 80
+  replicas: 1
+  EXTERNALADDRESS: 0.0.0.0:80
+  WARNINGS_PORT_HTTP: 8080
+  postStartCommand: bin/admin.sh
+  db_secretName: warnings-db
+  db_secretType: secretsmanager
+  spcName: warnings-spc
+  secretServiceAccount: warnings-service-account
+  nginx:
+    name: warnings-nginx
+    registry: registry.gitlab.com/opengeoweb/backend-services/warnings-backend/nginx-warnings-backend
+    WARNINGS_ENABLE_SSL: "FALSE"
+    WARNINGS_BACKEND_HOST: 0.0.0.0:8080
+    NGINX_PORT_HTTP: 80
+
+ingress:
+  name: nginx-ingress-controller # Sync with nginx-ingress-controller/values.yaml
