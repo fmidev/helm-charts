@@ -1,5 +1,5 @@
 versions:
-  warnings: "0.0.3"
+  warnings: "0.0.4"
 
 warnings:
   name: warnings

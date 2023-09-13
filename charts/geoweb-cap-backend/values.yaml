@@ -10,4 +10,4 @@ cap:
   replicas: 1
 
 ingress:
-  name: nginx-ingress-controller # Sync with nginx-ingress-controller/values.yaml
+  name: nginx-ingress-controller

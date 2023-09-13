@@ -57,7 +57,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 
 | Parameter | Description | Default |
 | - | - | - |
-| `versions.warnings` | Possibility to override application version | `0.0.3` |
+| `versions.warnings` | Possibility to override application version | `0.0.4` |
 | `warnings.name` | Name of backend | `warnings` |
 | `warnings.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/warnings-backend` |
 | `warnings.commitHash` | Adds commitHash annotation to the deployment | |
@@ -84,3 +84,5 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.nginx.WARNINGS_BACKEND_HOST` | Address where nginx accesses the backend | `0.0.0.0:8080` |
 | `warnings.nginx.NGINX_PORT_HTTP` | Port used for nginx | `80` |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |
+| `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | |
+| `ingress.customAnnotations` | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations if set | |
