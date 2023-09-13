@@ -38,3 +38,4 @@ ingress:
     if ($request_uri ~* \.(woff2|svg|webmanifest)) {
       add_header Cache-Control "max-age=604800";
     }
+  ingressClassName: nginx
