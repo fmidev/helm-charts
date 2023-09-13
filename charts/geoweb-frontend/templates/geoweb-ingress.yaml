@@ -3,6 +3,11 @@ kind: Ingress
 metadata:
   name: {{ .Values.ingress.name }}-{{ .Values.frontend.name }}
   annotations:
+  {{- if .Values.ingress.customAnnotations }}
+    {{- with .Values.ingress.customAnnotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- else }}
   {{- if .Values.frontend.auth_secret }}
     nginx.ingress.kubernetes.io/auth-type: basic
     nginx.ingress.kubernetes.io/auth-secret: {{ .Values.frontend.auth_secretName }}
@@ -15,6 +20,7 @@ metadata:
   {{- if .Values.ingress.rules }}
     nginx.ingress.kubernetes.io/configuration-snippet: |
     {{- .Values.ingress.rules | nindent 6 }}
+  {{- end }}
   {{- end }}
 spec:
 {{- if .Values.ingress.ingressClassName }}

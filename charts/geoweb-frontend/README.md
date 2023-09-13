@@ -163,5 +163,6 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.awsAccessKeySecret` | AWS_SECRET_ACCESS_KEY for authenticating to S3 | |
 | `frontend.awsDefaultRegion` | Region where your S3 bucket is located | |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |
-| `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | `` |
+| `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | |
 | `ingress.rules` | Extra nginx configuration rules, like cache headers | See reference in `values.yaml` |
+| `ingress.customAnnotations` | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations if set and `frontend.auth_secret`, `frontend.auth_secretName` and `ingress.rules` can't be used if set | |
