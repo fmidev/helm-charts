@@ -1,5 +1,5 @@
 versions:
-  frontend: "v6.1.1"
+  frontend: "v7.0.0"
 
 frontend:
   name: geoweb
@@ -31,3 +31,10 @@ frontend:
 
 ingress:
   name: nginx-ingress-controller
+  rules: |
+    if ($request_uri ~* \.(json)) {
+      add_header Cache-Control "no-cache";
+    }
+    if ($request_uri ~* \.(woff2|svg|webmanifest)) {
+      add_header Cache-Control "max-age=604800";
+    }

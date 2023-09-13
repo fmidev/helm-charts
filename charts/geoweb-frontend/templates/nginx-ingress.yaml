@@ -11,7 +11,11 @@ metadata:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-methods: "DELETE, PUT, GET, POST, OPTIONS, PATCH, HEAD"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET"
+  {{- if .Values.ingress.rules }}
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+    {{- .Values.ingress.rules | nindent 6 }}
+  {{- end }}
 spec:
 {{- if .Values.ingress.ingressClassName }}
   ingressClassName: {{ .Values.ingress.ingressClassName }}
