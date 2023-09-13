@@ -99,5 +99,5 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.publisher.DESTINATION` | Folder inside publisher container where TACs are stored | `/app/output` |
 | `opmet.publisher.volumeOptions` | yaml including the definition of the volume where TACs are published to, for example: <pre>hostPath:<br>&nbsp;&nbsp; path: /test/path</pre> or <pre>emptyDir:<br>&nbsp;&nbsp;</pre>| `emptyDir:` |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |
-| `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | |
+| `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | `nginx` |
 | `ingress.customAnnotations` | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations if set | |
