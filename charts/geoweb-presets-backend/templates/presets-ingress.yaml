@@ -1,25 +1,31 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ .Values.ingress.name }}-{{ .Values.warnings.name }}
+  name: {{ .Values.ingress.name }}-{{ .Values.presets.name }}
   annotations:
+  {{- if .Values.ingress.customAnnotations }}
+    {{- with .Values.ingress.customAnnotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- else }}
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
     nginx.ingress.kubernetes.io/rewrite-target: /$1
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-methods: "DELETE, PUT, GET, POST, OPTIONS, PATCH, HEAD"
+  {{- end }}
 spec:
 {{- if .Values.ingress.ingressClassName }}
   ingressClassName: {{ .Values.ingress.ingressClassName }}
 {{- end }}
   rules:
-    - host: {{ .Values.warnings.url }}
+    - host: {{ .Values.presets.url }}
       http:
         paths:
-          - path: {{ .Values.warnings.path }}
+          - path: {{ .Values.presets.path }}
             pathType: Prefix
             backend:
               service:
-                name: {{ .Values.warnings.name }}
+                name: {{ .Values.presets.name }}
                 port:
-                  number: {{ .Values.warnings.svcPort }}
+                  number: {{ .Values.presets.svcPort }}

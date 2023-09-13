@@ -3,11 +3,17 @@ kind: Ingress
 metadata:
   name: {{ .Values.ingress.name }}-{{ .Values.opmet.name }}
   annotations:
+  {{- if .Values.ingress.customAnnotations }}
+    {{- with .Values.ingress.customAnnotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- else }}
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
     nginx.ingress.kubernetes.io/rewrite-target: /$1
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-methods: "DELETE, PUT, GET, POST, OPTIONS, PATCH, HEAD"
+  {{- end }}
 spec:
 {{- if .Values.ingress.ingressClassName }}
   ingressClassName: {{ .Values.ingress.ingressClassName }}
