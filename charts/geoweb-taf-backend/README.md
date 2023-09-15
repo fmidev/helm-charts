@@ -76,10 +76,8 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `secretProvider` | Option to use secret provider instead of passing base64 encoded database connection string as taf.db_secret *(aws\|azure\|gcp\|vault)* | |
 | `secretProviderParameters` | Option to add custom parameters to the secretProvider, for example with aws you can specify region | |
 | `taf.env.AVIATION_TAF_PORT_HTTP` | Port used for container | `8000` |
-| `taf.env.EXTERNALADDRESSES` | - | `0.0.0.0:80` |
 | `taf.env.GEOWEB_KNMI_AVI_MESSAGESERVICES_HOST` | - | `"localhost:8081"` |
 | `taf.env.OAUTH2_USERINFO` | - | |
-| `taf.env.FORWARDED_ALLOW_IPS` | - | `"*"` |
 | `taf.env.AVIATION_TAF_PUBLISH_HOST` | - | `"localhost:8090"` |
 | `taf.messageconverter.name` | Name of messageconverter container | `taf-messageconverter` |
 | `taf.messageconverter.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/avi-msgconverter/geoweb-knmi-avi-messageservices` |

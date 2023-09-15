@@ -15,8 +15,6 @@ taf:
   env:
     GEOWEB_KNMI_AVI_MESSAGESERVICES_HOST: "localhost:8081"
     AVIATION_TAF_PORT_HTTP: 8000
-    EXTERNALADDRESSES: 0.0.0.0:80
-    FORWARDED_ALLOW_IPS: "*"
     AVIATION_TAF_PUBLISH_HOST: "localhost:8090"
   messageconverter:
     name: taf-messageconverter
