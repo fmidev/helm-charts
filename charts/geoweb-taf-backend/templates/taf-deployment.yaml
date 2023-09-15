@@ -1,0 +1,125 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.taf.name }}
+  labels:
+    app: {{ .Values.taf.name }}
+spec:
+  replicas: {{ .Values.taf.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.taf.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.taf.name }}
+      annotations:
+        eks.amazonaws.com/compute-type: ec2
+      {{- if .Values.taf.commitHash }}
+        commitHash: {{ .Values.taf.commitHash }}
+      {{- end }}
+    spec:
+    {{- if eq .Values.secretProvider "aws" }}
+      serviceAccountName: {{ .Values.taf.secretServiceAccount }}
+    {{- end }}
+      containers:
+      - name: {{ .Values.taf.name }}
+        image: {{ .Values.taf.registry }}:{{ .Values.versions.taf }}
+      {{- if .Values.taf.imagePullPolicy }}
+        imagePullPolicy: {{ .Values.taf.imagePullPolicy }}
+      {{- end }}
+      {{- if .Values.taf.postStartCommand }}
+        lifecycle:
+          postStart:
+            exec:
+              command: ["/bin/sh", "-c", {{ .Values.taf.postStartCommand | quote }}]
+      {{- end }}
+        ports:
+        - containerPort: {{ .Values.taf.env.AVIATION_TAF_PORT_HTTP }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Values.taf.name }}
+        env:
+        - name: AVIATION_TAF_BACKEND_DB
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.taf.db_secretName }}
+              key: AVIATION_TAF_BACKEND_DB
+        volumeMounts:
+        - name: secrets-store-inline
+          mountPath: "/mnt/secrets-store"
+          readOnly: true
+      - name: {{ .Values.taf.placeholder.name }}
+        image: {{ .Values.taf.placeholder.registry }}:{{ .Values.versions.taf }}
+      {{- if .Values.taf.imagePullPolicy }}
+        imagePullPolicy: {{ .Values.taf.imagePullPolicy }}
+      {{- end }}
+        ports:
+        - containerPort: {{ .Values.taf.placeholder.port }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Values.taf.placeholder.name }}
+        env:
+        - name: AVIATION_TAF_BACKEND_DB
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.taf.db_secretName }}
+              key: AVIATION_TAF_BACKEND_DB
+        volumeMounts:
+        - name: secrets-store-inline
+          mountPath: "/mnt/secrets-store"
+          readOnly: true
+      - name: {{ .Values.taf.messageconverter.name }}
+        image: {{ .Values.taf.messageconverter.registry }}:{{ .Values.taf.messageconverter.version }}
+      {{- if .Values.taf.imagePullPolicy }}
+        imagePullPolicy: {{ .Values.taf.imagePullPolicy }}
+      {{- end }}
+        env:
+        - name: AVI_CONTAINER_PORT
+          value: {{ .Values.taf.messageconverter.port | quote }}
+        ports:
+        - containerPort: {{ .Values.taf.messageconverter.port }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Values.taf.name }}
+      - name: {{ .Values.taf.publisher.name }}
+        image: {{ .Values.taf.publisher.registry }}:{{ .Values.versions.taf }}
+      {{- if .Values.taf.imagePullPolicy }}
+        imagePullPolicy: {{ .Values.taf.imagePullPolicy }}
+      {{- end }}
+        ports:
+        - containerPort: {{ .Values.taf.publisher.port }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Values.taf.publisher.name }}
+        volumeMounts:
+        - name: publisher-volume
+          mountPath: {{ .Values.taf.publisher.DESTINATION | quote }}
+      - name: {{ .Values.taf.nginx.name }}
+        image: {{ .Values.taf.nginx.registry }}:{{ .Values.versions.taf }}
+      {{- if .Values.taf.imagePullPolicy }}
+        imagePullPolicy: {{ .Values.taf.imagePullPolicy }}
+      {{- end }}
+        ports:
+        - containerPort: {{ .Values.taf.nginx.NGINX_PORT_HTTP }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Values.taf.nginx.name }}
+      volumes:
+      - name: secrets-store-inline
+      {{- if .Values.secretProvider }}
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: {{ .Values.taf.spcName | quote }}
+      {{- else }}
+        secret:
+          secretName: {{ .Values.taf.db_secretName | quote }}
+      {{- end }}
+      - name: publisher-volume
+      {{- if .Values.taf.publisher.volumeOptions }}
+        {{- toYaml .Values.taf.publisher.volumeOptions | nindent 8 }}
+      {{- else }}
+        emptyDir:
+      {{- end }}

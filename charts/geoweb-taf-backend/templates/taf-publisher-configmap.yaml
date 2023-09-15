@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.taf.publisher.name }}
+  annotations:
+  {{- if .Values.taf.commitHash }}
+    commitHash: {{ .Values.taf.commitHash }}
+  {{- end }}
+data:
+  AVIATION_TAF_PORT_HTTP: {{ .Values.taf.publisher.port | quote }}

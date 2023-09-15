@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.taf.name }}
+  annotations:
+  {{- if .Values.taf.commitHash }}
+    commitHash: {{ .Values.taf.commitHash }}
+  {{- end }}
+data:
+  GEOWEB_KNMI_AVI_MESSAGESERVICES_HOST: {{ .Values.taf.env.GEOWEB_KNMI_AVI_MESSAGESERVICES_HOST | quote }}
+  AVIATION_TAF_PORT_HTTP: {{ .Values.taf.env.AVIATION_TAF_PORT_HTTP | quote }}
+  AVIATION_TAF_PUBLISH_HOST: {{ .Values.taf.env.AVIATION_TAF_PUBLISH_HOST | quote }}
+  VERSION: {{ .Values.versions.taf | quote }}
+  AVI_VERSION: {{ .Values.taf.messageconverter.version | quote }}

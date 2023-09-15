@@ -1,0 +1,46 @@
+versions:
+  taf: "v0.0.1"
+
+taf:
+  name: taf
+  registry: registry.gitlab.com/opengeoweb/backend-services/aviation-taf-backend/aviation-taf-backend
+  path: /taf/(.*)
+  svcPort: 80
+  replicas: 1
+  db_secretName: taf-db
+  db_secretType: secretsmanager
+  spcName: taf-spc
+  postStartCommand: bin/admin.sh
+  secretServiceAccount: taf-service-account
+  env:
+    GEOWEB_KNMI_AVI_MESSAGESERVICES_HOST: "localhost:8081"
+    AVIATION_TAF_PORT_HTTP: 8000
+    EXTERNALADDRESSES: 0.0.0.0:80
+    FORWARDED_ALLOW_IPS: "*"
+    AVIATION_TAF_PUBLISH_HOST: "localhost:8090"
+  messageconverter:
+    name: taf-messageconverter
+    registry: registry.gitlab.com/opengeoweb/avi-msgconverter/geoweb-knmi-avi-messageservices
+    version: "0.1.3"
+    port: 8081
+  publisher:
+    name: taf-publisher
+    registry: registry.gitlab.com/opengeoweb/backend-services/aviation-taf-backend/aviation-taf-backend-publisher-local
+    port: 8090
+    DESTINATION: /app/output
+  nginx:
+    name: taf-nginx
+    registry: registry.gitlab.com/opengeoweb/backend-services/aviation-taf-backend/nginx-aviation-taf-backend
+    AVIATION_TAF_ENABLE_SSL: "FALSE"
+    NGINX_PORT_HTTP: 80
+    EXTERNAL_HOSTNAME: localhost:80
+    AVIATION_TAF_BACKEND_HOST: localhost:8000
+  placeholder:
+    name: taf-placeholder
+    registry: registry.gitlab.com/opengeoweb/backend-services/aviation-taf-backend/tafplaceholder-aviation-taf-backend
+    port: 8085
+    TAFPLACEHOLDER_KEEPRUNNING: true
+
+ingress:
+  name: nginx-ingress-controller
+  ingressClassName: nginx

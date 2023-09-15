@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.taf.nginx.name }}
+  annotations:
+  {{- if .Values.taf.commitHash }}
+    commitHash: {{ .Values.taf.commitHash }}
+  {{- end }}
+data:
+  AVIATION_TAF_ENABLE_SSL: {{ .Values.taf.nginx.AVIATION_TAF_ENABLE_SSL | quote }}
+  EXTERNAL_HOSTNAME: {{ .Values.taf.nginx.EXTERNAL_HOSTNAME | quote }}
+  OAUTH2_USERINFO: {{ .Values.taf.nginx.OAUTH2_USERINFO | quote }}
+  AVIATION_TAF_BACKEND_HOST: {{ .Values.taf.nginx.AVIATION_TAF_BACKEND_HOST | quote }}
+  NGINX_PORT_HTTP: {{ .Values.taf.nginx.NGINX_PORT_HTTP | quote }}
