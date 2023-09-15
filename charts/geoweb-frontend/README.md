@@ -128,6 +128,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `secretProviderParameters` | Option to add custom parameters to the secretProvider, for example with aws you can specify region | |
 | `frontend.env.GW_CAP_BASE_URL` | Url which the application uses to connect to CAP backend | |
 | `frontend.env.GW_DRAWINGS_BASE_URL` | Url which the application uses to connect to Drawings backend | |
+| `frontend.env.GW_TAF_BASE_URL` | Url which the application uses to connect to TAF backend | |
 | `frontend.env.GW_APP_URL` | Url which the application can be accessed | |
 | `frontend.env.GW_DEFAULT_THEME` | Default theme: lightMode or darkMode | |
 | `frontend.env.GW_FEATURE_APP_TITLE` | Application title | |
@@ -141,10 +142,6 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.env.GW_TIMESERIES_CONFIGURATION_FILENAME` | Filename to fetch TimeSeries preset locations | `timeSeriesPresetLocations.json` |
 | `frontend.env.GW_FEATURE_FORCE_AUTHENTICATION` | Force authentication (block Guest access) | `false` |
 | `frontend.env.GW_FEATURE_MODULE_SPACE_WEATHER` | Enable Space Weather module | `false` |
-| `frontend.env.GW_FEATURE_MODULE_TAF` | Enable TAF module | `false` |
-| `frontend.env.GW_FEATURE_MODULE_SIGMET` | Enable SIGMET module | `false` |
-| `frontend.env.GW_FEATURE_MODULE_AIRMET` | Enable AIRMET module | `false` |
-| `frontend.env.GW_FEATURE_MENU_SATCOMP` | Enable SATCOMP menu option | `false` |
 | `frontend.env.GW_FEATURE_MENU_FEEDBACK` | Enable Feedback menu option | `false` |
 | `frontend.env.GW_FEATURE_MENU_INFO` | Enable Info menu option | `true` |
 | `frontend.env.GW_FEATURE_MENU_VERSION` | Enable Version menu option | `false` |

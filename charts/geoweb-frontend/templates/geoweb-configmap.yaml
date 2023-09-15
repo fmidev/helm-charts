@@ -49,17 +49,8 @@ data:
 {{- if .Values.frontend.env.GW_FEATURE_MODULE_SPACE_WEATHER }}
   GW_FEATURE_MODULE_SPACE_WEATHER: {{ .Values.frontend.env.GW_FEATURE_MODULE_SPACE_WEATHER | quote }}
 {{- end }}
-{{- if .Values.frontend.env.GW_FEATURE_MODULE_TAF }}
-  GW_FEATURE_MODULE_TAF: {{ .Values.frontend.env.GW_FEATURE_MODULE_TAF | quote }}
-{{- end }}
-{{- if .Values.frontend.env.GW_FEATURE_MODULE_SIGMET }}
-  GW_FEATURE_MODULE_SIGMET: {{ .Values.frontend.env.GW_FEATURE_MODULE_SIGMET | quote }}
-{{- end }}
-{{- if .Values.frontend.env.GW_FEATURE_MODULE_AIRMET }}
-  GW_FEATURE_MODULE_AIRMET: {{ .Values.frontend.env.GW_FEATURE_MODULE_AIRMET | quote }}
-{{- end }}
-{{- if .Values.frontend.env.GW_FEATURE_MENU_SATCOMP }}
-  GW_FEATURE_MENU_SATCOMP: {{ .Values.frontend.env.GW_FEATURE_MENU_SATCOMP | quote }}
+{{- if .Values.frontend.env.GW_TAF_BASE_URL }}
+  GW_TAF_BASE_URL: {{ .Values.frontend.env.GW_TAF_BASE_URL | quote }}
 {{- end }}
 {{- if .Values.frontend.env.GW_FEATURE_MENU_FEEDBACK }}
   GW_FEATURE_MENU_FEEDBACK: {{ .Values.frontend.env.GW_FEATURE_MENU_FEEDBACK | quote }}
