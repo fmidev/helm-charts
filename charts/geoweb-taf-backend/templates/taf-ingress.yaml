@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.ingress.name }}-{{ .Values.taf.name }}
+  annotations:
+  {{- if .Values.ingress.customAnnotations }}
+    {{- with .Values.ingress.customAnnotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- else }}
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "DELETE, PUT, GET, POST, OPTIONS, PATCH, HEAD"
+  {{- end }}
+spec:
+{{- if .Values.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
+{{- end }}
+  rules:
+    - host: {{ .Values.taf.url }}
+      http:
+        paths:
+          - path: {{ .Values.taf.path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.taf.name }}
+                port:
+                  number: {{ .Values.taf.svcPort }}
