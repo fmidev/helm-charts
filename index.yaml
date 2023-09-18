@@ -64,6 +64,16 @@ entries:
   geoweb-frontend:
   - apiVersion: v2
     appVersion: v7.0.0
+    created: "2023-09-18T07:38:41.67496498Z"
+    description: A Helm chart for geoweb application frontend in Kubernetes
+    digest: 5ba09d4690468143bb83a9901fe0280321f8aa935ef9dee9e98f2aedd2f71802
+    name: geoweb-frontend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-frontend-3.0.0/geoweb-frontend-3.0.0.tgz
+    version: 3.0.0
+  - apiVersion: v2
+    appVersion: v7.0.0
     created: "2023-09-13T11:59:33.201469508Z"
     description: A Helm chart for geoweb application frontend in Kubernetes
     digest: e0060fdd238a007dcf5400c18c0dc9e6329d235e0f19de917a1500a34bd537b0
@@ -535,6 +545,17 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/geoweb-secrets-provider-aws-1.3.0/geoweb-secrets-provider-aws-1.3.0.tgz
     version: 1.3.0
+  geoweb-taf-backend:
+  - apiVersion: v2
+    appVersion: v0.0.1
+    created: "2023-09-18T07:38:41.89302065Z"
+    description: A Helm chart for geoweb taf backend resources in Kubernetes
+    digest: e57118d180e915bdae4d9aa764d365f6de2dab60855f240c1e4bc793f624738b
+    name: geoweb-taf-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-taf-backend-0.0.1/geoweb-taf-backend-0.0.1.tgz
+    version: 0.0.1
   geoweb-warnings-backend:
   - apiVersion: v2
     appVersion: 0.0.4
@@ -629,4 +650,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/smartmetserver-0.1.0/smartmetserver-0.1.0.tgz
     version: 0.1.0
-generated: "2023-09-13T11:59:33.632652152Z"
+generated: "2023-09-18T07:38:41.893197048Z"
