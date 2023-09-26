@@ -30,6 +30,9 @@ spec:
       {{- end }}
         ports:
         - containerPort: {{ .Values.opmet.env.OPMET_BACKEND_PORT_HTTP }}
+      {{- if .Values.opmet.resources }}
+        resources: {{ toYaml .Values.opmet.resources | nindent 10 }}
+      {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Values.opmet.name }}
@@ -52,6 +55,9 @@ spec:
       {{- end }}
         ports:
         - containerPort: {{ .Values.opmet.messageconverter.port }}
+      {{- if .Values.opmet.messageconverter.resources }}
+        resources: {{ toYaml .Values.opmet.messageconverter.resources | nindent 10 }}
+      {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Values.opmet.name }}
@@ -62,6 +68,9 @@ spec:
       {{- end }}
         ports:
         - containerPort: {{ .Values.opmet.publisher.port }}
+      {{- if .Values.opmet.publisher.resources }}
+        resources: {{ toYaml .Values.opmet.publisher.resources | nindent 10 }}
+      {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Values.opmet.publisher.name }}
@@ -75,6 +84,9 @@ spec:
       {{- end }}
         ports:
         - containerPort: {{ .Values.opmet.nginx.NGINX_PORT_HTTP }}
+      {{- if .Values.opmet.nginx.resources }}
+        resources: {{ toYaml .Values.opmet.nginx.resources | nindent 10 }}
+      {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Values.opmet.nginx.name }}

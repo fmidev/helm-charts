@@ -8,6 +8,13 @@ cap:
   svcPort: 80
   containerPort: 8080
   replicas: 1
+  resources:
+    requests:
+      memory: "250Mi"
+      cpu: "50m"
+    limits:
+      memory: "350Mi"
+      cpu: "1"
 
 ingress:
   name: nginx-ingress-controller

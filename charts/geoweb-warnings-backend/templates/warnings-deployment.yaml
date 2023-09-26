@@ -36,6 +36,9 @@ spec:
       {{- end }}
         ports:
         - containerPort: {{ .Values.warnings.WARNINGS_PORT_HTTP }}
+      {{- if .Values.warnings.resources }}
+        resources: {{ toYaml .Values.warnings.resources | nindent 10 }}
+      {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Values.warnings.name }}
@@ -56,6 +59,9 @@ spec:
       {{- end }}
         ports:
         - containerPort: {{ .Values.warnings.nginx.NGINX_PORT_HTTP }}
+      {{- if .Values.warnings.nginx.resources }}
+        resources: {{ toYaml .Values.warnings.nginx.resources | nindent 10 }}
+      {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Values.warnings.nginx.name }}

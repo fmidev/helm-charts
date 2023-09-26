@@ -11,6 +11,13 @@ opmet:
   db_secretType: secretsmanager
   spcName: opmet-spc
   secretServiceAccount: opmet-service-account
+  resources:
+    requests:
+      memory: "150Mi"
+      cpu: "50m"
+    limits:
+      memory: "300Mi"
+      cpu: "1"
   env:
     MESSAGECONVERTER_URL: "http://localhost:8080"
     OPMET_BACKEND_PORT_HTTP: 8000
@@ -23,11 +30,25 @@ opmet:
     registry: registry.gitlab.com/opengeoweb/avi-msgconverter/geoweb-knmi-avi-messageservices
     version: "0.1.1"
     port: 8080
+    resources:
+      requests:
+        memory: "250Mi"
+        cpu: "50m"
+      limits:
+        memory: "500Mi"
+        cpu: "1"
   publisher:
     name: opmet-publisher
     registry: registry.gitlab.com/opengeoweb/backend-services/opmet-backend/opmet-backend-publisher-local
     port: 8090
     DESTINATION: /app/output
+    resources:
+      requests:
+        memory: "50Mi"
+        cpu: "50m"
+      limits:
+        memory: "100Mi"
+        cpu: "1"
   nginx:
     name: opmet-nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/opmet-backend/nginx-opmet-backend
@@ -35,6 +56,13 @@ opmet:
     NGINX_PORT_HTTP: 80
     EXTERNAL_HOSTNAME: localhost:80
     OPMET_BACKEND_HOST: localhost:8000
+    resources:
+      requests:
+        memory: "10Mi"
+        cpu: "10m"
+      limits:
+        memory: "100Mi"
+        cpu: "100m"
 
 ingress:
   name: nginx-ingress-controller

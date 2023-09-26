@@ -1,5 +1,5 @@
 versions:
-  warnings: "0.0.4"
+  warnings: "0.0.6"
 
 warnings:
   name: warnings
@@ -14,12 +14,26 @@ warnings:
   db_secretType: secretsmanager
   spcName: warnings-spc
   secretServiceAccount: warnings-service-account
+  resources:
+    requests:
+      memory: "250Mi"
+      cpu: "50m"
+    limits:
+      memory: "400Mi"
+      cpu: "1"
   nginx:
     name: warnings-nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/warnings-backend/nginx-warnings-backend
     WARNINGS_ENABLE_SSL: "FALSE"
     WARNINGS_BACKEND_HOST: 0.0.0.0:8080
     NGINX_PORT_HTTP: 80
+    resources:
+      requests:
+        memory: "10Mi"
+        cpu: "10m"
+      limits:
+        memory: "100Mi"
+        cpu: "100m"
 
 ingress:
   name: nginx-ingress-controller # Sync with nginx-ingress-controller/values.yaml
