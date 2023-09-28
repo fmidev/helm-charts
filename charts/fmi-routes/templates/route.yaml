@@ -1,0 +1,32 @@
+{{- if .Values.routes }}
+{{- range $name, $route := .Values.routes }}
+{{- if $route.enabled }}
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    type: {{ $route.type }}
+  {{- if $route.annotations }}
+  annotations:
+{{ toYaml $route.annotations | indent 4 }}
+  {{- end }}
+spec:
+  host: {{ $route.host }}
+  port:
+    targetPort: {{ $route.targetPort  }}
+  to:
+    kind: Service
+    name: {{ $route.targetService }}
+    weight: 100
+  wildcardPolicy: None
+  {{- if $route.tls }}
+  tls:
+    termination: {{ $route.tls.termination }}
+    insecureEdgeTerminationPolicy: {{ $route.tls.insecureEdgeTerminationPolicy }}
+  {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

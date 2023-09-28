@@ -1,0 +1,22 @@
+{{- if .Values.nodeports }}
+{{- range $name, $nodeport := .Values.nodeports }}
+{{- if $nodeport.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}-nodeport
+  namespace: {{ $.Release.Namespace }}
+spec:
+  ports:
+  - name: {{ $name }}-service-port
+    nodePort: {{ $nodeport.apiPort }}
+    port: {{ $nodeport.servicePort }}
+    protocol: TCP
+    targetPort: {{ $nodeport.targetPodPort }}
+  selector:
+    app.kubernetes.io/instance: {{ $.Release.Namespace }}
+  type: NodePort
+{{- end }}
+{{- end }}
+{{- end }}
