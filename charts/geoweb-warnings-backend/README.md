@@ -57,7 +57,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 
 | Parameter | Description | Default |
 | - | - | - |
-| `versions.warnings` | Possibility to override application version | `0.0.4` |
+| `versions.warnings` | Possibility to override application version | `0.0.6` |
 | `warnings.name` | Name of backend | `warnings` |
 | `warnings.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/warnings-backend` |
 | `warnings.commitHash` | Adds commitHash annotation to the deployment | |
@@ -75,6 +75,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.db_secretKey` | Key of db secret | |
 | `warnings.iamRoleARN` | IAM Role with permissions to access db_secret secret | |
 | `warnings.secretServiceAccount` | Service Account created for handling secrets | `warnings-service-account` |
+| `warnings.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `secretProvider` | Option to use secret provider instead of passing base64 encoded database connection string as warnings.db_secret *(aws\|azure\|gcp\|vault)* | |
 | `secretProviderParameters` | Option to add custom parameters to the secretProvider, for example with aws you can specify region | |
 | `warnings.nginx.name` | Name of nginx container | `nginx` |
@@ -83,6 +84,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.nginx.OAUTH2_USERINFO` | Userinfo endpoint to retrieve consented claims, or assertions, about the logged in end-user | - |
 | `warnings.nginx.WARNINGS_BACKEND_HOST` | Address where nginx accesses the backend | `0.0.0.0:8080` |
 | `warnings.nginx.NGINX_PORT_HTTP` | Port used for nginx | `80` |
+| `warnings.nginx.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |
 | `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | `nginx` |
 | `ingress.customAnnotations` | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations if set | |

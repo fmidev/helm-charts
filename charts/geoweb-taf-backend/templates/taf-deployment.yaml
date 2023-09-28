@@ -36,6 +36,9 @@ spec:
       {{- end }}
         ports:
         - containerPort: {{ .Values.taf.env.AVIATION_TAF_PORT_HTTP }}
+      {{- if .Values.taf.resources }}
+        resources: {{ toYaml .Values.taf.resources | nindent 10 }}
+      {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Values.taf.name }}
@@ -56,6 +59,9 @@ spec:
       {{- end }}
         ports:
         - containerPort: {{ .Values.taf.placeholder.port }}
+      {{- if .Values.taf.placeholder.resources }}
+        resources: {{ toYaml .Values.taf.placeholder.resources | nindent 10 }}
+      {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Values.taf.placeholder.name }}
@@ -79,6 +85,9 @@ spec:
           value: {{ .Values.taf.messageconverter.port | quote }}
         ports:
         - containerPort: {{ .Values.taf.messageconverter.port }}
+      {{- if .Values.taf.messageconverter.resources }}
+        resources: {{ toYaml .Values.taf.messageconverter.resources | nindent 10 }}
+      {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Values.taf.name }}
@@ -89,6 +98,9 @@ spec:
       {{- end }}
         ports:
         - containerPort: {{ .Values.taf.publisher.port }}
+      {{- if .Values.taf.publisher.resources }}
+        resources: {{ toYaml .Values.taf.publisher.resources | nindent 10 }}
+      {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Values.taf.publisher.name }}
@@ -102,6 +114,9 @@ spec:
       {{- end }}
         ports:
         - containerPort: {{ .Values.taf.nginx.NGINX_PORT_HTTP }}
+      {{- if .Values.taf.nginx.resources }}
+        resources: {{ toYaml .Values.taf.nginx.resources | nindent 10 }}
+      {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Values.taf.nginx.name }}

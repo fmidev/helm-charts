@@ -27,3 +27,6 @@ spec:
       {{- end }}
         ports:
         - containerPort: {{ .Values.cap.containerPort}}
+      {{- if .Values.cap.resources }}
+        resources: {{ toYaml .Values.cap.resources | nindent 10 }}
+      {{- end }}

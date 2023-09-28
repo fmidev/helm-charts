@@ -52,6 +52,9 @@ spec:
       {{- end }}
         ports:
         - containerPort: {{ .Values.presets.PRESETS_PORT_HTTP }}
+      {{- if .Values.presets.resources }}
+        resources: {{ toYaml .Values.presets.resources | nindent 10 }}
+      {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Values.presets.name }}
@@ -76,6 +79,9 @@ spec:
       {{- end }}
         ports:
         - containerPort: {{ .Values.presets.nginx.NGINX_PORT_HTTP }}
+      {{- if .Values.presets.nginx.resources }}
+        resources: {{ toYaml .Values.presets.nginx.resources | nindent 10 }}
+      {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Values.presets.nginx.name }}
