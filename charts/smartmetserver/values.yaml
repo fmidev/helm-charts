@@ -1,51 +1,25 @@
-# Default values for smartmetserver.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
-replicaCount: 1
-
 image:
   repository: fmidev/smartmetserver
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: latest
 
-nameOverride: ""
-fullnameOverride: ""
-
-createNamespace: true
-
-podAnnotations: {}
-
-podSecurityContext: {}
-  # fsGroup: 2000
-
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
-
-service:
-  type: ClusterIP
-  port: 8080
+smartmetserver:
+  name: smartmetserver
+  containerPort: 8080
+  svcPort: 8080
+  replicas: 2
 
 ingress:
-  enabled: false
-  className: ""
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: chart-example.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+  name: nginx-ingress
+  ingressClassName: ""
 
+pv:
+  enable: true
+  name: pv
+  path: /tmp/smartmet-data
 
+pvc:
+  name: pvc
+  storageClassName: hostpath-smartmet
+  accessModes: ReadWriteOnce
+  storage: 1Gi
