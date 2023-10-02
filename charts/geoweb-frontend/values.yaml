@@ -38,7 +38,12 @@ ingress:
     if ($request_uri ~* \.(json)) {
       add_header Cache-Control "no-cache";
     }
-    if ($request_uri ~* \.(woff2|svg|webmanifest)) {
+    if ($request_uri ~* \.(woff2|svg)) {
+      add_header Cache-Control "max-age=604800";
+    }
+    if ($request_uri ~* \.(webmanifest)) {
+      more_clear_headers 'Content-Type';
+      add_header Content-Type "application/manifest+json";
       add_header Cache-Control "max-age=604800";
     }
   ingressClassName: nginx
