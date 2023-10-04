@@ -1,0 +1,13 @@
+apiVersion: v2
+name: fmi-nodeport
+description: Helm chart for defining api nodeport
+type: application
+version: 0.0.2
+keywords:
+  - fmi
+  - nodeport
+home: https://github.com/fmidev/fmi-public-helm-charts
+maintainers:
+  - name: fmi-build-bot
+    email: admin@weatherproof.fi
+    url: https://github.com/fmi-build-bot
