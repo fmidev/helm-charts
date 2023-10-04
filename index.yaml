@@ -1,5 +1,41 @@
 apiVersion: v1
 entries:
+  fmi-nodeport:
+  - apiVersion: v2
+    created: "2023-10-04T09:19:46.946709432Z"
+    description: Helm chart for defining api nodeport
+    digest: 67c1c8111400c9703e2775b325864777d32904a77687453b16a962f4102b4cee
+    home: https://github.com/fmidev/fmi-public-helm-charts
+    keywords:
+    - fmi
+    - nodeport
+    maintainers:
+    - email: admin@weatherproof.fi
+      name: fmi-build-bot
+      url: https://github.com/fmi-build-bot
+    name: fmi-nodeport
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/fmi-nodeport-0.0.2/fmi-nodeport-0.0.2.tgz
+    version: 0.0.2
+  fmi-routes:
+  - apiVersion: v2
+    created: "2023-10-04T09:19:47.251830063Z"
+    description: Helm chart for defining multiple routes
+    digest: e77d4e5cad461d71101d3fe4483bf8d32c8ff63b120d6f1d793657bfb49272d4
+    home: https://github.com/fmidev/fmi-public-helm-charts
+    keywords:
+    - fmi
+    - route
+    maintainers:
+    - email: admin@weatherproof.fi
+      name: fmi-build-bot
+      url: https://github.com/fmi-build-bot
+    name: fmi-routes
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/fmi-routes-0.0.8/fmi-routes-0.0.8.tgz
+    version: 0.0.8
   geoweb-cap-backend:
   - apiVersion: v2
     appVersion: v0.4.0
@@ -752,4 +788,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/smartmetserver-0.1.0/smartmetserver-0.1.0.tgz
     version: 0.1.0
-generated: "2023-10-02T09:17:34.440084647Z"
+generated: "2023-10-04T09:19:47.252099564Z"
