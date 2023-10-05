@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.smartmetserver.name }}-{{ .Values.smartmetConfCm.name }}
+  labels:
+    app: {{ .Values.smartmetserver.name }}
+  namespace: {{ .Release.Namespace }}
+data:
+  smartmet.conf: {{ .Values.smartmetConfCm.smartmetConf | toYaml | indent 1 }}

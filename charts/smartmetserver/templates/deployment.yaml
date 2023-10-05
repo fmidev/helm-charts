@@ -25,6 +25,8 @@ spec:
         volumeMounts:
         - mountPath: "/smartmet/data"
           name: smartmetserver-volume
+        - mountPath: "/etc/smartmet/"
+          name: smartmet-configuration
         livenessProbe:
           httpGet:
             path: /admin?what=qengine
@@ -32,16 +34,20 @@ spec:
           periodSeconds: 10
         readinessProbe:
           httpGet:
-            path: /admin?what=qengine
+            path: /wms?request=getCapabilities&service=WMS
             port: {{ .Values.smartmetserver.containerPort }}
+          failureThreshold: 5
           periodSeconds: 10
         startupProbe:
           httpGet:
             path: /admin?what=qengine
             port: {{ .Values.smartmetserver.containerPort }}
-          failureThreshold: 3
+          failureThreshold: 5
           periodSeconds: 10
       volumes:
       - name: smartmetserver-volume
         persistentVolumeClaim:
           claimName: {{ .Values.smartmetserver.name }}-{{ .Values.pvc.name }}
+      - name: smartmet-configuration
+        configMap:
+          name: {{ .Values.smartmetserver.name }}-{{ .Values.smartmetConfCm.name }}
