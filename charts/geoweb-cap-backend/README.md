@@ -54,6 +54,8 @@ The following table lists the configurable parameters of the CAP backend chart a
 | `cap.containerPort` | Port used for container | `8080` |
 | `cap.replicas` | Amount of replicas deployed | `1` |
 | `cap.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
+| `cap.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
+| `cap.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |
 | `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | `nginx` |
 | `ingress.customAnnotations` | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations if set | |

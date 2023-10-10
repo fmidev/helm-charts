@@ -18,6 +18,20 @@ opmet:
     limits:
       memory: "300Mi"
       cpu: "1"
+  livenessProbe:
+    httpGet:
+      path: /health_check
+      port: 8000
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    failureThreshold: 5
+  readinessProbe:
+    httpGet:
+      path: /health_check?readiness=true
+      port: 8000
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    failureThreshold: 1
   env:
     MESSAGECONVERTER_URL: "http://localhost:8080"
     OPMET_BACKEND_PORT_HTTP: 8000
@@ -37,6 +51,20 @@ opmet:
       limits:
         memory: "500Mi"
         cpu: "1"
+    livenessProbe:
+      httpGet:
+        path: /
+        port: 8080
+      initialDelaySeconds: 30
+      periodSeconds: 5
+      failureThreshold: 5
+    readinessProbe:
+      httpGet:
+        path: /?readiness=true
+        port: 8080
+      initialDelaySeconds: 30
+      periodSeconds: 5
+      failureThreshold: 1
   publisher:
     name: opmet-publisher
     registry: registry.gitlab.com/opengeoweb/backend-services/opmet-backend/opmet-backend-publisher-local
@@ -49,6 +77,20 @@ opmet:
       limits:
         memory: "100Mi"
         cpu: "1"
+    #livenessProbe:
+    #  httpGet:
+    #    path: /healthcheck
+    #    port: 8090
+    #  initialDelaySeconds: 30
+    #  periodSeconds: 5
+    #  failureThreshold: 5
+    #readinessProbe:
+    #  httpGet:
+    #    path: /healthcheck?readiness=true
+    #    port: 8090
+    #  initialDelaySeconds: 30
+    #  periodSeconds: 5
+    #  failureThreshold: 1
   nginx:
     name: opmet-nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/opmet-backend/nginx-opmet-backend
@@ -63,6 +105,20 @@ opmet:
       limits:
         memory: "100Mi"
         cpu: "100m"
+    livenessProbe:
+      httpGet:
+        path: /healthcheck
+        port: 80
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      failureThreshold: 5
+    readinessProbe:
+      httpGet:
+        path: /healthcheck?readiness=true
+        port: 80
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      failureThreshold: 1
 
 ingress:
   name: nginx-ingress-controller

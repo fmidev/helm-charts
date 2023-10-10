@@ -22,6 +22,20 @@ presets:
     limits:
       memory: "350Mi"
       cpu: "1"
+  livenessProbe:
+    httpGet:
+      path: /healthcheck
+      port: 8080
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    failureThreshold: 5
+  readinessProbe:
+    httpGet:
+      path: /healthcheck?readiness=true
+      port: 8080
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    failureThreshold: 1
   nginx:
     name: nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/presets-backend/nginx-presets-backend
@@ -35,6 +49,20 @@ presets:
       limits:
         memory: "100Mi"
         cpu: "100m"
+    livenessProbe:
+      httpGet:
+        path: /healthcheck
+        port: 80
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      failureThreshold: 5
+    readinessProbe:
+      httpGet:
+        path: /healthcheck?readiness=true
+        port: 80
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      failureThreshold: 1
   useCustomWorkspacePresets: false
   customWorkspacePresetLocation: local
   volumeAccessMode: ReadOnlyMany
