@@ -75,20 +75,20 @@ taf:
       limits:
         memory: "100Mi"
         cpu: "1"
-    #livenessProbe:
-    #  httpGet:
-    #    path: /healthcheck
-    #    port: 8090
-    #  initialDelaySeconds: 30
-    #  periodSeconds: 5
-    #  failureThreshold: 5
-    #readinessProbe:
-    #  httpGet:
-    #    path: /healthcheck?readiness=true
-    #    port: 8090
-    #  initialDelaySeconds: 30
-    #  periodSeconds: 5
-    #  failureThreshold: 1
+#    livenessProbe:
+#      httpGet:
+#        path: /healthcheck
+#        port: 8090
+#      initialDelaySeconds: 30
+#      periodSeconds: 5
+#      failureThreshold: 5
+#    readinessProbe:
+#      httpGet:
+#        path: /healthcheck?readiness=true
+#        port: 8090
+#      initialDelaySeconds: 30
+#      periodSeconds: 5
+#      failureThreshold: 1
   nginx:
     name: taf-nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/aviation-taf-backend/nginx-aviation-taf-backend
@@ -129,20 +129,20 @@ taf:
       limits:
         memory: "100Mi"
         cpu: "1"
-    #livenessProbe:
-    #  httpGet:
-    #    path: /healthcheck
-    #    port: 8085
-    #  initialDelaySeconds: 30
-    #  periodSeconds: 5
-    #  failureThreshold: 5
-    #readinessProbe:
-    #  httpGet:
-    #    path: /health_check?readiness=true
-    #    port: 8085
-    #  initialDelaySeconds: 30
-    #  periodSeconds: 5
-    #  failureThreshold: 1
+#    livenessProbe:
+#      httpGet:
+#        path: /healthcheck
+#        port: 8085
+#      initialDelaySeconds: 30
+#      periodSeconds: 5
+#      failureThreshold: 5
+#    readinessProbe:
+#      httpGet:
+#        path: /health_check?readiness=true
+#        port: 8085
+#      initialDelaySeconds: 30
+#      periodSeconds: 5
+#      failureThreshold: 1
 
 ingress:
   name: nginx-ingress-controller
