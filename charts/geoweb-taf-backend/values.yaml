@@ -144,14 +144,14 @@ taf:
 #      initialDelaySeconds: 30
 #      periodSeconds: 5
 #      failureThreshold: 1
-    db:
-      enableDefaultDb: true
-      name: postgres
-      image: postgres
-      port: 5432
-      POSTGRES_DB: taf
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+  db:
+    enableDefaultDb: true
+    name: postgres
+    image: postgres
+    port: 5432
+    POSTGRES_DB: taf
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
 
 ingress:
   name: nginx-ingress-controller
