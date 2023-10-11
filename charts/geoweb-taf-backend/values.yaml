@@ -7,6 +7,7 @@ taf:
   path: /taf/(.*)
   svcPort: 80
   replicas: 1
+  db_secret: cG9zdGdyZXNxbDovL3Bvc3RncmVzOnBvc3RncmVzQHBvc3RncmVzOjU0MzIvdGFm
   db_secretName: taf-db
   db_secretType: secretsmanager
   spcName: taf-spc
@@ -143,6 +144,14 @@ taf:
 #      initialDelaySeconds: 30
 #      periodSeconds: 5
 #      failureThreshold: 1
+    db:
+      enableDefaultDb: true
+      name: postgres
+      image: postgres
+      port: 5432
+      POSTGRES_DB: taf
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
 
 ingress:
   name: nginx-ingress-controller

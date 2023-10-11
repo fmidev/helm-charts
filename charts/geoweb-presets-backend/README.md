@@ -112,6 +112,13 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.nginx.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `presets.nginx.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
 | `presets.nginx.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
+| `presets.db.enableDefaultDb` | Enable default postgres database | `true` |
+| `presets.db.name` | Default postgres database container name | `postgres` |
+| `presets.db.image` | Default postgres database image | `postgres` |
+| `presets.db.port` | Default postgres database port | `5432` |
+| `presets.db.POSTGRES_DB` | Default postgres database name | `presets` |
+| `presets.db.POSTGRES_USER` | Default postgres database user | `postgres` |
+| `presets.db.POSTGRES_PASSWORD` | Default postgres database password | `postgres` |
 | `presets.useCustomWorkspacePresets` | Use custom presets | `false` |
 | `presets.customWorkspacePresetLocation` | Where custom presets are located *(local\|s3)* | `local` |
 | `presets.volumeAccessMode` | Permissions of the application for the custom presets PersistentVolume used | `ReadOnlyMany` |

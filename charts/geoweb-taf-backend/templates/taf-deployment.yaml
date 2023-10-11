@@ -150,6 +150,19 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Values.taf.nginx.name }}
+      {{- if .Values.taf.db.enableDefaultDb }}
+      - name: {{ .Values.taf.db.name }}
+        image: {{ .Values.taf.db.image }}
+        ports:
+          - containerPort: {{ .Values.taf.db.port }}
+        env:
+          - name: POSTGRES_DB
+            value: {{ .Values.taf.db.POSTGRES_DB }}
+          - name: POSTGRES_USER
+            value: {{ .Values.taf.db.POSTGRES_USER }}
+          - name: POSTGRES_PASSWORD
+            value: {{ .Values.taf.db.POSTGRES_PASSWORD }}
+      {{- end }}
       volumes:
       - name: secrets-store-inline
       {{- if .Values.secretProvider }}

@@ -77,6 +77,19 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Values.warnings.nginx.name }}
+      {{- if .Values.warnings.db.enableDefaultDb }}
+      - name: {{ .Values.warnings.db.name }}
+        image: {{ .Values.warnings.db.image }}
+        ports:
+          - containerPort: {{ .Values.warnings.db.port }}
+        env:
+          - name: POSTGRES_DB
+            value: {{ .Values.warnings.db.POSTGRES_DB }}
+          - name: POSTGRES_USER
+            value: {{ .Values.warnings.db.POSTGRES_USER }}
+          - name: POSTGRES_PASSWORD
+            value: {{ .Values.warnings.db.POSTGRES_PASSWORD }}
+      {{- end }}
       volumes:
       - name: secrets-store-inline
       {{- if .Values.secretProvider }}

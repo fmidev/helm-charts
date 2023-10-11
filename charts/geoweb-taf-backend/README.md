@@ -114,6 +114,13 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.placeholder.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `taf.placeholder.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
 | `taf.placeholder.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
+| `taf.db.enableDefaultDb` | Enable default postgres database | `true` |
+| `taf.db.name` | Default postgres database container name | `postgres` |
+| `taf.db.image` | Default postgres database image | `postgres` |
+| `taf.db.port` | Default postgres database port | `5432` |
+| `taf.db.POSTGRES_DB` | Default postgres database name | `taf` |
+| `taf.db.POSTGRES_USER` | Default postgres database user | `postgres` |
+| `taf.db.POSTGRES_PASSWORD` | Default postgres database password | `postgres` |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |
 | `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | |
 | `ingress.customAnnotations` | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations if set | |

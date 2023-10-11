@@ -110,6 +110,13 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.publisher.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `opmet.publisher.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
 | `opmet.publisher.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
+| `opmet.db.enableDefaultDb` | Enable default postgres database | `true` |
+| `opmet.db.name` | Default postgres database container name | `postgres` |
+| `opmet.db.image` | Default postgres database image | `postgres` |
+| `opmet.db.port` | Default postgres database port | `5432` |
+| `opmet.db.POSTGRES_DB` | Default postgres database name | `opmet` |
+| `opmet.db.POSTGRES_USER` | Default postgres database user | `postgres` |
+| `opmet.db.POSTGRES_PASSWORD` | Default postgres database password | `postgres` |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |
 | `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | `nginx` |
 | `ingress.customAnnotations` | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations if set | |

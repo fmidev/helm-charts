@@ -114,6 +114,19 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Values.opmet.nginx.name }}
+      {{- if .Values.opmet.db.enableDefaultDb }}
+      - name: {{ .Values.opmet.db.name }}
+        image: {{ .Values.opmet.db.image }}
+        ports:
+          - containerPort: {{ .Values.opmet.db.port }}
+        env:
+          - name: POSTGRES_DB
+            value: {{ .Values.opmet.db.POSTGRES_DB }}
+          - name: POSTGRES_USER
+            value: {{ .Values.opmet.db.POSTGRES_USER }}
+          - name: POSTGRES_PASSWORD
+            value: {{ .Values.opmet.db.POSTGRES_PASSWORD }}
+      {{- end }}
       volumes:
       - name: secrets-store-inline
       {{- if .Values.secretProvider }}
