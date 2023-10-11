@@ -10,7 +10,7 @@ warnings:
   EXTERNALADDRESS: 0.0.0.0:80
   WARNINGS_PORT_HTTP: 8080
   postStartCommand: bin/admin.sh
-  db_secret: cG9zdGdyZXNxbDovL3Bvc3RncmVzOnBvc3RncmVzQHBvc3RncmVzOjU0MzIvd2FybmluZ3M=
+  db_secret: cG9zdGdyZXNxbDovL3Bvc3RncmVzOnBvc3RncmVzQGxvY2FsaG9zdDo1NDMyL3dhcm5pbmdz
   db_secretName: warnings-db
   db_secretType: secretsmanager
   spcName: warnings-spc

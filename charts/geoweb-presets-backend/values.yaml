@@ -11,7 +11,7 @@ presets:
   PRESETS_PORT_HTTP: 8080
   DEPLOY_ENVIRONMENT: open
   postStartCommand: bin/admin.sh
-  db_secret: cG9zdGdyZXNxbDovL3Bvc3RncmVzOnBvc3RncmVzQHBvc3RncmVzOjU0MzIvcHJlc2V0cw==
+  db_secret: cG9zdGdyZXNxbDovL3Bvc3RncmVzOnBvc3RncmVzQGxvY2FsaG9zdDo1NDMyL3ByZXNldHM=
   db_secretName: presets-db
   db_secretType: secretsmanager
   spcName: presets-spc

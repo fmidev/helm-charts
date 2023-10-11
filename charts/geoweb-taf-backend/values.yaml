@@ -7,7 +7,7 @@ taf:
   path: /taf/(.*)
   svcPort: 80
   replicas: 1
-  db_secret: cG9zdGdyZXNxbDovL3Bvc3RncmVzOnBvc3RncmVzQHBvc3RncmVzOjU0MzIvdGFm
+  db_secret: cG9zdGdyZXNxbDovL3Bvc3RncmVzOnBvc3RncmVzQGxvY2FsaG9zdDo1NDMyL3RhZg==
   db_secretName: taf-db
   db_secretType: secretsmanager
   spcName: taf-spc
