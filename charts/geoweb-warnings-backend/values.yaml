@@ -53,14 +53,14 @@ warnings:
       httpGet:
         path: /healthcheck
         port: 80
-      initialDelaySeconds: 30
+      initialDelaySeconds: 5
       periodSeconds: 5
       failureThreshold: 5
     readinessProbe:
       httpGet:
         path: /healthcheck?readiness=true
         port: 80
-      initialDelaySeconds: 30
+      initialDelaySeconds: 5
       periodSeconds: 5
       failureThreshold: 1
   db:

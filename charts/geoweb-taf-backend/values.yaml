@@ -80,14 +80,14 @@ taf:
 #      httpGet:
 #        path: /healthcheck
 #        port: 8090
-#      initialDelaySeconds: 30
+#      initialDelaySeconds: 5
 #      periodSeconds: 5
 #      failureThreshold: 5
 #    readinessProbe:
 #      httpGet:
 #        path: /healthcheck?readiness=true
 #        port: 8090
-#      initialDelaySeconds: 30
+#      initialDelaySeconds: 5
 #      periodSeconds: 5
 #      failureThreshold: 1
   nginx:
@@ -108,14 +108,14 @@ taf:
       httpGet:
         path: /healthcheck
         port: 80
-      initialDelaySeconds: 30
+      initialDelaySeconds: 5
       periodSeconds: 5
       failureThreshold: 5
     readinessProbe:
       httpGet:
         path: /healthcheck?readiness=true
         port: 80
-      initialDelaySeconds: 30
+      initialDelaySeconds: 5
       periodSeconds: 5
       failureThreshold: 1
   placeholder:
@@ -134,14 +134,14 @@ taf:
 #      httpGet:
 #        path: /healthcheck
 #        port: 8085
-#      initialDelaySeconds: 30
+#      initialDelaySeconds: 5
 #      periodSeconds: 5
 #      failureThreshold: 5
 #    readinessProbe:
 #      httpGet:
 #        path: /health_check?readiness=true
 #        port: 8085
-#      initialDelaySeconds: 30
+#      initialDelaySeconds: 5
 #      periodSeconds: 5
 #      failureThreshold: 1
   db:
