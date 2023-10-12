@@ -22,6 +22,8 @@ spec:
         {{- if .Values.image.pullPolicy }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         {{- end }}
+        securityContext:
+          allowPrivilegeEscalation: false
         ports:
         - containerPort: {{ .Values.smartmetserver.containerPort }}
         volumeMounts:
