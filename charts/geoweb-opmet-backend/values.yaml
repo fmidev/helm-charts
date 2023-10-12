@@ -7,6 +7,7 @@ opmet:
   path: /opmet/(.*)
   svcPort: 80
   replicas: 1
+  db_secret: cG9zdGdyZXNxbDovL3Bvc3RncmVzOnBvc3RncmVzQGxvY2FsaG9zdDo1NDMyL29wbWV0
   db_secretName: opmet-db
   db_secretType: secretsmanager
   spcName: opmet-spc
@@ -18,6 +19,20 @@ opmet:
     limits:
       memory: "300Mi"
       cpu: "1"
+  livenessProbe:
+    httpGet:
+      path: /health_check
+      port: 8000
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    failureThreshold: 5
+  readinessProbe:
+    httpGet:
+      path: /health_check?readiness=true
+      port: 8000
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    failureThreshold: 1
   env:
     MESSAGECONVERTER_URL: "http://localhost:8080"
     OPMET_BACKEND_PORT_HTTP: 8000
@@ -37,6 +52,20 @@ opmet:
       limits:
         memory: "500Mi"
         cpu: "1"
+    livenessProbe:
+      httpGet:
+        path: /
+        port: 8080
+      initialDelaySeconds: 30
+      periodSeconds: 5
+      failureThreshold: 5
+    readinessProbe:
+      httpGet:
+        path: /?readiness=true
+        port: 8080
+      initialDelaySeconds: 30
+      periodSeconds: 5
+      failureThreshold: 1
   publisher:
     name: opmet-publisher
     registry: registry.gitlab.com/opengeoweb/backend-services/opmet-backend/opmet-backend-publisher-local
@@ -49,6 +78,20 @@ opmet:
       limits:
         memory: "100Mi"
         cpu: "1"
+#    livenessProbe:
+#      httpGet:
+#        path: /healthcheck
+#        port: 8090
+#      initialDelaySeconds: 5
+#      periodSeconds: 5
+#      failureThreshold: 5
+#    readinessProbe:
+#      httpGet:
+#        path: /healthcheck?readiness=true
+#        port: 8090
+#      initialDelaySeconds: 5
+#      periodSeconds: 5
+#      failureThreshold: 1
   nginx:
     name: opmet-nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/opmet-backend/nginx-opmet-backend
@@ -63,7 +106,28 @@ opmet:
       limits:
         memory: "100Mi"
         cpu: "100m"
-
+    livenessProbe:
+      httpGet:
+        path: /healthcheck
+        port: 80
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      failureThreshold: 5
+    readinessProbe:
+      httpGet:
+        path: /healthcheck?readiness=true
+        port: 80
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      failureThreshold: 1
+  db:
+    enableDefaultDb: true
+    name: postgres
+    image: postgres
+    port: 5432
+    POSTGRES_DB: opmet
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
 ingress:
   name: nginx-ingress-controller
   ingressClassName: nginx

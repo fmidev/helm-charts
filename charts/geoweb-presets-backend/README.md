@@ -99,6 +99,8 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.iamRoleARN` | IAM Role with permissions to access db_secret secret | |
 | `presets.secretServiceAccount` | Service Account created for handling secrets | `presets-service-account` |
 | `presets.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
+| `presets.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
+| `presets.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
 | `secretProvider` | Option to use secret provider instead of passing base64 encoded database connection string as presets.db_secret *(aws\|azure\|gcp\|vault)* | |
 | `secretProviderParameters` | Option to add custom parameters to the secretProvider, for example with aws you can specify region | |
 | `presets.nginx.name` | Name of nginx container | `nginx` |
@@ -108,6 +110,15 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.nginx.PRESETS_BACKEND_HOST` | Address where nginx accesses the backend | `0.0.0.0:8080` |
 | `presets.nginx.NGINX_PORT_HTTP` | Port used for nginx | `80` |
 | `presets.nginx.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
+| `presets.nginx.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
+| `presets.nginx.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
+| `presets.db.enableDefaultDb` | Enable default postgres database | `true` |
+| `presets.db.name` | Default postgres database container name | `postgres` |
+| `presets.db.image` | Default postgres database image | `postgres` |
+| `presets.db.port` | Default postgres database port | `5432` |
+| `presets.db.POSTGRES_DB` | Default postgres database name | `presets` |
+| `presets.db.POSTGRES_USER` | Default postgres database user | `postgres` |
+| `presets.db.POSTGRES_PASSWORD` | Default postgres database password | `postgres` |
 | `presets.useCustomWorkspacePresets` | Use custom presets | `false` |
 | `presets.customWorkspacePresetLocation` | Where custom presets are located *(local\|s3)* | `local` |
 | `presets.volumeAccessMode` | Permissions of the application for the custom presets PersistentVolume used | `ReadOnlyMany` |

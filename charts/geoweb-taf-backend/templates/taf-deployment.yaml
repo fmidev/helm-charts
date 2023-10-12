@@ -39,6 +39,12 @@ spec:
       {{- if .Values.taf.resources }}
         resources: {{ toYaml .Values.taf.resources | nindent 10 }}
       {{- end }}
+      {{- if .Values.taf.livenessProbe }}
+        livenessProbe: {{ toYaml .Values.taf.livenessProbe | nindent 10 }}
+      {{- end }}
+      {{- if .Values.taf.readinessProbe }}
+        readinessProbe: {{ toYaml .Values.taf.readinessProbe | nindent 10 }}
+      {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Values.taf.name }}
@@ -61,6 +67,12 @@ spec:
         - containerPort: {{ .Values.taf.placeholder.port }}
       {{- if .Values.taf.placeholder.resources }}
         resources: {{ toYaml .Values.taf.placeholder.resources | nindent 10 }}
+      {{- end }}
+      {{- if .Values.taf.placeholder.livenessProbe }}
+        livenessProbe: {{ toYaml .Values.taf.placeholder.livenessProbe | nindent 10 }}
+      {{- end }}
+      {{- if .Values.taf.placeholder.readinessProbe }}
+        readinessProbe: {{ toYaml .Values.taf.placeholder.readinessProbe | nindent 10 }}
       {{- end }}
         envFrom:
         - configMapRef:
@@ -88,6 +100,12 @@ spec:
       {{- if .Values.taf.messageconverter.resources }}
         resources: {{ toYaml .Values.taf.messageconverter.resources | nindent 10 }}
       {{- end }}
+      {{- if .Values.taf.messageconverter.livenessProbe }}
+        livenessProbe: {{ toYaml .Values.taf.messageconverter.livenessProbe | nindent 10 }}
+      {{- end }}
+      {{- if .Values.taf.messageconverter.readinessProbe }}
+        readinessProbe: {{ toYaml .Values.taf.messageconverter.readinessProbe | nindent 10 }}
+      {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Values.taf.name }}
@@ -100,6 +118,12 @@ spec:
         - containerPort: {{ .Values.taf.publisher.port }}
       {{- if .Values.taf.publisher.resources }}
         resources: {{ toYaml .Values.taf.publisher.resources | nindent 10 }}
+      {{- end }}
+      {{- if .Values.taf.publisher.livenessProbe }}
+        livenessProbe: {{ toYaml .Values.taf.publisher.livenessProbe | nindent 10 }}
+      {{- end }}
+      {{- if .Values.taf.publisher.readinessProbe }}
+        readinessProbe: {{ toYaml .Values.taf.publisher.readinessProbe | nindent 10 }}
       {{- end }}
         envFrom:
         - configMapRef:
@@ -117,9 +141,28 @@ spec:
       {{- if .Values.taf.nginx.resources }}
         resources: {{ toYaml .Values.taf.nginx.resources | nindent 10 }}
       {{- end }}
+      {{- if .Values.taf.nginx.livenessProbe }}
+        livenessProbe: {{ toYaml .Values.taf.nginx.livenessProbe | nindent 10 }}
+      {{- end }}
+      {{- if .Values.taf.nginx.readinessProbe }}
+        readinessProbe: {{ toYaml .Values.taf.nginx.readinessProbe | nindent 10 }}
+      {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Values.taf.nginx.name }}
+      {{- if .Values.taf.db.enableDefaultDb }}
+      - name: {{ .Values.taf.db.name }}
+        image: {{ .Values.taf.db.image }}
+        ports:
+          - containerPort: {{ .Values.taf.db.port }}
+        env:
+          - name: POSTGRES_DB
+            value: {{ .Values.taf.db.POSTGRES_DB }}
+          - name: POSTGRES_USER
+            value: {{ .Values.taf.db.POSTGRES_USER }}
+          - name: POSTGRES_PASSWORD
+            value: {{ .Values.taf.db.POSTGRES_PASSWORD }}
+      {{- end }}
       volumes:
       - name: secrets-store-inline
       {{- if .Values.secretProvider }}

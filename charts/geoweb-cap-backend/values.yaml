@@ -15,6 +15,20 @@ cap:
     limits:
       memory: "350Mi"
       cpu: "1"
+  livenessProbe:
+    httpGet:
+      path: /healthcheck
+      port: 8080
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    failureThreshold: 5
+  readinessProbe:
+    httpGet:
+      path: /healthcheck?readiness=true
+      port: 8080
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    failureThreshold: 1
 
 ingress:
   name: nginx-ingress-controller

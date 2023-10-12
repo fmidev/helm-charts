@@ -20,6 +20,20 @@ frontend:
     limits:
       memory: "200Mi"
       cpu: "1"
+  livenessProbe:
+    httpGet:
+      path: /assets/config.json
+      port: 8080
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    failureThreshold: 5
+  readinessProbe:
+    httpGet:
+      path: /assets/config.json?readiness=true
+      port: 8080
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    failureThreshold: 1
   env:
     GW_AUTH_LOGOUT_URL: "{app_url}"
     GW_AUTH_TOKEN_URL: https://gitlab.com/oauth/token

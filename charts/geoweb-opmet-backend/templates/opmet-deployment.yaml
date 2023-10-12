@@ -33,6 +33,12 @@ spec:
       {{- if .Values.opmet.resources }}
         resources: {{ toYaml .Values.opmet.resources | nindent 10 }}
       {{- end }}
+      {{- if .Values.opmet.livenessProbe }}
+        livenessProbe: {{ toYaml .Values.opmet.livenessProbe | nindent 10 }}
+      {{- end }}
+      {{- if .Values.opmet.readinessProbe }}
+        readinessProbe: {{ toYaml .Values.opmet.readinessProbe | nindent 10 }}
+      {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Values.opmet.name }}
@@ -58,6 +64,12 @@ spec:
       {{- if .Values.opmet.messageconverter.resources }}
         resources: {{ toYaml .Values.opmet.messageconverter.resources | nindent 10 }}
       {{- end }}
+      {{- if .Values.opmet.messageconverter.livenessProbe }}
+        livenessProbe: {{ toYaml .Values.opmet.messageconverter.livenessProbe | nindent 10 }}
+      {{- end }}
+      {{- if .Values.opmet.messageconverter.readinessProbe }}
+        readinessProbe: {{ toYaml .Values.opmet.messageconverter.readinessProbe | nindent 10 }}
+      {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Values.opmet.name }}
@@ -70,6 +82,12 @@ spec:
         - containerPort: {{ .Values.opmet.publisher.port }}
       {{- if .Values.opmet.publisher.resources }}
         resources: {{ toYaml .Values.opmet.publisher.resources | nindent 10 }}
+      {{- end }}
+      {{- if .Values.opmet.publisher.livenessProbe }}
+        livenessProbe: {{ toYaml .Values.opmet.publisher.livenessProbe | nindent 10 }}
+      {{- end }}
+      {{- if .Values.opmet.publisher.readinessProbe }}
+        readinessProbe: {{ toYaml .Values.opmet.publisher.readinessProbe | nindent 10 }}
       {{- end }}
         envFrom:
         - configMapRef:
@@ -87,9 +105,28 @@ spec:
       {{- if .Values.opmet.nginx.resources }}
         resources: {{ toYaml .Values.opmet.nginx.resources | nindent 10 }}
       {{- end }}
+      {{- if .Values.opmet.nginx.livenessProbe }}
+        livenessProbe: {{ toYaml .Values.opmet.nginx.livenessProbe | nindent 10 }}
+      {{- end }}
+      {{- if .Values.opmet.nginx.readinessProbe }}
+        readinessProbe: {{ toYaml .Values.opmet.nginx.readinessProbe | nindent 10 }}
+      {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Values.opmet.nginx.name }}
+      {{- if .Values.opmet.db.enableDefaultDb }}
+      - name: {{ .Values.opmet.db.name }}
+        image: {{ .Values.opmet.db.image }}
+        ports:
+          - containerPort: {{ .Values.opmet.db.port }}
+        env:
+          - name: POSTGRES_DB
+            value: {{ .Values.opmet.db.POSTGRES_DB }}
+          - name: POSTGRES_USER
+            value: {{ .Values.opmet.db.POSTGRES_USER }}
+          - name: POSTGRES_PASSWORD
+            value: {{ .Values.opmet.db.POSTGRES_PASSWORD }}
+      {{- end }}
       volumes:
       - name: secrets-store-inline
       {{- if .Values.secretProvider }}

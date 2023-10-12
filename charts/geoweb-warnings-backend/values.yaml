@@ -10,6 +10,7 @@ warnings:
   EXTERNALADDRESS: 0.0.0.0:80
   WARNINGS_PORT_HTTP: 8080
   postStartCommand: bin/admin.sh
+  db_secret: cG9zdGdyZXNxbDovL3Bvc3RncmVzOnBvc3RncmVzQGxvY2FsaG9zdDo1NDMyL3dhcm5pbmdz
   db_secretName: warnings-db
   db_secretType: secretsmanager
   spcName: warnings-spc
@@ -21,6 +22,20 @@ warnings:
     limits:
       memory: "400Mi"
       cpu: "1"
+  livenessProbe:
+    httpGet:
+      path: /version
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    failureThreshold: 5
+  readinessProbe:
+    httpGet:
+      path: /version?readiness=true
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    failureThreshold: 1
   nginx:
     name: warnings-nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/warnings-backend/nginx-warnings-backend
@@ -34,7 +49,29 @@ warnings:
       limits:
         memory: "100Mi"
         cpu: "100m"
+    livenessProbe:
+      httpGet:
+        path: /healthcheck
+        port: 80
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      failureThreshold: 5
+    readinessProbe:
+      httpGet:
+        path: /healthcheck?readiness=true
+        port: 80
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      failureThreshold: 1
+  db:
+    enableDefaultDb: true
+    name: postgres
+    image: postgres
+    port: 5432
+    POSTGRES_DB: warnings
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
 
 ingress:
-  name: nginx-ingress-controller # Sync with nginx-ingress-controller/values.yaml
+  name: nginx-ingress-controller
   ingressClassName: nginx

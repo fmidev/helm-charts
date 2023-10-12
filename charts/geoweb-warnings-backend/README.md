@@ -76,6 +76,8 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.iamRoleARN` | IAM Role with permissions to access db_secret secret | |
 | `warnings.secretServiceAccount` | Service Account created for handling secrets | `warnings-service-account` |
 | `warnings.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
+| `warnings.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
+| `warnings.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
 | `secretProvider` | Option to use secret provider instead of passing base64 encoded database connection string as warnings.db_secret *(aws\|azure\|gcp\|vault)* | |
 | `secretProviderParameters` | Option to add custom parameters to the secretProvider, for example with aws you can specify region | |
 | `warnings.nginx.name` | Name of nginx container | `nginx` |
@@ -85,6 +87,15 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.nginx.WARNINGS_BACKEND_HOST` | Address where nginx accesses the backend | `0.0.0.0:8080` |
 | `warnings.nginx.NGINX_PORT_HTTP` | Port used for nginx | `80` |
 | `warnings.nginx.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
+| `warnings.nginx.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
+| `warnings.nginx.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
+| `warnings.db.enableDefaultDb` | Enable default postgres database | `true` |
+| `warnings.db.name` | Default postgres database container name | `postgres` |
+| `warnings.db.image` | Default postgres database image | `postgres` |
+| `warnings.db.port` | Default postgres database port | `5432` |
+| `warnings.db.POSTGRES_DB` | Default postgres database name | `warnings` |
+| `warnings.db.POSTGRES_USER` | Default postgres database user | `postgres` |
+| `warnings.db.POSTGRES_PASSWORD` | Default postgres database password | `postgres` |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |
 | `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | `nginx` |
 | `ingress.customAnnotations` | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations if set | |

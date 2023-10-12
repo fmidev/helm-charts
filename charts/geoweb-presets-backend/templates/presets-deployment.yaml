@@ -55,6 +55,12 @@ spec:
       {{- if .Values.presets.resources }}
         resources: {{ toYaml .Values.presets.resources | nindent 10 }}
       {{- end }}
+      {{- if .Values.presets.livenessProbe }}
+        livenessProbe: {{ toYaml .Values.presets.livenessProbe | nindent 10 }}
+      {{- end }}
+      {{- if .Values.presets.readinessProbe }}
+        readinessProbe: {{ toYaml .Values.presets.readinessProbe | nindent 10 }}
+      {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Values.presets.name }}
@@ -82,9 +88,28 @@ spec:
       {{- if .Values.presets.nginx.resources }}
         resources: {{ toYaml .Values.presets.nginx.resources | nindent 10 }}
       {{- end }}
+      {{- if .Values.presets.nginx.livenessProbe }}
+        livenessProbe: {{ toYaml .Values.presets.nginx.livenessProbe | nindent 10 }}
+      {{- end }}
+      {{- if .Values.presets.nginx.readinessProbe }}
+        readinessProbe: {{ toYaml .Values.presets.nginx.readinessProbe | nindent 10 }}
+      {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Values.presets.nginx.name }}
+      {{- if .Values.presets.db.enableDefaultDb }}
+      - name: {{ .Values.presets.db.name }}
+        image: {{ .Values.presets.db.image }}
+        ports:
+          - containerPort: {{ .Values.presets.db.port }}
+        env:
+          - name: POSTGRES_DB
+            value: {{ .Values.presets.db.POSTGRES_DB }}
+          - name: POSTGRES_USER
+            value: {{ .Values.presets.db.POSTGRES_USER }}
+          - name: POSTGRES_PASSWORD
+            value: {{ .Values.presets.db.POSTGRES_PASSWORD }}
+      {{- end }}
       volumes:
     {{- if .Values.presets.useCustomWorkspacePresets}}
       - name: {{ .Values.presets.name }}-volume

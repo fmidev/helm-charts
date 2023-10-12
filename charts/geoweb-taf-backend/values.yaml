@@ -7,6 +7,7 @@ taf:
   path: /taf/(.*)
   svcPort: 80
   replicas: 1
+  db_secret: cG9zdGdyZXNxbDovL3Bvc3RncmVzOnBvc3RncmVzQGxvY2FsaG9zdDo1NDMyL3RhZg==
   db_secretName: taf-db
   db_secretType: secretsmanager
   spcName: taf-spc
@@ -19,6 +20,20 @@ taf:
     limits:
       memory: "500Mi"
       cpu: "1"
+  livenessProbe:
+    httpGet:
+      path: /healthcheck
+      port: 8000
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    failureThreshold: 5
+  readinessProbe:
+    httpGet:
+      path: /healthcheck?readiness=true
+      port: 8000
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    failureThreshold: 1
   env:
     GEOWEB_KNMI_AVI_MESSAGESERVICES_HOST: "localhost:8081"
     AVIATION_TAF_PORT_HTTP: 8000
@@ -35,6 +50,20 @@ taf:
       limits:
         memory: "500Mi"
         cpu: "1"
+    livenessProbe:
+      httpGet:
+        path: /
+        port: 8081
+      initialDelaySeconds: 30
+      periodSeconds: 5
+      failureThreshold: 5
+    readinessProbe:
+      httpGet:
+        path: /?readiness=true
+        port: 8081
+      initialDelaySeconds: 30
+      periodSeconds: 5
+      failureThreshold: 1
   publisher:
     name: taf-publisher
     registry: registry.gitlab.com/opengeoweb/backend-services/aviation-taf-backend/aviation-taf-backend-publisher-local
@@ -47,6 +76,20 @@ taf:
       limits:
         memory: "100Mi"
         cpu: "1"
+#    livenessProbe:
+#      httpGet:
+#        path: /healthcheck
+#        port: 8090
+#      initialDelaySeconds: 5
+#      periodSeconds: 5
+#      failureThreshold: 5
+#    readinessProbe:
+#      httpGet:
+#        path: /healthcheck?readiness=true
+#        port: 8090
+#      initialDelaySeconds: 5
+#      periodSeconds: 5
+#      failureThreshold: 1
   nginx:
     name: taf-nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/aviation-taf-backend/nginx-aviation-taf-backend
@@ -61,6 +104,20 @@ taf:
       limits:
         memory: "100Mi"
         cpu: "100m"
+    livenessProbe:
+      httpGet:
+        path: /healthcheck
+        port: 80
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      failureThreshold: 5
+    readinessProbe:
+      httpGet:
+        path: /healthcheck?readiness=true
+        port: 80
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      failureThreshold: 1
   placeholder:
     name: taf-placeholder
     registry: registry.gitlab.com/opengeoweb/backend-services/aviation-taf-backend/tafplaceholder-aviation-taf-backend
@@ -73,6 +130,28 @@ taf:
       limits:
         memory: "100Mi"
         cpu: "1"
+#    livenessProbe:
+#      httpGet:
+#        path: /healthcheck
+#        port: 8085
+#      initialDelaySeconds: 5
+#      periodSeconds: 5
+#      failureThreshold: 5
+#    readinessProbe:
+#      httpGet:
+#        path: /health_check?readiness=true
+#        port: 8085
+#      initialDelaySeconds: 5
+#      periodSeconds: 5
+#      failureThreshold: 1
+  db:
+    enableDefaultDb: true
+    name: postgres
+    image: postgres
+    port: 5432
+    POSTGRES_DB: taf
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
 
 ingress:
   name: nginx-ingress-controller

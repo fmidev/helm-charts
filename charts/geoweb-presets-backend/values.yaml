@@ -11,6 +11,7 @@ presets:
   PRESETS_PORT_HTTP: 8080
   DEPLOY_ENVIRONMENT: open
   postStartCommand: bin/admin.sh
+  db_secret: cG9zdGdyZXNxbDovL3Bvc3RncmVzOnBvc3RncmVzQGxvY2FsaG9zdDo1NDMyL3ByZXNldHM=
   db_secretName: presets-db
   db_secretType: secretsmanager
   spcName: presets-spc
@@ -22,6 +23,20 @@ presets:
     limits:
       memory: "350Mi"
       cpu: "1"
+  livenessProbe:
+    httpGet:
+      path: /healthcheck
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    failureThreshold: 5
+  readinessProbe:
+    httpGet:
+      path: /healthcheck?readiness=true
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    failureThreshold: 1
   nginx:
     name: nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/presets-backend/nginx-presets-backend
@@ -35,6 +50,28 @@ presets:
       limits:
         memory: "100Mi"
         cpu: "100m"
+    livenessProbe:
+      httpGet:
+        path: /healthcheck
+        port: 80
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      failureThreshold: 5
+    readinessProbe:
+      httpGet:
+        path: /healthcheck?readiness=true
+        port: 80
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      failureThreshold: 1
+  db:
+    enableDefaultDb: true
+    name: postgres
+    image: postgres
+    port: 5432
+    POSTGRES_DB: presets
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
   useCustomWorkspacePresets: false
   customWorkspacePresetLocation: local
   volumeAccessMode: ReadOnlyMany
