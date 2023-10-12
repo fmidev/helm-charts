@@ -6,4 +6,5 @@ metadata:
     app: {{ .Values.smartmetserver.name }}
   namespace: {{ .Release.Namespace }}
 data:
-  smartmet.conf: {{ .Values.smartmetConfCm.smartmetConf | toYaml | indent 1 }}
+  smartmet.conf: |
+    {{- .Values.smartmetConfCm.smartmetConf | nindent 4 }}

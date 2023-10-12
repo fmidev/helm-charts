@@ -14,6 +14,10 @@ spec:
       labels:
         app: {{ .Values.smartmetserver.name }}
     spec:
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
       containers:
       - name: {{.Values.smartmetserver.name }}
         image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
@@ -25,25 +29,28 @@ spec:
         volumeMounts:
         - mountPath: "/smartmet/data"
           name: smartmetserver-volume
-        - mountPath: "/etc/smartmet/"
+        - mountPath: "/etc/smartmet/smartmet.conf"
+          subPath: "smartmet.conf"
           name: smartmet-configuration
+        - mountPath: "/var/smartmet/cache"
+          name: cache-volume
         livenessProbe:
           httpGet:
             path: /admin?what=qengine
             port: {{ .Values.smartmetserver.containerPort }}
-          periodSeconds: 10
+          periodSeconds: {{ .Values.smartmetserver.livenessProbe.periodSeconds }}
         readinessProbe:
           httpGet:
             path: /wms?request=getCapabilities&service=WMS
             port: {{ .Values.smartmetserver.containerPort }}
-          failureThreshold: 5
-          periodSeconds: 10
+          failureThreshold: {{ .Values.smartmetserver.readinessProbe.failureThreshold }}
+          periodSeconds: {{ .Values.smartmetserver.readinessProbe.periodSeconds }}
         startupProbe:
           httpGet:
             path: /admin?what=qengine
             port: {{ .Values.smartmetserver.containerPort }}
-          failureThreshold: 5
-          periodSeconds: 10
+          failureThreshold: {{ .Values.smartmetserver.startupProbe.failureThreshold }}
+          periodSeconds: {{ .Values.smartmetserver.startupProbe.periodSeconds }}
       volumes:
       - name: smartmetserver-volume
         persistentVolumeClaim:
@@ -51,3 +58,5 @@ spec:
       - name: smartmet-configuration
         configMap:
           name: {{ .Values.smartmetserver.name }}-{{ .Values.smartmetConfCm.name }}
+      - name: cache-volume
+        emptyDir: {}
