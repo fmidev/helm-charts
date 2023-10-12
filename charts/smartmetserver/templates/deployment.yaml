@@ -15,8 +15,6 @@ spec:
         app: {{ .Values.smartmetserver.name }}
     spec:
       securityContext:
-        allowPrivilegeEscalation: false
-        readOnlyRootFilesystem: true
         runAsNonRoot: true
       containers:
       - name: {{.Values.smartmetserver.name }}
