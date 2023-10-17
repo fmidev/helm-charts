@@ -6,7 +6,7 @@ version: 0.0.8
 keywords:
   - fmi
   - route
-home: https://github.com/fmidev/fmi-public-helm-charts
+home: https://github.com/fmidev/helm-charts
 maintainers:
   - name: fmi-build-bot
     email: admin@weatherproof.fi
