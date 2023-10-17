@@ -2,11 +2,11 @@ apiVersion: v2
 name: fmi-routes
 description: Helm chart for defining multiple routes
 type: application
-version: 0.0.8
+version: 0.0.9
 keywords:
   - fmi
   - route
-home: https://github.com/fmidev/fmi-public-helm-charts
+home: https://github.com/fmidev/helm-charts
 maintainers:
   - name: fmi-build-bot
     email: admin@weatherproof.fi
