@@ -33,7 +33,7 @@ spec:
             export AWS_ACCESS_KEY_ID={{ .Values.taf.awsAccessKeyId }};
             export AWS_SECRET_ACCESS_KEY={{ .Values.taf.awsAccessKeySecret }};
             AWS_DEFAULT_REGION={{ .Values.taf.awsDefaultRegion }};
-            aws s3 cp --recursive s3://{{ .Values.taf.s3bucketName }}{{ .Values.taf.customConfigurationFolderPath }} /taf;
+            aws s3 cp --recursive --exclude "*/*" s3://{{ .Values.taf.s3bucketName }}{{ .Values.taf.customConfigurationFolderPath }} /taf;
         volumeMounts:
         - mountPath: "/taf/"
           name: {{ .Values.taf.name }}-volume
