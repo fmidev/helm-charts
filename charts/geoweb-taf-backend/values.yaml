@@ -152,6 +152,11 @@ taf:
     POSTGRES_DB: taf
     POSTGRES_USER: postgres
     POSTGRES_PASSWORD: postgres
+  useCustomConfigurationFiles: false
+  customConfigurationLocation: local
+  customConfigurationMountPath: /app/custom
+  volumeAccessMode: ReadOnlyMany
+  volumeSize: 100Mi
 
 ingress:
   name: nginx-ingress-controller
