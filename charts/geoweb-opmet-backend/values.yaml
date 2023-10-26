@@ -1,5 +1,5 @@
 versions:
-  opmet: "v1.3.0"
+  opmet: "v1.3.1"
 
 opmet:
   name: opmet
@@ -128,6 +128,12 @@ opmet:
     POSTGRES_DB: opmet
     POSTGRES_USER: postgres
     POSTGRES_PASSWORD: postgres
+  useCustomConfigurationFiles: false
+  customConfigurationLocation: local
+  customConfigurationMountPath: /app/configuration_files/custom
+  volumeAccessMode: ReadOnlyMany
+  volumeSize: 100Mi
+
 ingress:
   name: nginx-ingress-controller
   ingressClassName: nginx

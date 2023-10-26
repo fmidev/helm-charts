@@ -27,6 +27,35 @@ opmet:
   db_secret: base64_encoded_postgresql_connection_string
 ```
 
+* Using custom configuration files stored locally
+```yaml
+opmet:
+  env:
+    BACKEND_CONFIG: configuration_files/custom/backendConfig.json
+    SIGMET_CONFIG: configuration_files/custom/sigmetConfig.json
+    AIRMET_CONFIG: configuration_files/custom/airmetConfig.json
+  url: geoweb.example.com
+  useCustomConfigurationFiles: true
+  customConfigurationFolderPath: /example/path/
+```
+
+* Using custom configuration files stored in AWS S3
+```yaml
+opmet:
+  url: geoweb.example.com
+  env:
+    BACKEND_CONFIG: configuration_files/custom/backendConfig.json
+    SIGMET_CONFIG: configuration_files/custom/sigmetConfig.json
+    AIRMET_CONFIG: configuration_files/custom/airmetConfig.json
+  useCustomConfigurationFiles: true
+  customConfigurationLocation: s3
+  s3bucketName: example-bucket
+  customConfigurationFolderPath: /example/path/
+  awsAccessKeyId: <AWS_ACCESS_KEY_ID>
+  awsAccessKeySecret: <AWS_SECRET_ACCESS_KEY>
+  awsDefaultRegion: <AWS_DEFAULT_REGION>
+```
+
 # Testing the Chart
 Execute the following for testing the chart:
 
@@ -57,7 +86,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 
 | Parameter | Description | Default |
 | - | - | - |
-| `versions.opmet` | Possibility to override application version | `v1.3.0` |
+| `versions.opmet` | Possibility to override application version | `v1.3.1` |
 | `opmet.name` | Name of backend | `opmet` |
 | `opmet.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/opmet-backend` |
 | `opmet.commitHash` | Adds commitHash annotation to the deployment | |
@@ -85,6 +114,19 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.env.OPMET_ENABLE_SSL` | Toggle SSL termination | `"FALSE"` |
 | `opmet.env.FORWARDED_ALLOW_IPS` | - | `"*"` |
 | `opmet.env.PUBLISHER_URL` | - | `"http://localhost:8090/publish"` |
+| `opmet.env.BACKEND_CONFIG` | Location of backend configuration file that is used (application defaults to `configuration_files/backendConfig.json`) | |
+| `opmet.env.SIGMET_CONFIG` | Location of SIGMET configuration file that is used (application defaults to `configuration_files/sigmetConfig.json`) | |
+| `opmet.env.AIRMET_CONFIG` | Location of AIRMET configuration file that is used (application defaults to `configuration_files/airmetConfig.json`) | |
+| `opmet.useCustomConfigurationFiles` | Use custom configurations | `false` |
+| `opmet.customConfigurationLocation` | Where custom configurations are located *(local\|s3)* | `local` |
+| `opmet.volumeAccessMode` | Permissions of the application for the custom configurations PersistentVolume used | `ReadOnlyMany` |
+| `opmet.volumeSize` | Size of the custom configurations PersistentVolume | `100Mi` |
+| `opmet.customConfigurationFolderPath` | Path to the folder which contains custom configurations | |
+| `opmet.customConfigurationMountPath` | Folder used to mount custom configurations | `/app/custom` |
+| `opmet.s3bucketName` | Name of the S3 bucket where custom configurations are stored | |
+| `opmet.awsAccessKeyId` | AWS_ACCESS_KEY_ID for authenticating to S3 | |
+| `opmet.awsAccessKeySecret` | AWS_SECRET_ACCESS_KEY for authenticating to S3 | |
+| `opmet.awsDefaultRegion` | Region where your S3 bucket is located | |
 | `opmet.messageconverter.name` | Name of messageconverter container | `opmet-messageconverter` |
 | `opmet.messageconverter.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/avi-msgconverter/geoweb-knmi-avi-messageservices` |
 | `opmet.messageconverter.version` | Possibility to override application version | `"0.1.1"` |

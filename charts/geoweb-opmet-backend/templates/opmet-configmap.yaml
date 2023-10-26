@@ -14,3 +14,6 @@ data:
   OPMET_ENABLE_SSL: {{ .Values.opmet.env.OPMET_ENABLE_SSL | quote }}
   FORWARDED_ALLOW_IPS: {{ .Values.opmet.env.FORWARDED_ALLOW_IPS | quote }}
   PUBLISHER_URL: {{ .Values.opmet.env.PUBLISHER_URL | quote }}
+  BACKEND_CONFIG: {{ .Values.opmet.env.BACKEND_CONFIG | quote }}
+  SIGMET_CONFIG: {{ .Values.opmet.env.SIGMET_CONFIG | quote }}
+  AIRMET_CONFIG: {{ .Values.opmet.env.AIRMET_CONFIG | quote }}
