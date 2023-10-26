@@ -1,0 +1,22 @@
+apiVersion: "acid.zalan.do/v1"
+kind: postgresql
+metadata:
+  name: opmet-db
+spec:
+  teamId: fmi
+  volume:
+    size: 1Gi
+  numberOfInstances: 2
+  users:
+    geoweb:
+    - superuser
+    - createdb
+  databases:
+    opmet: geoweb
+  postgresql:
+    version: "15"
+  enableLogicalBackup: true
+  clone:
+    cluster: "opmet-db"
+    timestamp: "2024-10-24T11:40:00+00:00"
+    s3_wal_path: "s3://<s3-bucket>/spilo/opmet-db/wal/15"
