@@ -73,7 +73,7 @@ spec:
           readOnly: true
       {{- end }}
       {{- if and .Values.frontend.useCustomConfigurationFiles }}
-        - mountPath: "/usr/share/nginx/html/assets/custom"
+        - mountPath: {{ .Values.frontend.customConfigurationMountPath }}
           name: {{ .Values.frontend.name }}-volume
       {{- end }}
       volumes:
