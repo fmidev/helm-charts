@@ -7,7 +7,7 @@ helm repo update
 
 # Create requried dependencies
 
-Create values.yaml file for required variables:
+Create your own values file for required variables:
 * Using aws as the secret provider
 ```yaml
 taf: 
@@ -56,7 +56,7 @@ taf:
 Execute the following for testing the chart:
 
 ```bash
-helm install geoweb-taf-backend fmi/geoweb-taf-backend --dry-run --debug -n geoweb --values=./values.yaml
+helm install geoweb-taf-backend fmi/geoweb-taf-backend --dry-run --debug -n geoweb --values=./<yourvaluesfile>.yaml
 ```
 
 # Installing the Chart
@@ -64,7 +64,7 @@ helm install geoweb-taf-backend fmi/geoweb-taf-backend --dry-run --debug -n geow
 Execute the following for installing the chart:
 
 ```bash
-helm install geoweb-taf-backend fmi/geoweb-taf-backend -n geoweb --values=./values.yaml
+helm install geoweb-taf-backend fmi/geoweb-taf-backend -n geoweb --values=./<yourvaluesfile>.yaml
 ```
 
 # Deleting the Chart
@@ -78,7 +78,7 @@ kubectl delete namespace geoweb
 ```
 
 # Chart Configuration
-The following table lists the configurable parameters of the Taf backend chart and their default values.
+The following table lists the configurable parameters of the Taf backend chart and their default values specified in file values.yaml.
 
 | Parameter | Description | Default |
 | - | - | - |
