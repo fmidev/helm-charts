@@ -1,0 +1,29 @@
+{{- if and .Values.taf.useCustomConfigurationFiles (eq .Values.taf.customConfigurationLocation "local")}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.taf.name }}-claim
+spec:
+  storageClassName: ""
+  accessModes:
+    - {{ .Values.taf.volumeAccessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.taf.volumeSize }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.taf.name }}-volume
+spec:
+  storageClassName: manual
+  capacity:
+    storage: {{ .Values.taf.volumeSize }}
+  accessModes:
+    - {{ .Values.taf.volumeAccessMode }}
+  claimRef:
+    namespace: {{ .Release.Namespace }}
+    name: {{ .Values.taf.name }}-claim
+  hostPath:
+    path: {{ .Values.taf.customConfigurationFolderPath | quote }}
+{{- end }}
