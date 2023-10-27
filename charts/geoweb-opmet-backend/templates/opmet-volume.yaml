@@ -1,0 +1,29 @@
+{{- if and .Values.opmet.useCustomConfigurationFiles (eq .Values.opmet.customConfigurationLocation "local")}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.opmet.name }}-claim
+spec:
+  storageClassName: ""
+  accessModes:
+    - {{ .Values.opmet.volumeAccessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.opmet.volumeSize }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.opmet.name }}-volume
+spec:
+  storageClassName: manual
+  capacity:
+    storage: {{ .Values.opmet.volumeSize }}
+  accessModes:
+    - {{ .Values.opmet.volumeAccessMode }}
+  claimRef:
+    namespace: {{ .Release.Namespace }}
+    name: {{ .Values.opmet.name }}-claim
+  hostPath:
+    path: {{ .Values.opmet.customConfigurationFolderPath | quote }}
+{{- end }}
