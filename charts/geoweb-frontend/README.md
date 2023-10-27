@@ -7,7 +7,7 @@ helm repo update
 
 # Create requried dependencies
 
-Create values.yaml file for required variables:
+Create your own values file for required variables:
 
 * Minimal setup
 ```yaml
@@ -77,7 +77,7 @@ frontend:
 Execute the following for testing the chart:
 
 ```bash
-helm install geoweb-frontend fmi/geoweb-frontend --dry-run --debug -n geoweb --values=./values.yaml
+helm install geoweb-frontend fmi/geoweb-frontend --dry-run --debug -n geoweb --values=./<yourvaluesfile>.yaml
 ```
 
 # Installing the Chart
@@ -85,7 +85,7 @@ helm install geoweb-frontend fmi/geoweb-frontend --dry-run --debug -n geoweb --v
 Execute the following for installing the chart:
 
 ```bash
-helm install geoweb-frontend fmi/geoweb-frontend -n geoweb --values=./values.yaml
+helm install geoweb-frontend fmi/geoweb-frontend -n geoweb --values=./<yourvaluesfile>.yaml
 ```
 
 # Deleting the Chart
@@ -99,7 +99,7 @@ kubectl delete namespace geoweb
 ```
 
 # Chart Configuration
-The following table lists the configurable parameters of the GeoWeb frontend chart and their default values.
+The following table lists the configurable parameters of the GeoWeb frontend chart and their default values specified in file values.yaml.
 
 | Parameter | Description | Default |
 | - | - | - |
