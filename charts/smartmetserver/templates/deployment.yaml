@@ -22,8 +22,10 @@ spec:
         {{- if .Values.image.pullPolicy }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         {{- end }}
+        command: ["/usr/sbin/smartmetd"]
         securityContext:
           allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
         ports:
         - containerPort: {{ .Values.smartmetserver.containerPort }}
         volumeMounts:
