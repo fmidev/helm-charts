@@ -30,7 +30,7 @@ pvc:
   name: pvc
   storageClassName: hostpath-smartmet
   accessModes: ReadWriteOnce
-  storage: 1Gi 
+  storage: 1Gi
 
 hpa:
   name: hpa
