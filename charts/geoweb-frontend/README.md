@@ -7,7 +7,7 @@ helm repo update
 
 # Create requried dependencies
 
-Create values.yaml file for required variables:
+Create your own values file for required variables:
 
 * Minimal setup
 ```yaml
@@ -77,7 +77,7 @@ frontend:
 Execute the following for testing the chart:
 
 ```bash
-helm install geoweb-frontend fmi/geoweb-frontend --dry-run --debug -n geoweb --values=./values.yaml
+helm install geoweb-frontend fmi/geoweb-frontend --dry-run --debug -n geoweb --values=./<yourvaluesfile>.yaml
 ```
 
 # Installing the Chart
@@ -85,7 +85,7 @@ helm install geoweb-frontend fmi/geoweb-frontend --dry-run --debug -n geoweb --v
 Execute the following for installing the chart:
 
 ```bash
-helm install geoweb-frontend fmi/geoweb-frontend -n geoweb --values=./values.yaml
+helm install geoweb-frontend fmi/geoweb-frontend -n geoweb --values=./<yourvaluesfile>.yaml
 ```
 
 # Deleting the Chart
@@ -99,11 +99,11 @@ kubectl delete namespace geoweb
 ```
 
 # Chart Configuration
-The following table lists the configurable parameters of the GeoWeb frontend chart and their default values.
+The following table lists the configurable parameters of the GeoWeb frontend chart and their default values specified in file values.yaml.
 
 | Parameter | Description | Default |
 | - | - | - |
-| `versions.frontend` | Possibility to override application version | `v8.2.0` |
+| `versions.frontend` | Possibility to override application version | `v8.3.1` |
 | `frontend.name` | Name of frontend | `geoweb` |
 | `frontend.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/opengeoweb` |
 | `frontend.commitHash` | Adds commitHash annotation to the deployment | |
@@ -132,6 +132,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.env.GW_CAP_BASE_URL` | Url which the application uses to connect to CAP backend | |
 | `frontend.env.GW_DRAWINGS_BASE_URL` | Url which the application uses to connect to Drawings backend | |
 | `frontend.env.GW_TAF_BASE_URL` | Url which the application uses to connect to TAF backend | |
+| `frontend.env.GW_SW_BASE_URL` | Url which the application uses to connect to Space Weather backend | |
 | `frontend.env.GW_APP_URL` | Url which the application can be accessed | |
 | `frontend.env.GW_DEFAULT_THEME` | Default theme: lightMode or darkMode | |
 | `frontend.env.GW_FEATURE_APP_TITLE` | Application title | |
@@ -149,6 +150,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.env.GW_FEATURE_MENU_INFO` | Enable Info menu option | `true` |
 | `frontend.env.GW_FEATURE_MENU_VERSION` | Enable Version menu option | `false` |
 | `frontend.env.GW_FEATURE_MENU_FE_VERSION` | Enable FE Version menu option | `true` |
+| `frontend.env.GW_FEATURE_MENU_USER_DOCUMENTATION_URL` | Link to user documentation | |
 | `frontend.env.GW_SIGMET_BASE_URL` | Url which the application uses to connect to SIGMET backend | |
 | `frontend.env.GW_AIRMET_BASE_URL` | Url which the application uses to connect to AIRMET backend | |
 | `frontend.env.GW_FEATURE_MODULE_SIGMET_CONFIGURATION` | Configuration used by SIGMET module | |
@@ -158,6 +160,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.volumeAccessMode` | Permissions of the application for the custom configurations PersistentVolume used | `ReadOnlyMany` |
 | `frontend.volumeSize` | Size of the custom configurations PersistentVolume | `100Mi` |
 | `frontend.customConfigurationFolderPath` | Path to the folder which contains custom configurations | |
+| `frontend.customConfigurationMountPath` | Folder used to mount custom configurations | `/usr/share/nginx/html/assets/custom` |
 | `frontend.s3bucketName` | Name of the S3 bucket where custom configurations are stored | |
 | `frontend.awsAccessKeyId` | AWS_ACCESS_KEY_ID for authenticating to S3 | |
 | `frontend.awsAccessKeySecret` | AWS_SECRET_ACCESS_KEY for authenticating to S3 | |

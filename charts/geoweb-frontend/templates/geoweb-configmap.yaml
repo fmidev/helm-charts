@@ -52,6 +52,9 @@ data:
 {{- if .Values.frontend.env.GW_TAF_BASE_URL }}
   GW_TAF_BASE_URL: {{ .Values.frontend.env.GW_TAF_BASE_URL | quote }}
 {{- end }}
+{{- if .Values.frontend.env.GW_SW_BASE_URL }}
+  GW_SW_BASE_URL: {{ .Values.frontend.env.GW_SW_BASE_URL | quote }}
+{{- end }}
 {{- if .Values.frontend.env.GW_FEATURE_MENU_FEEDBACK }}
   GW_FEATURE_MENU_FEEDBACK: {{ .Values.frontend.env.GW_FEATURE_MENU_FEEDBACK | quote }}
 {{- end }}
