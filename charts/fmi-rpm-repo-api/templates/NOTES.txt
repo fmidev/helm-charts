@@ -1,0 +1,12 @@
+1. Create auth file (if does not exist already):
+
+$ htpasswd -c auth <USERNAME>
+
+2. Create a secret using auth file
+
+$ oc create secret generic auth --from-file=auth
+
+Repo api endpoint is at: https://{{ .Values.repo.host }}
+
+Test: curl -v -u USER:PASS -F file=@/path/to/some.rpm https://{{ .Values.repo.host }}
+

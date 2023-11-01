@@ -1,0 +1,75 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  strategy:
+    type: Rolling
+    rollingParams:
+      timeoutSeconds: 20
+  template:
+    metadata:
+      name: {{ .Release.Name }}
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: nginx
+        image: {{ include "fmi-rpm-repo-api.localImageRepository" . }}/{{ .Release.Name }}-nginx:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8888
+          protocol: TCP
+        volumeMounts:
+        - name: auth
+          mountPath: "/mnt/secrets"
+          readOnly: true
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+        {{- toYaml .Values.resources.nginx | nindent 10 }}
+      - name: yumapi
+        image: {{ include "fmi-rpm-repo-api.localImageRepository" . }}/{{ .Release.Name }}-yumapi:latest
+        securityContext:
+          runAsGroup: 1888
+        volumeMounts:
+        - name: repo-dir
+          mountPath: "/repo"
+        resources:
+        {{- toYaml .Values.resources.yumapi | nindent 10 }}
+      volumes:
+      - name: repo-dir
+        nfs:
+          server: download.fmi.fi
+          path: "/var/www/html"
+      - name: auth
+        secret:
+          secretName: auth
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 20
+  triggers:
+  - type: ConfigChange
+  - type: ImageChange
+    imageChangeParams:
+      automatic: true
+      containerNames:
+      - nginx
+      from:
+        kind: ImageStreamTag
+        name: {{ .Release.Name }}-nginx:latest
+  - type: ImageChange
+    imageChangeParams:
+      automatic: true
+      containerNames:
+      - yumapi
+      from:
+        kind: ImageStreamTag
+        name: {{ .Release.Name }}-yumapi:latest
