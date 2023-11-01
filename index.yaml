@@ -53,6 +53,17 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/fmi-routes-0.0.8/fmi-routes-0.0.8.tgz
     version: 0.0.8
+  fmi-rpm-repo-api:
+  - apiVersion: v2
+    appVersion: 1.1.0
+    created: "2023-11-01T07:37:17.076781243Z"
+    description: Provide Helm chart for rpm repo api
+    digest: 0333c21ddeb06e5c650fefbd705ce28f613182ed8b6e445e140bf7446e1d5cb9
+    name: fmi-rpm-repo-api
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/fmi-rpm-repo-api-1.0.0/fmi-rpm-repo-api-1.0.0.tgz
+    version: 1.0.0
   geoweb-cap-backend:
   - apiVersion: v2
     appVersion: v0.4.0
@@ -961,4 +972,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/smartmetserver-0.1.0/smartmetserver-0.1.0.tgz
     version: 0.1.0
-generated: "2023-10-30T11:17:55.598667739Z"
+generated: "2023-11-01T07:37:17.076967645Z"
