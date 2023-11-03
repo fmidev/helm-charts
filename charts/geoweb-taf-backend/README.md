@@ -7,7 +7,7 @@ helm repo update
 
 # Create requried dependencies
 
-Create values.yaml file for required variables:
+Create your own values file for required variables:
 * Using aws as the secret provider
 ```yaml
 taf: 
@@ -27,11 +27,36 @@ taf:
   db_secret: base64_encoded_postgresql_connection_string
 ```
 
+* Using custom configuration files stored locally
+```yaml
+taf:
+  env:
+    TAF_CONFIG: custom/config.ini
+  url: geoweb.example.com
+  useCustomConfigurationFiles: true
+  customConfigurationFolderPath: /example/path/
+```
+
+* Using custom configuration files stored in AWS S3
+```yaml
+taf:
+  url: geoweb.example.com
+  env:
+    TAF_CONFIG: custom/config.ini
+  useCustomConfigurationFiles: true
+  customConfigurationLocation: s3
+  s3bucketName: example-bucket
+  customConfigurationFolderPath: /example/path/
+  awsAccessKeyId: <AWS_ACCESS_KEY_ID>
+  awsAccessKeySecret: <AWS_SECRET_ACCESS_KEY>
+  awsDefaultRegion: <AWS_DEFAULT_REGION>
+```
+
 # Testing the Chart
 Execute the following for testing the chart:
 
 ```bash
-helm install geoweb-taf-backend fmi/geoweb-taf-backend --dry-run --debug -n geoweb --values=./values.yaml
+helm install geoweb-taf-backend fmi/geoweb-taf-backend --dry-run --debug -n geoweb --values=./<yourvaluesfile>.yaml
 ```
 
 # Installing the Chart
@@ -39,7 +64,7 @@ helm install geoweb-taf-backend fmi/geoweb-taf-backend --dry-run --debug -n geow
 Execute the following for installing the chart:
 
 ```bash
-helm install geoweb-taf-backend fmi/geoweb-taf-backend -n geoweb --values=./values.yaml
+helm install geoweb-taf-backend fmi/geoweb-taf-backend -n geoweb --values=./<yourvaluesfile>.yaml
 ```
 
 # Deleting the Chart
@@ -53,7 +78,7 @@ kubectl delete namespace geoweb
 ```
 
 # Chart Configuration
-The following table lists the configurable parameters of the Taf backend chart and their default values.
+The following table lists the configurable parameters of the Taf backend chart and their default values specified in file values.yaml.
 
 | Parameter | Description | Default |
 | - | - | - |
@@ -82,6 +107,17 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.env.GEOWEB_KNMI_AVI_MESSAGESERVICES_HOST` | - | `"localhost:8081"` |
 | `taf.env.OAUTH2_USERINFO` | - | |
 | `taf.env.AVIATION_TAF_PUBLISH_HOST` | - | `"localhost:8090"` |
+| `taf.env.TAF_CONFIG` | Location of configuration file that is used (application defaults to `config.ini`) | |
+| `taf.useCustomConfigurationFiles` | Use custom configurations | `false` |
+| `taf.customConfigurationLocation` | Where custom configurations are located *(local\|s3)* | `local` |
+| `taf.volumeAccessMode` | Permissions of the application for the custom configurations PersistentVolume used | `ReadOnlyMany` |
+| `taf.volumeSize` | Size of the custom configurations PersistentVolume | `100Mi` |
+| `taf.customConfigurationFolderPath` | Path to the folder which contains custom configurations | |
+| `taf.customConfigurationMountPath` | Folder used to mount custom configurations | `/app/custom` |
+| `taf.s3bucketName` | Name of the S3 bucket where custom configurations are stored | |
+| `taf.awsAccessKeyId` | AWS_ACCESS_KEY_ID for authenticating to S3 | |
+| `taf.awsAccessKeySecret` | AWS_SECRET_ACCESS_KEY for authenticating to S3 | |
+| `taf.awsDefaultRegion` | Region where your S3 bucket is located | |
 | `taf.messageconverter.name` | Name of messageconverter container | `taf-messageconverter` |
 | `taf.messageconverter.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/avi-msgconverter/geoweb-knmi-avi-messageservices` |
 | `taf.messageconverter.version` | Possibility to override application version | `"0.1.1"` |

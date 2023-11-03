@@ -10,5 +10,6 @@ data:
   GEOWEB_KNMI_AVI_MESSAGESERVICES_HOST: {{ .Values.taf.env.GEOWEB_KNMI_AVI_MESSAGESERVICES_HOST | quote }}
   AVIATION_TAF_PORT_HTTP: {{ .Values.taf.env.AVIATION_TAF_PORT_HTTP | quote }}
   AVIATION_TAF_PUBLISH_HOST: {{ .Values.taf.env.AVIATION_TAF_PUBLISH_HOST | quote }}
+  TAF_CONFIG: {{ .Values.taf.env.TAF_CONFIG | quote }}
   VERSION: {{ .Values.versions.taf | quote }}
   AVI_VERSION: {{ .Values.taf.messageconverter.version | quote }}

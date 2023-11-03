@@ -1,5 +1,5 @@
 versions:
-  frontend: "v8.2.0"
+  frontend: "v8.4.0"
 
 frontend:
   name: geoweb
@@ -45,6 +45,11 @@ frontend:
     GW_FEATURE_MENU_INFO: true
     GW_FEATURE_MENU_VERSION: false
     GW_FEATURE_MENU_FE_VERSION: true
+  useCustomConfigurationFiles: false
+  customConfigurationLocation: local
+  customConfigurationMountPath: /usr/share/nginx/html/assets/custom
+  volumeAccessMode: ReadOnlyMany
+  volumeSize: 100Mi
 
 ingress:
   name: nginx-ingress-controller

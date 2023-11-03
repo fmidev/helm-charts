@@ -1,0 +1,71 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: {{ .Release.Name }}-nginx
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: {{ .Release.Name }}-nginx:latest
+  resources:
+    limits:
+      cpu: "1"
+      memory: 1Gi
+    requests:
+      cpu: "1"
+      memory: 1Gi
+  runPolicy: Serial
+  source:
+    type: Dockerfile
+    dockerfile: |
+      FROM docker.io/library/nginx:latest
+      RUN curl https://raw.githubusercontent.com/FINRAOS/yum-nginx-api/master/nginx/nginx.conf -o /etc/nginx/nginx.conf && \
+          curl https://raw.githubusercontent.com/FINRAOS/yum-nginx-api/master/nginx/mime.types -o /etc/nginx/mime.types
+      RUN sed -i 's/yumapi:8080/localhost:8080/g' /etc/nginx/nginx.conf && \
+          sed -i 's/listen\(.*\)80;/listen 8888;/g' /etc/nginx/nginx.conf && \
+          sed -i 's/^user/#user/g' /etc/nginx/nginx.conf && \
+          sed -i '/location @api/ a auth_basic_user_file /mnt/secrets/auth;' /etc/nginx/nginx.conf && \
+          sed -i '/location @api/ a auth_basic \"Restricted Content\";' /etc/nginx/nginx.conf && \
+          sed -i '/location @api/ a deny all;' /etc/nginx/nginx.conf && \
+          sed -i '/location @api/ a allow 127.0.0.1;' /etc/nginx/nginx.conf && \
+          sed -i '/location @api/ a satisfy any;' /etc/nginx/nginx.conf
+
+      RUN chmod g+rwx /var/cache/nginx /var/run /var/log/nginx
+
+    type: Git
+  strategy:
+    type: Docker
+  successfulBuildsHistoryLimit: 2
+  triggers:
+    - type: ConfigChange
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: {{ .Release.Name }}-yumapi
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: {{ .Release.Name }}-yumapi:latest
+  resources:
+    limits:
+      cpu: "1"
+      memory: 1Gi
+    requests:
+      cpu: "1"
+      memory: 1Gi
+  runPolicy: Serial
+  source:
+    type: Dockerfile
+    dockerfile: |
+      FROM finraos/yum-nginx-api:latest
+      RUN echo "upload_dir: /repo/{{ .Values.repo.path }}" > /yumapi.yaml
+      CMD /yumapi
+
+    type: Git
+  strategy:
+    type: Docker
+  successfulBuildsHistoryLimit: 2
+  triggers:
+    - type: ConfigChange

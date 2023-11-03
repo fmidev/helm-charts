@@ -33,7 +33,7 @@ spec:
             export AWS_ACCESS_KEY_ID={{ .Values.frontend.awsAccessKeyId }};
             export AWS_SECRET_ACCESS_KEY={{ .Values.frontend.awsAccessKeySecret }};
             AWS_DEFAULT_REGION={{ .Values.frontend.awsDefaultRegion }};
-            aws s3 cp --recursive s3://{{ .Values.frontend.s3bucketName }}{{ .Values.frontend.customConfigurationFolderPath }} /frontend;
+            aws s3 cp --recursive --exclude "*/*" s3://{{ .Values.frontend.s3bucketName }}{{ .Values.frontend.customConfigurationFolderPath }} /frontend;
         volumeMounts:
         - mountPath: "/frontend/"
           name: {{ .Values.frontend.name }}-volume
@@ -73,7 +73,7 @@ spec:
           readOnly: true
       {{- end }}
       {{- if and .Values.frontend.useCustomConfigurationFiles }}
-        - mountPath: "/usr/share/nginx/html/assets/custom"
+        - mountPath: {{ .Values.frontend.customConfigurationMountPath }}
           name: {{ .Values.frontend.name }}-volume
       {{- end }}
       volumes:

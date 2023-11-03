@@ -1,0 +1,17 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    type: external
+spec:
+  host: {{ .Values.repo.host }}
+  port:
+    targetPort: "8888-tcp"
+  tls:
+    termination: edge
+  to:
+    kind: Service
+    name: {{ .Release.Name }}
+    weight: 100
+  wildcardPolicy: None

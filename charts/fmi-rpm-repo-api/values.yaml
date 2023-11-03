@@ -1,0 +1,26 @@
+# Default values for fmi-rpm-repo-api
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+resources:
+  nginx:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+  yumapi:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 500m
+      memory: 256Mi
+
+repo:
+  # relative path to repository at download.fmi.fi
+  path:
+  # the host name this api is exposed, no protocol
+  # usually in the form of: something-something.out.{ock.ocp}-api.fmi.fi
+  host:

@@ -22,6 +22,22 @@ spec:
     {{- if eq .Values.secretProvider "aws" }}
       serviceAccountName: {{ .Values.taf.secretServiceAccount }}
     {{- end }}
+    {{- if and .Values.taf.useCustomConfigurationFiles (eq .Values.taf.customConfigurationLocation "s3")}}
+      initContainers:
+      - name: init
+        image: amazon/aws-cli
+        command: ["/bin/sh"]
+        args:
+          - -c
+          - |
+            export AWS_ACCESS_KEY_ID={{ .Values.taf.awsAccessKeyId }};
+            export AWS_SECRET_ACCESS_KEY={{ .Values.taf.awsAccessKeySecret }};
+            AWS_DEFAULT_REGION={{ .Values.taf.awsDefaultRegion }};
+            aws s3 cp --recursive --exclude "*/*" s3://{{ .Values.taf.s3bucketName }}{{ .Values.taf.customConfigurationFolderPath }} /taf;
+        volumeMounts:
+        - mountPath: "/taf/"
+          name: {{ .Values.taf.name }}-volume
+    {{- end }}
       containers:
       - name: {{ .Values.taf.name }}
         image: {{ .Values.taf.registry }}:{{ .Values.versions.taf }}
@@ -58,6 +74,10 @@ spec:
         - name: secrets-store-inline
           mountPath: "/mnt/secrets-store"
           readOnly: true
+      {{- if and .Values.taf.useCustomConfigurationFiles }}
+        - mountPath: {{ .Values.taf.customConfigurationMountPath }}
+          name: {{ .Values.taf.name }}-volume
+      {{- end }}
       - name: {{ .Values.taf.placeholder.name }}
         image: {{ .Values.taf.placeholder.registry }}:{{ .Values.versions.taf }}
       {{- if .Values.taf.imagePullPolicy }}
@@ -164,6 +184,15 @@ spec:
             value: {{ .Values.taf.db.POSTGRES_PASSWORD }}
       {{- end }}
       volumes:
+    {{- if .Values.taf.useCustomConfigurationFiles }}
+      - name: {{ .Values.taf.name }}-volume
+      {{- if eq .Values.taf.customConfigurationLocation "s3"}}
+        emptyDir: {}
+      {{- else if eq .Values.taf.customConfigurationLocation "local"}}
+        persistentVolumeClaim:
+          claimName: {{ .Values.taf.name }}-claim
+      {{- end }}
+    {{- end }}
       - name: secrets-store-inline
       {{- if .Values.secretProvider }}
         csi:
