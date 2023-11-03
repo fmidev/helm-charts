@@ -53,12 +53,14 @@ spec:
             secretKeyRef:
               name: geoweb.opmet-db.credentials.postgresql.acid.zalan.do
               key: username
+        - name: SQLALCHEMY_DATABASE_URL
+          value: "postgresql://$(PG_USER):$(PG_PASS)@opmet-db:5432/opmet"
         volumeMounts:
         - name: secrets-store-inline
           mountPath: "/mnt/secrets-store"
           readOnly: true
         command: ["/bin/sh"]
-        args: ["-c", "sleep 30; export SQLALCHEMY_DATABASE_URL='postgresql://$(PG_USER):$(PG_PASS)@opmet-db:5432/opmet'; gunicorn --bind 0.0.0.0:8000 -k uvicorn.workers.UvicornWorker --log-config opmet_logging.conf opmet_backend.main:app"]
+        args: ["-c", "sleep 10; gunicorn --bind 0.0.0.0:8000 -k uvicorn.workers.UvicornWorker --log-config opmet_logging.conf opmet_backend.main:app"]
       - name: {{ .Values.opmet.messageconverter.name }}
         image: {{ .Values.opmet.messageconverter.registry }}:{{ .Values.opmet.messageconverter.version }}
       {{- if .Values.opmet.imagePullPolicy }}

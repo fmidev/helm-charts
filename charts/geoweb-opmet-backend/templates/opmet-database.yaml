@@ -6,7 +6,7 @@ spec:
   teamId: fmi
   volume:
     size: 1Gi
-  numberOfInstances: 2
+  numberOfInstances: 1
   users:
     geoweb:
     - superuser
@@ -18,5 +18,5 @@ spec:
   enableLogicalBackup: true
   clone:
     cluster: "opmet-db"
-    timestamp: "2024-10-24T11:40:00+00:00"
-    s3_wal_path: "s3://<s3-bucket>/spilo/opmet-db/wal/15"
+    timestamp: "2030-01-01T00:00:00+00:00"
+    s3_wal_path: "s3://<s3-bucket>/"

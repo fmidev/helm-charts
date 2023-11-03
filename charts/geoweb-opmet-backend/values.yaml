@@ -128,6 +128,7 @@ opmet:
     POSTGRES_DB: opmet
     POSTGRES_USER: postgres
     POSTGRES_PASSWORD: postgres
+
 ingress:
   name: nginx-ingress-controller
   ingressClassName: nginx
