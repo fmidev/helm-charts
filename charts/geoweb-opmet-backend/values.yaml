@@ -7,7 +7,7 @@ opmet:
   path: /opmet/(.*)
   svcPort: 80
   replicas: 1
-  db_secret: cG9zdGdyZXNxbDovL3Bvc3RncmVzOnBvc3RncmVzQGxvY2FsaG9zdDo1NDMyL29wbWV0
+  db_secret: cG9zdGdyZXNxbDovL2dlb3dlYjpwb3N0Z3Jlc0Bsb2NhbGhvc3Q6NTQzMi9vcG1ldA==
   db_secretName: opmet-db
   db_secretType: secretsmanager
   spcName: opmet-spc
@@ -122,12 +122,18 @@ opmet:
       failureThreshold: 1
   db:
     enableDefaultDb: true
-    name: postgres
+    useZalandoOperatorDb: false
+    name: opmet-db
     image: postgres
     port: 5432
     POSTGRES_DB: opmet
-    POSTGRES_USER: postgres
+    POSTGRES_USER: geoweb
     POSTGRES_PASSWORD: postgres
+    POSTGRES_VERSION: 15
+    numberOfInstances: 1
+    instanceSize: 100Mi
+    zalandoTeamId: geoweb
+    enableLogicalBackup: true
   useCustomConfigurationFiles: false
   customConfigurationLocation: local
   customConfigurationMountPath: /app/configuration_files/custom

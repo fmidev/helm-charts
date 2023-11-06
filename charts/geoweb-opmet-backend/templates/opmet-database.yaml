@@ -1,22 +1,24 @@
+{{- if .Values.opmet.db.useZalandoOperatorDb }}
 apiVersion: "acid.zalan.do/v1"
 kind: postgresql
 metadata:
-  name: opmet-db
+  name: {{ .Values.opmet.db.name }}
 spec:
-  teamId: fmi
+  teamId: {{ .Values.opmet.db.zalandoTeamId }}
   volume:
-    size: 1Gi
-  numberOfInstances: 1
+    size: {{ .Values.opmet.db.instanceSize }}
+  numberOfInstances: {{ .Values.opmet.db.numberOfInstances }}
   users:
-    geoweb:
+    {{ .Values.opmet.db.POSTGRES_USER }}:
     - superuser
     - createdb
   databases:
-    opmet: geoweb
+    {{ .Values.opmet.db.POSTGRES_DB }}: {{ .Values.opmet.db.POSTGRES_USER }}
   postgresql:
-    version: "15"
-  enableLogicalBackup: true
+    version: {{ .Values.opmet.db.POSTGRES_VERSION | quote }}
+  enableLogicalBackup: {{ .Values.opmet.db.enableLogicalBackup }}
   clone:
-    cluster: "opmet-db"
-    timestamp: "2030-01-01T00:00:00+00:00"
-    s3_wal_path: "s3://<s3-bucket>/"
+    cluster: {{ .Values.opmet.db.name | quote }}
+    timestamp: {{ .Values.opmet.db.backupTimestamp | quote }}
+    s3_wal_path: {{ .Values.opmet.db.backupBucket | quote }}
+{{- end }}
