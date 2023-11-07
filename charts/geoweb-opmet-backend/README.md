@@ -56,6 +56,17 @@ opmet:
   awsDefaultRegion: <AWS_DEFAULT_REGION>
 ```
 
+* Using Zalando Operator Database
+```yaml
+opmet:
+  url: geoweb.example.com
+  db:
+    enableDefaultDb: false
+    useZalandoOperatorDb: true
+    cleanInstall: false # Add this line only after first install
+    backupBucket: s3://<S3-bucket-name>/
+```
+
 # Testing the Chart
 Execute the following for testing the chart:
 
@@ -153,11 +164,20 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.publisher.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
 | `opmet.publisher.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
 | `opmet.db.enableDefaultDb` | Enable default postgres database | `true` |
-| `opmet.db.name` | Default postgres database container name | `postgres` |
+| `opmet.db.useZalandoOperatorDb` | Enable postgres database with Zalando Postgres Operator | `false` |
+| `opmet.db.POSTGRES_VERSION` | Postgres version used by Zalando Postgres database | `15` |
+| `opmet.db.numberOfInstances` | Number of Zalando postgres database instances created | `1` |
+| `opmet.db.instanceSize` | Size of the volumes used by Zalando postgres database instances | `100Mi` |
+| `opmet.db.zalandoTeamId` | Team id of Zalando databases  | `geoweb` |
+| `opmet.db.enableLogicalBackup` | Enable logical backup for Zalando postgres databases (SQL commands with pg_dump) | `true` |
+| `opmet.db.cleanInstall` | Create a clean Zalando postgres database (turning `false` will enable cloning startup state from backup, database won't start if no backup found) | `true` |
+| `opmet.db.backupBucket` | AWS S3 bucket used to fetch database backup | |
+| `opmet.db.backupTimestamp` | Timestamp to fetch database backup from (latest backup before configured timestamp) | `"2030-01-01T00:00:00+00:00"` |
+| `opmet.db.name` | Default postgres database container/Zalando postgres database pod name | `opmet-db` |
 | `opmet.db.image` | Default postgres database image | `postgres` |
 | `opmet.db.port` | Default postgres database port | `5432` |
-| `opmet.db.POSTGRES_DB` | Default postgres database name | `opmet` |
-| `opmet.db.POSTGRES_USER` | Default postgres database user | `postgres` |
+| `opmet.db.POSTGRES_DB` | Default/Zalando postgres database name | `opmet` |
+| `opmet.db.POSTGRES_USER` | Default/Zalando postgres database user | `geoweb` |
 | `opmet.db.POSTGRES_PASSWORD` | Default postgres database password | `postgres` |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |
 | `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | `nginx` |

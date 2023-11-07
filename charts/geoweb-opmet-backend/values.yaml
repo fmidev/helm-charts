@@ -134,6 +134,8 @@ opmet:
     instanceSize: 100Mi
     zalandoTeamId: geoweb
     enableLogicalBackup: true
+    cleanInstall: true
+    backupTimestamp: "2030-01-01T00:00:00+00:00"
   useCustomConfigurationFiles: false
   customConfigurationLocation: local
   customConfigurationMountPath: /app/configuration_files/custom

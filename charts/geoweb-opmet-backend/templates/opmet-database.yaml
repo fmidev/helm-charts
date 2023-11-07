@@ -17,8 +17,10 @@ spec:
   postgresql:
     version: {{ .Values.opmet.db.POSTGRES_VERSION | quote }}
   enableLogicalBackup: {{ .Values.opmet.db.enableLogicalBackup }}
+  {{- if not .Values.opmet.db.cleanInstall }}
   clone:
     cluster: {{ .Values.opmet.db.name | quote }}
     timestamp: {{ .Values.opmet.db.backupTimestamp | quote }}
     s3_wal_path: {{ .Values.opmet.db.backupBucket | quote }}
+  {{- end }}
 {{- end }}
