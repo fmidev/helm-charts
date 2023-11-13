@@ -47,7 +47,7 @@ opmet:
   messageconverter:
     name: opmet-messageconverter
     registry: registry.gitlab.com/opengeoweb/avi-msgconverter/geoweb-knmi-avi-messageservices
-    version: "0.1.1"
+    version: "0.2.0"
     port: 8080
     resources:
       requests:
@@ -75,7 +75,7 @@ opmet:
     registry: registry.gitlab.com/opengeoweb/backend-services/opmet-backend/opmet-backend-publisher-local
     port: 8090
     DESTINATION: /app/output
-    PRIVATE_KEY_PATH: /mnt/secrets-store/opmet-publisher-ssh-key
+    PRIVATE_KEY_BASE_PATH: /mnt/secrets-store/
     resources:
       requests:
         memory: "50Mi"

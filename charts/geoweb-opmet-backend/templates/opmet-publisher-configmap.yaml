@@ -16,8 +16,8 @@ data:
 {{- if .Values.opmet.publisher.PASSWORD }}
   PASSWORD: {{ .Values.opmet.publisher.PASSWORD | quote }}
 {{- end }}
-{{- if .Values.opmet.publisher.PRIVATE_KEY_PATH }}
-  PRIVATE_KEY_PATH: {{ .Values.opmet.publisher.PRIVATE_KEY_PATH | quote }}
+{{- if and .Values.opmet.publisher.PRIVATE_KEY_BASE_PATH .Values.opmet.ssh_secret }}
+  PRIVATE_KEY_PATH: "{{ .Values.opmet.publisher.PRIVATE_KEY_BASE_PATH }}{{ .Values.opmet.ssh_secret }}"
 {{- end }}
 {{- if .Values.opmet.publisher.PRIVATE_KEY_PASSPHRASE }}
   PRIVATE_KEY_PASSPHRASE: {{ .Values.opmet.publisher.PRIVATE_KEY_PASSPHRASE | quote }}
