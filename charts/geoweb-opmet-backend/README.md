@@ -183,6 +183,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.publisher.TIMEOUT_SECONDS` | Timeout when trying to connect to SFTP server | |
 | `opmet.publisher.USE_TEMP_FILE` | Use temp file before publishing file to SFTP server | |
 | `opmet.publisher.TEMP_FILE_SUFFIX` | Suffix used for the temp file | |
+| `opmet.publisher.S3_BUCKET_NAME` | S3 Bucket used to publish files to | |
 | `opmet.publisher.volumeOptions` | yaml including the definition of the volume where TACs are published to, for example: <pre>hostPath:<br>&nbsp;&nbsp; path: /test/path</pre> or <pre>emptyDir:<br>&nbsp;&nbsp;</pre>| `emptyDir:` |
 | `opmet.publisher.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `opmet.publisher.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |

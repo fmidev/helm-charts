@@ -40,3 +40,6 @@ data:
 {{- if .Values.opmet.publisher.TEMP_FILE_SUFFIX }}
   TEMP_FILE_SUFFIX: {{ .Values.opmet.publisher.TEMP_FILE_SUFFIX | quote }}
 {{- end }}
+{{- if .Values.opmet.publisher.S3_BUCKET_NAME }}
+  S3_BUCKET_NAME: {{ .Values.opmet.publisher.S3_BUCKET_NAME | quote }}
+{{- end }}
