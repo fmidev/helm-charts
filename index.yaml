@@ -815,6 +815,18 @@ entries:
     version: 1.3.0
   geoweb-taf-backend:
   - apiVersion: v2
+    appVersion: v0.0.2
+    created: "2023-11-14T08:21:18.987560674Z"
+    description: A Helm chart for geoweb taf backend resources in Kubernetes
+    digest: 2d89f094b446a0eba9aeb4ab060f5c851240fa2bc53d543ab9069227602dff7e
+    maintainers:
+    - name: Jusaa
+    name: geoweb-taf-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-taf-backend-0.1.1/geoweb-taf-backend-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
     appVersion: v0.0.1
     created: "2023-10-27T12:38:01.074026333Z"
     description: A Helm chart for geoweb taf backend resources in Kubernetes
@@ -984,4 +996,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/smartmetserver-0.1.0/smartmetserver-0.1.0.tgz
     version: 0.1.0
-generated: "2023-11-09T12:22:43.098865617Z"
+generated: "2023-11-14T08:21:18.987763494Z"
