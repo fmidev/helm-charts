@@ -1,5 +1,5 @@
 versions:
-  taf: "v0.0.1"
+  taf: "v0.0.2"
 
 taf:
   name: taf
@@ -38,6 +38,7 @@ taf:
     GEOWEB_KNMI_AVI_MESSAGESERVICES_HOST: "localhost:8081"
     AVIATION_TAF_PORT_HTTP: 8000
     AVIATION_TAF_PUBLISH_HOST: "localhost:8090"
+    TAF_CONFIG: config.ini
   messageconverter:
     name: taf-messageconverter
     registry: registry.gitlab.com/opengeoweb/avi-msgconverter/geoweb-knmi-avi-messageservices

@@ -82,7 +82,7 @@ The following table lists the configurable parameters of the Taf backend chart a
 
 | Parameter | Description | Default |
 | - | - | - |
-| `versions.taf` | Possibility to override application version | `v0.0.1` |
+| `versions.taf` | Possibility to override application version | `v0.0.2` |
 | `taf.name` | Name of backend | `taf` |
 | `taf.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/aviation-taf-backend/aviation-taf-backend` |
 | `taf.commitHash` | Adds commitHash annotation to the deployment | |
@@ -107,7 +107,7 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.env.GEOWEB_KNMI_AVI_MESSAGESERVICES_HOST` | - | `"localhost:8081"` |
 | `taf.env.OAUTH2_USERINFO` | - | |
 | `taf.env.AVIATION_TAF_PUBLISH_HOST` | - | `"localhost:8090"` |
-| `taf.env.TAF_CONFIG` | Location of configuration file that is used (application defaults to `config.ini`) | |
+| `taf.env.TAF_CONFIG` | Location of configuration file that is used | `config.ini` |
 | `taf.useCustomConfigurationFiles` | Use custom configurations | `false` |
 | `taf.customConfigurationLocation` | Where custom configurations are located *(local\|s3)* | `local` |
 | `taf.volumeAccessMode` | Permissions of the application for the custom configurations PersistentVolume used | `ReadOnlyMany` |
