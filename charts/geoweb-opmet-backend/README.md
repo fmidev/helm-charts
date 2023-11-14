@@ -116,16 +116,16 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.db_secretPath` | Path to db secret | |
 | `opmet.db_secretKey` | Key of db secret | |
 | `opmet.ssh_secret` | Secret containing base64 encoded SSH private key | |
-| `opmet.ssh_secretName` | Name of db secret | `opmet-publisher-ssh-key` |
-| `opmet.ssh_secretType` | Type to db secret | `secretsmanager` |
-| `opmet.ssh_secretPath` | Path to db secret | |
-| `opmet.ssh_secretKey` | Key of db secret | |
+| `opmet.ssh_secretName` | Name of ssh key secret | `opmet-publisher-ssh-key` |
+| `opmet.ssh_secretType` | Type to ssh key secret | `secretsmanager` |
+| `opmet.ssh_secretPath` | Path to ssh key secret | |
+| `opmet.ssh_secretKey` | Key of ssh key secret | |
 | `opmet.ssh_passphrase_secret` | Secret containing base64 encoded SSH private key passphrase | |
-| `opmet.ssh_passphrase_secretName` | Name of db secret | `opmet-publisher-ssh-passphrase` |
-| `opmet.ssh_passphrase_secretType` | Type to db secret | `secretsmanager` |
-| `opmet.ssh_passphrase_secretPath` | Path to db secret | |
-| `opmet.ssh_passphrase_secretKey` | Key of db secret | |
-| `opmet.iamRoleARN` | IAM Role with permissions to access db_secret secret | |
+| `opmet.ssh_passphrase_secretName` | Name of ssh passphrase secret | `opmet-publisher-ssh-passphrase` |
+| `opmet.ssh_passphrase_secretType` | Type to ssh passphrase secret | `secretsmanager` |
+| `opmet.ssh_passphrase_secretPath` | Path to ssh passphrase secret | |
+| `opmet.ssh_passphrase_secretKey` | Key of ssh passphrase secret | |
+| `opmet.iamRoleARN` | IAM Role with permissions to access secrets | |
 | `opmet.secretServiceAccount` | Service Account created for handling secrets | `opmet-service-account` |
 | `opmet.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `opmet.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
@@ -147,7 +147,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.volumeAccessMode` | Permissions of the application for the custom configurations PersistentVolume used | `ReadOnlyMany` |
 | `opmet.volumeSize` | Size of the custom configurations PersistentVolume | `100Mi` |
 | `opmet.customConfigurationFolderPath` | Path to the folder which contains custom configurations | |
-| `opmet.customConfigurationMountPath` | Folder used to mount custom configurations | `/app/custom` |
+| `opmet.customConfigurationMountPath` | Folder used to mount custom configurations | `/app/configuration_files/custom` |
 | `opmet.s3bucketName` | Name of the S3 bucket where custom configurations are stored | |
 | `opmet.awsAccessKeyId` | AWS_ACCESS_KEY_ID for authenticating to S3 | |
 | `opmet.awsAccessKeySecret` | AWS_SECRET_ACCESS_KEY for authenticating to S3 | |
