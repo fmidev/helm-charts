@@ -22,7 +22,7 @@ spec:
     {{- if eq .Values.secretProvider "aws" }}
       serviceAccountName: {{ .Values.opmet.secretServiceAccount }}
     {{- end }}
-        {{- if and .Values.opmet.useCustomConfigurationFiles (eq .Values.opmet.customConfigurationLocation "s3")}}
+    {{- if and .Values.opmet.useCustomConfigurationFiles (eq .Values.opmet.customConfigurationLocation "s3")}}
       initContainers:
       - name: init
         image: amazon/aws-cli
@@ -130,7 +130,20 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Values.opmet.publisher.name }}
+      {{- if .Values.opmet.ssh_passphrase_secret }}
+        env:
+        - name: PRIVATE_KEY_PASSPHRASE
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.opmet.ssh_passphrase_secretName }}
+              key: SSH_KEY_PASSPHRASE
+      {{- end }}
         volumeMounts:
+      {{- if .Values.opmet.ssh_secret }}
+        - name: secrets-store-inline
+          mountPath: "/mnt/secrets-store"
+          readOnly: true
+      {{- end }}
         - name: publisher-volume
           mountPath: {{ .Values.opmet.publisher.DESTINATION | quote }}
       - name: {{ .Values.opmet.nginx.name }}
@@ -184,8 +197,20 @@ spec:
           volumeAttributes:
             secretProviderClass: {{ .Values.opmet.spcName | quote }}
       {{- else }}
-        secret:
-          secretName: {{ .Values.opmet.db_secretName | quote }}
+        projected:
+          sources:
+          {{- if and .Values.opmet.db_secret (not .Values.opmet.db.useZalandoOperatorDb) }}
+          - secret:
+              name: {{ .Values.opmet.db_secretName }}
+          {{- end }}
+          {{- if .Values.opmet.ssh_secret }}
+          - secret:
+              name: {{ .Values.opmet.ssh_secretName }}
+          {{- end }}
+          {{- if .Values.opmet.ssh_passphrase_secret }}
+          - secret:
+              name: {{ .Values.opmet.ssh_passphrase_secretName }}
+          {{- end }}
       {{- end }}
     {{- end }}
       - name: publisher-volume
