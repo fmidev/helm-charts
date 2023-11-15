@@ -101,7 +101,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 
 | Parameter | Description | Default |
 | - | - | - |
-| `versions.opmet` | Possibility to override application version | `v1.3.1` |
+| `versions.opmet` | Possibility to override application version | `v1.4.0` |
 | `opmet.name` | Name of backend | `opmet` |
 | `opmet.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/opmet-backend` |
 | `opmet.commitHash` | Adds commitHash annotation to the deployment | |
