@@ -25,16 +25,16 @@ opmet:
       cpu: "1"
   livenessProbe:
     httpGet:
-      path: /health_check
+      path: /healthcheck
       port: 8000
-    initialDelaySeconds: 30
+    initialDelaySeconds: 60
     periodSeconds: 5
     failureThreshold: 5
   readinessProbe:
     httpGet:
-      path: /health_check?readiness=true
+      path: /healthcheck?readiness=true
       port: 8000
-    initialDelaySeconds: 30
+    initialDelaySeconds: 60
     periodSeconds: 5
     failureThreshold: 1
   env:
@@ -58,14 +58,14 @@ opmet:
         cpu: "1"
     livenessProbe:
       httpGet:
-        path: /
+        path: /healthcheck
         port: 8080
       initialDelaySeconds: 30
       periodSeconds: 5
       failureThreshold: 5
     readinessProbe:
       httpGet:
-        path: /?readiness=true
+        path: /healthcheck?readiness=true
         port: 8080
       initialDelaySeconds: 30
       periodSeconds: 5
@@ -83,20 +83,20 @@ opmet:
       limits:
         memory: "100Mi"
         cpu: "1"
-#    livenessProbe:
-#      httpGet:
-#        path: /healthcheck
-#        port: 8090
-#      initialDelaySeconds: 5
-#      periodSeconds: 5
-#      failureThreshold: 5
-#    readinessProbe:
-#      httpGet:
-#        path: /healthcheck?readiness=true
-#        port: 8090
-#      initialDelaySeconds: 5
-#      periodSeconds: 5
-#      failureThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /healthcheck
+        port: 8090
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      failureThreshold: 5
+    readinessProbe:
+      httpGet:
+        path: /healthcheck?readiness=true
+        port: 8090
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      failureThreshold: 1
   nginx:
     name: opmet-nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/opmet-backend/nginx-opmet-backend
@@ -113,14 +113,14 @@ opmet:
         cpu: "100m"
     livenessProbe:
       httpGet:
-        path: /healthcheck
+        path: /health_heck
         port: 80
       initialDelaySeconds: 5
       periodSeconds: 5
       failureThreshold: 5
     readinessProbe:
       httpGet:
-        path: /healthcheck?readiness=true
+        path: /health_check?readiness=true
         port: 80
       initialDelaySeconds: 5
       periodSeconds: 5
