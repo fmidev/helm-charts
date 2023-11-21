@@ -8,6 +8,14 @@ smartmetserver:
   containerPort: 8080
   svcPort: 8080
   replicas: 2
+  livenessProbe:
+    periodSeconds: 30
+  readinessProbe:
+    failureThreshold: 5
+    periodSeconds: 60
+  startupProbe:
+    failureThreshold: 5
+    periodSeconds: 60
 
 ingress:
   name: nginx-ingress
@@ -23,3 +31,101 @@ pvc:
   storageClassName: hostpath-smartmet
   accessModes: ReadWriteOnce
   storage: 1Gi
+
+hpa:
+  name: hpa
+  minReplicas: 1
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 60
+
+smartmetConfCm:
+  name: smartmet-cnf
+  smartmetConf: |
+    // Bind to port
+    port            = 8080;
+
+    // Print access log
+    defaultlogging  = false;
+    logrequests     = true;
+    accesslogdir    = "/var/log/smartmet";
+
+    // Print configuration information when starting
+    verbose         = true;
+
+    // Print debug infromation
+    debug           = true;
+
+    lazylinking     = true;
+
+    // Compress HTTP responses if possible
+    compress = true;
+
+    // Do not compress small responses
+    compresslimit = 1000;
+
+    slowpool:
+    {
+            maxthreads = 24;
+            maxrequeuesize = 100;
+    };
+    fastpool:
+    {
+            maxthreads = 24;
+            maxrequeuesize = 100;
+    };
+
+    engines:
+    {
+            sputnik:
+            {
+                    configfile = "engines/sputnik.conf";
+            }
+            contour:
+            {
+                    configfile = "engines/contour.conf";
+            };
+            geonames:
+            {
+                    configfile = "engines/geonames.conf";
+            };
+            gis:
+            {
+                    configfile = "engines/gis.conf";
+            };
+            querydata:
+            {
+                    configfile = "engines/querydata.conf";
+            };
+            grid:
+            {
+                    configfile = "engines/grid.conf";
+            };
+    };
+
+    plugins:
+    {
+            admin:
+            {
+                    configfile = "plugins/admin.conf";
+            };
+            autocomplete:
+            {
+                    configfile = "plugins/autocomplete.conf";
+            };
+            download:
+            {
+                    configfile = "plugins/download.conf";
+            };
+            edr:
+            {
+                    configfile = "plugins/edr.conf";
+            };
+            timeseries:
+            {
+                    configfile = "plugins/timeseries.conf";
+            };
+            wms:
+            {
+                    configfile = "plugins/wms.conf";
+            };
+    };

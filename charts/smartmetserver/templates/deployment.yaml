@@ -14,34 +14,51 @@ spec:
       labels:
         app: {{ .Values.smartmetserver.name }}
     spec:
+      securityContext:
+        runAsNonRoot: true
       containers:
       - name: {{.Values.smartmetserver.name }}
         image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
         {{- if .Values.image.pullPolicy }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         {{- end }}
+        command: ["/usr/sbin/smartmetd"]
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
         ports:
         - containerPort: {{ .Values.smartmetserver.containerPort }}
         volumeMounts:
         - mountPath: "/smartmet/data"
           name: smartmetserver-volume
+        - mountPath: "/etc/smartmet/smartmet.conf"
+          subPath: "smartmet.conf"
+          name: smartmet-configuration
+        - mountPath: "/var/smartmet/cache"
+          name: cache-volume
         livenessProbe:
           httpGet:
             path: /admin?what=qengine
             port: {{ .Values.smartmetserver.containerPort }}
-          periodSeconds: 10
+          periodSeconds: {{ .Values.smartmetserver.livenessProbe.periodSeconds }}
         readinessProbe:
           httpGet:
-            path: /admin?what=qengine
+            path: /wms?request=getCapabilities&service=WMS
             port: {{ .Values.smartmetserver.containerPort }}
-          periodSeconds: 10
+          failureThreshold: {{ .Values.smartmetserver.readinessProbe.failureThreshold }}
+          periodSeconds: {{ .Values.smartmetserver.readinessProbe.periodSeconds }}
         startupProbe:
           httpGet:
             path: /admin?what=qengine
             port: {{ .Values.smartmetserver.containerPort }}
-          failureThreshold: 3
-          periodSeconds: 10
+          failureThreshold: {{ .Values.smartmetserver.startupProbe.failureThreshold }}
+          periodSeconds: {{ .Values.smartmetserver.startupProbe.periodSeconds }}
       volumes:
       - name: smartmetserver-volume
         persistentVolumeClaim:
           claimName: {{ .Values.smartmetserver.name }}-{{ .Values.pvc.name }}
+      - name: smartmet-configuration
+        configMap:
+          name: {{ .Values.smartmetserver.name }}-{{ .Values.smartmetConfCm.name }}
+      - name: cache-volume
+        emptyDir: {}
