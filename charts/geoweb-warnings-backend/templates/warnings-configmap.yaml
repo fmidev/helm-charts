@@ -7,5 +7,9 @@ metadata:
     commitHash: {{ .Values.warnings.commitHash }}
   {{- end }}
 data:
+{{- if .Values.versions.warnings }}
   VERSION: {{ .Values.versions.warnings | quote }}
+{{- end }}
+{{- if .Values.warnings.WARNINGS_PORT_HTTP }}
   WARNINGS_PORT_HTTP: {{ .Values.warnings.WARNINGS_PORT_HTTP | quote }}
+{{- end }}

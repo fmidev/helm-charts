@@ -7,8 +7,18 @@ metadata:
     commitHash: {{ .Values.taf.commitHash }}
   {{- end }}
 data:
+{{- if .Values.taf.nginx.AVIATION_TAF_ENABLE_SSL }}
   AVIATION_TAF_ENABLE_SSL: {{ .Values.taf.nginx.AVIATION_TAF_ENABLE_SSL | quote }}
-  EXTERNAL_HOSTNAME: {{ .Values.taf.nginx.EXTERNAL_HOSTNAME | quote }}
+{{- end }}
+{{- if .Values.taf.nginx.OAUTH2_USERINFO }}
   OAUTH2_USERINFO: {{ .Values.taf.nginx.OAUTH2_USERINFO | quote }}
+{{- end }}
+{{- if .Values.taf.nginx.AVIATION_TAF_BACKEND_HOST }}
   AVIATION_TAF_BACKEND_HOST: {{ .Values.taf.nginx.AVIATION_TAF_BACKEND_HOST | quote }}
+{{- end }}
+{{- if .Values.taf.nginx.NGINX_PORT_HTTP }}
   NGINX_PORT_HTTP: {{ .Values.taf.nginx.NGINX_PORT_HTTP | quote }}
+{{- end }}
+{{- if .Values.taf.nginx.NGINX_PORT_HTTPS }}
+  NGINX_PORT_HTTPS: {{ .Values.taf.nginx.NGINX_PORT_HTTPS | quote }}
+{{- end }}

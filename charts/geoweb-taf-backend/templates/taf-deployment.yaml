@@ -83,8 +83,6 @@ spec:
       {{- if .Values.taf.imagePullPolicy }}
         imagePullPolicy: {{ .Values.taf.imagePullPolicy }}
       {{- end }}
-        ports:
-        - containerPort: {{ .Values.taf.placeholder.port }}
       {{- if .Values.taf.placeholder.resources }}
         resources: {{ toYaml .Values.taf.placeholder.resources | nindent 10 }}
       {{- end }}
@@ -94,15 +92,16 @@ spec:
       {{- if .Values.taf.placeholder.readinessProbe }}
         readinessProbe: {{ toYaml .Values.taf.placeholder.readinessProbe | nindent 10 }}
       {{- end }}
-        envFrom:
-        - configMapRef:
-            name: {{ .Values.taf.placeholder.name }}
         env:
         - name: AVIATION_TAF_BACKEND_DB
           valueFrom:
             secretKeyRef:
               name: {{ .Values.taf.db_secretName }}
               key: AVIATION_TAF_BACKEND_DB
+      {{- if .Values.taf.placeholder.TAFPLACEHOLDER_KEEPRUNNING }}
+        - name: TAFPLACEHOLDER_KEEPRUNNING
+          value: {{ .Values.taf.placeholder.TAFPLACEHOLDER_KEEPRUNNING | quote }}
+      {{- end }}
         volumeMounts:
         - name: secrets-store-inline
           mountPath: "/mnt/secrets-store"
@@ -150,7 +149,7 @@ spec:
             name: {{ .Values.taf.publisher.name }}
         volumeMounts:
         - name: publisher-volume
-          mountPath: {{ .Values.taf.publisher.DESTINATION | quote }}
+          mountPath: {{ .Values.taf.publisher.PUBLISH_DIR | quote }}
       - name: {{ .Values.taf.nginx.name }}
         image: {{ .Values.taf.nginx.registry }}:{{ .Values.versions.taf }}
       {{- if .Values.taf.imagePullPolicy }}

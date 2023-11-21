@@ -105,7 +105,6 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `secretProviderParameters` | Option to add custom parameters to the secretProvider, for example with aws you can specify region | |
 | `taf.env.AVIATION_TAF_PORT_HTTP` | Port used for container | `8000` |
 | `taf.env.GEOWEB_KNMI_AVI_MESSAGESERVICES_HOST` | - | `"localhost:8081"` |
-| `taf.env.OAUTH2_USERINFO` | - | |
 | `taf.env.AVIATION_TAF_PUBLISH_HOST` | - | `"localhost:8090"` |
 | `taf.env.TAF_CONFIG` | Location of configuration file that is used | `config.ini` |
 | `taf.useCustomConfigurationFiles` | Use custom configurations | `false` |
@@ -130,7 +129,7 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.nginx.AVIATION_TAF_ENABLE_SSL` | Toggle SSL termination | `"FALSE"` |
 | `taf.nginx.OAUTH2_USERINFO` | Userinfo endpoint to retrieve consented claims, or assertions, about the logged in end-user | |
 | `taf.nginx.NGINX_PORT_HTTP` | Port used for nginx | `80` |
-| `taf.nginx.EXTERNAL_HOSTNAME` | - | `localhost:80` |
+| `taf.nginx.NGINX_PORT_HTTPS` | Port used for nginx when SSL is enabled | `443` |
 | `taf.nginx.AVIATION_TAF_BACKEND_HOST` | Address where nginx accesses the backend | `localhost:8080` |
 | `taf.nginx.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `taf.nginx.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
@@ -138,14 +137,13 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.publisher.name` | Name of publisher container  | `taf-publisher` |
 | `taf.publisher.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/aviation-taf-backend/aviation-taf-backend-publisher-local` |
 | `taf.publisher.port` | Port used for publisher | `8090`|
-| `taf.publisher.DESTINATION` | Folder inside publisher container where TACs are stored | `/app/output` |
+| `taf.publisher.PUBLISH_DIR` | Folder inside publisher container where TACs are stored | `/app/output` |
 | `taf.publisher.volumeOptions` | yaml including the definition of the volume where TACs are published to, for example: <pre>hostPath:<br>&nbsp;&nbsp; path: /test/path</pre> or <pre>emptyDir:<br>&nbsp;&nbsp;</pre>| `emptyDir:` |
 | `taf.publisher.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `taf.publisher.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
 | `taf.publisher.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
 | `taf.placeholder.name` | Name of publisher container  | `taf-placeholder` |
 | `taf.placeholder.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/aviation-taf-backend/tafplaceholder-aviation-taf-backend` |
-| `taf.placeholder.port` | Port used for tafplaceholder | `8085` |
 | `taf.placeholder.TAFPLACEHOLDER_KEEPRUNNING` | - | `TRUE` |
 | `taf.placeholder.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `taf.placeholder.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |

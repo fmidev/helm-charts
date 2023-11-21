@@ -86,6 +86,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.nginx.OAUTH2_USERINFO` | Userinfo endpoint to retrieve consented claims, or assertions, about the logged in end-user | - |
 | `warnings.nginx.WARNINGS_BACKEND_HOST` | Address where nginx accesses the backend | `0.0.0.0:8080` |
 | `warnings.nginx.NGINX_PORT_HTTP` | Port used for nginx | `80` |
+| `warnings.nginx.NGINX_PORT_HTTPS` | Port used for nginx when SSL is enabled | `443` |
 | `warnings.nginx.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `warnings.nginx.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
 | `warnings.nginx.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |

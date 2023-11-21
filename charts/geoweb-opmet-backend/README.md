@@ -133,11 +133,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `secretProvider` | Option to use secret provider instead of passing base64 encoded database connection string as opmet.db_secret *(aws\|azure\|gcp\|vault)* | |
 | `secretProviderParameters` | Option to add custom parameters to the secretProvider, for example with aws you can specify region | |
 | `opmet.env.BACKEND_OPMET_PORT_HTTP` | Port used for container | `8000` |
-| `opmet.env.EXTERNALADDRESSES` | - | `0.0.0.0:80` |
 | `opmet.env.MESSAGECONVERTER_URL` | - | `"http://localhost:8080"` |
-| `opmet.env.OAUTH2_USERINFO` | - | `https://gitlab.com/oauth/userinfo` |
-| `opmet.env.OPMET_ENABLE_SSL` | Toggle SSL termination | `"FALSE"` |
-| `opmet.env.FORWARDED_ALLOW_IPS` | - | `"*"` |
 | `opmet.env.PUBLISHER_URL` | - | `"http://localhost:8090/publish"` |
 | `opmet.env.BACKEND_CONFIG` | Location of backend configuration file that is used (application defaults to `configuration_files/backendConfig.json`) | |
 | `opmet.env.SIGMET_CONFIG` | Location of SIGMET configuration file that is used (application defaults to `configuration_files/sigmetConfig.json`) | |
@@ -164,7 +160,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.nginx.OPMET_ENABLE_SSL` | Toggle SSL termination | `"FALSE"` |
 | `opmet.nginx.OAUTH2_USERINFO` | Userinfo endpoint to retrieve consented claims, or assertions, about the logged in end-user | - |
 | `opmet.nginx.NGINX_PORT_HTTP` | Port used for nginx | `80` |
-| `opmet.nginx.EXTERNAL_HOSTNAME` | - | `localhost:80` |
+| `opmet.nginx.NGINX_PORT_HTTPS` | Port used for nginx when SSL is enabled | `443` |
 | `opmet.nginx.OPMET_BACKEND_HOST` | Address where nginx accesses the backend | `localhost:8080` |
 | `opmet.nginx.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `opmet.nginx.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |

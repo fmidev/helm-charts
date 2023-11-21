@@ -3,8 +3,18 @@ kind: ConfigMap
 metadata:
   name: {{ .Values.warnings.nginx.name }}
 data:
+{{- if .Values.warnings.nginx.WARNINGS_ENABLE_SSL }}
   WARNINGS_ENABLE_SSL: {{ .Values.warnings.nginx.WARNINGS_ENABLE_SSL | quote }}
+{{- end }}
+{{- if .Values.warnings.nginx.OAUTH2_USERINFO }}
   OAUTH2_USERINFO: {{ .Values.warnings.nginx.OAUTH2_USERINFO | quote }}
+{{- end }}
+{{- if .Values.warnings.nginx.WARNINGS_BACKEND_HOST }}
   WARNINGS_BACKEND_HOST: {{ .Values.warnings.nginx.WARNINGS_BACKEND_HOST | quote }}
+{{- end }}
+{{- if .Values.warnings.nginx.NGINX_PORT_HTTP }}
   NGINX_PORT_HTTP: {{ .Values.warnings.nginx.NGINX_PORT_HTTP | quote }}
-  VERSION: {{ .Values.versions.warnings | quote }}
+{{- end }}
+{{- if .Values.warnings.nginx.NGINX_PORT_HTTPS }}
+  NGINX_PORT_HTTPS: {{ .Values.warnings.nginx.NGINX_PORT_HTTPS | quote }}
+{{- end }}

@@ -7,7 +7,6 @@ presets:
   path: /presets/(.*)
   svcPort: 80
   replicas: 1
-  EXTERNALADDRESS: 0.0.0.0:80
   PRESETS_PORT_HTTP: 8080
   DEPLOY_ENVIRONMENT: open
   postStartCommand: bin/admin.sh
@@ -43,6 +42,7 @@ presets:
     PRESETS_ENABLE_SSL: "FALSE"
     PRESETS_BACKEND_HOST: 0.0.0.0:8080
     NGINX_PORT_HTTP: 80
+    NGINX_PORT_HTTPS: 443
     resources:
       requests:
         memory: "10Mi"
@@ -52,14 +52,14 @@ presets:
         cpu: "100m"
     livenessProbe:
       httpGet:
-        path: /healthcheck
+        path: /health_check
         port: 80
       initialDelaySeconds: 5
       periodSeconds: 5
       failureThreshold: 5
     readinessProbe:
       httpGet:
-        path: /healthcheck?readiness=true
+        path: /health_check?readiness=true
         port: 80
       initialDelaySeconds: 5
       periodSeconds: 5

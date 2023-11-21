@@ -88,7 +88,6 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.svcPort` | Port used for service | `80` |
 | `presets.PRESETS_PORT_HTTP` | Port used for container | `8080` |
 | `presets.replicas` | Amount of replicas deployed | `1` |
-| `presets.EXTERNALADDRESSES` | - | `0.0.0.0:80` |
 | `presets.DEPLOY_ENVIRONMENT` | Environment which presets should be seeded to the database  | `open` |
 | `presets.postStartCommand` | Command to run after presets-backend is started | `bin/admin.sh` |
 | `presets.db_secret` | Secret containing base64 encoded Postgresql database connection string | |
@@ -109,6 +108,7 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.nginx.OAUTH2_USERINFO` | Userinfo endpoint to retrieve consented claims, or assertions, about the logged in end-user | - |
 | `presets.nginx.PRESETS_BACKEND_HOST` | Address where nginx accesses the backend | `0.0.0.0:8080` |
 | `presets.nginx.NGINX_PORT_HTTP` | Port used for nginx | `80` |
+| `presets.nginx.NGINX_PORT_HTTPS` | Port used for nginx when SSL is enabled | `443` |
 | `presets.nginx.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `presets.nginx.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
 | `presets.nginx.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |

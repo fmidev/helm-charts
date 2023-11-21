@@ -7,7 +7,6 @@ warnings:
   path: /warnings/(.*)
   svcPort: 80
   replicas: 1
-  EXTERNALADDRESS: 0.0.0.0:80
   WARNINGS_PORT_HTTP: 8080
   postStartCommand: bin/admin.sh
   db_secret: cG9zdGdyZXNxbDovL3Bvc3RncmVzOnBvc3RncmVzQGxvY2FsaG9zdDo1NDMyL3dhcm5pbmdz
@@ -24,14 +23,14 @@ warnings:
       cpu: "1"
   livenessProbe:
     httpGet:
-      path: /version
+      path: /healthcheck
       port: 8080
     initialDelaySeconds: 30
     periodSeconds: 5
     failureThreshold: 5
   readinessProbe:
     httpGet:
-      path: /version?readiness=true
+      path: /healthcheck?readiness=true
       port: 8080
     initialDelaySeconds: 30
     periodSeconds: 5
@@ -42,6 +41,7 @@ warnings:
     WARNINGS_ENABLE_SSL: "FALSE"
     WARNINGS_BACKEND_HOST: 0.0.0.0:8080
     NGINX_PORT_HTTP: 80
+    NGINX_PORT_HTTPS: 443
     resources:
       requests:
         memory: "10Mi"
@@ -51,14 +51,14 @@ warnings:
         cpu: "100m"
     livenessProbe:
       httpGet:
-        path: /healthcheck
+        path: /health_check
         port: 80
       initialDelaySeconds: 5
       periodSeconds: 5
       failureThreshold: 5
     readinessProbe:
       httpGet:
-        path: /healthcheck?readiness=true
+        path: /health_check?readiness=true
         port: 80
       initialDelaySeconds: 5
       periodSeconds: 5
