@@ -7,26 +7,17 @@ metadata:
     commitHash: {{ .Values.opmet.commitHash }}
   {{- end }}
 data:
+{{- if .Values.versions.opmet }}
+  VERSION: {{ .Values.versions.opmet | quote }}
+{{- end }}
 {{- if .Values.opmet.env.MESSAGECONVERTER_URL }}
   MESSAGECONVERTER_URL: {{ .Values.opmet.env.MESSAGECONVERTER_URL | quote }}
 {{- end }}
-{{- if .Values.opmet.env.OAUTH2_USERINFO }}
-  OAUTH2_USERINFO: {{ .Values.opmet.env.OAUTH2_USERINFO | quote }}
+{{- if .Values.opmet.env.PUBLISHER_URL }}
+  PUBLISHER_URL: {{ .Values.opmet.env.PUBLISHER_URL | quote }}
 {{- end }}
 {{- if .Values.opmet.env.OPMET_BACKEND_PORT_HTTP }}
   OPMET_BACKEND_PORT_HTTP: {{ .Values.opmet.env.OPMET_BACKEND_PORT_HTTP | quote }}
-{{- end }}
-{{- if .Values.opmet.env.EXTERNALADDRESSES }}
-  EXTERNALADDRESSES: {{ .Values.opmet.env.EXTERNALADDRESSES | quote }}
-{{- end }}
-{{- if .Values.opmet.env.OPMET_ENABLE_SSL }}
-  OPMET_ENABLE_SSL: {{ .Values.opmet.env.OPMET_ENABLE_SSL | quote }}
-{{- end }}
-{{- if .Values.opmet.env.FORWARDED_ALLOW_IPS }}
-  FORWARDED_ALLOW_IPS: {{ .Values.opmet.env.FORWARDED_ALLOW_IPS | quote }}
-{{- end }}
-{{- if .Values.opmet.env.PUBLISHER_URL }}
-  PUBLISHER_URL: {{ .Values.opmet.env.PUBLISHER_URL | quote }}
 {{- end }}
 {{- if .Values.opmet.env.BACKEND_CONFIG }}
   BACKEND_CONFIG: {{ .Values.opmet.env.BACKEND_CONFIG | quote }}

@@ -40,9 +40,6 @@ opmet:
   env:
     MESSAGECONVERTER_URL: "http://localhost:8080"
     OPMET_BACKEND_PORT_HTTP: 8000
-    EXTERNALADDRESSES: 0.0.0.0:80
-    OPMET_ENABLE_SSL: "FALSE"
-    FORWARDED_ALLOW_IPS: "*"
     PUBLISHER_URL: "http://localhost:8090/publish"
   messageconverter:
     name: opmet-messageconverter
@@ -102,7 +99,7 @@ opmet:
     registry: registry.gitlab.com/opengeoweb/backend-services/opmet-backend/nginx-opmet-backend
     OPMET_ENABLE_SSL: "FALSE"
     NGINX_PORT_HTTP: 80
-    EXTERNAL_HOSTNAME: localhost:80
+    NGINX_PORT_HTTPS: 443
     OPMET_BACKEND_HOST: localhost:8000
     resources:
       requests:

@@ -3,8 +3,18 @@ kind: ConfigMap
 metadata:
   name: {{ .Values.presets.nginx.name }}
 data:
+{{- if .Values.presets.nginx.PRESETS_ENABLE_SSL }}
   PRESETS_ENABLE_SSL: {{ .Values.presets.nginx.PRESETS_ENABLE_SSL | quote }}
+{{- end }}
+{{- if .Values.presets.nginx.OAUTH2_USERINFO }}
   OAUTH2_USERINFO: {{ .Values.presets.nginx.OAUTH2_USERINFO | quote }}
+{{- end }}
+{{- if .Values.presets.nginx.PRESETS_BACKEND_HOST }}
   PRESETS_BACKEND_HOST: {{ .Values.presets.nginx.PRESETS_BACKEND_HOST | quote }}
+{{- end }}
+{{- if .Values.presets.nginx.NGINX_PORT_HTTP }}
   NGINX_PORT_HTTP: {{ .Values.presets.nginx.NGINX_PORT_HTTP | quote }}
-  VERSION: {{ .Values.versions.presets | quote }}
+{{- end }}
+{{- if .Values.presets.nginx.NGINX_PORT_HTTPS }}
+  NGINX_PORT_HTTPS: {{ .Values.presets.nginx.NGINX_PORT_HTTPS | quote }}
+{{- end }}

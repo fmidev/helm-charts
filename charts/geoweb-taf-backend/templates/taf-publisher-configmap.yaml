@@ -7,4 +7,9 @@ metadata:
     commitHash: {{ .Values.taf.commitHash }}
   {{- end }}
 data:
+{{- if .Values.taf.publisher.PUBLISH_DIR }}
+  PUBLISH_DIR: {{ .Values.taf.publisher.PUBLISH_DIR | quote }}
+{{- end }}
+{{- if .Values.taf.publisher.port }}
   AVIATION_TAF_PORT_HTTP: {{ .Values.taf.publisher.port | quote }}
+{{- end }}
