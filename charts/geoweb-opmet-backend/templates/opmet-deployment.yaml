@@ -63,12 +63,12 @@ spec:
         - name: PG_PASS
           valueFrom:
             secretKeyRef:
-              name: geoweb.opmet-db.credentials.postgresql.acid.zalan.do
+              name: {{ .Values.opmet.db.POSTGRES_USER }}.{{ .Values.opmet.db.name }}.credentials.postgresql.acid.zalan.do
               key: password
         - name: PG_USER
           valueFrom:
             secretKeyRef:
-              name: geoweb.opmet-db.credentials.postgresql.acid.zalan.do
+              name: {{ .Values.opmet.db.POSTGRES_USER }}.{{ .Values.opmet.db.name }}.credentials.postgresql.acid.zalan.do
               key: username
       {{- end }}
         - name: SQLALCHEMY_DATABASE_URL
