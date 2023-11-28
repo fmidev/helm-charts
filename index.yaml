@@ -67,6 +67,18 @@ entries:
   geoweb-cap-backend:
   - apiVersion: v2
     appVersion: v0.4.0
+    created: "2023-11-28T13:41:47.757119221Z"
+    description: A Helm chart for geoweb cap backend resources in Kubernetes
+    digest: ad4151d076a73425168ba6b5d3f9c1f48dd96022d75f68bd2dccc23405b06570
+    maintainers:
+    - name: Jusaa
+    name: geoweb-cap-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-cap-backend-1.3.4/geoweb-cap-backend-1.3.4.tgz
+    version: 1.3.4
+  - apiVersion: v2
+    appVersion: v0.4.0
     created: "2023-10-12T10:21:36.960343518Z"
     description: A Helm chart for geoweb cap backend resources in Kubernetes
     digest: f6736671438aae90205a2542fbd80a74b54df9b0e0e9214f7fae492f07b17319
@@ -1104,4 +1116,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/smartmetserver-0.1.0/smartmetserver-0.1.0.tgz
     version: 0.1.0
-generated: "2023-11-28T12:20:25.966980393Z"
+generated: "2023-11-28T13:41:47.757294169Z"
