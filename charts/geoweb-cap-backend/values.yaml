@@ -13,7 +13,7 @@ cap:
       memory: "250Mi"
       cpu: "50m"
     limits:
-      memory: "350Mi"
+      memory: "600Mi"
       cpu: "1"
   livenessProbe:
     httpGet:
