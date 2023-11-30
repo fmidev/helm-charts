@@ -78,7 +78,7 @@ The following table lists the configurable parameters of the Presets backend cha
 
 | Parameter | Description | Default |
 | - | - | - |
-| `versions.presets` | Possibility to override application version | `3.5.5` |
+| `versions.presets` | Possibility to override application version | `3.6.0` |
 | `presets.name` | Name of backend | `presets` |
 | `presets.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/presets-backend` |
 | `presets.commitHash` | Adds commitHash annotation to the deployment | |
