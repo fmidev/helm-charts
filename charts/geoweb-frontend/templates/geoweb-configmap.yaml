@@ -85,3 +85,9 @@ data:
 {{- if .Values.frontend.env.GW_FEATURE_MODULE_AIRMET_CONFIGURATION }}
   GW_FEATURE_MODULE_AIRMET_CONFIGURATION: {{ .Values.frontend.env.GW_FEATURE_MODULE_AIRMET_CONFIGURATION | quote }}
 {{- end }}
+{{- if .Values.frontend.env.GW_LANGUAGE }}
+  GW_LANGUAGE: {{ .Values.frontend.env.GW_LANGUAGE | quote }}
+{{- end }}
+{{- if .Values.frontend.env.GW_FEATURE_DISPLAY_SEARCH_ON_MAP }}
+  GW_FEATURE_DISPLAY_SEARCH_ON_MAP: {{ .Values.frontend.env.GW_FEATURE_DISPLAY_SEARCH_ON_MAP | quote }}
+{{- end }}

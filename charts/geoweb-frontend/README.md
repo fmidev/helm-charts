@@ -103,7 +103,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 
 | Parameter | Description | Default |
 | - | - | - |
-| `versions.frontend` | Possibility to override application version | `v8.4.0` |
+| `versions.frontend` | Possibility to override application version | `v9.0.0` |
 | `frontend.name` | Name of frontend | `geoweb` |
 | `frontend.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/opengeoweb` |
 | `frontend.commitHash` | Adds commitHash annotation to the deployment | |
@@ -155,6 +155,8 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.env.GW_AIRMET_BASE_URL` | Url which the application uses to connect to AIRMET backend | |
 | `frontend.env.GW_FEATURE_MODULE_SIGMET_CONFIGURATION` | Configuration used by SIGMET module | |
 | `frontend.env.GW_FEATURE_MODULE_AIRMET_CONFIGURATION` | Configuration used by AIRMET module | |
+| `frontend.env.GW_LANGUAGE` | Set language | |
+| `frontend.env.GW_FEATURE_DISPLAY_SEARCH_ON_MAP` | Enable geolocation search | |
 | `frontend.useCustomConfigurationFiles` | Use custom configurations | `false` |
 | `frontend.customConfigurationLocation` | Where custom configurations are located *(local\|s3)* | `local` |
 | `frontend.volumeAccessMode` | Permissions of the application for the custom configurations PersistentVolume used | `ReadOnlyMany` |
