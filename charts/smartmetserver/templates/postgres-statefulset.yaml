@@ -38,9 +38,15 @@ spec:
           - containerPort: 5432
             hostPort: 5432
         volumeMounts:
-        - mountPath: /var/lib/postgresql/data
-          name: smartmetserver-volume
+        - mountPath: "/var/lib/postgresql/data"
+          name: postgres-volume
+        - mountPath: "/docker-entrypoint-initdb.d/init.sql"
+          subPath: "init.sql"
+          name: initsql-cm
       volumes:
-      - name: smartmetserver-volume
+      - name: postgres-volume
         persistentVolumeClaim:
-          claimName: {{ .Values.smartmetserver.name }}-{{ .Values.pvc.name }}
+          claimName: {{ .Values.postgres.name }}-{{ .Values.postgrespvc.name }}
+      - name: initsql-cm
+        configMap:
+          name: {{ .Values.smartmetserver.name }}-{{ .Values.initSqlCm.name }}

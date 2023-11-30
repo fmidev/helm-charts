@@ -1,0 +1,17 @@
+{{- if .Values.postgrespv.enable }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.postgres.name }}-{{ .Values.postgrespv.name }}
+spec:
+  storageClassName: {{ .Values.postgrespvc.storageClassName }}
+  capacity:
+    storage: {{ .Values.postgrespvc.storage }}
+  accessModes:
+    - {{ .Values.postgrespvc.accessModes }}
+  claimRef:
+    namespace: {{ .Release.Namespace }}
+    name: {{ .Values.postgres.name }}-{{ .Values.postgrespvc.name }}
+  hostPath:
+    path: {{ .Values.postgrespv.path | quote }}
+{{- end }}
