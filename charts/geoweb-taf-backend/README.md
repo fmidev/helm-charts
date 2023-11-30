@@ -82,7 +82,7 @@ The following table lists the configurable parameters of the Taf backend chart a
 
 | Parameter | Description | Default |
 | - | - | - |
-| `versions.taf` | Possibility to override application version | `v0.0.3` |
+| `versions.taf` | Possibility to override application version | `v0.0.4` |
 | `taf.name` | Name of backend | `taf` |
 | `taf.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/aviation-taf-backend/aviation-taf-backend` |
 | `taf.commitHash` | Adds commitHash annotation to the deployment | |
