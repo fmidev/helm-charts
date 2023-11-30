@@ -161,6 +161,18 @@ entries:
     version: 1.0.0
   geoweb-frontend:
   - apiVersion: v2
+    appVersion: v9.0.0
+    created: "2023-11-30T09:00:10.533739778Z"
+    description: A Helm chart for geoweb application frontend in Kubernetes
+    digest: 2e667cc2192101850766e1447729992baba987ea9ee214e5a1c77ca4f8324ffb
+    maintainers:
+    - name: Jusaa
+    name: geoweb-frontend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-frontend-3.1.0/geoweb-frontend-3.1.0.tgz
+    version: 3.1.0
+  - apiVersion: v2
     appVersion: v8.4.0
     created: "2023-10-30T11:17:55.598166707Z"
     description: A Helm chart for geoweb application frontend in Kubernetes
@@ -1116,4 +1128,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/smartmetserver-0.1.0/smartmetserver-0.1.0.tgz
     version: 0.1.0
-generated: "2023-11-28T13:41:47.757294169Z"
+generated: "2023-11-30T09:00:10.534127863Z"
