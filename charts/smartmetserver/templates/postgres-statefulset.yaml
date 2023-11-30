@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.smartmetserver.name }}-{{ .Values.postgres.name }}
+spec:
+  selector:
+    app: {{ .Values.smartmetserver.name }}-{{ .Values.postgres.name }}
+  ports:
+    - port: 5432
+      targetPort: 5432
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.smartmetserver.name }}-{{ .Values.postgres.name }}
+  labels:
+    app: {{ .Values.smartmetserver.name }}-{{ .Values.postgres.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.smartmetserver.name }}-{{ .Values.postgres.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.smartmetserver.name }}-{{ .Values.postgres.name }}
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:12.14
+        env:
+          - name: POSTGRES_PASSWORD
+            value: gis_pw
+          - name: POSTGRES_USER
+            value: gis_user
+        ports:
+          - containerPort: 5432
+            hostPort: 5432
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: smartmetserver-volume
+      volumes:
+      - name: smartmetserver-volume
+        persistentVolumeClaim:
+          claimName: {{ .Values.smartmetserver.name }}-{{ .Values.pvc.name }}

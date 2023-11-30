@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.smartmetserver.name }}-{{ .Values.geonamesConfCm.name }}
+  labels:
+    app: {{ .Values.smartmetserver.name }}
+  namespace: {{ .Release.Namespace }}
+data:
+  geonames.conf: |
+    {{- .Values.geonamesConfCm.geonamesConf | nindent 4 }}

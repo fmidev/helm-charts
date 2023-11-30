@@ -34,6 +34,12 @@ spec:
         - mountPath: "/etc/smartmet/smartmet.conf"
           subPath: "smartmet.conf"
           name: smartmet-configuration
+        - mountPath: "/etc/smartmet/engines/gis.conf"
+          subPath: "gis.conf"
+          name: gis-configuration
+        - mountPath: "/etc/smartmet/engines/geonames.conf"
+          subPath: "geonames.conf"
+          name: geonames-configuration
         - mountPath: "/var/smartmet/cache"
           name: cache-volume
         livenessProbe:
@@ -60,5 +66,11 @@ spec:
       - name: smartmet-configuration
         configMap:
           name: {{ .Values.smartmetserver.name }}-{{ .Values.smartmetConfCm.name }}
+      - name: gis-configuration
+        configMap:
+          name: {{ .Values.smartmetserver.name }}-{{ .Values.gisConfCm.name }}
+      - name: geonames-configuration
+        configMap:
+          name: {{ .Values.smartmetserver.name }}-{{ .Values.geonamesConfCm.name }}
       - name: cache-volume
         emptyDir: {}
