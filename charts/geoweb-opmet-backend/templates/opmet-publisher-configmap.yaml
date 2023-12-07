@@ -10,36 +10,9 @@ data:
 {{- if .Values.opmet.publisher.DESTINATION }}
   DESTINATION: {{ .Values.opmet.publisher.DESTINATION | quote }}
 {{- end }}
-{{- if .Values.opmet.publisher.USERNAME }}
-  USERNAME: {{ .Values.opmet.publisher.USERNAME | quote }}
-{{- end }}
-{{- if .Values.opmet.publisher.PASSWORD }}
-  PASSWORD: {{ .Values.opmet.publisher.PASSWORD | quote }}
-{{- end }}
-{{- if and .Values.opmet.publisher.PRIVATE_KEY_BASE_PATH .Values.opmet.ssh_secret }}
-  PRIVATE_KEY_PATH: "{{ .Values.opmet.publisher.PRIVATE_KEY_BASE_PATH }}{{ .Values.opmet.ssh_secret }}"
-{{- end }}
-{{- if .Values.opmet.publisher.PRIVATE_KEY_PASSPHRASE }}
-  PRIVATE_KEY_PASSPHRASE: {{ .Values.opmet.publisher.PRIVATE_KEY_PASSPHRASE | quote }}
-{{- end }}
-{{- if .Values.opmet.publisher.HOSTNAME }}
-  HOSTNAME: {{ .Values.opmet.publisher.HOSTNAME | quote }}
-{{- end }}
-{{- if .Values.opmet.publisher.PORT }}
-  PORT: {{ .Values.opmet.publisher.PORT | quote }}
-{{- end }}
-{{- if .Values.opmet.publisher.REMOTE_DIR }}
-  REMOTE_DIR: {{ .Values.opmet.publisher.REMOTE_DIR | quote }}
-{{- end }}
-{{- if .Values.opmet.publisher.TIMEOUT_SECONDS }}
-  TIMEOUT_SECONDS: {{ .Values.opmet.publisher.TIMEOUT_SECONDS | quote }}
-{{- end }}
-{{- if .Values.opmet.publisher.USE_TEMP_FILE }}
-  USE_TEMP_FILE: {{ .Values.opmet.publisher.USE_TEMP_FILE | quote }}
-{{- end }}
-{{- if .Values.opmet.publisher.TEMP_FILE_SUFFIX }}
-  TEMP_FILE_SUFFIX: {{ .Values.opmet.publisher.TEMP_FILE_SUFFIX | quote }}
-{{- end }}
+#{{- if .Values.opmet.publisher.SERVERS }}
+#  SERVERS: {{ .Values.opmet.publisher.SERVERS | quote }}
+#{{- end }}
 {{- if .Values.opmet.publisher.S3_BUCKET_NAME }}
   S3_BUCKET_NAME: {{ .Values.opmet.publisher.S3_BUCKET_NAME | quote }}
 {{- end }}
