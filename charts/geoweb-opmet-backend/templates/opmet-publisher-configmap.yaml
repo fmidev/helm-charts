@@ -10,9 +10,9 @@ data:
 {{- if .Values.opmet.publisher.DESTINATION }}
   DESTINATION: {{ .Values.opmet.publisher.DESTINATION | quote }}
 {{- end }}
-#{{- if .Values.opmet.publisher.SERVERS }}
-#  SERVERS: {{ .Values.opmet.publisher.SERVERS | quote }}
-#{{- end }}
+{{- if .Values.opmet.publisher.SERVERS }}
+  SERVERS: {{ .Values.opmet.publisher.SERVERS | quote }}
+{{- end }}
 {{- if .Values.opmet.publisher.S3_BUCKET_NAME }}
   S3_BUCKET_NAME: {{ .Values.opmet.publisher.S3_BUCKET_NAME | quote }}
 {{- end }}
