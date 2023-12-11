@@ -127,19 +127,21 @@ spec:
       {{- if .Values.opmet.publisher.readinessProbe }}
         readinessProbe: {{ toYaml .Values.opmet.publisher.readinessProbe | nindent 10 }}
       {{- end }}
+        env:
+        - name: SERVERS
+          value: {{ .Values.opmet.publisher.SERVERS | quote }}
+      {{- range $ssh_passphrase_secret := .Values.opmet.ssh_passphrase_secrets }}
+        - name: {{ $ssh_passphrase_secret.name }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ $ssh_passphrase_secret.name }}
+              key: SSH_KEY_PASSPHRASE
+      {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Values.opmet.publisher.name }}
-      {{- if .Values.opmet.ssh_passphrase_secret }}
-        env:
-        - name: PRIVATE_KEY_PASSPHRASE
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.opmet.ssh_passphrase_secretName }}
-              key: SSH_KEY_PASSPHRASE
-      {{- end }}
         volumeMounts:
-      {{- if .Values.opmet.ssh_secret }}
+      {{- if and .Values.opmet.ssh_secrets .Values.opmet.ssh_passphrase_secrets }}
         - name: secrets-store-inline
           mountPath: "/mnt/secrets-store"
           readOnly: true
@@ -188,7 +190,7 @@ spec:
           claimName: {{ .Values.opmet.name }}-claim
       {{- end }}
     {{- end }}
-    {{- if not .Values.opmet.db.useZalandoOperatorDb }}
+    {{- if or (and .Values.opmet.db_secret (not .Values.opmet.db.useZalandoOperatorDb)) (and .Values.opmet.ssh_secrets .Values.opmet.ssh_passphrase_secrets) }}
       - name: secrets-store-inline
       {{- if .Values.secretProvider }}
         csi:
@@ -203,13 +205,13 @@ spec:
           - secret:
               name: {{ .Values.opmet.db_secretName }}
           {{- end }}
-          {{- if .Values.opmet.ssh_secret }}
+          {{- range $ssh_secret := .Values.opmet.ssh_secrets }}
           - secret:
-              name: {{ .Values.opmet.ssh_secretName }}
+              name: {{ $ssh_secret.name }}
           {{- end }}
-          {{- if .Values.opmet.ssh_passphrase_secret }}
+          {{- range $ssh_passphrase_secret := .Values.opmet.ssh_passphrase_secrets }}
           - secret:
-              name: {{ .Values.opmet.ssh_passphrase_secretName }}
+              name: {{ $ssh_passphrase_secret.name }}
           {{- end }}
       {{- end }}
     {{- end }}

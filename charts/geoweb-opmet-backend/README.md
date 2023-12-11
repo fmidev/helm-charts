@@ -8,13 +8,19 @@ helm repo update
 # Create requried dependencies
 
 Create values.yaml file for required variables:
-* Using aws as the secret provider (use any mix of db_secret, ssh_secret and ssh_secret_passphrase)
+* Using AWS as the secret provider (use any mix of db_secret, ssh_secret and ssh_secret_passphrase)
 ```yaml
 opmet: 
   url: geoweb.example.com
   db_secret: secretName
-  ssh_secret: secretName
-  ssh_secret_passphrase: secretName
+  ssh_secrets:
+  - name: key_secret_name_in_kubernetes
+    secret: secret_name_in_AWS
+    type: secretsmanager
+  ssh_secret_passphrases:
+  - name: passphrase_secret_name_in_kubernetes
+    secret: secret_name_in_AWS
+    type: secretsmanager
   iamRoleARN: arn:aws:iam::123456789012:role/example-iam-role-with-permissions-to-secret
 
 secretProvider: aws
@@ -27,8 +33,12 @@ secretProviderParameters:
 opmet:
   url: geoweb.example.com
   db_secret: base64_encoded_postgresql_connection_string
-  ssh_secret: base64_encoded_ssh_private_key
-  ssh_secret_passphrase: base64_encoded_ssh_private_key_passphrase
+  ssh_secret:
+  - name: key_secret_name_in_kubernetes
+    secret: base64_encoded_ssh_private_key
+  ssh_secret_passphrase:
+  - name: passphrase_secret_name_in_kubernetes
+    secret: base64_encoded_ssh_private_key_passphrase
 ```
 
 * Using custom configuration files stored locally
@@ -101,7 +111,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 
 | Parameter | Description | Default |
 | - | - | - |
-| `versions.opmet` | Possibility to override application version | `v1.4.0` |
+| `versions.opmet` | Possibility to override application version | `v2.0.0` |
 | `opmet.name` | Name of backend | `opmet` |
 | `opmet.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/opmet-backend` |
 | `opmet.commitHash` | Adds commitHash annotation to the deployment | |
@@ -112,19 +122,11 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.replicas` | Amount of replicas deployed | `1` |
 | `opmet.db_secret` | Secret containing base64 encoded Postgresql database connection string | |
 | `opmet.db_secretName` | Name of db secret | `opmet-db` |
-| `opmet.db_secretType` | Type to db secret | `secretsmanager` |
-| `opmet.db_secretPath` | Path to db secret | |
-| `opmet.db_secretKey` | Key of db secret | |
-| `opmet.ssh_secret` | Secret containing base64 encoded SSH private key | |
-| `opmet.ssh_secretName` | Name of ssh key secret | `opmet-publisher-ssh-key` |
-| `opmet.ssh_secretType` | Type to ssh key secret | `secretsmanager` |
-| `opmet.ssh_secretPath` | Path to ssh key secret | |
-| `opmet.ssh_secretKey` | Key of ssh key secret | |
-| `opmet.ssh_passphrase_secret` | Secret containing base64 encoded SSH private key passphrase | |
-| `opmet.ssh_passphrase_secretName` | Name of ssh passphrase secret | `opmet-publisher-ssh-passphrase` |
-| `opmet.ssh_passphrase_secretType` | Type to ssh passphrase secret | `secretsmanager` |
-| `opmet.ssh_passphrase_secretPath` | Path to ssh passphrase secret | |
-| `opmet.ssh_passphrase_secretKey` | Key of ssh passphrase secret | |
+| `opmet.db_secretType` | Type to db secret (only aws + azure) | `secretsmanager` |
+| `opmet.db_secretPath` | Path to db secret (only gcp and vault) | |
+| `opmet.db_secretKey` | Key of db secret (only vault) | |
+| `opmet.ssh_secrets` | Map to configure which ssh private key secrets you want with multiples supported, map can use values of `secret`, `name`, `type` (only aws + azure), `path` (only gcp and vault) and `key` (only vault) | |
+| `opmet.ssh_passphrase_secrets` | Map to configure which ssh private key passphrase secrets you want with multiples supported, map can use values of `secret`, `name`, `type` (only aws + azure), `path` (only gcp and vault) and `key` (only vault) | |
 | `opmet.iamRoleARN` | IAM Role with permissions to access secrets | |
 | `opmet.secretServiceAccount` | Service Account created for handling secrets | `opmet-service-account` |
 | `opmet.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
@@ -169,16 +171,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.publisher.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/opmet-backend/opmet-backend-publisher-local` |
 | `opmet.publisher.port` | Port used for publisher | `8090`|
 | `opmet.publisher.DESTINATION` | Folder inside publisher container where TACs are stored (used with local-publisher) | `/app/output` |
-| `opmet.publisher.USERNAME` | Username used to access SFTP server | |
-| `opmet.publisher.PASSWORD` | Password used to access SFTP server (Empty if using SSH authentication) | |
-| `opmet.publisher.PRIVATE_KEY_BASE_PATH` | Path to SSH key used to access SFTP server (Empty if using password authentication), gets combined to PRIVATE_KEY_PATH environment variable with ssh_secret added as filename | `/mnt/secrets-store/` |
-| `opmet.publisher.PRIVATE_KEY_PASSPHRASE` | SSH passphrase used for the SSH key (Empty if using password authentication)| |
-| `opmet.publisher.HOSTNAME` | Hostname of used SFTP server | |
-| `opmet.publisher.PORT` | Port used to connect to SFTP server | |
-| `opmet.publisher.REMOTE_DIR` | Folder used in the SFTP server | |
-| `opmet.publisher.TIMEOUT_SECONDS` | Timeout when trying to connect to SFTP server | |
-| `opmet.publisher.USE_TEMP_FILE` | Use temp file before publishing file to SFTP server | |
-| `opmet.publisher.TEMP_FILE_SUFFIX` | Suffix used for the temp file | |
+| `opmet.publisher.SERVERS` | List of configuration options used to access SFTP server. List of jsons. Note that ssh secrets get mounted to `/mnt/secrets-store`. Details https://gitlab.com/opengeoweb/backend-services/opmet-backend#sftp-publisher | |
 | `opmet.publisher.S3_BUCKET_NAME` | S3 Bucket used to publish files to | |
 | `opmet.publisher.volumeOptions` | yaml including the definition of the volume where TACs are published to, for example: <pre>hostPath:<br>&nbsp;&nbsp; path: /test/path</pre> or <pre>emptyDir:<br>&nbsp;&nbsp;</pre>| `emptyDir:` |
 | `opmet.publisher.resources` | Configure resource limits & requests | see defaults from `values.yaml` |

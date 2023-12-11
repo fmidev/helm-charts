@@ -1,5 +1,5 @@
 versions:
-  opmet: "v1.4.0"
+  opmet: "v2.0.0"
 
 opmet:
   name: opmet
@@ -10,10 +10,6 @@ opmet:
   db_secret: cG9zdGdyZXNxbDovL2dlb3dlYjpwb3N0Z3Jlc0Bsb2NhbGhvc3Q6NTQzMi9vcG1ldA==
   db_secretName: opmet-db
   db_secretType: secretsmanager
-  ssh_secretName: opmet-publisher-ssh-key
-  ssh_secretType: secretsmanager
-  ssh_passphrase_secretName: opmet-publisher-ssh-passphrase
-  ssh_passphrase_secretType: secretsmanager
   spcName: opmet-spc
   secretServiceAccount: opmet-service-account
   resources:
@@ -72,7 +68,6 @@ opmet:
     registry: registry.gitlab.com/opengeoweb/backend-services/opmet-backend/opmet-backend-publisher-local
     port: 8090
     DESTINATION: /app/output
-    PRIVATE_KEY_BASE_PATH: /mnt/secrets-store/
     resources:
       requests:
         memory: "50Mi"
