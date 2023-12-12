@@ -128,8 +128,6 @@ spec:
         readinessProbe: {{ toYaml .Values.opmet.publisher.readinessProbe | nindent 10 }}
       {{- end }}
         env:
-        - name: SERVERS
-          value: {{ .Values.opmet.publisher.SERVERS | quote }}
       {{- range $ssh_passphrase_secret := .Values.opmet.ssh_passphrase_secrets }}
         - name: {{ $ssh_passphrase_secret.name }}
           valueFrom:
@@ -137,6 +135,8 @@ spec:
               name: {{ $ssh_passphrase_secret.name }}
               key: SSH_KEY_PASSPHRASE
       {{- end }}
+        - name: SERVERS
+          value: {{ .Values.opmet.publisher.SERVERS | quote }}
         envFrom:
         - configMapRef:
             name: {{ .Values.opmet.publisher.name }}
