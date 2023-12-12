@@ -9,6 +9,12 @@ data:
 {{- if .Values.presets.nginx.OAUTH2_USERINFO }}
   OAUTH2_USERINFO: {{ .Values.presets.nginx.OAUTH2_USERINFO | quote }}
 {{- end }}
+{{- if .Values.opmet.nginx.GEOWEB_REQUIRE_READ_PERMISSION }}
+  GEOWEB_REQUIRE_READ_PERMISSION: {{ .Values.opmet.nginx.GEOWEB_REQUIRE_READ_PERMISSION | quote }}
+{{- end }}
+{{- if .Values.opmet.nginx.GEOWEB_REQUIRE_WRITE_PERMISSION }}
+  GEOWEB_REQUIRE_WRITE_PERMISSION: {{ .Values.opmet.nginx.GEOWEB_REQUIRE_WRITE_PERMISSION | quote }}
+{{- end }}
 {{- if .Values.presets.nginx.PRESETS_BACKEND_HOST }}
   PRESETS_BACKEND_HOST: {{ .Values.presets.nginx.PRESETS_BACKEND_HOST | quote }}
 {{- end }}
