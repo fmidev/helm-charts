@@ -57,7 +57,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 
 | Parameter | Description | Default |
 | - | - | - |
-| `versions.warnings` | Possibility to override application version | `v0.3.0` |
+| `versions.warnings` | Possibility to override application version | `0.4.0` |
 | `warnings.name` | Name of backend | `warnings` |
 | `warnings.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/warnings-backend` |
 | `warnings.commitHash` | Adds commitHash annotation to the deployment | |
