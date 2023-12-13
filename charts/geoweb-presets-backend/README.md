@@ -78,7 +78,7 @@ The following table lists the configurable parameters of the Presets backend cha
 
 | Parameter | Description | Default |
 | - | - | - |
-| `versions.presets` | Possibility to override application version | `3.6.0` |
+| `versions.presets` | Possibility to override application version | `3.6.2` |
 | `presets.name` | Name of backend | `presets` |
 | `presets.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/presets-backend` |
 | `presets.commitHash` | Adds commitHash annotation to the deployment | |
@@ -106,6 +106,8 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.nginx.registry` | Registry to fetch nginx image | `registry.gitlab.com/opengeoweb/backend-services/presets-backend/nginx-presets-backend` |
 | `presets.nginx.PRESETS_ENABLE_SSL` | Toggle SSL termination | `"FALSE"` |
 | `presets.nginx.OAUTH2_USERINFO` | Userinfo endpoint to retrieve consented claims, or assertions, about the logged in end-user | - |
+| `opmet.nginx.GEOWEB_REQUIRE_READ_PERMISSION` | Required OAUTH claim name and value to be present in the userinfo response for read operations | `"FALSE"` |
+| `opmet.nginx.GEOWEB_REQUIRE_WRITE_PERMISSION` | Required OAUTH claim name and value to be present in the userinfo response for write operations | `"FALSE"` |
 | `presets.nginx.PRESETS_BACKEND_HOST` | Address where nginx accesses the backend | `0.0.0.0:8080` |
 | `presets.nginx.NGINX_PORT_HTTP` | Port used for nginx | `80` |
 | `presets.nginx.NGINX_PORT_HTTPS` | Port used for nginx when SSL is enabled | `443` |
