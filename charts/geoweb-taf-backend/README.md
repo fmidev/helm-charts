@@ -82,7 +82,7 @@ The following table lists the configurable parameters of the Taf backend chart a
 
 | Parameter | Description | Default |
 | - | - | - |
-| `versions.taf` | Possibility to override application version | `v0.0.5` |
+| `versions.taf` | Possibility to override application version | |
 | `taf.name` | Name of backend | `taf` |
 | `taf.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/aviation-taf-backend/aviation-taf-backend` |
 | `taf.commitHash` | Adds commitHash annotation to the deployment | |
@@ -119,7 +119,7 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.awsDefaultRegion` | Region where your S3 bucket is located | |
 | `taf.messageconverter.name` | Name of messageconverter container | `taf-messageconverter` |
 | `taf.messageconverter.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/avi-msgconverter/geoweb-knmi-avi-messageservices` |
-| `taf.messageconverter.version` | Possibility to override application version | `"0.1.1"` |
+| `taf.messageconverter.version` | Possibility to override application version | see default from `values.yaml` |
 | `taf.messageconverter.port` | Port used for messageconverter | `8080` |
 | `taf.messageconverter.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `taf.messageconverter.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |

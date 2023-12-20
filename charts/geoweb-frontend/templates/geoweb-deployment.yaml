@@ -40,7 +40,7 @@ spec:
     {{- end }}
       containers:
       - name: {{ .Values.frontend.name }}
-        image: {{ .Values.frontend.registry }}:{{ .Values.versions.frontend }}
+        image: {{ .Values.frontend.registry }}:{{ default .Chart.AppVersion .Values.versions.frontend }}
       {{- if .Values.frontend.imagePullPolicy }}
         imagePullPolicy: {{ .Values.frontend.imagePullPolicy }}
       {{- end }}

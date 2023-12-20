@@ -1,5 +1,5 @@
 versions:
-  frontend: "v9.1.0"
+  frontend:
 
 frontend:
   name: geoweb

@@ -40,7 +40,7 @@ spec:
     {{- end }}
       containers:
       - name: {{ .Values.taf.name }}
-        image: {{ .Values.taf.registry }}:{{ .Values.versions.taf }}
+        image: {{ .Values.taf.registry }}:{{ default .Chart.AppVersion .Values.versions.taf }}
       {{- if .Values.taf.imagePullPolicy }}
         imagePullPolicy: {{ .Values.taf.imagePullPolicy }}
       {{- end }}
@@ -79,7 +79,7 @@ spec:
           name: {{ .Values.taf.name }}-volume
       {{- end }}
       - name: {{ .Values.taf.placeholder.name }}
-        image: {{ .Values.taf.placeholder.registry }}:{{ .Values.versions.taf }}
+        image: {{ .Values.taf.placeholder.registry }}:{{ default .Chart.AppVersion .Values.versions.taf }}
       {{- if .Values.taf.imagePullPolicy }}
         imagePullPolicy: {{ .Values.taf.imagePullPolicy }}
       {{- end }}
@@ -129,7 +129,7 @@ spec:
         - configMapRef:
             name: {{ .Values.taf.name }}
       - name: {{ .Values.taf.publisher.name }}
-        image: {{ .Values.taf.publisher.registry }}:{{ .Values.versions.taf }}
+        image: {{ .Values.taf.publisher.registry }}:{{ default .Chart.AppVersion .Values.versions.taf }}
       {{- if .Values.taf.imagePullPolicy }}
         imagePullPolicy: {{ .Values.taf.imagePullPolicy }}
       {{- end }}
@@ -151,7 +151,7 @@ spec:
         - name: publisher-volume
           mountPath: {{ .Values.taf.publisher.PUBLISH_DIR | quote }}
       - name: {{ .Values.taf.nginx.name }}
-        image: {{ .Values.taf.nginx.registry }}:{{ .Values.versions.taf }}
+        image: {{ .Values.taf.nginx.registry }}:{{ default .Chart.AppVersion .Values.versions.taf }}
       {{- if .Values.taf.imagePullPolicy }}
         imagePullPolicy: {{ .Values.taf.imagePullPolicy }}
       {{- end }}

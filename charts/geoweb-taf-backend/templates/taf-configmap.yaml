@@ -7,6 +7,7 @@ metadata:
     commitHash: {{ .Values.taf.commitHash }}
   {{- end }}
 data:
+  VERSION: {{ default .Chart.AppVersion .Values.versions.taf | quote }}
 {{- if .Values.taf.env.GEOWEB_KNMI_AVI_MESSAGESERVICES_HOST }}
   GEOWEB_KNMI_AVI_MESSAGESERVICES_HOST: {{ .Values.taf.env.GEOWEB_KNMI_AVI_MESSAGESERVICES_HOST | quote }}
 {{- end }}
@@ -18,9 +19,6 @@ data:
 {{- end }}
 {{- if .Values.taf.env.TAF_CONFIG }}
   TAF_CONFIG: {{ .Values.taf.env.TAF_CONFIG | quote }}
-{{- end }}
-{{- if .Values.versions.taf }}
-  VERSION: {{ .Values.versions.taf | quote }}
 {{- end }}
 {{- if .Values.taf.messageconverter.version }}
   AVI_VERSION: {{ .Values.taf.messageconverter.version | quote }}

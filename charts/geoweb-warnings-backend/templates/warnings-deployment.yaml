@@ -24,7 +24,7 @@ spec:
     {{- end }}
       containers:
       - name: {{ .Values.warnings.name }}
-        image: {{ .Values.warnings.registry }}:{{ .Values.versions.warnings }}
+        image: {{ .Values.warnings.registry }}:{{ default .Chart.AppVersion .Values.versions.warnings }}
       {{- if .Values.warnings.imagePullPolicy }}
         imagePullPolicy: {{ .Values.warnings.imagePullPolicy }}
       {{- end }}
@@ -59,7 +59,7 @@ spec:
           mountPath: "/mnt/secrets-store"
           readOnly: true
       - name: {{ .Values.warnings.nginx.name }}
-        image: {{ .Values.warnings.nginx.registry }}:{{ .Values.versions.warnings }}
+        image: {{ .Values.warnings.nginx.registry }}:{{ default .Chart.AppVersion .Values.versions.warnings }}
       {{- if .Values.warnings.imagePullPolicy }}
         imagePullPolicy: {{ .Values.warnings.imagePullPolicy }}
       {{- end }}
