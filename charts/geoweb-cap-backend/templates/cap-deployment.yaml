@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: {{ .Values.cap.name }}
-        image: {{ .Values.cap.registry }}:{{ .Values.versions.cap }}
+        image: {{ .Values.cap.registry }}:{{ default .Chart.AppVersion .Values.versions.cap }}
       {{- if .Values.cap.imagePullPolicy }}
         imagePullPolicy: {{ .Values.cap.imagePullPolicy }}
       {{- end }}

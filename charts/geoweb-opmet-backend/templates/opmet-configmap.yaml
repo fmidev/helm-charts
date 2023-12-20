@@ -7,9 +7,7 @@ metadata:
     commitHash: {{ .Values.opmet.commitHash }}
   {{- end }}
 data:
-{{- if .Values.versions.opmet }}
-  VERSION: {{ .Values.versions.opmet | quote }}
-{{- end }}
+  VERSION: {{ default .Chart.AppVersion .Values.versions.opmet | quote }}
 {{- if .Values.opmet.env.MESSAGECONVERTER_URL }}
   MESSAGECONVERTER_URL: {{ .Values.opmet.env.MESSAGECONVERTER_URL | quote }}
 {{- end }}

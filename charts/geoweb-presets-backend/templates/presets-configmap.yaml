@@ -7,9 +7,7 @@ metadata:
     commitHash: {{ .Values.presets.commitHash }}
   {{- end }}
 data:
-{{- if .Values.versions.presets }}
-  VERSION: {{ .Values.versions.presets | quote }}
-{{- end }}
+  VERSION: {{ default .Chart.AppVersion .Values.versions.presets | quote }}
 {{- if .Values.presets.PRESETS_PORT_HTTP }}
   PRESETS_PORT_HTTP: {{ .Values.presets.PRESETS_PORT_HTTP | quote }}
 {{- end }}

@@ -40,7 +40,7 @@ spec:
     {{- end }}
       containers:
       - name: {{ .Values.presets.name }}
-        image: {{ .Values.presets.registry }}:{{ .Values.versions.presets }}
+        image: {{ .Values.presets.registry }}:{{ default .Chart.AppVersion .Values.versions.presets }}
       {{- if .Values.presets.imagePullPolicy }}
         imagePullPolicy: {{ .Values.presets.imagePullPolicy }}
       {{- end }}
@@ -79,7 +79,7 @@ spec:
           name: {{ .Values.presets.name }}-volume
       {{- end }}
       - name: {{ .Values.presets.nginx.name }}
-        image: {{ .Values.presets.nginx.registry }}:{{ .Values.versions.presets }}
+        image: {{ .Values.presets.nginx.registry }}:{{ default .Chart.AppVersion .Values.versions.presets }}
       {{- if .Values.presets.imagePullPolicy }}
         imagePullPolicy: {{ .Values.presets.imagePullPolicy }}
       {{- end }}

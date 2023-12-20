@@ -111,7 +111,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 
 | Parameter | Description | Default |
 | - | - | - |
-| `versions.opmet` | Possibility to override application version | `v2.2.0` |
+| `versions.opmet` | Possibility to override application version | |
 | `opmet.name` | Name of backend | `opmet` |
 | `opmet.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/opmet-backend` |
 | `opmet.commitHash` | Adds commitHash annotation to the deployment | |
@@ -152,7 +152,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.awsDefaultRegion` | Region where your S3 bucket is located | |
 | `opmet.messageconverter.name` | Name of messageconverter container | `opmet-messageconverter` |
 | `opmet.messageconverter.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/avi-msgconverter/geoweb-knmi-avi-messageservices` |
-| `opmet.messageconverter.version` | Possibility to override application version | `"0.1.1"` |
+| `opmet.messageconverter.version` | Possibility to override application version | see default from `values.yaml` |
 | `opmet.messageconverter.port` | Port used for messageconverter | `8080` |
 | `opmet.messageconverter.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `opmet.messageconverter.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |

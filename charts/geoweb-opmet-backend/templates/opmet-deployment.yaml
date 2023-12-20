@@ -40,7 +40,7 @@ spec:
     {{- end }}
       containers:
       - name: {{ .Values.opmet.name }}
-        image: {{ .Values.opmet.registry }}:{{ .Values.versions.opmet }}
+        image: {{ .Values.opmet.registry }}:{{ default .Chart.AppVersion .Values.versions.opmet }}
       {{- if .Values.opmet.imagePullPolicy }}
         imagePullPolicy: {{ .Values.opmet.imagePullPolicy }}
       {{- end }}
@@ -112,7 +112,7 @@ spec:
         - configMapRef:
             name: {{ .Values.opmet.name }}
       - name: {{ .Values.opmet.publisher.name }}
-        image: {{ .Values.opmet.publisher.registry }}:{{ .Values.versions.opmet }}
+        image: {{ .Values.opmet.publisher.registry }}:{{ default .Chart.AppVersion .Values.versions.opmet }}
       {{- if .Values.opmet.imagePullPolicy }}
         imagePullPolicy: {{ .Values.opmet.imagePullPolicy }}
       {{- end }}
@@ -149,7 +149,7 @@ spec:
         - name: publisher-volume
           mountPath: {{ .Values.opmet.publisher.DESTINATION | quote }}
       - name: {{ .Values.opmet.nginx.name }}
-        image: {{ .Values.opmet.nginx.registry }}:{{ .Values.versions.opmet }}
+        image: {{ .Values.opmet.nginx.registry }}:{{ default .Chart.AppVersion .Values.versions.opmet }}
       {{- if .Values.opmet.imagePullPolicy }}
         imagePullPolicy: {{ .Values.opmet.imagePullPolicy }}
       {{- end }}
