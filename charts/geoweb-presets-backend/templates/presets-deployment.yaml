@@ -138,7 +138,7 @@ spec:
           claimName: {{ .Values.presets.name }}-claim
       {{- end }}
     {{- end }}
-    {{- if not .Values.taf.db.useZalandoOperatorDb }}
+    {{- if not .Values.presets.db.useZalandoOperatorDb }}
       - name: secrets-store-inline
       {{- if .Values.secretProvider }}
         csi:

@@ -69,6 +69,7 @@ spec:
             secretKeyRef:
               name: {{ .Values.warnings.db_secretName }}
               key: WARNINGS_BACKEND_DB
+        {{- end }}
       {{- if not .Values.warnings.db.useZalandoOperatorDb }}
         volumeMounts:
         - name: secrets-store-inline
