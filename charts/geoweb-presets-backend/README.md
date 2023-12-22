@@ -48,6 +48,17 @@ presets:
   awsDefaultRegion: <AWS_DEFAULT_REGION>
 ```
 
+* Using Zalando Operator Database
+```yaml
+presets:
+  url: geoweb.example.com
+  db:
+    enableDefaultDb: false
+    useZalandoOperatorDb: true
+    cleanInstall: false # Add this line only after first install
+    backupBucket: s3://<S3-bucket-name>/
+```
+
 # Testing the Chart
 Execute the following for testing the chart:
 

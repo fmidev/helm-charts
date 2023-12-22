@@ -1,0 +1,26 @@
+{{- if .Values.taf.db.useZalandoOperatorDb }}
+apiVersion: "acid.zalan.do/v1"
+kind: postgresql
+metadata:
+  name: {{ .Values.taf.db.name }}
+spec:
+  teamId: {{ .Values.taf.db.zalandoTeamId }}
+  volume:
+    size: {{ .Values.taf.db.instanceSize }}
+  numberOfInstances: {{ .Values.taf.db.numberOfInstances }}
+  users:
+    {{ .Values.taf.db.POSTGRES_USER }}:
+    - superuser
+    - createdb
+  databases:
+    {{ .Values.taf.db.POSTGRES_DB }}: {{ .Values.taf.db.POSTGRES_USER }}
+  postgresql:
+    version: {{ .Values.taf.db.POSTGRES_VERSION | quote }}
+  enableLogicalBackup: {{ .Values.taf.db.enableLogicalBackup }}
+  {{- if not .Values.taf.db.cleanInstall }}
+  clone:
+    cluster: {{ .Values.taf.db.name | quote }}
+    timestamp: {{ .Values.taf.db.backupTimestamp | quote }}
+    s3_wal_path: {{ .Values.taf.db.backupBucket | quote }}
+  {{- end }}
+{{- end }}

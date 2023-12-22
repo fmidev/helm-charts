@@ -1,0 +1,26 @@
+{{- if .Values.presets.db.useZalandoOperatorDb }}
+apiVersion: "acid.zalan.do/v1"
+kind: postgresql
+metadata:
+  name: {{ .Values.presets.db.name }}
+spec:
+  teamId: {{ .Values.presets.db.zalandoTeamId }}
+  volume:
+    size: {{ .Values.presets.db.instanceSize }}
+  numberOfInstances: {{ .Values.presets.db.numberOfInstances }}
+  users:
+    {{ .Values.presets.db.POSTGRES_USER }}:
+    - superuser
+    - createdb
+  databases:
+    {{ .Values.presets.db.POSTGRES_DB }}: {{ .Values.presets.db.POSTGRES_USER }}
+  postgresql:
+    version: {{ .Values.presets.db.POSTGRES_VERSION | quote }}
+  enableLogicalBackup: {{ .Values.presets.db.enableLogicalBackup }}
+  {{- if not .Values.presets.db.cleanInstall }}
+  clone:
+    cluster: {{ .Values.presets.db.name | quote }}
+    timestamp: {{ .Values.presets.db.backupTimestamp | quote }}
+    s3_wal_path: {{ .Values.presets.db.backupBucket | quote }}
+  {{- end }}
+{{- end }}

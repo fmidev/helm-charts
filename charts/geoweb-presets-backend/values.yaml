@@ -10,7 +10,7 @@ presets:
   PRESETS_PORT_HTTP: 8080
   DEPLOY_ENVIRONMENT: open
   postStartCommand: bin/admin.sh
-  db_secret: cG9zdGdyZXNxbDovL3Bvc3RncmVzOnBvc3RncmVzQGxvY2FsaG9zdDo1NDMyL3ByZXNldHM=
+  db_secret: cG9zdGdyZXNxbDovL2dlb3dlYjpwb3N0Z3Jlc0Bsb2NhbGhvc3Q6NTQzMi9wcmVzZXRz
   db_secretName: presets-db
   db_secretType: secretsmanager
   spcName: presets-spc
@@ -66,12 +66,20 @@ presets:
       failureThreshold: 1
   db:
     enableDefaultDb: true
-    name: postgres
+    useZalandoOperatorDb: false
+    name: presets-db
     image: postgres
     port: 5432
     POSTGRES_DB: presets
-    POSTGRES_USER: postgres
+    POSTGRES_USER: geoweb
     POSTGRES_PASSWORD: postgres
+    POSTGRES_VERSION: 15
+    numberOfInstances: 1
+    instanceSize: 100Mi
+    zalandoTeamId: geoweb
+    enableLogicalBackup: true
+    cleanInstall: true
+    backupTimestamp: "2030-01-01T00:00:00+00:00"
   useCustomWorkspacePresets: false
   customWorkspacePresetLocation: local
   volumeAccessMode: ReadOnlyMany

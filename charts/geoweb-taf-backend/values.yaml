@@ -7,7 +7,7 @@ taf:
   path: /taf/(.*)
   svcPort: 80
   replicas: 1
-  db_secret: cG9zdGdyZXNxbDovL3Bvc3RncmVzOnBvc3RncmVzQGxvY2FsaG9zdDo1NDMyL3RhZg==
+  db_secret: cG9zdGdyZXNxbDovL2dlb3dlYjpwb3N0Z3Jlc0Bsb2NhbGhvc3Q6NTQzMi90YWY=
   db_secretName: taf-db
   db_secretType: secretsmanager
   spcName: taf-spc
@@ -150,12 +150,20 @@ taf:
       failureThreshold: 1
   db:
     enableDefaultDb: true
-    name: postgres
+    useZalandoOperatorDb: false
+    name: taf-db
     image: postgres
     port: 5432
     POSTGRES_DB: taf
-    POSTGRES_USER: postgres
+    POSTGRES_USER: geoweb
     POSTGRES_PASSWORD: postgres
+    POSTGRES_VERSION: 15
+    numberOfInstances: 1
+    instanceSize: 100Mi
+    zalandoTeamId: geoweb
+    enableLogicalBackup: true
+    cleanInstall: true
+    backupTimestamp: "2030-01-01T00:00:00+00:00"
   useCustomConfigurationFiles: false
   customConfigurationLocation: local
   customConfigurationMountPath: /app/custom

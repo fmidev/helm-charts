@@ -27,6 +27,17 @@ warnings:
   db_secret: base64_encoded_postgresql_connection_string
 ```
 
+* Using Zalando Operator Database
+```yaml
+warnings:
+  url: geoweb.example.com
+  db:
+    enableDefaultDb: false
+    useZalandoOperatorDb: true
+    cleanInstall: false # Add this line only after first install
+    backupBucket: s3://<S3-bucket-name>/
+```
+
 # Testing the Chart
 Execute the following for testing the chart:
 
