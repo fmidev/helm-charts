@@ -834,6 +834,18 @@ entries:
   geoweb-presets-backend:
   - apiVersion: v2
     appVersion: 3.6.3
+    created: "2024-01-11T10:13:24.552237147Z"
+    description: A Helm chart for geoweb presets backend resources in Kubernetes
+    digest: 5bcb2c75c6390e1952ab130a9f32ffd82b9b493839f155c0954a61d9b44184a4
+    maintainers:
+    - name: Jusaa
+    name: geoweb-presets-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-presets-backend-2.7.0/geoweb-presets-backend-2.7.0.tgz
+    version: 2.7.0
+  - apiVersion: v2
+    appVersion: 3.6.3
     created: "2023-12-20T15:18:51.179840136Z"
     description: A Helm chart for geoweb presets backend resources in Kubernetes
     digest: b8dc2776ae1d7951ce99ff4253312c670ac3e3a28fb7c8119088e376cdc6e24a
@@ -1068,6 +1080,18 @@ entries:
   geoweb-taf-backend:
   - apiVersion: v2
     appVersion: v0.0.5
+    created: "2024-01-11T10:13:24.767644673Z"
+    description: A Helm chart for geoweb taf backend resources in Kubernetes
+    digest: 2643c4f0d4c64e1e5a6864991b5278e88648e58ef31dbaf6f75970ec2209535c
+    maintainers:
+    - name: Jusaa
+    name: geoweb-taf-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-taf-backend-0.3.0/geoweb-taf-backend-0.3.0.tgz
+    version: 0.3.0
+  - apiVersion: v2
+    appVersion: v0.0.5
     created: "2023-12-20T15:18:51.321624808Z"
     description: A Helm chart for geoweb taf backend resources in Kubernetes
     digest: 4f68d2da690359266da68f44388f0f3e4d75bf6e51edac18e081c68fb5a55da3
@@ -1171,6 +1195,18 @@ entries:
     - https://github.com/fmidev/helm-charts/releases/download/geoweb-taf-backend-0.0.1/geoweb-taf-backend-0.0.1.tgz
     version: 0.0.1
   geoweb-warnings-backend:
+  - apiVersion: v2
+    appVersion: 0.5.0
+    created: "2024-01-11T10:13:24.954835522Z"
+    description: A Helm chart for geoweb warnings backend resources in Kubernetes
+    digest: 56fc6b7f7ef8a4a74b5cf03552fc6b51c9ed389f190ccd0f5468458d9c50bf57
+    maintainers:
+    - name: Jusaa
+    name: geoweb-warnings-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-warnings-backend-0.3.0/geoweb-warnings-backend-0.3.0.tgz
+    version: 0.3.0
   - apiVersion: v2
     appVersion: 0.5.0
     created: "2023-12-20T15:18:51.465337003Z"
@@ -1356,4 +1392,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/smartmetserver-0.1.0/smartmetserver-0.1.0.tgz
     version: 0.1.0
-generated: "2023-12-21T14:20:49.777256153Z"
+generated: "2024-01-11T10:13:24.955221449Z"
