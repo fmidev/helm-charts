@@ -65,15 +65,33 @@ spec:
         - configMapRef:
             name: {{ .Values.presets.name }}
         env:
+      {{- if .Values.presets.db.useZalandoOperatorDb }}
+        - name: PG_PASS
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.presets.db.POSTGRES_USER }}.{{ .Values.presets.db.name }}.credentials.postgresql.acid.zalan.do
+              key: password
+        - name: PG_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.presets.db.POSTGRES_USER }}.{{ .Values.presets.db.name }}.credentials.postgresql.acid.zalan.do
+              key: username
+      {{- end }}
         - name: PRESETS_BACKEND_DB
+        {{- if .Values.presets.db.useZalandoOperatorDb }}
+          value: "postgresql://$(PG_USER):$(PG_PASS)@{{ .Values.presets.db.name }}:5432/{{ .Values.presets.db.POSTGRES_DB }}"
+        {{- else }}
           valueFrom:
             secretKeyRef:
               name: {{ .Values.presets.db_secretName }}
               key: PRESETS_BACKEND_DB
+        {{- end }}
+      {{- if not .Values.presets.db.useZalandoOperatorDb }}
         volumeMounts:
         - name: secrets-store-inline
           mountPath: "/mnt/secrets-store"
           readOnly: true
+      {{- end }}
       {{- if and .Values.presets.useCustomWorkspacePresets }}
         - mountPath: "/app/staticpresets"
           name: {{ .Values.presets.name }}-volume
@@ -120,6 +138,7 @@ spec:
           claimName: {{ .Values.presets.name }}-claim
       {{- end }}
     {{- end }}
+    {{- if not .Values.presets.db.useZalandoOperatorDb }}
       - name: secrets-store-inline
       {{- if .Values.secretProvider }}
         csi:
@@ -131,3 +150,4 @@ spec:
         secret:
           secretName: {{ .Values.presets.db_secretName | quote }}
       {{- end }}
+    {{- end }}

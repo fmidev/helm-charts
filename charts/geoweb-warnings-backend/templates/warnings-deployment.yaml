@@ -49,15 +49,33 @@ spec:
         - configMapRef:
             name: {{ .Values.warnings.name }}
         env:
+      {{- if .Values.warnings.db.useZalandoOperatorDb }}
+        - name: PG_PASS
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.warnings.db.POSTGRES_USER }}.{{ .Values.warnings.db.name }}.credentials.postgresql.acid.zalan.do
+              key: password
+        - name: PG_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.warnings.db.POSTGRES_USER }}.{{ .Values.warnings.db.name }}.credentials.postgresql.acid.zalan.do
+              key: username
+      {{- end }}
         - name: WARNINGS_BACKEND_DB
+        {{- if .Values.warnings.db.useZalandoOperatorDb }}
+          value: "postgresql://$(PG_USER):$(PG_PASS)@{{ .Values.warnings.db.name }}:5432/{{ .Values.warnings.db.POSTGRES_DB }}"
+        {{- else }}
           valueFrom:
             secretKeyRef:
               name: {{ .Values.warnings.db_secretName }}
               key: WARNINGS_BACKEND_DB
+        {{- end }}
+      {{- if not .Values.warnings.db.useZalandoOperatorDb }}
         volumeMounts:
         - name: secrets-store-inline
           mountPath: "/mnt/secrets-store"
           readOnly: true
+      {{- end }}
       - name: {{ .Values.warnings.nginx.name }}
         image: {{ .Values.warnings.nginx.registry }}:{{ default .Chart.AppVersion .Values.versions.warnings }}
       {{- if .Values.warnings.imagePullPolicy }}
@@ -91,6 +109,7 @@ spec:
             value: {{ .Values.warnings.db.POSTGRES_PASSWORD }}
       {{- end }}
       volumes:
+    {{- if not .Values.warnings.db.useZalandoOperatorDb }}
       - name: secrets-store-inline
       {{- if .Values.secretProvider }}
         csi:
@@ -102,3 +121,4 @@ spec:
         secret:
           secretName: {{ .Values.warnings.db_secretName | quote }}
       {{- end }}
+    {{- end }}

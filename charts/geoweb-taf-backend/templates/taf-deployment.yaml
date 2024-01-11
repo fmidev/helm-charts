@@ -65,15 +65,33 @@ spec:
         - configMapRef:
             name: {{ .Values.taf.name }}
         env:
+      {{- if .Values.taf.db.useZalandoOperatorDb }}
+        - name: PG_PASS
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.taf.db.POSTGRES_USER }}.{{ .Values.taf.db.name }}.credentials.postgresql.acid.zalan.do
+              key: password
+        - name: PG_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.taf.db.POSTGRES_USER }}.{{ .Values.taf.db.name }}.credentials.postgresql.acid.zalan.do
+              key: username
+      {{- end }}
         - name: AVIATION_TAF_BACKEND_DB
+        {{- if .Values.taf.db.useZalandoOperatorDb }}
+          value: "postgresql://$(PG_USER):$(PG_PASS)@{{ .Values.taf.db.name }}:5432/{{ .Values.taf.db.POSTGRES_DB }}"
+        {{- else }}
           valueFrom:
             secretKeyRef:
               name: {{ .Values.taf.db_secretName }}
               key: AVIATION_TAF_BACKEND_DB
+        {{- end }}
+      {{- if not .Values.taf.db.useZalandoOperatorDb }}
         volumeMounts:
         - name: secrets-store-inline
           mountPath: "/mnt/secrets-store"
           readOnly: true
+      {{- end }}
       {{- if and .Values.taf.useCustomConfigurationFiles }}
         - mountPath: {{ .Values.taf.customConfigurationMountPath }}
           name: {{ .Values.taf.name }}-volume
@@ -93,19 +111,37 @@ spec:
         readinessProbe: {{ toYaml .Values.taf.placeholder.readinessProbe | nindent 10 }}
       {{- end }}
         env:
+      {{- if .Values.taf.db.useZalandoOperatorDb }}
+        - name: PG_PASS
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.taf.db.POSTGRES_USER }}.{{ .Values.taf.db.name }}.credentials.postgresql.acid.zalan.do
+              key: password
+        - name: PG_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.taf.db.POSTGRES_USER }}.{{ .Values.taf.db.name }}.credentials.postgresql.acid.zalan.do
+              key: username
+      {{- end }}
         - name: AVIATION_TAF_BACKEND_DB
+        {{- if .Values.taf.db.useZalandoOperatorDb }}
+          value: "postgresql://$(PG_USER):$(PG_PASS)@{{ .Values.taf.db.name }}:5432/{{ .Values.taf.db.POSTGRES_DB }}"
+        {{- else }}
           valueFrom:
             secretKeyRef:
               name: {{ .Values.taf.db_secretName }}
               key: AVIATION_TAF_BACKEND_DB
+        {{- end }}
       {{- if .Values.taf.placeholder.TAFPLACEHOLDER_KEEPRUNNING }}
         - name: TAFPLACEHOLDER_KEEPRUNNING
           value: {{ .Values.taf.placeholder.TAFPLACEHOLDER_KEEPRUNNING | quote }}
       {{- end }}
+      {{- if not .Values.taf.db.useZalandoOperatorDb }}
         volumeMounts:
         - name: secrets-store-inline
           mountPath: "/mnt/secrets-store"
           readOnly: true
+      {{- end }}
       - name: {{ .Values.taf.messageconverter.name }}
         image: {{ .Values.taf.messageconverter.registry }}:{{ .Values.taf.messageconverter.version }}
       {{- if .Values.taf.imagePullPolicy }}
@@ -192,6 +228,7 @@ spec:
           claimName: {{ .Values.taf.name }}-claim
       {{- end }}
     {{- end }}
+    {{- if not .Values.taf.db.useZalandoOperatorDb }}
       - name: secrets-store-inline
       {{- if .Values.secretProvider }}
         csi:
@@ -203,6 +240,7 @@ spec:
         secret:
           secretName: {{ .Values.taf.db_secretName | quote }}
       {{- end }}
+    {{- end }}
       - name: publisher-volume
       {{- if .Values.taf.publisher.volumeOptions }}
         {{- toYaml .Values.taf.publisher.volumeOptions | nindent 8 }}
