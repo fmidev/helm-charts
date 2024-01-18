@@ -40,7 +40,7 @@ opmet:
   messageconverter:
     name: opmet-messageconverter
     registry: registry.gitlab.com/opengeoweb/avi-msgconverter/geoweb-knmi-avi-messageservices
-    version: "0.4.0"
+    version: "v0.5.0"
     port: 8080
     resources:
       requests:
