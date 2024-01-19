@@ -1,0 +1,11 @@
+Serviceaccount {{ .Release.Name }}-{{ .Values.serviceAccount.name }} created.
+
+Get serviceaccount access token by executing the following command (needs jq).
+
+oc get secret -o json | jq '.items[] | select(.metadata.name | contains("{{ .Release.Name }}-{{ .Values.serviceAccount.name }}-token")) | .data.token' | tr -d '"' | base64 -d
+
+Test login:
+
+oc login --token <token from previous command>
+ 
+Have a nice day!
