@@ -3,8 +3,8 @@ kind: ConfigMap
 metadata:
   name: {{ .Values.presets.nginx.name }}
 data:
-{{- if .Values.presets.nginx.PRESETS_ENABLE_SSL }}
-  PRESETS_ENABLE_SSL: {{ .Values.presets.nginx.PRESETS_ENABLE_SSL | quote }}
+{{- if .Values.presets.nginx.ENABLE_SSL }}
+  ENABLE_SSL: {{ .Values.presets.nginx.ENABLE_SSL | quote }}
 {{- end }}
 {{- if .Values.presets.nginx.OAUTH2_USERINFO }}
   OAUTH2_USERINFO: {{ .Values.presets.nginx.OAUTH2_USERINFO | quote }}

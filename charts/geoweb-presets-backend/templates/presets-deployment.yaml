@@ -97,7 +97,7 @@ spec:
           name: {{ .Values.presets.name }}-volume
       {{- end }}
       - name: {{ .Values.presets.nginx.name }}
-        image: {{ .Values.presets.nginx.registry }}:{{ default .Chart.AppVersion .Values.versions.presets }}
+        image: {{ .Values.presets.nginx.registry }}:{{ .Values.presets.nginx.version }}
       {{- if .Values.presets.imagePullPolicy }}
         imagePullPolicy: {{ .Values.presets.imagePullPolicy }}
       {{- end }}
