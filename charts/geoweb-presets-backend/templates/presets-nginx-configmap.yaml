@@ -15,8 +15,8 @@ data:
 {{- if .Values.presets.nginx.GEOWEB_REQUIRE_WRITE_PERMISSION }}
   GEOWEB_REQUIRE_WRITE_PERMISSION: {{ .Values.presets.nginx.GEOWEB_REQUIRE_WRITE_PERMISSION | quote }}
 {{- end }}
-{{- if .Values.presets.nginx.PRESETS_BACKEND_HOST }}
-  PRESETS_BACKEND_HOST: {{ .Values.presets.nginx.PRESETS_BACKEND_HOST | quote }}
+{{- if .Values.presets.nginx.BACKEND_HOST }}
+  BACKEND_HOST: {{ .Values.presets.nginx.BACKEND_HOST | quote }}
 {{- end }}
 {{- if .Values.presets.nginx.NGINX_PORT_HTTP }}
   NGINX_PORT_HTTP: {{ .Values.presets.nginx.NGINX_PORT_HTTP | quote }}
