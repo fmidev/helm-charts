@@ -114,9 +114,10 @@ The following table lists the configurable parameters of the Presets backend cha
 | `secretProvider` | Option to use secret provider instead of passing base64 encoded database connection string as presets.db_secret *(aws\|azure\|gcp\|vault)* | |
 | `secretProviderParameters` | Option to add custom parameters to the secretProvider, for example with aws you can specify region | |
 | `presets.nginx.name` | Name of nginx container | `nginx` |
-| `presets.nginx.registry` | Registry to fetch nginx image | `registry.gitlab.com/opengeoweb/backend-services/presets-backend/nginx-presets-backend` |
+| `presets.nginx.registry` | Registry to fetch nginx image | `registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend` |
 | `presets.nginx.ENABLE_SSL` | Toggle SSL termination | `"FALSE"` |
 | `presets.nginx.OAUTH2_USERINFO` | Userinfo endpoint to retrieve consented claims, or assertions, about the logged in end-user | - |
+| `opmet.nginx.GEOWEB_USERNAME_CLAIM` | Claim name used as a user identifier in the presets-backend | `"email"` |
 | `opmet.nginx.GEOWEB_REQUIRE_READ_PERMISSION` | Required OAUTH claim name and value to be present in the userinfo response for read operations | `"FALSE"` |
 | `opmet.nginx.GEOWEB_REQUIRE_WRITE_PERMISSION` | Required OAUTH claim name and value to be present in the userinfo response for write operations | `"FALSE"` |
 | `presets.nginx.BACKEND_HOST` | Presets-backend address where Nginx reverse proxy forwards the requests | `0.0.0.0:8080` |
