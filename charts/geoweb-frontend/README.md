@@ -171,3 +171,10 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | `nginx` |
 | `ingress.rules` | Extra nginx configuration rules, like cache headers | See reference in `values.yaml` |
 | `ingress.customAnnotations` | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations and `frontend.auth_secret`, `frontend.auth_secretName` and `ingress.rules` can't be used if set | |
+
+# Chart versions
+
+| Chart version | frontend version |
+|---------------|------------------|
+| 3.3.0         | 9.6.0            |
+| 3.2.0         | 9.5.0            |
