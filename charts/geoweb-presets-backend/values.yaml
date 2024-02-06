@@ -81,6 +81,8 @@ presets:
     enableLogicalBackup: true
     cleanInstall: true
     backupTimestamp: "2030-01-01T00:00:00+00:00"
+  useCustomConfigurationFiles: false
+  customConfigurationLocation: local
   useCustomWorkspacePresets: false
   customWorkspacePresetLocation: local
   volumeAccessMode: ReadOnlyMany
