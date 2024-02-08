@@ -30,10 +30,6 @@ presets:
 * Using custom configuration files stored locally
 ```yaml
 presets:
-  env:
-    BACKEND_CONFIG: configuration_files/custom/backendConfig.json
-    SIGMET_CONFIG: configuration_files/custom/sigmetConfig.json
-    AIRMET_CONFIG: configuration_files/custom/airmetConfig.json
   url: geoweb.example.com
   useCustomConfigurationFiles: true
   customConfigurationFolderPath: /example/path/
@@ -43,10 +39,6 @@ presets:
 ```yaml
 presets:
   url: geoweb.example.com
-  env:
-    BACKEND_CONFIG: configuration_files/custom/backendConfig.json
-    SIGMET_CONFIG: configuration_files/custom/sigmetConfig.json
-    AIRMET_CONFIG: configuration_files/custom/airmetConfig.json
   useCustomConfigurationFiles: true
   customConfigurationLocation: s3
   s3bucketName: example-bucket
