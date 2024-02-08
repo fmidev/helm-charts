@@ -142,6 +142,7 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.nginx.GEOWEB_USERNAME_CLAIM` | Claim name used as a user identifier in the presets-backend | `"email"` |
 | `presets.nginx.GEOWEB_REQUIRE_READ_PERMISSION` | Required OAUTH claim name and value to be present in the userinfo response for read operations | `"FALSE"` |
 | `presets.nginx.GEOWEB_REQUIRE_WRITE_PERMISSION` | Required OAUTH claim name and value to be present in the userinfo response for write operations | `"FALSE"` |
+| `presets.nginx.ALLOW_ANONYMOUS_ACCESS` | Allow/disallow anonymous access. Note that if an access token has been passed, it is checked even if anonymous access is allowed. | `"FALSE"` |
 | `presets.nginx.BACKEND_HOST` | Presets-backend container address where Nginx reverse proxy forwards the requests | `0.0.0.0:8080` |
 | `presets.nginx.NGINX_PORT_HTTP` | Port used for Nginx reverse proxy| `80` |
 | `presets.nginx.NGINX_PORT_HTTPS` | Port used for Nginx reverse proxy when SSL is enabled | `443` |
