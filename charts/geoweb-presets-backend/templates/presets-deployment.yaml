@@ -131,6 +131,7 @@ spec:
         - configMapRef:
             name: {{ .Values.presets.nginx.name }}
       {{- if and .Values.presets.useCustomConfigurationFiles }}
+        volumeMounts:
         - mountPath: "/nginx.conf"
           subPath: "/presets/nginx.conf"
           name: {{ .Values.presets.name }}-volume
