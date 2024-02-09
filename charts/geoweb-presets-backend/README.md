@@ -158,6 +158,7 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.db.POSTGRES_PASSWORD` | Default postgres database password | `postgres` |
 | `presets.useCustomConfigurationFiles` | Use custom configurations | `false` |
 | `presets.customConfigurationLocation` | Where custom configurations are located *(local\|s3)* | `local` |
+| `presets.customConfigurationFolderPath` | Path to the folder which contains custom configurations | |
 | `presets.useCustomWorkspacePresets` | Use custom presets | `false` |
 | `presets.customWorkspacePresetLocation` | Where custom presets are located *(local\|s3)* | `local` |
 | `presets.customPresetsPath` | Path to the folder which contains custom presets | |
