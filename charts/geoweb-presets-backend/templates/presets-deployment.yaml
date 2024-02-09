@@ -22,7 +22,7 @@ spec:
     {{- if eq .Values.secretProvider "aws" }}
       serviceAccountName: {{ .Values.presets.secretServiceAccount }}
     {{- end }}
-      InitContainers:
+      initContainers:
       {{- if and .Values.presets.useCustomConfigurationFiles (eq .Values.presets.customConfigurationLocation "s3")}}
       - name: init-custom-configuration
         image: amazon/aws-cli
