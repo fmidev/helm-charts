@@ -22,9 +22,9 @@ spec:
     {{- if eq .Values.secretProvider "aws" }}
       serviceAccountName: {{ .Values.presets.secretServiceAccount }}
     {{- end }}
-    {{- if and .Values.presets.useCustomWorkspacePresets (eq .Values.presets.customWorkspacePresetLocation "s3")}}
-      initContainers:
-      - name: init
+      InitContainers:
+      {{- if and .Values.presets.useCustomConfigurationFiles (eq .Values.presets.customConfigurationLocation "s3")}}
+      - name: init-custom-configuration
         image: amazon/aws-cli
         command: ["/bin/sh"]
         args:
@@ -33,11 +33,26 @@ spec:
             export AWS_ACCESS_KEY_ID={{ .Values.presets.awsAccessKeyId }};
             export AWS_SECRET_ACCESS_KEY={{ .Values.presets.awsAccessKeySecret }};
             AWS_DEFAULT_REGION={{ .Values.presets.awsDefaultRegion }};
-            aws s3 cp --recursive s3://{{ .Values.presets.s3bucketName }}{{ .Values.presets.customPresetsPath }} /presets;
+            aws s3 cp --recursive --exclude "*/*" s3://{{ .Values.presets.s3bucketName }}{{ .Values.presets.customConfigurationFolderPath }} /presets;
         volumeMounts:
         - mountPath: "/presets/"
           name: {{ .Values.presets.name }}-volume
-    {{- end }}
+      {{- end }}
+      {{- if and .Values.presets.useCustomWorkspacePresets (eq .Values.presets.customWorkspacePresetLocation "s3")}}
+      - name: init-custom-presets
+        image: amazon/aws-cli
+        command: ["/bin/sh"]
+        args:
+          - -c
+          - |
+            export AWS_ACCESS_KEY_ID={{ .Values.presets.awsAccessKeyId }};
+            export AWS_SECRET_ACCESS_KEY={{ .Values.presets.awsAccessKeySecret }};
+            AWS_DEFAULT_REGION={{ .Values.presets.awsDefaultRegion }};
+            aws s3 cp --recursive s3://{{ .Values.presets.customPresetsS3bucketName }}{{ .Values.presets.customPresetsPath }} /custom-presets;
+        volumeMounts:
+        - mountPath: "/custom-presets/"
+          name: {{ .Values.presets.name }}-custom-presets-volume
+      {{- end }}
       containers:
       - name: {{ .Values.presets.name }}
         image: {{ .Values.presets.registry }}:{{ default .Chart.AppVersion .Values.versions.presets }}
@@ -94,10 +109,10 @@ spec:
       {{- end }}
       {{- if and .Values.presets.useCustomWorkspacePresets }}
         - mountPath: "/app/staticpresets"
-          name: {{ .Values.presets.name }}-volume
+          name: {{ .Values.presets.name }}-custom-presets-volume
       {{- end }}
       - name: {{ .Values.presets.nginx.name }}
-        image: {{ .Values.presets.nginx.registry }}:{{ default .Chart.AppVersion .Values.versions.presets }}
+        image: {{ .Values.presets.nginx.registry }}:{{ .Values.presets.nginx.version }}
       {{- if .Values.presets.imagePullPolicy }}
         imagePullPolicy: {{ .Values.presets.imagePullPolicy }}
       {{- end }}
@@ -115,6 +130,11 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Values.presets.nginx.name }}
+      {{- if and .Values.presets.useCustomConfigurationFiles }}
+        - mountPath: "/nginx.conf"
+          subPath: "/presets/nginx.conf"
+          name: {{ .Values.presets.name }}-volume
+      {{- end }}
       {{- if .Values.presets.db.enableDefaultDb }}
       - name: {{ .Values.presets.db.name }}
         image: {{ .Values.presets.db.image }}
@@ -129,13 +149,22 @@ spec:
             value: {{ .Values.presets.db.POSTGRES_PASSWORD }}
       {{- end }}
       volumes:
-    {{- if .Values.presets.useCustomWorkspacePresets}}
+    {{- if .Values.presets.useCustomConfigurationFiles }}
       - name: {{ .Values.presets.name }}-volume
+      {{- if eq .Values.presets.customConfigurationLocation "s3"}}
+        emptyDir: {}
+      {{- else if eq .Values.presets.customConfigurationLocation "local"}}
+        persistentVolumeClaim:
+          claimName: {{ .Values.presets.name }}-claim
+      {{- end }}
+    {{- end }}
+    {{- if .Values.presets.useCustomWorkspacePresets}}
+      - name: {{ .Values.presets.name }}-custom-presets-volume
       {{- if eq .Values.presets.customWorkspacePresetLocation "s3"}}
         emptyDir: {}
       {{- else if eq .Values.presets.customWorkspacePresetLocation "local"}}
         persistentVolumeClaim:
-          claimName: {{ .Values.presets.name }}-claim
+          claimName: {{ .Values.presets.name }}-custom-presets-claim
       {{- end }}
     {{- end }}
     {{- if not .Values.presets.db.useZalandoOperatorDb }}

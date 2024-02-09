@@ -1,4 +1,4 @@
-{{- if and .Values.presets.useCustomWorkspacePresets (eq .Values.presets.customWorkspacePresetLocation "local")}}
+{{- if and .Values.presets.useCustomConfigurationFiles (eq .Values.presets.customConfigurationLocation "local")}}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -24,6 +24,36 @@ spec:
   claimRef:
     namespace: {{ .Release.Namespace }}
     name: {{ .Values.presets.name }}-claim
+  hostPath:
+    path: {{ .Values.presets.customConfigurationFolderPath | quote }}
+{{- end }}
+---
+{{- if and .Values.presets.useCustomWorkspacePresets (eq .Values.presets.customWorkspacePresetLocation "local")}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.presets.name }}-custom-presets-claim
+spec:
+  storageClassName: ""
+  accessModes:
+    - {{ .Values.presets.volumeAccessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.presets.volumeSize }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.presets.name }}-custom-presets-volume
+spec:
+  storageClassName: manual
+  capacity:
+    storage: {{ .Values.presets.volumeSize }}
+  accessModes:
+    - {{ .Values.presets.volumeAccessMode }}
+  claimRef:
+    namespace: {{ .Release.Namespace }}
+    name: {{ .Values.presets.name }}-custom-presets-claim
   hostPath:
     path: {{ .Values.presets.customPresetsFolderPath | quote }}
 {{- end }}
