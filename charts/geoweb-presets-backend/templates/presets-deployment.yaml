@@ -133,7 +133,7 @@ spec:
       {{- if and .Values.presets.useCustomConfigurationFiles }}
         volumeMounts:
         - mountPath: "/nginx.conf"
-          subPath: "nginx.conf"
+          subPath: "presets/nginx.conf"
           name: {{ .Values.presets.name }}-volume
       {{- end }}
       {{- if .Values.presets.db.enableDefaultDb }}
