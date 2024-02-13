@@ -1,7 +1,7 @@
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ .Values.smartmetserver.name }}-{{ .Values.hpa.name }}
+  name: {{ .Values.smartmetserver.name }}-hpa
   namespace: {{ .Release.Namespace }}
 spec:
   scaleTargetRef:
