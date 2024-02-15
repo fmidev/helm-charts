@@ -171,6 +171,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.nginx.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
 | `opmet.publisher.name` | Name of publisher container  | `opmet-publisher` |
 | `opmet.publisher.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/opmet-backend/opmet-backend-publisher-local` |
+| `opmet.publisher.version` | Publisher version | defaults to Chart.AppVersion |
 | `opmet.publisher.port` | Port used for publisher | `8090`|
 | `opmet.publisher.DESTINATION` | Folder inside publisher container where TACs are stored (used with local-publisher) | `/app/output` |
 | `opmet.publisher.SERVERS` | List of configuration options used to access SFTP server. List of jsons. Note that ssh secrets get mounted to `/mnt/secrets-store`. Details https://gitlab.com/opengeoweb/backend-services/opmet-backend#sftp-publisher | |

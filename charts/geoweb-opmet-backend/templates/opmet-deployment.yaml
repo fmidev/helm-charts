@@ -112,7 +112,7 @@ spec:
         - configMapRef:
             name: {{ .Values.opmet.name }}
       - name: {{ .Values.opmet.publisher.name }}
-        image: {{ .Values.opmet.publisher.registry }}:{{ default .Chart.AppVersion .Values.versions.opmet }}
+        image: {{ .Values.opmet.publisher.registry }}:{{ default .Chart.AppVersion .Values.opmet.publisher.version }}
       {{- if .Values.opmet.imagePullPolicy }}
         imagePullPolicy: {{ .Values.opmet.imagePullPolicy }}
       {{- end }}
