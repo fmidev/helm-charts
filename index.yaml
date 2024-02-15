@@ -516,6 +516,18 @@ entries:
     version: 1.0.0
   geoweb-opmet-backend:
   - apiVersion: v2
+    appVersion: v2.7.0
+    created: "2024-02-15T10:40:45.9694344Z"
+    description: A Helm chart for geoweb opmet backend resources in Kubernetes
+    digest: b0a41ac84c24a625d5f68bf9f7b1d1e8549f93278d755c6c9e4deb468cbe84e7
+    maintainers:
+    - name: Jusaa
+    name: geoweb-opmet-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-opmet-backend-3.1.0/geoweb-opmet-backend-3.1.0.tgz
+    version: 3.1.0
+  - apiVersion: v2
     appVersion: v2.4.0
     created: "2024-01-18T07:36:55.804232137Z"
     description: A Helm chart for geoweb opmet backend resources in Kubernetes
@@ -1559,4 +1571,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/smartmetserver-0.1.0/smartmetserver-0.1.0.tgz
     version: 0.1.0
-generated: "2024-02-12T12:14:55.321902524Z"
+generated: "2024-02-15T10:40:45.969881431Z"
