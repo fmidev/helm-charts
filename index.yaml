@@ -1478,6 +1478,16 @@ entries:
   job-service-account:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2024-02-16T06:40:13.605314327Z"
+    description: This chart creates a serviceaccount that can launch jobs
+    digest: b0bc37298ca8730dd9288e24d614c8a9bfd7333a739c5b3b0af08c87dd0396f0
+    name: job-service-account
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/job-service-account-1.0.1/job-service-account-1.0.1.tgz
+    version: 1.0.1
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2024-01-19T06:02:53.466997468Z"
     description: This chart creates a serviceaccount that can launch jobs
     digest: c0688c9ccb88f1705a512142b50a954e297f3bba9410d2a85ac9b1e212f3c638
@@ -1571,4 +1581,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/smartmetserver-0.1.0/smartmetserver-0.1.0.tgz
     version: 0.1.0
-generated: "2024-02-15T10:40:45.969881431Z"
+generated: "2024-02-16T06:40:13.605592995Z"
