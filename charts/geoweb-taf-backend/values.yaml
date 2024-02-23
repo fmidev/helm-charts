@@ -42,7 +42,7 @@ taf:
   messageconverter:
     name: taf-messageconverter
     registry: registry.gitlab.com/opengeoweb/avi-msgconverter/geoweb-knmi-avi-messageservices
-    version: "0.2.1"
+    version: "0.10.1"
     port: 8081
     resources:
       requests:
