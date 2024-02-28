@@ -6,8 +6,8 @@ spec:
   selector:
     app: {{ .Values.smartmetserver.name }}-{{ .Values.postgres.name }}
   ports:
-    - port: 5432
-      targetPort: 5432
+    - port: {{ .Values.postgres.svcPort }}
+      targetPort: {{ .Values.postgres.containerPort }}
   clusterIP: None
 ---
 apiVersion: apps/v1
@@ -17,7 +17,8 @@ metadata:
   labels:
     app: {{ .Values.smartmetserver.name }}-{{ .Values.postgres.name }}
 spec:
-  replicas: 1
+  serviceName: {{ .Values.smartmetserver.name }}-{{ .Values.postgres.name }}
+  replicas: {{ .Values.postgres.replicas }}
   selector:
     matchLabels:
       app: {{ .Values.smartmetserver.name }}-{{ .Values.postgres.name }}
@@ -28,15 +29,17 @@ spec:
     spec:
       containers:
       - name: postgres
-        image: postgres:12.14
+        image: {{ .Values.postgres.image }}
+        {{- if .Values.postgres.pullPolicy }}
+        imagePullPolicy: {{ .Values.postgres.pullPolicy }}
+        {{- end }}
         env:
           - name: POSTGRES_PASSWORD
             value: gis_pw
           - name: POSTGRES_USER
             value: gis_user
         ports:
-          - containerPort: 5432
-            hostPort: 5432
+          - containerPort: {{ .Values.postgres.containerPort }}
         volumeMounts:
         - mountPath: "/var/lib/postgresql/data"
           name: postgres-volume
@@ -49,4 +52,4 @@ spec:
           claimName: {{ .Values.postgres.name }}-{{ .Values.postgrespvc.name }}
       - name: initsql-cm
         configMap:
-          name: {{ .Values.smartmetserver.name }}-{{ .Values.initSqlCm.name }}
+          name: {{ .Values.smartmetserver.name }}-init-sql

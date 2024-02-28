@@ -47,18 +47,21 @@ spec:
             path: /admin?what=qengine
             port: {{ .Values.smartmetserver.containerPort }}
           periodSeconds: {{ .Values.smartmetserver.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.smartmetserver.livenessProbe.timeoutSeconds }}
         readinessProbe:
           httpGet:
             path: /wms?request=getCapabilities&service=WMS
             port: {{ .Values.smartmetserver.containerPort }}
           failureThreshold: {{ .Values.smartmetserver.readinessProbe.failureThreshold }}
           periodSeconds: {{ .Values.smartmetserver.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.smartmetserver.readinessProbe.timeoutSeconds }}
         startupProbe:
           httpGet:
             path: /admin?what=qengine
             port: {{ .Values.smartmetserver.containerPort }}
           failureThreshold: {{ .Values.smartmetserver.startupProbe.failureThreshold }}
           periodSeconds: {{ .Values.smartmetserver.startupProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.smartmetserver.startupProbe.timeoutSeconds }}
       volumes:
       - name: smartmetserver-volume
         persistentVolumeClaim:

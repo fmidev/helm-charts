@@ -1,11 +1,14 @@
+{{- if .Values.ingress.enabled -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ .Values.smartmetserver.name }}-{{ .Values.ingress.name }}
+  {{- with .Values.ingress.annotations }}
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
-  {{- if.Values.ingress.ingressClassName }}
+  {{- if .Values.ingress.ingressClassName }}
   ingressClassName: {{ .Values.ingress.ingressClassName }}
   {{- end }}
   {{- with .Values.ingress.tls }}
@@ -29,3 +32,4 @@ spec:
               number: {{ .Values.smartmetserver.svcPort }}
         path: /
         pathType: Prefix
+{{- end }}
