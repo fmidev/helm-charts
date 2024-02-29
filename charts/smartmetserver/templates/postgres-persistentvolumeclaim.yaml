@@ -1,4 +1,4 @@
-{{- if and .Values.postgres.enabled .Values.postgres.pv.enabled -}}
+{{- if and (not .Values.postgres.external) .Values.postgres.pv.enabled -}}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

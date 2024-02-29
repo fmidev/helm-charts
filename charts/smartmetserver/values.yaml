@@ -46,7 +46,7 @@ hpa:
   targetCPUUtilizationPercentage: 60
 
 postgres:
-  enabled: false
+  external: false
   username: gis_user
   password: gis_pw
   name: postgres-statefulset
