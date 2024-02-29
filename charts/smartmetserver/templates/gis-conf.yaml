@@ -1,10 +1,39 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.smartmetserver.name }}-{{ .Values.gisConfCm.name }}
+  name: {{ .Values.smartmetserver.name }}-gis-conf
   labels:
     app: {{ .Values.smartmetserver.name }}
   namespace: {{ .Release.Namespace }}
 data:
   gis.conf: |
-    {{- .Values.gisConfCm.gisConf | nindent 4 }}
+    crsDefinitionDir = "/etc/smartmet/engines/gis/crs";
+
+    postgis:
+    {
+        # Enter Your postgres database connection data below
+        disable	        = {{ .Values.postgres.postgis.disable }};
+        host		= "{{ .Values.smartmetserver.name }}-{{ .Values.postgres.name }}.{{ .Release.Namespace }}";
+        port		= {{ .Values.postgres.svcPort }};
+        database	= {{ .Values.postgres.postgis.database | quote }};
+        username	= {{ .Values.postgres.username | quote }};
+        password	= {{ .Values.postgres.password | quote }};
+        encoding	= "UTF8";
+    };
+
+    cache:
+    {
+        max_size	= 1000;
+    };
+
+    gdal:
+    {
+        # Discard projected points which fall outside the valid area
+        # for the spatial reference. For example eureffin is not valid
+        # in the full area of EC Europe data
+
+        OGR_ENABLE_PARTIAL_REPROJECTION	= "YES";
+
+        # Seems to be the only way to properly disable error messages
+        CPL_LOG	= "/dev/null";
+    };

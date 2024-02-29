@@ -1,17 +1,17 @@
-{{- if .Values.postgrespv.enable }}
+{{- if and .Values.postgres.enabled .Values.postgres.pv.enabled -}}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ .Values.postgres.name }}-{{ .Values.postgrespv.name }}
+  name: {{ .Values.postgres.name }}-{{ .Values.postgres.pv.name }}
 spec:
-  storageClassName: {{ .Values.postgrespvc.storageClassName }}
+  storageClassName: {{ .Values.postgres.pvc.storageClassName }}
   capacity:
-    storage: {{ .Values.postgrespvc.storage }}
+    storage: {{ .Values.postgres.pvc.storage }}
   accessModes:
-    - {{ .Values.postgrespvc.accessModes }}
+    - {{ .Values.postgres.pvc.accessModes }}
   claimRef:
     namespace: {{ .Release.Namespace }}
-    name: {{ .Values.postgres.name }}-{{ .Values.postgrespvc.name }}
+    name: {{ .Values.postgres.name }}-{{ .Values.postgres.pvc.name }}
   hostPath:
-    path: {{ .Values.postgrespv.path | quote }}
+    path: {{ .Values.postgres.pv.path | quote }}
 {{- end }}

@@ -71,9 +71,10 @@ spec:
           name: {{ .Values.smartmetserver.name }}-{{ .Values.smartmetConfCm.name }}
       - name: gis-configuration
         configMap:
-          name: {{ .Values.smartmetserver.name }}-{{ .Values.gisConfCm.name }}
+          name: {{ .Values.smartmetserver.name }}-gis-conf
       - name: geonames-configuration
         configMap:
-          name: {{ .Values.smartmetserver.name }}-{{ .Values.geonamesConfCm.name }}
+          name: {{ .Values.smartmetserver.name }}-geonames-conf
+
       - name: cache-volume
         emptyDir: {}

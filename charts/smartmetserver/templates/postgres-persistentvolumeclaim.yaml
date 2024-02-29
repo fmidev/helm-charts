@@ -1,11 +1,13 @@
+{{- if and .Values.postgres.enabled .Values.postgres.pv.enabled -}}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Values.postgres.name }}-{{ .Values.postgrespvc.name }}
+  name: {{ .Values.postgres.name }}-{{ .Values.postgres.pvc.name }}
 spec:
-  storageClassName: {{ .Values.postgrespvc.storageClassName }}
+  storageClassName: {{ .Values.postgres.pvc.storageClassName }}
   accessModes:
-    - {{ .Values.postgrespvc.accessModes }}
+    - {{ .Values.postgres.pvc.accessModes }}
   resources:
     requests:
-      storage: {{ .Values.postgrespvc.storage }}
+      storage: {{ .Values.postgres.pvc.storage }}
+{{- end }}

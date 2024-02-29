@@ -1,3 +1,4 @@
+{{- if .Values.postgres.enabled -}}
 apiVersion: v1
 kind: Service
 metadata:
@@ -35,9 +36,9 @@ spec:
         {{- end }}
         env:
           - name: POSTGRES_PASSWORD
-            value: gis_pw
+            value: {{ .Values.postgres.postgis.password }}
           - name: POSTGRES_USER
-            value: gis_user
+            value: {{ .Values.postgres.postgis.username }} 
         ports:
           - containerPort: {{ .Values.postgres.containerPort }}
         volumeMounts:
@@ -49,7 +50,8 @@ spec:
       volumes:
       - name: postgres-volume
         persistentVolumeClaim:
-          claimName: {{ .Values.postgres.name }}-{{ .Values.postgrespvc.name }}
+          claimName: {{ .Values.postgres.name }}-{{ .Values.postgres.pvc.name }}
       - name: initsql-cm
         configMap:
           name: {{ .Values.smartmetserver.name }}-init-sql
+{{- end }}
