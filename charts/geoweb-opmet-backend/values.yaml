@@ -92,11 +92,12 @@ opmet:
       failureThreshold: 1
   nginx:
     name: opmet-nginx
-    registry: registry.gitlab.com/opengeoweb/backend-services/opmet-backend/nginx-opmet-backend
-    OPMET_ENABLE_SSL: "FALSE"
+    registry: registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend
+    version: "v0.1.0"
+    ENABLE_SSL: "FALSE"
     NGINX_PORT_HTTP: 80
     NGINX_PORT_HTTPS: 443
-    OPMET_BACKEND_HOST: localhost:8000
+    BACKEND_HOST: 0.0.0.0:8080
     resources:
       requests:
         memory: "10Mi"

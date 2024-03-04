@@ -3,8 +3,8 @@ kind: ConfigMap
 metadata:
   name: {{ .Values.opmet.nginx.name }}
 data:
-{{- if .Values.opmet.nginx.OPMET_ENABLE_SSL }}
-  OPMET_ENABLE_SSL: {{ .Values.opmet.nginx.OPMET_ENABLE_SSL | quote }}
+{{- if .Values.opmet.nginx.ENABLE_SSL }}
+  ENABLE_SSL: {{ .Values.opmet.nginx.ENABLE_SSL | quote }}
 {{- end }}
 {{- if .Values.opmet.nginx.OAUTH2_USERINFO }}
   OAUTH2_USERINFO: {{ .Values.opmet.nginx.OAUTH2_USERINFO | quote }}
@@ -15,8 +15,8 @@ data:
 {{- if .Values.opmet.nginx.GEOWEB_REQUIRE_WRITE_PERMISSION }}
   GEOWEB_REQUIRE_WRITE_PERMISSION: {{ .Values.opmet.nginx.GEOWEB_REQUIRE_WRITE_PERMISSION | quote }}
 {{- end }}
-{{- if .Values.opmet.nginx.OPMET_BACKEND_HOST }}
-  OPMET_BACKEND_HOST: {{ .Values.opmet.nginx.OPMET_BACKEND_HOST | quote }}
+{{- if .Values.opmet.nginx.BACKEND_HOST }}
+  BACKEND_HOST: {{ .Values.opmet.nginx.BACKEND_HOST | quote }}
 {{- end }}
 {{- if .Values.opmet.nginx.NGINX_PORT_HTTP }}
   NGINX_PORT_HTTP: {{ .Values.opmet.nginx.NGINX_PORT_HTTP | quote }}

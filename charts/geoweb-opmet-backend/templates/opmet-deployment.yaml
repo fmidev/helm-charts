@@ -167,6 +167,9 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Values.opmet.nginx.name }}
+        volumeMounts:
+          - mountPath: "/nginx.conf"
+            name: nginx-config
       {{- if .Values.opmet.db.enableDefaultDb }}
       - name: {{ .Values.opmet.db.name }}
         image: {{ .Values.opmet.db.image }}
