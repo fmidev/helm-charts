@@ -101,13 +101,13 @@ spec:
               name: {{ .Values.presets.db_secretName }}
               key: PRESETS_BACKEND_DB
         {{- end }}
-      {{- if not .Values.presets.db.useZalandoOperatorDb }}
         volumeMounts:
+      {{- if not .Values.presets.db.useZalandoOperatorDb }}
         - name: secrets-store-inline
           mountPath: "/mnt/secrets-store"
           readOnly: true
       {{- end }}
-      {{- if and .Values.presets.useCustomWorkspacePresets }}
+      {{- if .Values.presets.useCustomWorkspacePresets }}
         - mountPath: "/app/staticpresets"
           name: {{ .Values.presets.name }}-custom-presets-volume
       {{- end }}
