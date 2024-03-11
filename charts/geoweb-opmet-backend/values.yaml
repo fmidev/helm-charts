@@ -93,7 +93,7 @@ opmet:
   nginx:
     name: opmet-nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend
-    version: "v0.1.0"
+    version: "v0.1.1"
     ENABLE_SSL: "FALSE"
     NGINX_PORT_HTTP: 80
     NGINX_PORT_HTTPS: 443

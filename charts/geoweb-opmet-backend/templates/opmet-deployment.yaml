@@ -149,7 +149,7 @@ spec:
         - name: publisher-volume
           mountPath: {{ .Values.opmet.publisher.DESTINATION | quote }}
       - name: {{ .Values.opmet.nginx.name }}
-        image: {{ .Values.opmet.nginx.registry }}:{{ default .Chart.AppVersion .Values.versions.opmet }}
+        image: {{ .Values.opmet.nginx.registry }}:{{ default .Chart.AppVersion .Values.opmet.nginx.version }}
       {{- if .Values.opmet.imagePullPolicy }}
         imagePullPolicy: {{ .Values.opmet.imagePullPolicy }}
       {{- end }}
