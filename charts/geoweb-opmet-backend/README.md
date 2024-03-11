@@ -160,6 +160,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.messageconverter.version`              | Possibility to override application version | see default from `values.yaml` |
 | `opmet.name`                                  | Name of backend | `opmet` |
 | `opmet.nginx.BACKEND_HOST`                    | Address where nginx accesses the backend | `localhost:8080` |
+| `opmet.nginx.ENABLE_SSL`                      | Toggle SSL termination | `"FALSE"` |
 | `opmet.nginx.GEOWEB_REQUIRE_READ_PERMISSION`  | Required OAUTH claim name and value to be present in the userinfo response for read operations | `"FALSE"` |
 | `opmet.nginx.GEOWEB_REQUIRE_WRITE_PERMISSION` | Required OAUTH claim name and value to be present in the userinfo response for write operations | `"FALSE"` |
 | `opmet.nginx.livenessProbe`                   | Configure libenessProbe | see defaults from `values.yaml` |
@@ -167,9 +168,8 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.nginx.NGINX_PORT_HTTP`                 | Port used for nginx | `80` |
 | `opmet.nginx.NGINX_PORT_HTTPS`                | Port used for nginx when SSL is enabled | `443` |
 | `opmet.nginx.OAUTH2_USERINFO`                 | Userinfo endpoint to retrieve consented claims, or assertions, about the logged in end-user | - |
-| `opmet.nginx.OPMET_ENABLE_SSL`                | Toggle SSL termination | `"FALSE"` |
 | `opmet.nginx.readinessProbe`                  | Configure readinessProbe | see defaults from `values.yaml` |
-| `opmet.nginx.registry`                         | Registry to fetch nginx image |
+| `opmet.nginx.registry`                        | Registry to fetch nginx image |
 | `opmet.nginx.registry`                        | Registry to fetch nginx image | `registry.gitlab.com/opengeoweb/backend-services/opmet-backend/nginx-opmet-backend` |
 | `opmet.nginx.resources`                       | Configure resource limits & requests | see defaults from `values.yaml` |
 | `opmet.path`                                  | Path suffix added to url | `/opmet/(.*)` |
