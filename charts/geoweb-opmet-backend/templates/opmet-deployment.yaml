@@ -185,7 +185,6 @@ spec:
             value: {{ .Values.opmet.db.POSTGRES_PASSWORD }}
       {{- end }}
       volumes:
-    {{- if .Values.opmet.useCustomConfigurationFiles }}
       - name: {{ .Values.opmet.name }}-volume
       {{- if eq .Values.opmet.customConfigurationLocation "s3"}}
         emptyDir: {}
@@ -193,7 +192,6 @@ spec:
         persistentVolumeClaim:
           claimName: {{ .Values.opmet.name }}-claim
       {{- end }}
-    {{- end }}
     {{- if or (and .Values.opmet.db_secret (not .Values.opmet.db.useZalandoOperatorDb)) (and .Values.opmet.ssh_secrets .Values.opmet.ssh_passphrase_secrets) }}
       - name: secrets-store-inline
       {{- if .Values.secretProvider }}
