@@ -1,4 +1,3 @@
-{{- if and .Values.opmet.useCustomConfigurationFiles (eq .Values.opmet.customConfigurationLocation "local")}}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -26,4 +25,3 @@ spec:
     name: {{ .Values.opmet.name }}-claim
   hostPath:
     path: {{ .Values.opmet.customConfigurationFolderPath | quote }}
-{{- end }}
