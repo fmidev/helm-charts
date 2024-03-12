@@ -169,9 +169,9 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.nginx.NGINX_PORT_HTTPS`                | Port used for nginx when SSL is enabled | `443` |
 | `opmet.nginx.OAUTH2_USERINFO`                 | Userinfo endpoint to retrieve consented claims, or assertions, about the logged in end-user | - |
 | `opmet.nginx.readinessProbe`                  | Configure readinessProbe | see defaults from `values.yaml` |
-| `opmet.nginx.registry`                        | Registry to fetch nginx image |
 | `opmet.nginx.registry`                        | Registry to fetch nginx image | `registry.gitlab.com/opengeoweb/backend-services/opmet-backend/nginx-opmet-backend` |
 | `opmet.nginx.resources`                       | Configure resource limits & requests | see defaults from `values.yaml` |
+| `opmet.nginx.version` | Version of the auth container image | `v0.1.1` |
 | `opmet.path`                                  | Path suffix added to url | `/opmet/(.*)` |
 | `opmet.publisher.DESTINATION`                 | Folder inside publisher container where TACs are stored (used with local-publisher) | `/app/output` |
 | `opmet.publisher.livenessProbe`               | Configure libenessProbe | see defaults from `values.yaml` |
