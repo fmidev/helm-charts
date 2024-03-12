@@ -188,10 +188,9 @@ spec:
       - name: {{ .Values.opmet.name }}-volume
       {{- if eq .Values.opmet.customConfigurationLocation "s3"}}
         emptyDir: {}
-      {{- else if eq .Values.opmet.customConfigurationLocation "local"}}
+      {{- end }}
         persistentVolumeClaim:
           claimName: {{ .Values.opmet.name }}-claim
-      {{- end }}
     {{- if or (and .Values.opmet.db_secret (not .Values.opmet.db.useZalandoOperatorDb)) (and .Values.opmet.ssh_secrets .Values.opmet.ssh_passphrase_secrets) }}
       - name: secrets-store-inline
       {{- if .Values.secretProvider }}
