@@ -149,7 +149,7 @@ spec:
         - name: publisher-volume
           mountPath: {{ .Values.opmet.publisher.DESTINATION | quote }}
       - name: {{ .Values.opmet.nginx.name }}
-        image: {{ .Values.opmet.nginx.registry }}:{{ default .Chart.AppVersion .Values.opmet.nginx.version }}
+        image: {{ .Values.opmet.nginx.registry }}:{{ default .Values.opmet.nginx.version }}
       {{- if .Values.opmet.imagePullPolicy }}
         imagePullPolicy: {{ .Values.opmet.imagePullPolicy }}
       {{- end }}
@@ -188,9 +188,10 @@ spec:
       - name: {{ .Values.opmet.name }}-volume
       {{- if eq .Values.opmet.customConfigurationLocation "s3"}}
         emptyDir: {}
-      {{- end }}
+      {{- else if eq .Values.opmet.customConfigurationLocation "local"}}
         persistentVolumeClaim:
           claimName: {{ .Values.opmet.name }}-claim
+      {{- end }}
     {{- if or (and .Values.opmet.db_secret (not .Values.opmet.db.useZalandoOperatorDb)) (and .Values.opmet.ssh_secrets .Values.opmet.ssh_passphrase_secrets) }}
       - name: secrets-store-inline
       {{- if .Values.secretProvider }}

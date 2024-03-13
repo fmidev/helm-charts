@@ -24,4 +24,4 @@ spec:
     namespace: {{ .Release.Namespace }}
     name: {{ .Values.opmet.name }}-claim
   hostPath:
-    path: {{ .Values.opmet.customConfigurationMountPath | quote }}
+    path: {{ .Values.opmet.customConfigurationFolderPath | quote }}
