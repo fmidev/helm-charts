@@ -24,4 +24,4 @@ spec:
     namespace: {{ .Release.Namespace }}
     name: {{ .Values.opmet.name }}-claim
   hostPath:
-    path: {{ .Values.opmet.customConfigurationFolderPath | quote }}
+    path: {{ default .Values.opmet.nginx.CONF_MOUNT_PATH | quote }}

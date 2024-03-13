@@ -168,7 +168,7 @@ spec:
         - configMapRef:
             name: {{ .Values.opmet.nginx.name }}
         volumeMounts:
-          - mountPath: "/nginx.conf"
+          - mountPath: {{ .Values.opmet.nginx.CONF_MOUNT_PATH | quote }}
             subPath: "nginx.conf"
             name: {{ .Values.opmet.name }}-volume
       {{- if .Values.opmet.db.enableDefaultDb }}
