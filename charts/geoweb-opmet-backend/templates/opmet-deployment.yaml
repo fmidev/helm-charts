@@ -171,7 +171,7 @@ spec:
         volumeMounts:
         - mountPath: "/nginx.conf"
           subPath: "nginx.conf"
-          name: {{ .Values.presets.name }}-volume
+          name: {{ .Values.opmet.name }}-volume
       {{- end }}
       {{- if .Values.opmet.db.enableDefaultDb }}
       - name: {{ .Values.opmet.db.name }}
