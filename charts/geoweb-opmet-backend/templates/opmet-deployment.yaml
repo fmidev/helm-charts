@@ -167,10 +167,12 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Values.opmet.nginx.name }}
+      {{- if and .Values.opmet.useCustomConfigurationFiles }}
         volumeMounts:
-          - mountPath: {{ .Values.opmet.nginx.CONF_MOUNT_PATH | quote }}
-            subPath: "nginx.conf"
-            name: {{ .Values.opmet.name }}-volume
+        - mountPath: "/nginx.conf"
+          subPath: "nginx.conf"
+          name: {{ .Values.opmet.name }}-volume
+      {{- end }}
       {{- if .Values.opmet.db.enableDefaultDb }}
       - name: {{ .Values.opmet.db.name }}
         image: {{ .Values.opmet.db.image }}
@@ -185,6 +187,7 @@ spec:
             value: {{ .Values.opmet.db.POSTGRES_PASSWORD }}
       {{- end }}
       volumes:
+    {{- if .Values.opmet.useCustomConfigurationFiles }}
       - name: {{ .Values.opmet.name }}-volume
       {{- if eq .Values.opmet.customConfigurationLocation "s3"}}
         emptyDir: {}
@@ -192,6 +195,7 @@ spec:
         persistentVolumeClaim:
           claimName: {{ .Values.opmet.name }}-claim
       {{- end }}
+    {{- end }}
     {{- if or (and .Values.opmet.db_secret (not .Values.opmet.db.useZalandoOperatorDb)) (and .Values.opmet.ssh_secrets .Values.opmet.ssh_passphrase_secrets) }}
       - name: secrets-store-inline
       {{- if .Values.secretProvider }}
