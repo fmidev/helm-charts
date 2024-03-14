@@ -149,7 +149,7 @@ spec:
         - name: publisher-volume
           mountPath: {{ .Values.opmet.publisher.DESTINATION | quote }}
       - name: {{ .Values.opmet.nginx.name }}
-        image: {{ .Values.opmet.nginx.registry }}:{{ default .Chart.AppVersion .Values.versions.opmet }}
+        image: {{ .Values.opmet.nginx.registry }}:{{ default .Values.opmet.nginx.version }}
       {{- if .Values.opmet.imagePullPolicy }}
         imagePullPolicy: {{ .Values.opmet.imagePullPolicy }}
       {{- end }}
@@ -167,6 +167,12 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Values.opmet.nginx.name }}
+      {{- if and .Values.opmet.useCustomConfigurationFiles }}
+        volumeMounts:
+        - mountPath: "/nginx.conf"
+          subPath: "nginx.conf"
+          name: {{ .Values.opmet.name }}-volume
+      {{- end }}
       {{- if .Values.opmet.db.enableDefaultDb }}
       - name: {{ .Values.opmet.db.name }}
         image: {{ .Values.opmet.db.image }}
