@@ -47,6 +47,8 @@ hpa:
 
 postgres:
   external: false
+  externalHost: ""
+  externalPort: ""
   username: gis_user
   password: gis_pw
   name: postgres-statefulset

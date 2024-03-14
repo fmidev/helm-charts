@@ -36,9 +36,9 @@ spec:
         {{- end }}
         env:
           - name: POSTGRES_PASSWORD
-            value: {{ .Values.postgres.postgis.password }}
+            value: {{ .Values.postgres.password }}
           - name: POSTGRES_USER
-            value: {{ .Values.postgres.postgis.username }} 
+            value: {{ .Values.postgres.username }} 
         ports:
           - containerPort: {{ .Values.postgres.containerPort }}
         volumeMounts:

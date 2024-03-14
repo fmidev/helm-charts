@@ -13,8 +13,13 @@ data:
     {
         # Enter Your postgres database connection data below
         disable	        = {{ .Values.postgres.postgis.disable }};
+        {{- if not .Values.postgres.external }}
         host		= "{{ .Values.smartmetserver.name }}-{{ .Values.postgres.name }}.{{ .Release.Namespace }}";
         port		= {{ .Values.postgres.svcPort }};
+        {{- else }}
+        host		= {{ .Values.postgres.externalHost | quote }};
+        port		= {{ .Values.postgres.externalPort }};
+        {{- end }}
         database	= {{ .Values.postgres.postgis.database | quote }};
         username	= {{ .Values.postgres.username | quote }};
         password	= {{ .Values.postgres.password | quote }};

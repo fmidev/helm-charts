@@ -40,7 +40,11 @@ data:
     database:
     {
     	disable  = {{ .Values.postgres.geonames.disable }};
+        {{- if not .Values.postgres.external }}
         host     = "{{ .Values.smartmetserver.name }}-{{ .Values.postgres.name }}.{{ .Release.Namespace }}";
+        {{- else }}
+        host     = {{ .Values.postgres.externalHost | quote }};
+        {{- end }}
     	user	 = {{ .Values.postgres.username | quote }};
     	database = {{ .Values.postgres.geonames.database | quote }};
     	pass	 = {{ .Values.postgres.password | quote }};

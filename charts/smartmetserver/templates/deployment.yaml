@@ -75,6 +75,5 @@ spec:
       - name: geonames-configuration
         configMap:
           name: {{ .Values.smartmetserver.name }}-geonames-conf
-
       - name: cache-volume
         emptyDir: {}
