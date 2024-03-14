@@ -167,7 +167,7 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Values.opmet.nginx.name }}
-      {{- if and .Values.presets.useCustomConfigurationFiles }}
+      {{- if and .Values.opmet.useCustomConfigurationFiles }}
         volumeMounts:
         - mountPath: "/nginx.conf"
           subPath: "nginx.conf"
