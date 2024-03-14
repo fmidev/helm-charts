@@ -160,10 +160,11 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.messageconverter.version`              | Possibility to override application version | see default from `values.yaml`                                                                |
 | `opmet.name`                                  | Name of backend | `opmet`                                                                                       |
 | `opmet.nginx.BACKEND_HOST`                    | Address where nginx accesses the backend | `localhost:8080`                                                                              |
-| `opmet.nginx.CONFIG_MOUNT_PATH`               | Mount path of nginx.conf file | `/nginx.conf`                                                                                  |
 | `opmet.nginx.ENABLE_SSL`                      | Toggle SSL termination | `"FALSE"`                                                                                     |
+| `opmet.nginx.GEOWEB_USERNAME_CLAIM`           | Claim name used as a user identifier in the presets-backend | `"email"`                                                |
 | `opmet.nginx.GEOWEB_REQUIRE_READ_PERMISSION`  | Required OAUTH claim name and value to be present in the userinfo response for read operations | `"FALSE"`                                                                                     |
 | `opmet.nginx.GEOWEB_REQUIRE_WRITE_PERMISSION` | Required OAUTH claim name and value to be present in the userinfo response for write operations | `"FALSE"`                                                                                     |
+| `opmet.nginx.ALLOW_ANONYMOUS_ACCESS`          | Allow/disallow anonymous access. Note that if an access token has been passed, it is checked even if anonymous access is allowed. | `"FALSE"` |
 | `opmet.nginx.livenessProbe`                   | Configure libenessProbe | see defaults from `values.yaml`                                                               |
 | `opmet.nginx.name`                            | Name of nginx container | `opmet-nginx`                                                                                 |
 | `opmet.nginx.NGINX_PORT_HTTP`                 | Port used for nginx | `80`                                                                                          |
