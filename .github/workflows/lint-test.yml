@@ -1,7 +1,10 @@
 # From: https://github.com/marketplace/actions/helm-chart-testing
 name: Lint and Test Charts
 
-on: pull_request
+on:
+  push:
+    branches:
+      - '**'
 
 jobs:
   lint-test:
