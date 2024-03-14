@@ -202,3 +202,9 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `secretProvider`                              | Option to use secret provider instead of passing base64 encoded database connection string as opmet.db_secret *(aws\|azure\|gcp\|vault)* |                                                                                              |
 | `secretProviderParameters`                    | Option to add custom parameters to the secretProvider, for example with aws you can specify region |                                                                                              |
 | `versions.opmet`                              | Possibility to override application version |                                                                                              |
+
+# Chart versions
+
+| Chart version | opmet version |
+|---------------|---------------|
+| 3.2.0         | 2.7.0         |
