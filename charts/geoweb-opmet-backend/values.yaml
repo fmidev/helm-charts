@@ -97,7 +97,7 @@ opmet:
     ENABLE_SSL: "FALSE"
     NGINX_PORT_HTTP: 80
     NGINX_PORT_HTTPS: 443
-    BACKEND_HOST: 0.0.0.0:8080
+    BACKEND_HOST: 0.0.0.0:8000
     resources:
       requests:
         memory: "10Mi"
