@@ -55,7 +55,7 @@ ingress:
   name: nginx-ingress-controller
   rules: |
     if ($request_uri ~* \.(js)) {
-      add_header "Document-Policy", "js-profiling";
+      add_header "Document-Policy" "js-profiling";
     }
     if ($request_uri ~* \.(json)) {
       add_header Cache-Control "no-cache";
