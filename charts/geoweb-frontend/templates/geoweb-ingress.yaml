@@ -3,9 +3,6 @@ kind: Ingress
 metadata:
   name: {{ .Values.ingress.name }}-{{ .Values.frontend.name }}
   annotations:
-  {{- if .Values.frontend.mapDocumentPolicyForJsProfiling }}
-    nginx.ingress.kubernetes.io/server-snippet: {{ .Values.frontend.mapDocumentPolicyForJsProfiling}}
-  {{- end }}
   {{- if .Values.ingress.customAnnotations }}
     {{- with .Values.ingress.customAnnotations }}
       {{- toYaml . | nindent 4 }}
@@ -20,6 +17,9 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET"
+  {{- if .Values.ingress.server-snippet }}
+    nginx.ingress.kubernetes.io/server-snippet: {{ .Values.ingress.server-snippet}}
+  {{- end }}
   {{- if .Values.ingress.rules }}
     nginx.ingress.kubernetes.io/configuration-snippet: |
     {{- .Values.ingress.rules | nindent 6 }}

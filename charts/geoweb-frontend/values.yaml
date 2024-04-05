@@ -50,9 +50,13 @@ frontend:
   customConfigurationMountPath: /usr/share/nginx/html/assets/custom
   volumeAccessMode: ReadOnlyMany
   volumeSize: 100Mi
-  mapDocumentPolicyForJsProfiling: map $sent_http_content_type $document_policy {default         "";text/html       "js-profiling";}
 
 ingress:
+  server-snippet: |
+    map $sent_http_content_type $document_policy {
+        default         "";
+        text/html       "js-profiling";
+    }
   name: nginx-ingress-controller
   rules: |
     add_header Document-Policy $document_policy;
