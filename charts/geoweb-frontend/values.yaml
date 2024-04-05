@@ -50,14 +50,12 @@ frontend:
   customConfigurationMountPath: /usr/share/nginx/html/assets/custom
   volumeAccessMode: ReadOnlyMany
   volumeSize: 100Mi
+  mapDocumentPolicyForJsProfiling: map $sent_http_content_type $document_policy {default         "";text/html       "js-profiling";}
 
 ingress:
   name: nginx-ingress-controller
   rules: |
-    map $sent_http_content_type $document_policy {
-        default         "";
-        text/html       "js-profiling";
-    }
+    add_header Document-Policy $document_policy;
     if ($request_uri ~* \.(json)) {
       add_header Cache-Control "no-cache";
     }

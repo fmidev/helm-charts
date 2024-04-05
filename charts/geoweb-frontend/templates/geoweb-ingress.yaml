@@ -3,6 +3,9 @@ kind: Ingress
 metadata:
   name: {{ .Values.ingress.name }}-{{ .Values.frontend.name }}
   annotations:
+  {{- if .Values.frontend.mapDocumentPolicyForJsProfiling }}
+    nginx.ingress.kubernetes.io/server-snippet: {{ .Values.frontend.mapDocumentPolicyForJsProfiling}}
+  {{- end }}
   {{- if .Values.ingress.customAnnotations }}
     {{- with .Values.ingress.customAnnotations }}
       {{- toYaml . | nindent 4 }}
