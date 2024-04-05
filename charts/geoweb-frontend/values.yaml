@@ -53,7 +53,7 @@ frontend:
 
 ingress:
   name: nginx-ingress-controller
-  server-snippet: |
+  serverSnippet: |
     map $sent_http_content_type $document_policy {
         default         "";
         text/html       "js-profiling";

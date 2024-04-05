@@ -17,9 +17,9 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET"
-  {{- if .Values.ingress.server-snippet }}
+  {{- if .Values.ingress.serverSnippet }}
       nginx.ingress.kubernetes.io/server-snippet: |
-      {{ .Values.ingress.server-snippet | nindent 6 }}
+      {{ .Values.ingress.serverSnippet | nindent 6 }}
   {{- end }}
   {{- if .Values.ingress.rules }}
     nginx.ingress.kubernetes.io/configuration-snippet: |
