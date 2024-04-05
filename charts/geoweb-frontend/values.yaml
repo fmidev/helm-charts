@@ -53,10 +53,13 @@ frontend:
 
 ingress:
   name: nginx-ingress-controller
-  rules: |
-    if ($request_uri ~* \.(js)) {
-      add_header Document-Policy "js-profiling";
+  serverSnippet: |
+    map $sent_http_content_type $document_policy {
+        default         "";
+        text/html       "js-profiling";
     }
+  rules: |
+    add_header Document-Policy $document_policy;
     if ($request_uri ~* \.(json)) {
       add_header Cache-Control "no-cache";
     }
