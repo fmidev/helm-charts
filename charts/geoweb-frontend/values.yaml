@@ -53,11 +53,6 @@ frontend:
 
 ingress:
   name: nginx-ingress-controller
-  serverSnippet: |
-    map $sent_http_content_type $document_policy {
-        default         "";
-        text/html       "js-profiling";
-    }
   rules: |
     add_header Document-Policy $document_policy;
     if ($request_uri ~* \.(json)) {
