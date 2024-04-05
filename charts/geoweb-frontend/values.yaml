@@ -54,7 +54,6 @@ frontend:
 ingress:
   name: nginx-ingress-controller
   rules: |
-    add_header Document-Policy $document_policy;
     if ($request_uri ~* \.(json)) {
       add_header Cache-Control "no-cache";
     }
