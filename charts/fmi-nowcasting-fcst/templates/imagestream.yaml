@@ -1,0 +1,24 @@
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: {{ .Release.Name }}-nowcasting-fcst
+  labels:
+    app: {{ .Release.Name }}
+    app.kubernetes.io/component: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/part-of: {{ .Release.Name }}
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+{{- if ne .Values.environment "dev" }}
+  - name: {{ .Values.prodType }}
+{{- end }}
+  - from:
+      kind: DockerImage
+      name: {{ .Values.image.repository.address }}:{{ .Values.image.repository.tag }}
+    importPolicy:
+      insecure: false
+      scheduled: true
+    name: latest

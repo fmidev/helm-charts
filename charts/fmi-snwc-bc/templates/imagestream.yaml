@@ -1,0 +1,25 @@
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Release.Name }}
+    app.kubernetes.io/component: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/part-of: {{ .Release.Name }}
+spec:
+  tags:
+  - name: latest
+    importPolicy:
+      scheduled: true
+      importMode: PreserveOriginal
+    from:
+      kind: DockerImage
+      name: {{ .Values.image.repository.address }}:{{ .Values.image.repository.tag }}
+  lookupPolicy:
+    local: true
+{{- if ne .Values.environment "dev" }}
+  - name: {{ .Values.prodType }}
+{{- end }}
+

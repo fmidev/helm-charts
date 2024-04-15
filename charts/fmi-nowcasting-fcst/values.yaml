@@ -1,0 +1,32 @@
+# Default values for nowcasting-fcst.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+environment: dev
+prodType: preop
+cloud: fmi
+
+serviceaccount:
+  enabled: false
+
+image:
+  repository:
+    address: quay.io/fmi/nowcasting_fcst
+    tag: latest
+
+  pullPolicy: Always
+
+job:
+  restartPolicy: Never
+
+s3:
+  credentials:
+    name: 
+
+resources:
+  limits:
+    cpu: "1"
+    memory: 2Gi
+  requests:
+    cpu: "1"
+    memory: 1Gi

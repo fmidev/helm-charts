@@ -1,0 +1,3 @@
+nowcasting_fcst configured with release name {{ .Release.Name }}.
+
+openshift job name is {{ .Release.Name }}-job-template

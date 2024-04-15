@@ -1,0 +1,70 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name:  {{ .Release.Name }}-nowcasting-fcst
+  labels:
+    app.kubernetes.io/name: nowcasting-fcst
+objects:
+- apiVersion: batch/v1
+  kind: Job
+  metadata:
+    name: {{ .Release.Name }}-nowcasting-fcst
+  spec:
+    parallelism: 1
+    completions: 1
+    backoffLimit: 0
+    template:
+      metadata:
+        name: {{ .Release.Name }}-nowcasting-fcst
+        labels:
+          app.kubernetes.io/name: {{ .Release.Name }}-nowcasting-fcst
+      spec:
+        successfulJobsHistoryLimit: 2
+        failedJobsHistoryLimit: 2
+        activeDeadlineSeconds: 300
+        restartPolicy: {{ .Values.job.restartPolicy }}
+        containers:
+        - env:
+          {{- if .Values.s3.credentials.name }}
+          - name: S3_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                key: S3_ACCESS_KEY_ID
+                name: {{ .Values.s3.credentials.name }}
+          - name: S3_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                key: S3_SECRET_ACCESS_KEY
+                name: {{ .Values.s3.credentials.name }}
+          {{- end }}
+          - name: HOME
+            value: /tmp
+          - name: S3_HOSTNAME
+            value: ${S3_HOSTNAME}
+          - name: ENVIRONMENT
+            value: {{ .Values.environment | default .Values.global.environment | quote }}
+          - name: CLOUD
+            value: {{ .Values.cloud | default .Values.global.cloud | quote }}
+          - name: TYPE
+            value: {{ .Values.prodType | default .Values.global.prodType | quote }}
+          command:
+          - sh
+          - -c
+          - |
+            cd /nowcasting_fcst
+
+            set -x
+            python3 ${COMMAND}
+
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          name: nowcasting-fcst
+          image: {{ include "nowcasting_fcst.localImageRepository" . }}-nowcasting_fcst:latest
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+parameters:
+- description: Command to run with all options included
+  name: COMMAND
+  required: true
+- description: s3 endpoint
+  name: S3_HOSTNAME
+  required: false

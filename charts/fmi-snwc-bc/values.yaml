@@ -1,0 +1,33 @@
+# Default values for snwc-bc.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+environment: dev
+prodType: preop
+cloud: fmi
+
+image:
+  repository:
+    address: quay.io/fmi/snwc_bc
+    tag: latest
+
+  pullPolicy: Always
+
+serviceAccount:
+  enabled: false
+
+s3:
+  credentials:
+    name:
+
+tiuha:
+  credentials:
+    name:
+
+resources:
+  limits:
+    cpu: "1"
+    memory: 2Gi
+  requests:
+    cpu: "1"
+    memory: 1Gi
