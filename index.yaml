@@ -1685,6 +1685,22 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/nginx-ingress-controller-1.0.0/nginx-ingress-controller-1.0.0.tgz
     version: 1.0.0
+  nowcasting-fcst:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2024-04-15T06:32:25.397860719Z"
+    dependencies:
+    - condition: serviceaccount.enabled
+      name: job-service-account
+      repository: https://fmidev.github.io/helm-charts
+      version: 1.0.1
+    description: A Helm chart for Kubernetes
+    digest: 7370b7a6e53193bf6bec3e2a9af3b194f650b3d0c5d8bb50e07c7527c9906e49
+    name: nowcasting-fcst
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/nowcasting-fcst-1.0.0/nowcasting-fcst-1.0.0.tgz
+    version: 1.0.0
   secrets:
   - apiVersion: v2
     appVersion: 1.0.r2-46-gf2a8f35-2023.03.21.21.55
@@ -1749,4 +1765,20 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/smartmetserver-0.1.0/smartmetserver-0.1.0.tgz
     version: 0.1.0
-generated: "2024-04-08T08:46:33.173909617Z"
+  snwc-bc:
+  - apiVersion: v2
+    appVersion: 1.1.0
+    created: "2024-04-15T06:32:25.576179716Z"
+    dependencies:
+    - condition: serviceaccount.enabled
+      name: job-service-account
+      repository: https://fmidev.github.io/helm-charts
+      version: 1.0.1
+    description: A Helm chart for Kubernetes
+    digest: a78c1e8c58f01b9cc0b4e2b24c41ca419e18b37623ea4685397c9d513c0a7f3a
+    name: snwc-bc
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
+    version: 1.0.0
+generated: "2024-04-15T06:32:25.576399765Z"
