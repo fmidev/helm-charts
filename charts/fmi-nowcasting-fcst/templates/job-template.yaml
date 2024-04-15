@@ -59,7 +59,7 @@ objects:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           name: nowcasting-fcst
-          image: {{ include "nowcasting_fcst.localImageRepository" . }}-nowcasting_fcst:latest
+          image: {{ include "nowcasting_fcst.localImageRepository" . }}-nowcasting-fcst:latest
           imagePullPolicy: {{ .Values.image.pullPolicy }}
 parameters:
 - description: Command to run with all options included

@@ -12,8 +12,8 @@ spec:
   lookupPolicy:
     local: false
   tags:
-{{- if ne .Values.environment "dev" }}
-  - name: {{ .Values.prodType }}
+{{- if ne .Values.global.environment "dev" }}
+  - name: {{ .Values.global.prodType }}
 {{- end }}
   - from:
       kind: DockerImage
