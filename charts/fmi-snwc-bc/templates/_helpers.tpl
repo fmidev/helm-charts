@@ -3,9 +3,9 @@ image-registry.openshift-image-registry.svc:5000/{{ .Release.Namespace }}/{{ .Re
 {{- end }}
 
 {{- define "snwc_bc.imageTag" -}} 
-{{- if eq .Values.environment "dev" -}} 
+{{- if eq .Values.global.environment "dev" -}}
 latest
 {{- else -}} 
-{{ .Values.prodType }}
+{{ .Values.global.prodType }}
 {{- end }}
 {{- end }}

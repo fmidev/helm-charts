@@ -59,16 +59,18 @@ objects:
           - name: S3_HOSTNAME
             value: ${S3_HOSTNAME}
           - name: ENVIRONMENT
-            value: {{ .Values.environment }}
+            value: {{ .Values.global.environment }}
           - name: CLOUD
-            value: {{ .Values.cloud }}
-          - name: SNWC1_KEY
+            value: {{ .Values.global.cloud }}
+          - name: TYPE
+            value: {{ .Values.global.prodType }}
+          - name: SNWC1_PROD3_KEY
             valueFrom:
               secretKeyRef:
-                key: SNWC1_KEY
+                key: SNWC1_PROD3_KEY
                 name: {{ .Values.tiuha.credentials.name }}
-          name: snwc_bc
-          image: {{ include "snwc_bc.localImageRepository" . }}:{{- include "snwc_bc.imageTag" . | trim }}
+          name: snwc-bc
+          image: {{ include "snwc_bc.localImageRepository" . }}-snwc-bc:{{- include "snwc_bc.imageTag" . | trim }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
 parameters:
 - description: Input data directory name

@@ -10,6 +10,9 @@ metadata:
     app.kubernetes.io/part-of: {{ .Release.Name }}
 spec:
   tags:
+{{- if ne .Values.global.environment "dev" }}
+  - name: {{ .Values.global.prodType }}
+{{- end }}
   - name: latest
     importPolicy:
       scheduled: true
@@ -19,6 +22,4 @@ spec:
       name: {{ .Values.image.repository.address }}:{{ .Values.image.repository.tag }}
   lookupPolicy:
     local: true
-{{- if ne .Values.global.environment "dev" }}
-  - name: {{ .Values.global.prodType }}
-{{- end }}
+
