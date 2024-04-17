@@ -140,7 +140,6 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.env.GW_AUTH_LOGOUT_URL` | Url to redirect when logging out | `"http://localhost:5400"` |
 | `frontend.env.GW_AUTH_TOKEN_URL` | - | `https://gitlab.com/oauth/token` |
 | `frontend.env.GW_AUTH_LOGIN_URL` | Url to redirect when logging in | `https://gitlab.com/oauth/authorize?client_id={client_id}&response_type=code&scope=email+openid+read_repository+read_api&redirect_uri={app_url}/code&state={state}&code_challenge={code_challenge}&code_challenge_method=S256` |
-| `frontend.env.GW_INFRA_BASE_URL` | - | `https://api.opengeoweb.com` |
 | `frontend.env.GW_INITIAL_PRESETS_FILENAME` | Filename to fetch initial presets | `initialPresets.json` |
 | `frontend.env.GW_CAP_CONFIGURATION_FILENAME` | Filename to fetch CAP Warnings configured feeds | `capWarningPresets.json` |
 | `frontend.env.GW_TIMESERIES_CONFIGURATION_FILENAME` | Filename to fetch TimeSeries preset locations | `timeSeriesPresetLocations.json` |
@@ -177,6 +176,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | Chart version | frontend version |
 |---------------|------------------|
 | 3.9.0         | 9.14.0           |
+| 3.8.1         | 9.14.0           |
 | 3.4.0         | 9.9.0            |
 | 3.3.0         | 9.6.0            |
 | 3.2.0         | 9.5.0            |
