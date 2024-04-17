@@ -38,7 +38,6 @@ frontend:
     GW_AUTH_LOGOUT_URL: "{app_url}"
     GW_AUTH_TOKEN_URL: https://gitlab.com/oauth/token
     GW_AUTH_LOGIN_URL: https://gitlab.com/oauth/authorize?client_id={client_id}&response_type=code&scope=email+openid+read_repository+read_api&redirect_uri={app_url}/code&state={state}&code_challenge={code_challenge}&code_challenge_method=S256
-    GW_INFRA_BASE_URL: https://api.opengeoweb.com
     GW_FEATURE_FORCE_AUTHENTICATION: false
     GW_FEATURE_MODULE_SPACE_WEATHER: false
     GW_FEATURE_MENU_FEEDBACK: false
