@@ -1,0 +1,144 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filesys2smartmet-config
+data: 
+  configuration: |
+    smartmet :
+    {
+      library :
+      {
+
+      grid-files :
+      {
+        configFile = "/config/libraries/grid-files/grid-files.conf"
+        memoryMapper :
+        {
+          enabled = {{ printf "%v" (default false .Values.filesys2smartmet.config.memoryMapper.enabled) }}
+        }
+      }
+
+      } # library
+
+    tools :
+    {
+      grid :
+      {
+        filesys2smartmet :
+        { 
+          content-source : 
+          { 
+            source-id = 200
+            producerDefFile = "/config/libraries/grid-tools/producerDef.csv"
+
+          {{- if .Values.filesys2smartmet.data }}
+          locations = 
+            ( 
+              {{- range .Values.filesys2smartmet.data }} 
+              location :
+              {
+                type    = "{{ .type }}"
+                url     = "{{ .url }}"
+                
+                {{- if .authentication.enabled }}
+                authentication :
+                {
+                  method = {{ .authentication.method }}
+                  username = "{{ .authentication.username }}"
+                  password = "{{ .authentication.password }}"
+                }
+                {{- else }}
+                authentication :
+                {
+                  method = 0
+                  username = ""
+                  password = ""
+                }
+                {{- end }}
+                patterns = 
+                [
+                {{- $total := len .patterns }}
+                {{- range $i, $pattern := .patterns }}
+                  "{{ $pattern }}"{{ if ne $i (sub $total 1) }},{{ end }}
+                {{- end }}
+                ]
+              },
+            
+            {{- end }}
+            ) #locations
+            {{- end }}
+              
+            filenameFixer : 
+            {
+              luaFilename = ""
+              luaFunction = ""
+            }
+            
+            # Meta information scanned from the grid files is cached into separate files so that this information    
+            # can be re-used when the Content Storage is re-filled. 
+            
+            cacheDir = "/tmp"        
+          } #content-source
+
+
+          # The "addFileInfoListWithContent" message can contain max this many records:
+
+          maxMessageSize = 5000
+
+          content-storage  : 
+          {
+            # Content storage type (redis/postgresql/corba/http)
+            
+            type = "redis"
+
+            redis :
+            {
+              address      = "$(REDIS_CONTENT_SERVER_ADDRESS)"
+              port         = $(REDIS_CONTENT_SERVER_PORT)
+              tablePrefix  = "$(REDIS_CONTENT_SERVER_TABLE_PREFIX)"
+            }
+
+            # TODO: These are mandatory and intentionally empty
+            postgresql :
+            {
+              connection-string = ""
+            }    
+
+            corba :
+            {
+              ior          = ""
+            }
+
+            http :
+            {
+              url          = ""
+            }    
+
+        }#content-storage
+          
+          processing-log :
+          {
+            enabled      = true
+            file         = "/dev/stdout"
+            maxSize      = 100000000
+            truncateSize = 20000000
+          }
+
+          debug-log :
+          {
+            enabled      = true
+            file         = "/dev/stdout"
+            maxSize      = 100000000
+            truncateSize = 20000000
+          }
+            
+        }#filesys2smartmet
+        }#grid
+      }#tools
+    }#smartmet
+  producerdef: |
+      {{- if .Values.producers }}
+      {{- range .Values.producers }}
+      {{ .abbreviation }};{{ .name }};{{ .title }};{{ .description }}
+      {{- end }}
+      {{- end }}

@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smartmet-engine-gis-config
+data: 
+  config: |
+    crsDefinitionDir = "/config/engines/gis/crs";
+
+    // Default for tables whose SRID is not set. Comment out to report an error instead.
+    // default_epsg = 4326;
+
+    // To silence warnings, for example from the above default
+    quiet = {{ .Values.config.engines.gis.quiet }};
+
+    postgis:
+    {
+            host = "$(GIS_HOST)";
+            # TODO: We cannot read this from env because it is always a string
+            # and this variable must be int
+            port = 5432;
+            username = "$(GIS_USER)"; 
+            database = "$(GIS_DATABASE)";
+            password = "$(GIS_PASSWORD)";
+            encoding = "UTF8";
+    };
+
+    cache:
+    {
+            max_size        = 1000;
+    };
