@@ -13,6 +13,6 @@ maintainers:
 - email: admin@weatherproof.fi
   name: fmi-build-bot
   url: https://github.com/fmi-build-bot
-name:  smartmet-server
+name: smartmet-server
 type: application
 version: 0.1.0
