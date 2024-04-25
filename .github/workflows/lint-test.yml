@@ -33,6 +33,16 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
+      # Custom FMI code not included in the reference implementation (https://github.com/marketplace/actions/helm-chart-testing)
+      - name: Update dependencies (only for changed)
+        run: |
+          for chart_dir in $(ct list-changed --target-branch ${{ github.event.repository.default_branch }}); do
+            echo "processing changed chart in '${chart_dir}'" 1>&2
+            cd "${chart_dir}"
+            helm dependency update
+            cd - &> /dev/null
+          done
+
       - name: Run chart-testing (lint)
         if: steps.list-changed.outputs.changed == 'true'
         run: ct lint --target-branch ${{ github.event.repository.default_branch }}
