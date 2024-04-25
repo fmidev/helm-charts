@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smartmet-plugin-backend-config
+data: 
+  config: |
+    favicon = "/config/favicon.ico";

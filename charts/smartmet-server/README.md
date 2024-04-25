@@ -1,0 +1,1 @@
+Helm template for smartmet-server

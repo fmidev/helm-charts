@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filesys2smartmet
+  labels:
+    app: {{ .Release.Name }}
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      #TODO SA definition template
+      serviceAccountName: ptrace-sa-v1
+      securityContext:
+        runAsNonRoot: true
+        runAsGroup: 0
+      #TODO Pull secret templating
+      imagePullSecrets:
+        - name: fmi-openshift-pull-secret
+      #TODO only if using internal redis
+      initContainers:
+      - name: wait-for-redis
+        image: busybox
+        command: ['/bin/sh', '-c']
+        args:
+        - |
+          until echo quit | telnet {{ default "redis-master.{{ .Release.Name }}" .Values.filesys2smartmet.config.redis.address }} {{ default 6379 .Values.filesys2smartmet.config.redis.port }} ; do
+            echo 'waiting for database...'
+            sleep 2
+          done
+      containers:
+        - name: filesys2smartmet
+          securityContext:
+            runAsGroup: 0
+            capabilities:
+              add:
+              - SYS_PTRACE
+          resources:
+            requests:
+              memory: 2Gi
+              cpu: 0.2
+            limits:
+              memory: 8Gi
+              cpu: 1
+          image: {{ .Values.filesys2smartmet.image.repository }}:{{ .Values.filesys2smartmet.image.tag }}
+          {{- if .Values.filesys2smartmet.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.filesys2smartmet.image.pullPolicy }}
+          {{- end }}
+          command: ["/usr/bin/fmi/filesys2smartmet", "/config/filesys2smartmet.conf", "{{ default 60 .Values.filesys2smartmet.config.loopInterval}}" ]
+          env:
+            - name: REDIS_CONTENT_SERVER_ADDRESS
+              value: "{{ default "redis-master.{{ .Release.Name }}" .Values.filesys2smartmet.config.redis.address }}"
+            - name: REDIS_CONTENT_SERVER_PORT
+              value: "{{ default 6379 .Values.filesys2smartmet.config.redis.port }}"
+            - name: REDIS_CONTENT_SERVER_TABLE_PREFIX
+              value: "{{ default "smartmet." .Values.filesys2smartmet.config.redis.tablePrefix }}"
+          volumeMounts:
+            - name: filesys2smartmet-config
+              mountPath: "/config/filesys2smartmet.conf"
+              subPath: "filesys2smartmet.conf"
+            - name: smartmet-library-grid-files
+              mountPath: "/config/libraries/grid-files/grid-files.conf"
+              subPath: "grid-files.conf"
+            - name: filesys2smartmet-producerdef-config
+              mountPath: "/config/libraries/grid-tools/producerDef.csv"
+              subPath: "producerDef.csv"
+      volumes:
+        - name: filesys2smartmet-config
+          configMap:
+            name: filesys2smartmet-config
+            items:
+              - key: configuration
+                path: filesys2smartmet.conf
+        - name: smartmet-library-grid-files
+          configMap:
+            name: smartmet-library-grid-files
+            items:
+              - key: config
+                path: grid-files.conf
+        - name: filesys2smartmet-producerdef-config
+          configMap:
+            name: filesys2smartmet-config
+            items:
+              - key: producerdef
+                path: producerDef.csv

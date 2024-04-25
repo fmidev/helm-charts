@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smartmet-plugin-grid-admin-config
+data: 
+  config: |
+    smartmet :
+    {
+    plugin :
+    {
+    grid-admin :
+    {
+
+      content-server  : 
+      {
+        type = "redis"
+
+        redis :
+        {
+          address      = "$(REDIS_CONTENT_SERVER_ADDRESS)"
+          port         = $(REDIS_CONTENT_SERVER_PORT)
+          tablePrefix  = "$(REDIS_CONTENT_SERVER_TABLE_PREFIX)"
+        }
+        
+        corba :
+        {
+          ior          = ""
+        }
+
+        http :
+        {
+          url          = ""
+        }
+      }
+
+    }
+    }
+    }

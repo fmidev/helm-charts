@@ -1,0 +1,239 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Release.Name }}
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      #TODO proper sa template
+      serviceAccountName: ptrace-sa-v1
+      securityContext:
+        runAsNonRoot: true
+        runAsGroup: 0
+      # TODO proper pullsecret
+      imagePullSecrets:
+        - name: fmi-openshift-pull-secret
+      #TODO only if using internal redis
+      initContainers:
+      - name: wait-for-redis
+        image: busybox
+        command: ['/bin/sh', '-c']
+        args:
+        - |
+          until echo quit | telnet {{ default "redis-master.smartmet-server-development" .Values.filesys2smartmet.config.redis.address }} {{ default 6379 .Values.filesys2smartmet.config.redis.port }} ; do
+            echo 'waiting for database...'
+            sleep 2
+          done
+      containers:
+        - name: {{ .Release.Name }}
+          securityContext:
+            runAsGroup: 0
+            # seccompProfile:
+            #   type: Unconfined
+            capabilities:
+              add:
+              - SYS_PTRACE
+          resources:
+            requests:
+              memory: 2Gi
+              cpu: 0.2
+            limits:
+              memory: 8Gi
+              cpu: 1
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          {{- if .Values.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- end }}
+          command: ["/usr/sbin/smartmetd", "-c", "/config/smartmet.conf", "-p", "{{ .Values.config.port }}"]
+          env:
+            - name: SMARTMET_LOG_DIR
+              value: {{ if eq .Values.logging.target "stdout" -}} /dev/stdout {{- else -}} {{ .Values.logging.directory }} {{- end }}
+            - name: GRID_FILE_STORAGE_DIR
+              value: ""
+            - name: REDIS_CONTENT_SERVER_ADDRESS
+              value: "{{ default (printf "redis-replicas.%s" .Release.name) .Values.config.redis.address }}"
+            - name: REDIS_CONTENT_SERVER_PORT
+              value: "{{ .Values.config.redis.port }}"
+            - name: REDIS_CONTENT_SERVER_TABLE_PREFIX
+              value: "{{ .Values.config.redis.tableprefix }}"
+            - name: PRIMARY_FORECAST_SOURCE
+              value: "grid"
+            - name: FMINAMES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: smartmet-server-sealedsecrets
+                  key: FMINAMES_USER
+            - name: FMINAMES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: smartmet-server-sealedsecrets
+                  key: FMINAMES_PW
+            - name: FMINAMES_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: smartmet-server-sealedsecrets
+                  key: FMINAMES_HOST
+            - name: FMINAMES_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: smartmet-server-sealedsecrets
+                  key: FMINAMES_PORT
+            - name: FMINAMES_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: smartmet-server-sealedsecrets
+                  key: FMINAMES_DATABASE
+            - name: GIS_USER
+              valueFrom:
+                secretKeyRef:
+                  name: smartmet-server-sealedsecrets
+                  key: GIS_USER
+            - name: GIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: smartmet-server-sealedsecrets
+                  key: GIS_PW
+            - name: GIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: smartmet-server-sealedsecrets
+                  key: GIS_HOST
+            - name: GIS_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: smartmet-server-sealedsecrets
+                  key: GIS_PORT
+            - name: GIS_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: smartmet-server-sealedsecrets
+                  key: GIS_DATABASE
+          volumeMounts:
+          - name: smartmet-main-configuration
+            mountPath: /config/smartmet.conf
+            subPath: smartmet.conf
+          - name: smartmet-plugin-backend-config
+            mountPath: /config/plugins/backend.conf
+            subPath: backend.conf
+          - name: smartmet-engine-sputnik-config
+            mountPath: /config/engines/sputnik.conf
+            subPath: sputnik.conf
+          - name: smartmet-engine-grid-config
+            mountPath: /config/engines/grid-engine.conf
+            subPath: grid-engine.conf
+          - name: smartmet-plugin-grid-gui-config
+            mountPath: /config/plugins/grid-gui.conf
+            subPath: grid-gui.conf
+          - name: smartmet-plugin-grid-admin-config
+            mountPath: /config/plugins/grid-admin.conf
+            subPath: grid-admin.conf
+          - name: smartmet-engine-grid-producers
+            mountPath: /config/engines/grid-engine/producers.csv
+            subPath: producers.csv
+          - name: smartmet-library-grid-files
+            mountPath: /config/libraries/grid-files/grid-files.conf
+            subPath: grid-files.conf
+          - name: smartmet-libraries-mapping-fmi
+            mountPath: /config/libraries/mappings/mapping_fmi.csv
+            subPath: mapping_fmi.csv
+          - name: smartmet-plugin-timeseries-config
+            mountPath: /config/plugins/timeseries.conf
+            subPath: timeseries.conf
+          - name: smartmet-plugin-edr-config
+            mountPath: /config/plugins/edr.conf
+            subPath: edr.conf
+          - name: smartmet-engine-gis-config
+            mountPath: /config/engines/gis.conf
+            subPath: gis.conf
+          - name: smartmet-engine-geonames-config
+            mountPath: /config/engines/geonames.conf
+            subPath: geonames.conf
+      volumes:
+      - name: smartmet-main-configuration
+        configMap:
+          name: smartmet-config
+          items:
+            - key: config
+              path: smartmet.conf
+      - name: smartmet-plugin-backend-config
+        configMap:
+          name: smartmet-plugin-backend-config
+          items:
+            - key: config
+              path: backend.conf
+      - name: smartmet-engine-sputnik-config
+        configMap:
+          name: smartmet-engine-sputnik-config
+          items:
+            - key: config
+              path: sputnik.conf
+      - name: smartmet-engine-grid-config
+        configMap:
+          name: smartmet-engine-grid-config
+          items:
+            - key: config
+              path: grid-engine.conf
+      - name: smartmet-plugin-grid-gui-config
+        configMap:
+          name: smartmet-plugin-grid-gui-config
+          items:
+            - key: config
+              path: grid-gui.conf
+      - name: smartmet-plugin-grid-admin-config
+        configMap:
+          name: smartmet-plugin-grid-admin-config
+          items:
+            - key: config
+              path: grid-admin.conf
+      - name: smartmet-engine-grid-producers
+        configMap:
+          name: smartmet-engine-grid-producers
+          items:
+            - key: config
+              path: producers.csv
+      - name: smartmet-library-grid-files
+        configMap:
+          name: smartmet-library-grid-files
+          items:
+            - key: config
+              path: grid-files.conf
+      - name: smartmet-libraries-mapping-fmi
+        configMap:
+          name: smartmet-libraries-mapping-fmi
+          items:
+            - key: config
+              path: mapping_fmi.csv
+      - name: smartmet-plugin-timeseries-config
+        configMap:
+          name: smartmet-plugin-timeseries-config
+          items:
+            - key: config
+              path: timeseries.conf
+      - name: smartmet-plugin-edr-config
+        configMap:
+          name: smartmet-plugin-edr-config
+          items:
+            - key: config
+              path: edr.conf
+      - name: smartmet-engine-gis-config
+        configMap:
+          name: smartmet-engine-gis-config
+          items:
+            - key: config
+              path: gis.conf
+      - name: smartmet-engine-geonames-config
+        configMap:
+          name: smartmet-engine-geonames-config
+          items:
+            - key: config
+              path: geonames.conf
