@@ -47,6 +47,23 @@ spec:
         - mountPath: "/docker-entrypoint-initdb.d/init.sql"
           subPath: "init.sql"
           name: initsql-cm
+        - mountPath: "/docker-entrypoint-initdb.d/insert_geonames.sh"
+          subPath: "insert_geonames.sh"
+          name: initsh-cm
+        - mountPath: "/workdir"
+          name: load-emptydir
+      initContainers:
+        - name: load-geonames
+          image: alpine:3.19
+          command:
+            - /bin/sh
+            - -c
+            - |
+              wget -O geonames.zip 'https://download.geonames.org/export/dump/FI.zip' &&
+              unzip geonames.zip -d /workdir/
+          volumeMounts:
+            - mountPath: "/workdir"
+              name: load-emptydir
       volumes:
       - name: postgres-volume
         persistentVolumeClaim:
@@ -54,4 +71,9 @@ spec:
       - name: initsql-cm
         configMap:
           name: {{ .Values.smartmetserver.name }}-init-sql
+      - name: initsh-cm
+        configMap:
+          name: {{ .Values.smartmetserver.name }}-init-sh
+      - name: load-emptydir
+        emptyDir: {}
 {{- end }}
