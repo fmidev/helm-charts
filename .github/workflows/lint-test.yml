@@ -34,12 +34,16 @@ jobs:
           fi
 
       # Custom FMI code not included in the reference implementation (https://github.com/marketplace/actions/helm-chart-testing)
-      - name: Update dependencies (only for changed)
+      - name: Add repos for all dependencies (only for the changed)
         run: |
           for chart_dir in $(ct list-changed --target-branch ${{ github.event.repository.default_branch }}); do
             echo "processing changed chart in '${chart_dir}'" 1>&2
             cd "${chart_dir}"
-            helm dependency update
+            if [[ -e "./Chart.lock" ]]; then
+              yq --indent 0 '.dependencies | map(["helm", "repo", "add", .name, .repository] | join(" ")) | .[]' "./Chart.lock" | sh --;
+            else
+              echo "no Chart.lock found, skip repo addition" 1>&2
+            fi
             cd - &> /dev/null
           done
 
