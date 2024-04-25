@@ -1,4 +1,4 @@
-#Default values
+# Default values
 image:
   repository: quay.io/fmi/smartmet-server
   pullPolicy: IfNotPresent
