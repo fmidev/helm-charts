@@ -8,4 +8,4 @@ spec:
   ports:
     - name: {{ .Release.Name }}-port
       port: {{ .Values.config.port }}
-      targetPort: 8080
+      targetPort: {{ .Values.config.port }}
