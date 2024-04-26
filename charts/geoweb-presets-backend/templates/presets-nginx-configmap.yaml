@@ -9,6 +9,21 @@ data:
 {{- if .Values.presets.nginx.OAUTH2_USERINFO }}
   OAUTH2_USERINFO: {{ .Values.presets.nginx.OAUTH2_USERINFO | quote }}
 {{- end }}
+{{- if .Values.presets.nginx.JWKS_URI }}
+  JWKS_URI: {{ .Values.presets.nginx.JWKS_URI | quote }}
+{{- end }}
+{{- if .Values.presets.nginx.AUD_CLAIM }}
+  AUD_CLAIM: {{ .Values.presets.nginx.AUD_CLAIM | quote }}
+{{- end }}
+{{- if .Values.presets.nginx.AUD_CLAIM_VALUE }}
+  AUD_CLAIM_VALUE: {{ .Values.presets.nginx.AUD_CLAIM_VALUE | quote }}
+{{- end }}
+{{- if .Values.presets.nginx.ISS_CLAIM }}
+  ISS_CLAIM: {{ .Values.presets.nginx.ISS_CLAIM | quote }}
+{{- end }}
+{{- if .Values.presets.nginx.ISS_CLAIM_VALUE }}
+  ISS_CLAIM_VALUE: {{ .Values.presets.nginx.ISS_CLAIM_VALUE | quote }}
+{{- end }}
 {{- if .Values.presets.nginx.GEOWEB_USERNAME_CLAIM }}
   GEOWEB_USERNAME_CLAIM: {{ .Values.presets.nginx.GEOWEB_USERNAME_CLAIM | quote }}
 {{- end }}

@@ -9,6 +9,21 @@ data:
 {{- if .Values.opmet.nginx.OAUTH2_USERINFO }}
   OAUTH2_USERINFO: {{ .Values.opmet.nginx.OAUTH2_USERINFO | quote }}
 {{- end }}
+{{- if .Values.opmet.nginx.JWKS_URI }}
+  JWKS_URI: {{ .Values.opmet.nginx.JWKS_URI | quote }}
+{{- end }}
+{{- if .Values.opmet.nginx.AUD_CLAIM }}
+  AUD_CLAIM: {{ .Values.opmet.nginx.AUD_CLAIM | quote }}
+{{- end }}
+{{- if .Values.opmet.nginx.AUD_CLAIM_VALUE }}
+  AUD_CLAIM_VALUE: {{ .Values.opmet.nginx.AUD_CLAIM_VALUE | quote }}
+{{- end }}
+{{- if .Values.opmet.nginx.ISS_CLAIM }}
+  ISS_CLAIM: {{ .Values.opmet.nginx.ISS_CLAIM | quote }}
+{{- end }}
+{{- if .Values.opmet.nginx.ISS_CLAIM_VALUE }}
+  ISS_CLAIM_VALUE: {{ .Values.opmet.nginx.ISS_CLAIM_VALUE | quote }}
+{{- end }}
 {{- if .Values.opmet.nginx.GEOWEB_USERNAME_CLAIM }}
   GEOWEB_USERNAME_CLAIM: {{ .Values.opmet.nginx.GEOWEB_USERNAME_CLAIM | quote }}
 {{- end }}
@@ -17,6 +32,9 @@ data:
 {{- end }}
 {{- if .Values.opmet.nginx.GEOWEB_REQUIRE_WRITE_PERMISSION }}
   GEOWEB_REQUIRE_WRITE_PERMISSION: {{ .Values.opmet.nginx.GEOWEB_REQUIRE_WRITE_PERMISSION | quote }}
+{{- end }}
+{{- if .Values.opmet.nginx.ALLOW_ANONYMOUS_ACCESS }}
+  ALLOW_ANONYMOUS_ACCESS: {{ .Values.opmet.nginx.ALLOW_ANONYMOUS_ACCESS | quote }}
 {{- end }}
 {{- if .Values.opmet.nginx.BACKEND_HOST }}
   BACKEND_HOST: {{ .Values.opmet.nginx.BACKEND_HOST | quote }}
