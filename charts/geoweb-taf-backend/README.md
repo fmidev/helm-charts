@@ -169,5 +169,6 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.db.POSTGRES_USER` | Default postgres database user | `postgres` |
 | `taf.db.POSTGRES_PASSWORD` | Default postgres database password | `postgres` |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |
+| `ingress.tls` | TLS configuration section for the ingress | |
 | `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | |
 | `ingress.customAnnotations` | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations if set | |

@@ -114,6 +114,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `ingress.customAnnotations`                   | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations if set |                                                                                              |
 | `ingress.ingressClassName`                    | Set ingressClassName parameter to not use default ingressClass | `nginx`                                                                                      |
 | `ingress.name`                                | Name of the ingress controller in use | `nginx-ingress-controller`                                                                   |
+| `ingress.tls`                                 | TLS configuration section for the ingress | |
 | `opmet.awsAccessKeyId`                        | AWS_ACCESS_KEY_ID for authenticating to S3 |                                                                                              |
 | `opmet.awsAccessKeySecret`                    | AWS_SECRET_ACCESS_KEY for authenticating to S3 |                                                                                              |
 | `opmet.awsDefaultRegion`                      | Region where your S3 bucket is located |                                                                                              |

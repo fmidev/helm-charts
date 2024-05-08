@@ -57,5 +57,6 @@ The following table lists the configurable parameters of the CAP backend chart a
 | `cap.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
 | `cap.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |
+| `ingress.tls` | TLS configuration section for the ingress | |
 | `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | `nginx` |
 | `ingress.customAnnotations` | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations if set | |
