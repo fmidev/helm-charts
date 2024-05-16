@@ -59,8 +59,13 @@ spec:
             - /bin/sh
             - -c
             - |
+              set -x
+              mkdir /workdir/names &&
+              mkdir /workdir/alternate &&
               wget -O geonames.zip 'https://download.geonames.org/export/dump/FI.zip' &&
-              unzip geonames.zip -d /workdir/
+              unzip geonames.zip -d /workdir/names &&
+              wget -O alternate_names.zip 'https://download.geonames.org/export/dump/alternatenames/FI.zip' &&
+              unzip alternate_names.zip -d /workdir/alternate
           volumeMounts:
             - mountPath: "/workdir"
               name: load-emptydir

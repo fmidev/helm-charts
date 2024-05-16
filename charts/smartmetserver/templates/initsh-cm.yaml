@@ -14,7 +14,7 @@ data:
     
     psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
     CREATE TEMPORARY TABLE temp_geoname (
-       geonameid	int,
+       geonameid int,
        name varchar(200),
        asciiname varchar(200),
        alternatenames text,
@@ -56,7 +56,7 @@ data:
        timezone,
        moddate
     )
-    FROM '/workdir/FI.txt' NULL as '';
+    FROM '/workdir/names/FI.txt' NULL as '';
     
     INSERT INTO public.geonames (
        id,
@@ -98,7 +98,58 @@ data:
        timezone,
        moddate
     FROM temp_geoname;
-    
+
     DROP TABLE temp_geoname;
+
+    CREATE TEMPORARY TABLE temp_alternate_geonames (
+      id int4 NOT NULL,
+      geonames_id int4 NOT NULL,
+      "language" varchar(100),
+      name varchar(200) NOT NULL,
+      preferred bool DEFAULT false,
+      short bool DEFAULT false,
+      colloquial bool DEFAULT false,
+      historic bool DEFAULT false,
+      "from" int,
+      "to" int
+    );
+
+    COPY temp_alternate_geonames (
+      id,
+      geonames_id,
+      "language",
+      name,
+      preferred,
+      short,
+      colloquial,
+      historic,
+      "from",
+      "to"
+    )
+    FROM '/workdir/alternate/FI.txt' NULL as '';
+
+    INSERT INTO public.alternate_geonames (
+      id,
+      geonames_id,
+      "language",
+      name,
+      preferred,
+      short,
+      colloquial,
+      historic
+    )
+    SELECT
+      id,
+      geonames_id,
+      COALESCE("language", '') AS language,
+      name,
+      COALESCE(preferred, false) AS preferred,
+      COALESCE(short, false) AS short,
+      COALESCE(colloquial, false) AS colloquial,
+      COALESCE(historic, false) AS historic
+    FROM temp_alternate_geonames;
+
+    DROP TABLE temp_alternate_geonames;
+    
     EOSQL
     
