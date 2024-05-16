@@ -46,6 +46,8 @@ hpa:
   targetCPUUtilizationPercentage: 60
 
 postgres:
+  # Either ISO 639 country code or value all
+  geonames_file: 'FI'
   external: false
   externalHost: ""
   externalPort: ""
@@ -166,4 +168,3 @@ smartmetConfCm:
                     configfile = "plugins/wms.conf";
             };
     };
-

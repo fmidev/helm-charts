@@ -142,7 +142,7 @@ data:
             "class" bpchar(1) NULL DEFAULT NULL::bpchar,
             features_code varchar(10) NULL DEFAULT NULL::character varying,
             countries_iso2 varchar(2) NULL DEFAULT NULL::character varying,
-            cc2 varchar(60) NULL,
+            cc2 varchar(200) NULL,
             admin1 varchar(20) NULL DEFAULT NULL::character varying,
             admin2 varchar(80) NULL DEFAULT NULL::character varying,
             admin3 varchar(20) NULL DEFAULT NULL::character varying,

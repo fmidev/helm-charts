@@ -23,7 +23,7 @@ data:
        fclass char(1),
        fcode varchar(10),
        country varchar(2),
-       cc2 varchar(60),
+       cc2 varchar(200),
        admin1 varchar(20),
        admin2 varchar(80),
        admin3 varchar(20),
@@ -56,7 +56,13 @@ data:
        timezone,
        moddate
     )
-    FROM '/workdir/names/FI.txt' NULL as '';
+    {{- if eq (lower .Values.postgres.geonames_file) "all" }}
+    FROM '/workdir/names/allCountries.txt' NULL as '';
+    {{- else if or (eq (len (trim .Values.postgres.geonames_file)) 2) (eq (len (trim .Values.postgres.geonames_file)) 3) }}
+    FROM '/workdir/names/{{ upper .Values.postgres.geonames_file }}.txt' NULL as '';
+    {{- else }}
+    {{- fail "Value .Values.postgres.geonames_file must be ISO 639 countrycode or value all." }}
+    {{- end }}
     
     INSERT INTO public.geonames (
        id,
@@ -110,8 +116,8 @@ data:
       short bool DEFAULT false,
       colloquial bool DEFAULT false,
       historic bool DEFAULT false,
-      "from" int,
-      "to" int
+      "from" varchar(30),
+      "to" varchar(30) 
     );
 
     COPY temp_alternate_geonames (
@@ -126,7 +132,13 @@ data:
       "from",
       "to"
     )
-    FROM '/workdir/alternate/FI.txt' NULL as '';
+    {{- if eq (lower .Values.postgres.geonames_file) "all" }}
+    FROM '/workdir/alternate/alternateNamesV2.txt' NULL as '';
+    {{- else if or (eq (len (trim .Values.postgres.geonames_file)) 2) (eq (len (trim .Values.postgres.geonames_file)) 3) }}
+    FROM '/workdir/alternate/{{ upper .Values.postgres.geonames_file }}.txt' NULL as '';
+    {{- else }}
+    {{- fail "Value .Values.postgres.geonames_file must be ISO 639 countrycode or value all." }}
+    {{- end }}
 
     INSERT INTO public.alternate_geonames (
       id,

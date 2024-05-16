@@ -62,9 +62,16 @@ spec:
               set -x
               mkdir /workdir/names &&
               mkdir /workdir/alternate &&
-              wget -O geonames.zip 'https://download.geonames.org/export/dump/FI.zip' &&
+              {{- if eq (lower .Values.postgres.geonames_file) "all" }}
+              wget -O geonames.zip 'https://download.geonames.org/export/dump/allCountries.zip' &&
+              wget -O alternate_names.zip 'https://download.geonames.org/export/dump/alternateNamesV2.zip' &&
+              {{- else if or (eq (len (trim .Values.postgres.geonames_file)) 2) (eq (len (trim .Values.postgres.geonames_file)) 3) }}
+              wget -O geonames.zip 'https://download.geonames.org/export/dump/{{ upper .Values.postgres.geonames_file }}.zip' &&
+              wget -O alternate_names.zip 'https://download.geonames.org/export/dump/alternatenames/{{ upper .Values.postgres.geonames_file }}.zip' &&
+              {{- else }}
+              {{- fail "Value .Values.postgres.geonames_file must be ISO 639 countrycode or value all." }}
+              {{- end }}
               unzip geonames.zip -d /workdir/names &&
-              wget -O alternate_names.zip 'https://download.geonames.org/export/dump/alternatenames/FI.zip' &&
               unzip alternate_names.zip -d /workdir/alternate
           volumeMounts:
             - mountPath: "/workdir"
