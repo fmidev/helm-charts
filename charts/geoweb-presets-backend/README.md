@@ -177,3 +177,10 @@ The following table lists the configurable parameters of the Presets backend cha
 | `ingress.tls` | TLS configuration section for the ingress | |
 | `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | `nginx` |
 | `ingress.customAnnotations` | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations if set | |
+
+# Chart versions
+
+| Chart version | presets version |
+| ------------- | ------------- |
+| 2.10.1        | 3.11.1        |
+| 2.10.0        | 3.11.0        |

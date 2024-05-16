@@ -176,6 +176,8 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 
 | Chart version | frontend version |
 |---------------|------------------|
+| 3.10.1        | 9.17.0           |
+| 3.10.0        | 9.14.0           |
 | 3.9.0         | 9.14.0           |
 | 3.8.1         | 9.14.0           |
 | 3.4.0         | 9.9.0            |
