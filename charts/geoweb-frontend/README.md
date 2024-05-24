@@ -138,8 +138,10 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.env.GW_FEATURE_APP_TITLE` | Application title | |
 | `frontend.env.GW_PRESET_BACKEND_URL` | Url which the application uses to connect to Presets backend | |
 | `frontend.env.GW_AUTH_LOGOUT_URL` | Url to redirect when logging out | `"http://localhost:5400"` |
-| `frontend.env.GW_AUTH_TOKEN_URL` | - | `https://gitlab.com/oauth/token` |
+| `frontend.env.GW_AUTH_TOKEN_URL` | Url to retrieve tokens | `https://gitlab.com/oauth/token` |
 | `frontend.env.GW_AUTH_LOGIN_URL` | Url to redirect when logging in | `https://gitlab.com/oauth/authorize?client_id={client_id}&response_type=code&scope=email+openid+read_repository+read_api&redirect_uri={app_url}/code&state={state}&code_challenge={code_challenge}&code_challenge_method=S256` |
+| `frontend.env.GW_AUTH_ROLE_CLAIM_NAME` | The name of the ID token claim containing the security groups used with the roles | |
+| `frontend.env.GW_AUTH_ROLE_CLAIM_VALUE_PRESETS_ADMIN` | The name of the security group required for the preset-admin role | |
 | `frontend.env.GW_INITIAL_PRESETS_FILENAME` | Filename to fetch initial presets | `initialPresets.json` |
 | `frontend.env.GW_CAP_CONFIGURATION_FILENAME` | Filename to fetch CAP Warnings configured feeds | `capWarningPresets.json` |
 | `frontend.env.GW_TIMESERIES_CONFIGURATION_FILENAME` | Filename to fetch TimeSeries preset locations | `timeSeriesPresetLocations.json` |
