@@ -36,6 +36,12 @@ data:
 {{- if .Values.presets.nginx.ALLOW_ANONYMOUS_ACCESS }}
   ALLOW_ANONYMOUS_ACCESS: {{ .Values.presets.nginx.ALLOW_ANONYMOUS_ACCESS | quote }}
 {{- end }}
+{{- if .Values.presets.nginx.GEOWEB_ROLE_CLAIM_NAME }}
+  GEOWEB_ROLE_CLAIM_NAME: {{ .Values.presets.nginx.GEOWEB_ROLE_CLAIM_NAME | quote }}
+{{- end }}
+{{- if .Values.presets.nginx.GEOWEB_ROLE_CLAIM_VALUE_PRESETS_ADMIN }}
+  GEOWEB_ROLE_CLAIM_VALUE_PRESETS_ADMIN: {{ .Values.presets.nginx.GEOWEB_ROLE_CLAIM_VALUE_PRESETS_ADMIN | quote }}
+{{- end }}
 {{- if .Values.presets.nginx.BACKEND_HOST }}
   BACKEND_HOST: {{ .Values.presets.nginx.BACKEND_HOST | quote }}
 {{- end }}
