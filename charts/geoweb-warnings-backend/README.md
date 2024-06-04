@@ -141,6 +141,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.db.POSTGRES_PASSWORD` | Default postgres database password | `postgres` |
 | `warnings.useCustomConfigurationFiles` | Use custom configurations | `false` |
 | `warnings.customConfigurationLocation` | Where custom configurations are located *(local\|s3)* | `local` |
+| `warnings.customConfigurationFolderPath` | Path to the folder which contains custom configurations | |
 | `warnings.volumeAccessMode` | Permissions of the application for the custom configurations and custom warnings PersistentVolume used | `ReadOnlyMany` |
 | `warnings.volumeSize` | Size of the custom configuration and warnings PersistentVolume | `100Mi` |
 | `warnings.awsAccessKeyId` | AWS_ACCESS_KEY_ID for authenticating to S3 | |
