@@ -209,6 +209,18 @@ entries:
     version: 1.0.0
   geoweb-frontend:
   - apiVersion: v2
+    appVersion: v9.19.0
+    created: "2024-06-04T07:55:16.665835798Z"
+    description: A Helm chart for geoweb application frontend in Kubernetes
+    digest: 1db22765b78ef8b1ea3a68dd6925f8d16c506d0cced2cccdd7793713321b5643
+    maintainers:
+    - name: Jusaa
+    name: geoweb-frontend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-frontend-3.11.1/geoweb-frontend-3.11.1.tgz
+    version: 3.11.1
+  - apiVersion: v2
     appVersion: v9.18.0
     created: "2024-05-24T08:58:52.393958992Z"
     description: A Helm chart for geoweb application frontend in Kubernetes
@@ -1700,6 +1712,18 @@ entries:
     version: 0.0.1
   geoweb-warnings-backend:
   - apiVersion: v2
+    appVersion: v0.11.0
+    created: "2024-06-04T07:55:16.862458623Z"
+    description: A Helm chart for geoweb warnings backend resources in Kubernetes
+    digest: 2269cb0c4800ec3df5f09acb77eb627e98cfa0f592922380f737e7610247b25a
+    maintainers:
+    - name: Jusaa
+    name: geoweb-warnings-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-warnings-backend-0.5.2/geoweb-warnings-backend-0.5.2.tgz
+    version: 0.5.2
+  - apiVersion: v2
     appVersion: v0.9.2
     created: "2024-05-16T12:20:11.932055301Z"
     description: A Helm chart for geoweb warnings backend resources in Kubernetes
@@ -2055,4 +2079,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2024-05-31T05:51:59.463435786Z"
+generated: "2024-06-04T07:55:16.862996506Z"
