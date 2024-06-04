@@ -37,9 +37,10 @@ warnings:
     failureThreshold: 1
   nginx:
     name: warnings-nginx
-    registry: registry.gitlab.com/opengeoweb/backend-services/warnings-backend/nginx-warnings-backend
-    WARNINGS_ENABLE_SSL: "FALSE"
-    WARNINGS_BACKEND_HOST: 0.0.0.0:8080
+    registry: registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend
+    version: "v0.3.0"
+    ENABLE_SSL: "FALSE"
+    BACKEND_HOST: 0.0.0.0:8080
     NGINX_PORT_HTTP: 80
     NGINX_PORT_HTTPS: 443
     resources:
@@ -79,6 +80,10 @@ warnings:
     enableLogicalBackup: true
     cleanInstall: true
     backupTimestamp: "2030-01-01T00:00:00+00:00"
+  useCustomConfigurationFiles: false
+  customConfigurationLocation: local
+  volumeAccessMode: ReadOnlyMany
+  volumeSize: 100Mi
 
 ingress:
   name: nginx-ingress-controller

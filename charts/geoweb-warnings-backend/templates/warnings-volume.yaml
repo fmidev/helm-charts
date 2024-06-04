@@ -1,0 +1,29 @@
+{{- if and .Values.warnings.useCustomConfigurationFiles (eq .Values.warnings.customConfigurationLocation "local")}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.warnings.name }}-claim
+spec:
+  storageClassName: ""
+  accessModes:
+    - {{ .Values.warnings.volumeAccessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.warnings.volumeSize }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.warnings.name }}-volume
+spec:
+  storageClassName: manual
+  capacity:
+    storage: {{ .Values.warnings.volumeSize }}
+  accessModes:
+    - {{ .Values.warnings.volumeAccessMode }}
+  claimRef:
+    namespace: {{ .Release.Namespace }}
+    name: {{ .Values.warnings.name }}-claim
+  hostPath:
+    path: {{ .Values.warnings.customConfigurationFolderPath | quote }}
+{{- end }}
