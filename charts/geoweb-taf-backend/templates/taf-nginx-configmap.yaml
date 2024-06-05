@@ -7,11 +7,29 @@ metadata:
     commitHash: {{ .Values.taf.commitHash }}
   {{- end }}
 data:
-{{- if .Values.taf.nginx.AVIATION_TAF_ENABLE_SSL }}
-  AVIATION_TAF_ENABLE_SSL: {{ .Values.taf.nginx.AVIATION_TAF_ENABLE_SSL | quote }}
+{{- if .Values.taf.nginx.ENABLE_SSL }}
+  ENABLE_SSL: {{ .Values.taf.nginx.ENABLE_SSL | quote }}
 {{- end }}
 {{- if .Values.taf.nginx.OAUTH2_USERINFO }}
   OAUTH2_USERINFO: {{ .Values.taf.nginx.OAUTH2_USERINFO | quote }}
+{{- end }}
+{{- if .Values.taf.nginx.JWKS_URI }}
+  JWKS_URI: {{ .Values.taf.nginx.JWKS_URI | quote }}
+{{- end }}
+{{- if .Values.taf.nginx.AUD_CLAIM }}
+  AUD_CLAIM: {{ .Values.taf.nginx.AUD_CLAIM | quote }}
+{{- end }}
+{{- if .Values.taf.nginx.AUD_CLAIM_VALUE }}
+  AUD_CLAIM_VALUE: {{ .Values.taf.nginx.AUD_CLAIM_VALUE | quote }}
+{{- end }}
+{{- if .Values.taf.nginx.ISS_CLAIM }}
+  ISS_CLAIM: {{ .Values.taf.nginx.ISS_CLAIM | quote }}
+{{- end }}
+{{- if .Values.taf.nginx.ISS_CLAIM_VALUE }}
+  ISS_CLAIM_VALUE: {{ .Values.taf.nginx.ISS_CLAIM_VALUE | quote }}
+{{- end }}
+{{- if .Values.taf.nginx.GEOWEB_USERNAME_CLAIM }}
+  GEOWEB_USERNAME_CLAIM: {{ .Values.taf.nginx.GEOWEB_USERNAME_CLAIM | quote }}
 {{- end }}
 {{- if .Values.taf.nginx.GEOWEB_REQUIRE_READ_PERMISSION }}
   GEOWEB_REQUIRE_READ_PERMISSION: {{ .Values.taf.nginx.GEOWEB_REQUIRE_READ_PERMISSION | quote }}
@@ -19,8 +37,11 @@ data:
 {{- if .Values.taf.nginx.GEOWEB_REQUIRE_WRITE_PERMISSION }}
   GEOWEB_REQUIRE_WRITE_PERMISSION: {{ .Values.taf.nginx.GEOWEB_REQUIRE_WRITE_PERMISSION | quote }}
 {{- end }}
-{{- if .Values.taf.nginx.AVIATION_TAF_BACKEND_HOST }}
-  AVIATION_TAF_BACKEND_HOST: {{ .Values.taf.nginx.AVIATION_TAF_BACKEND_HOST | quote }}
+{{- if .Values.taf.nginx.ALLOW_ANONYMOUS_ACCESS }}
+  ALLOW_ANONYMOUS_ACCESS: {{ .Values.taf.nginx.ALLOW_ANONYMOUS_ACCESS | quote }}
+{{- end }}
+{{- if .Values.taf.nginx.BACKEND_HOST }}
+  BACKEND_HOST: {{ .Values.taf.nginx.BACKEND_HOST | quote }}
 {{- end }}
 {{- if .Values.taf.nginx.NGINX_PORT_HTTP }}
   NGINX_PORT_HTTP: {{ .Values.taf.nginx.NGINX_PORT_HTTP | quote }}
