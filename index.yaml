@@ -1571,6 +1571,18 @@ entries:
     version: 1.3.0
   geoweb-taf-backend:
   - apiVersion: v2
+    appVersion: v0.0.9
+    created: "2024-06-11T04:35:49.819461442Z"
+    description: A Helm chart for geoweb taf backend resources in Kubernetes
+    digest: 8d9be41f42c9cd724fd4fc0d99a36418f354926b8e16e798fb258f2c54b4eaf4
+    maintainers:
+    - name: Jusaa
+    name: geoweb-taf-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-taf-backend-0.5.0/geoweb-taf-backend-0.5.0.tgz
+    version: 0.5.0
+  - apiVersion: v2
     appVersion: v0.0.8
     created: "2024-05-08T06:32:35.930616917Z"
     description: A Helm chart for geoweb taf backend resources in Kubernetes
@@ -2103,4 +2115,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2024-06-04T11:24:37.712342089Z"
+generated: "2024-06-11T04:35:49.819857646Z"
