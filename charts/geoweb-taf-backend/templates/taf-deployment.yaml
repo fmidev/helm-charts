@@ -187,7 +187,7 @@ spec:
         - name: publisher-volume
           mountPath: {{ .Values.taf.publisher.PUBLISH_DIR | quote }}
       - name: {{ .Values.taf.nginx.name }}
-        image: {{ .Values.taf.nginx.registry }}:{{ default .Chart.AppVersion .Values.versions.taf }}
+        image: {{ .Values.taf.nginx.registry }}:{{ default .Values.taf.nginx.version }}
       {{- if .Values.taf.imagePullPolicy }}
         imagePullPolicy: {{ .Values.taf.imagePullPolicy }}
       {{- end }}
@@ -205,6 +205,12 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Values.taf.nginx.name }}
+      {{- if and .Values.taf.useCustomConfigurationFiles }}
+        volumeMounts:
+        - mountPath: "/nginx.conf"
+          subPath: "nginx.conf"
+          name: {{ .Values.taf.name }}-volume
+      {{- end }}
       {{- if .Values.taf.db.enableDefaultDb }}
       - name: {{ .Values.taf.db.name }}
         image: {{ .Values.taf.db.image }}

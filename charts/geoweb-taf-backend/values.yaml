@@ -93,11 +93,12 @@ taf:
       failureThreshold: 1
   nginx:
     name: taf-nginx
-    registry: registry.gitlab.com/opengeoweb/backend-services/aviation-taf-backend/nginx-aviation-taf-backend
-    AVIATION_TAF_ENABLE_SSL: "FALSE"
+    registry: registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend
+    version: "v0.3.0"
+    ENABLE_SSL: "FALSE"
     NGINX_PORT_HTTP: 80
     NGINX_PORT_HTTPS: 443
-    AVIATION_TAF_BACKEND_HOST: localhost:8000
+    BACKEND_HOST: localhost:8000
     resources:
       requests:
         memory: "10Mi"
