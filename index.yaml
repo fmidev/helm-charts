@@ -1919,6 +1919,17 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/geoweb-warnings-backend-0.0.1/geoweb-warnings-backend-0.0.1.tgz
     version: 0.0.1
+  himan:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2024-06-12T06:25:34.469366477Z"
+    description: A Helm chart for Kubernetes
+    digest: 8c367b2f5436793e8213243bd8f9e428aa005f89cf5d92e8d69245bdc7f1f180
+    name: himan
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/himan-1.0.0/himan-1.0.0.tgz
+    version: 1.0.0
   job-service-account:
   - apiVersion: v2
     appVersion: 1.0.0
@@ -2115,4 +2126,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2024-06-11T04:35:49.819857646Z"
+generated: "2024-06-12T06:25:34.469692032Z"
