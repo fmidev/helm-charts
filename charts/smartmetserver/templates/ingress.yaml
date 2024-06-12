@@ -11,11 +11,16 @@ spec:
   {{- with .Values.ingress.tls }}
   tls:
   - hosts:
-    - {{ .hostname | quote }}
+    - {{ .Values.ingress.host | quote }}
     secretName: {{ .secretName }}
   {{- end }}
   rules:
+  {{- if eq .Values.ingress.host "" }}
   - http:
+  {{- else }}
+  - host: {{ .Values.ingress.host }}
+    http:
+  {{- end }}
       paths:
       - backend:
           service:
