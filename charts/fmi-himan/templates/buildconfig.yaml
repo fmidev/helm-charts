@@ -1,0 +1,56 @@
+{{- if .Values.image.configuration.enabled }}
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: {{ .Release.Name }}-himan
+spec:
+  failedBuildsHistoryLimit: 2
+  output:
+    to:
+      kind: ImageStreamTag
+      name: {{ .Release.Name }}-himan:latest
+  resources:
+    limits:
+      cpu: "1"
+      memory: 1Gi
+    requests:
+      cpu: "1"
+      memory: 1Gi
+  runPolicy: Serial
+  source:
+    type: Dockerfile
+{{- if .Values.image.configuration.sshKey.name }}
+    secrets:
+    - destinationDir: secrets
+      secret:
+        name: {{ .Values.image.configuration.sshKey.name }}
+{{- end }}
+    dockerfile: |
+      FROM quay.io/fmi/himan:latest
+      
+      {{- if .Values.image.configuration.sshKey.name }}
+      ENV GIT_SSH_COMMAND "ssh -i /ssh-privatekey -o IdentitiesOnly=yes -o StrictHostKeyChecking=no"
+      COPY secrets /
+      {{- end }}
+
+      RUN dnf -y install git s3cmd jq && dnf clean all && \
+      {{- if .Values.image.configuration.sshKey.name }}
+          mkdir ~/.ssh/ && \
+      {{- end }}
+          git clone --branch {{ .Values.image.configuration.git.branch }} {{ .Values.image.configuration.git.repository }} && \
+          rm -f /ssh-privatekey
+
+      {{- $repo := splitList "/" .Values.image.configuration.git.repository | last }}
+      {{- $repo := split "." $repo }}
+      WORKDIR /{{ $repo._0 }}
+
+    type: Git
+  strategy:
+    type: Docker
+    dockerStrategy:
+      imageOptimizationPolicy: SkipLayers
+  successfulBuildsHistoryLimit: 2
+  triggers:
+    - type: ConfigChange
+{{- end }}

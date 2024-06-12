@@ -1,0 +1,208 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name:  {{ .Release.Name }}-himan
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+  annotations:
+    description: Template to run himan jobs
+objects:
+- apiVersion: batch/v1
+  kind: Job
+  metadata:
+    name: {{ .Release.Name }}-himan
+  spec:
+    parallelism: 1
+    completions: 1
+    backoffLimit: 0
+    template:
+      metadata:
+        name: {{ .Release.Name }}-himan
+        labels:
+          app.kubernetes.io/name: {{ .Release.Name }}-himan
+      spec:
+        activeDeadlineSeconds: ${{ "{{" }}TIMEOUT{{ "}}" }}
+        restartPolicy: Never
+        containers:
+        - command:
+          - sh
+          - -c
+          - |
+            set -u
+
+            test -n '${CUSTOM_ENV_VARIABLES}' && export ${CUSTOM_ENV_VARIABLES}
+
+            if [ -n "${COMMAND}" ]; then
+              echo "Running command ${COMMAND}"
+              set -e
+              ${COMMAND}
+
+            elif [ -n "${CONFIGURATION}" ]; then
+              conf=$(cat ${CONFIGURATION})
+              test -n "${START_HOUR}" && conf=$(echo $conf | jq --arg a ${START_HOUR} '.start_hour=$a')
+              test -n "${STOP_HOUR}" && conf=$(echo $conf | jq --arg a ${STOP_HOUR} '.stop_hour=$a')
+              test -n "${STEP_LENGTH}" && conf=$(echo $conf | jq --arg a ${STEP_LENGTH} '.step=$a')
+              test -n "${START_MINUTE}" && conf=$(echo $conf | jq --arg a ${START_MINUTE} '.start_minute=$a')
+              test -n "${STOP_MINUTE}" && conf=$(echo $conf | jq --arg a ${STOP_MINUTE} '.stop_minute=$a')
+              test -n "${HOURS}" && conf=$(echo $conf | jq --arg a ${HOURS} '.hours=$a')
+              test -n "${ANALYSIS_TIME}" && conf=$(echo $conf | jq --arg a "${ANALYSIS_TIME}" '.origintime=$a')
+              test -n "${FORECAST_TYPE}" && conf=$(echo $conf | jq --arg a ${FORECAST_TYPE} '.forecast_type=$a')
+              test -n "${FILENAME_TEMPLATE}" && conf=$(echo $conf | jq --arg a ${FILENAME_TEMPLATE} '.filename_template=$a')
+              test -n "${WRITE_STORAGE_TYPE}" && conf=$(echo $conf | jq --arg a ${WRITE_STORAGE_TYPE} '.write_storage_type=$a')
+              test -n "${CACHE_LIMIT}" && conf=$(echo $conf | jq --arg a ${CACHE_LIMIT} '.cache_limit=$a')
+
+              set -e
+
+              echo $conf | jq '.'
+              echo $conf | himan -s -f -
+
+            else
+              echo "Neither CONFIGURATION nor COMMAND specified, unable to continue"
+              exit 1
+            fi
+
+            if [ -n "${ECF_NAME}" ]; then
+          
+              payload=$(jq -n \
+                --arg type meter \
+                --arg hour $hour \
+                --arg name progress \
+                --arg ecf_name ${ECF_NAME} \
+                --arg ecf_pass ${ECF_PASS} \
+                --arg ecf_rid ${ECF_RID} \
+                --arg ecf_tryno ${ECF_TRYNO} \
+                '{type: $type, hour: $hour, name: $name, xECF_NAME: $ecf_name, ECF_PASS: $ecf_pass, ECF_RID: $ecf_rid, ECF_TRYNO: $ecf_tryno}'
+              )
+              echo curl -v -X PUT \
+                 -H 'content-type: application/json' \
+                 -H 'authorization: Bearer testitoken' \
+                 -d "$payload" \
+                 http://$SNWC_ECFLOW_HTTP_SERVICE_HOST:$SNWC_ECFLOW_HTTP_SERVICE_PORT/v1/suites/$ECF_NAME/attributes
+            fi
+          env:
+          {{ if .Values.s3.credentials.name }}
+          - name: S3_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                key: S3_ACCESS_KEY_ID
+                name: {{ .Values.s3.credentials.name }}
+          - name: S3_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                key: S3_SECRET_ACCESS_KEY
+                name: {{ .Values.s3.credentials.name }}
+          {{- end }}
+          {{- $global := .Values.global | default dict }}
+          - name: TYPE
+            value: {{ .Values.prodType | default $global.prodType | quote }}
+          - name: ENVIRONMENT
+            value: {{ .Values.environment | default $global.environment | quote }}
+          - name: CLOUD
+            value: {{ .Values.cloud | default $global.cloud | quote }}
+          - name: HOME
+            value: /tmp
+          - name: S3_HOSTNAME
+            value: ${S3_HOSTNAME}
+          - name: HIMAN_NUM_THREADS
+            valueFrom:
+              resourceFieldRef:
+                containerName: himan
+                resource: limits.cpu
+          - name: RADON_HOSTNAME
+            value: {{ .Values.radon.host }}
+          - name: RADON_PORT
+            value: {{ .Values.radon.port | default "5432" | quote }}
+          - name: RADON_DATABASENAME
+            value: {{ .Values.radon.databaseName | default "radon" | quote }}
+          - name: RADON_WETODB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: RADON_WETODB_PASSWORD
+                name: {{ .Values.radon.credentials.name  }}
+          name: himan
+          image: {{ include "himan.localImageRepository" . }}-himan:latest
+          imagePullPolicy: Always
+          resources:
+            limits:
+              cpu: ${CPU_LIMIT}
+              memory: ${MEMORY_LIMIT}
+            requests:
+              cpu: ${CPU_REQUEST}
+              memory: ${MEMORY_REQUEST}
+          {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 10 }}
+          {{- end }}
+        volumes:
+        {{- with .Values.volumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+parameters:
+- description: Configuration file name
+  name: CONFIGURATION
+- description: Forecast analysis time, YYYY-MM-DD HH24:MI:SS (optional)
+  name: ANALYSIS_TIME
+- description: Start step in hours (optional)
+  name: START_HOUR
+  value:
+- description: Stop step in hours (optional)
+  name: STOP_HOUR
+  value:
+- description: Step length (optional)
+  name: STEP_LENGTH
+  value:
+- description: Start step in minutes (optional)
+  name: START_MINUTE
+  value:
+- description: Stop step in minutes (optional)
+  name: STOP_MINUTE
+  value:
+- description: List of hours (optional)
+  name: HOURS
+  value:
+- description: Forecast type
+  name: FORECAST_TYPE
+  value:
+- description: ECF_NAME
+  name: ECF_NAME
+  value:
+- description: ECF_PASS
+  name: ECF_PASS
+- description: ECF_RID
+  name: ECF_RID
+- description: ECF_TRYNO
+  name: ECF_TRYNO
+- description: Job deadline in seconds
+  name: TIMEOUT 
+  value: "1800"
+  required: true
+- description: Job memory request
+  name: MEMORY_REQUEST
+  value: "512Mi"
+- description: Job memory limit
+  name: MEMORY_LIMIT
+  value: "1Gi"
+- description: Job CPU request
+  name: CPU_REQUEST
+  value: "2"
+- description: Job CPU limit
+  name: CPU_LIMIT
+  value: "2"
+- description: S3 hostname (required when writing to s3)
+  name: S3_HOSTNAME
+  value: 
+- description: Filename template for himan
+  name: FILENAME_TEMPLATE
+  value:
+- description: "Storage type: local or s3"
+  name: WRITE_STORAGE_TYPE
+  value:
+- description: Cache limit
+  name: CACHE_LIMIT
+  value:
+- description: Override command
+  name: COMMAND
+  value:
+- description: Custom environment variables, for example "X=foo Y=bar"
+  name: CUSTOM_ENV_VARIABLES
+  value:

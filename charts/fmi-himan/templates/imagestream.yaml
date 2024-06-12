@@ -1,0 +1,23 @@
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: {{ .Release.Name }}-himan
+  labels:
+    app: {{ .Release.Name }}
+    app.kubernetes.io/component: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/part-of: {{ .Release.Name }}
+spec:
+  lookupPolicy:
+    local: false
+{{- if not .Values.image.configuration.enabled }}
+  tags:
+  - from:
+      kind: DockerImage
+      name: quay.io/fmi/himan:latest
+    importPolicy:
+      insecure: false
+      scheduled: true
+    name: latest
+{{- end }}
