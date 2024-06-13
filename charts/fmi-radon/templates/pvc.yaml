@@ -1,0 +1,39 @@
+{{- if eq .Values.environment "local" -}}
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: {{ .Values.storage.persistent.volume.name }}
+  labels:
+    type: local
+    app: {{ .Release.Namespace }}
+spec:
+  storageClassName: default
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  local: # local cluster/node mount path
+    path: /mnt/data # local cluster/node mount path
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - crc
+---
+{{- end -}}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ .Values.storage.persistent.claim.name }}-{{ .Values.environment }}
+  labels:
+{{ include "radon.labels" . | indent 4 }}
+spec:
+  storageClassName: {{ .Values.storage.storageClassName }}
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.storage.size }}

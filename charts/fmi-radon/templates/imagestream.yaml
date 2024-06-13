@@ -1,0 +1,20 @@
+
+{{- if .Values.imageStream }}
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+{{ include "radon.labels" . | indent 4 }}
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+  - annotations: null
+    from:
+      kind: DockerImage
+      name: {{ .Values.image.repository.host }}:{{ .Values.image.repository.tag }}
+    name: {{ .Values.image.repository.tag }}
+    referencePolicy:
+      type: Local
+{{ end }}

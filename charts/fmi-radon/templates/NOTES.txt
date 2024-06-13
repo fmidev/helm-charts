@@ -1,0 +1,4 @@
+Chart installed as {{ .Release.Name }} to namespace {{ .Release.Namespace }}
+
+Open a connection to Radon with: 
+psql -h {{ .Release.Namespace }}.{{ .Release.Name }} -U postgres
