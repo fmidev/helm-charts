@@ -23,6 +23,7 @@ spec:
       securityContext:
         runAsUser: {{ .Values.security.userId }}
         runAsGroup: {{ .Values.security.groupId }}
+        fsGroup: {{ .Values.security.userId }}
       serviceAccountName: {{ .Release.Name }}
       containers:
         - name: radondb
