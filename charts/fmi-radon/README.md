@@ -8,13 +8,16 @@ Chart contains configuration for Radon openshift deployment.
 
 ## Preconditions
 
+Check these from values.yaml:
+- The storage.storageClassName must be configured according to the options
+provided by the cloud provider (e.g. gp3-csi for aws).
+- serviceAccount.create must be true on the first installation.
+- When installing on a non openshift cluster set the imageStream to false.
+
 ### Secrets
 
-Necessary passwords for the database users need to be created before creating the chart.
-
-```bash
-oc create secret generic db-credentials --from-env-file=.env
-```
+Necessary passwords for the database users need to be created before creating
+the chart. Set the passwords to templates/secrets.yaml before installation.
 
 ### [SCC policy](https://docs.openshift.com/container-platform/3.11/admin_guide/manage_scc.html)
 

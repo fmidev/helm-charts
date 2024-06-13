@@ -27,10 +27,10 @@ spec:
       serviceAccountName: {{ .Release.Name }}
       containers:
         - name: radondb
-          {{- if .Values.testing }}
-          image: {{ .Values.image.repository.host }}:{{ .Values.image.repository.tag }}
-          {{ else }}
+          {{- if .Values.imageStream }}
           image: "{{ include "radon.localImageRepository" . }}/{{ .Release.Name }}:{{ .Values.image.repository.tag }}"
+          {{ else }}
+          image: {{ .Values.image.repository.host }}:{{ .Values.image.repository.tag }}
           {{ end -}}
           ports:
             - containerPort: 5432

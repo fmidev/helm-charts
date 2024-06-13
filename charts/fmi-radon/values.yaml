@@ -1,8 +1,6 @@
 environment: prod
 cloud:
 
-testing: true
-
 image:
   repository:
     host: quay.io/fmi/radon
@@ -24,3 +22,5 @@ storage:
 
 serviceAccount:
   create: true
+
+imageStream: false
