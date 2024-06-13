@@ -67,6 +67,9 @@ data:
 {{- if .Values.frontend.env.GW_FEATURE_MENU_FE_VERSION }}
   GW_FEATURE_MENU_FE_VERSION: {{ .Values.frontend.env.GW_FEATURE_MENU_FE_VERSION | quote }}
 {{- end }}
+{{- if .Values.frontend.env.GW_FEATURE_INITIALIZE_SENTRY }}
+  GW_FEATURE_INITIALIZE_SENTRY: {{ .Values.frontend.env.GW_FEATURE_INITIALIZE_SENTRY | quote }}
+{{- end }}
 {{- if .Values.frontend.env.GW_PRESET_BACKEND_URL }}
   GW_PRESET_BACKEND_URL: {{ .Values.frontend.env.GW_PRESET_BACKEND_URL | quote }}
 {{- end }}
