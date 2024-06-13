@@ -1,5 +1,7 @@
 environment: prod
-cloud: aws
+cloud:
+
+testing: true
 
 image:
   repository:
@@ -16,7 +18,7 @@ storage:
     claim:
       name: radondb-pv-claim
   size: 128Mi
-  storageClassName: gp3-csi
+  storageClassName: 
   volumeMode: Filesystem
   mountPath: /radondb
 
