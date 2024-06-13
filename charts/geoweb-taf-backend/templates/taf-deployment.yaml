@@ -86,13 +86,13 @@ spec:
               name: {{ .Values.taf.db_secretName }}
               key: AVIATION_TAF_BACKEND_DB
         {{- end }}
-      {{- if not .Values.taf.db.useZalandoOperatorDb }}
         volumeMounts:
+      {{- if not .Values.taf.db.useZalandoOperatorDb }}
         - name: secrets-store-inline
           mountPath: "/mnt/secrets-store"
           readOnly: true
       {{- end }}
-      {{- if and .Values.taf.useCustomConfigurationFiles }}
+      {{- if .Values.taf.useCustomConfigurationFiles }}
         - mountPath: {{ .Values.taf.customConfigurationMountPath }}
           name: {{ .Values.taf.name }}-volume
       {{- end }}
