@@ -23,4 +23,4 @@ storage:
   mountPath: /radondb
 
 serviceAccount:
-  create: false
+  create: true
