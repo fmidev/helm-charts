@@ -140,9 +140,16 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.nginx.ENABLE_SSL` | Toggle SSL termination | `"FALSE"` |
 | `presets.nginx.OAUTH2_USERINFO` | Userinfo endpoint to retrieve consented claims, or assertions, about the logged in end-user | - |
 | `presets.nginx.GEOWEB_USERNAME_CLAIM` | Claim name used as a user identifier in the presets-backend | `"email"` |
+| `presets.nginx.AUD_CLAIM` | Claim name used to get the token audience | `"aud"` |
+| `presets.nginx.AUD_CLAIM_VALUE` | Required value for the audience claim | |
+| `presets.nginx.ISS_CLAIM` | Issuer claim name used to get the token issuer | `"iss"` |
+| `presets.nginx.ISS_CLAIM_VALUE` | Required value for the issuer claim | |
+| `presets.nginx.JWKS_URI` | JSON Web Key Set URI that points to an identity provider's public key set in JSON format | |
 | `presets.nginx.GEOWEB_REQUIRE_READ_PERMISSION` | Required OAUTH claim name and value to be present in the userinfo response for read operations | `"FALSE"` |
 | `presets.nginx.GEOWEB_REQUIRE_WRITE_PERMISSION` | Required OAUTH claim name and value to be present in the userinfo response for write operations | `"FALSE"` |
 | `presets.nginx.ALLOW_ANONYMOUS_ACCESS` | Allow/disallow anonymous access. Note that if an access token has been passed, it is checked even if anonymous access is allowed. | `"FALSE"` |
+| `presets.nginx.GEOWEB_ROLE_CLAIM_NAME` | The name of the claim containing the security groups used with the roles | `"FALSE"` |
+| `presets.nginx.GEOWEB_ROLE_CLAIM_VALUE_PRESETS_ADMIN` | The name of the security group required to grant the preset-admin role | `"FALSE"` |
 | `presets.nginx.BACKEND_HOST` | Presets-backend container address where Nginx reverse proxy forwards the requests | `0.0.0.0:8080` |
 | `presets.nginx.NGINX_PORT_HTTP` | Port used for Nginx reverse proxy| `80` |
 | `presets.nginx.NGINX_PORT_HTTPS` | Port used for Nginx reverse proxy when SSL is enabled | `443` |
@@ -169,5 +176,14 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.awsAccessKeySecret` | AWS_SECRET_ACCESS_KEY for authenticating to S3 | |
 | `presets.awsDefaultRegion` | Region where your S3 bucket is located | |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |
+| `ingress.tls` | TLS configuration section for the ingress | |
 | `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | `nginx` |
 | `ingress.customAnnotations` | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations if set | |
+
+# Chart versions
+
+| Chart version | presets version |
+| ------------- | ------------- |
+| 2.11.0        | 3.12.0        |
+| 2.10.1        | 3.11.1        |
+| 2.10.0        | 3.11.0        |

@@ -1,0 +1,87 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name:  {{ .Release.Name }}-snwc-bc
+  labels:
+    app.kubernetes.io/name: snwc-bc
+objects:
+- apiVersion: batch/v1
+  kind: Job
+  metadata:
+    name: {{ .Release.Name }}-snwc-bc
+  spec:
+    parallelism: 1
+    completions: 1
+    backoffLimit: 0
+    template:
+      metadata:
+        name: {{ .Release.Name }}-snwc-bc
+        labels:
+          app.kubernetes.io/name: {{ .Release.Name }}-snwc-bc
+      spec:
+        successfulJobsHistoryLimit: 2
+        failedJobsHistoryLimit: 2
+        activeDeadlineSeconds: 600
+        restartPolicy: Never
+        containers:
+        - command:
+          - sh
+          - -c
+          - |
+            python3 biasc.py --topography_data ${INPUT_DIR}/Z-M2S2.grib2 \
+                             --landseacover ${INPUT_DIR}/LC-0TO1.grib2 \
+                             --t2_data ${INPUT_DIR}/T-K.grib2 \
+                             --wg_data ${INPUT_DIR}/FFG-MS.grib2 \
+                             --nl_data ${INPUT_DIR}/NL-0TO1.grib2 \
+                             --ppa_data ${INPUT_DIR}/P-PA.grib2 \
+                             --wd_data ${INPUT_DIR}/DD-D.grib2 \
+                             --q2_data ${INPUT_DIR}/Q-KGKG.grib2 \
+                             --ws_data ${INPUT_DIR}/FF-MS.grib2 \
+                             --rh_data ${INPUT_DIR}/RH-0TO1.grib2 \
+                             --output ${OUTPUT_FILE} \
+                             --parameter ${PARAM}
+
+          env:
+          {{ if .Values.s3.credentials.name }}
+          - name: S3_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                key: S3_ACCESS_KEY_ID
+                name: {{ .Values.s3.credentials.name }}
+          - name: S3_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                key: S3_SECRET_ACCESS_KEY
+                name: {{ .Values.s3.credentials.name }}
+          {{- end }}
+          - name: HOME
+            value: /tmp
+          - name: S3_HOSTNAME
+            value: ${S3_HOSTNAME}
+          - name: ENVIRONMENT
+            value: {{ .Values.global.environment }}
+          - name: CLOUD
+            value: {{ .Values.global.cloud }}
+          - name: TYPE
+            value: {{ .Values.global.prodType }}
+          - name: SNWC1_PROD3_KEY
+            valueFrom:
+              secretKeyRef:
+                key: SNWC1_PROD3_KEY
+                name: {{ .Values.tiuha.credentials.name }}
+          name: snwc-bc
+          image: {{ include "snwc_bc.localImageRepository" . }}-snwc-bc:{{- include "snwc_bc.imageTag" . | trim }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+parameters:
+- description: Input data directory name
+  name: INPUT_DIR
+  required: true
+- description: Output data file name
+  name: OUTPUT_FILE
+  required: true
+- description: Parameter name
+  name: PARAM
+  required: true
+- description: s3 endpoint
+  name: S3_HOSTNAME
+  required: false

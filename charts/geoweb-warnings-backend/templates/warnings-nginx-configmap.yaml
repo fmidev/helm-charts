@@ -3,11 +3,29 @@ kind: ConfigMap
 metadata:
   name: {{ .Values.warnings.nginx.name }}
 data:
-{{- if .Values.warnings.nginx.WARNINGS_ENABLE_SSL }}
-  WARNINGS_ENABLE_SSL: {{ .Values.warnings.nginx.WARNINGS_ENABLE_SSL | quote }}
+{{- if .Values.warnings.nginx.ENABLE_SSL }}
+  ENABLE_SSL: {{ .Values.warnings.nginx.ENABLE_SSL | quote }}
 {{- end }}
 {{- if .Values.warnings.nginx.OAUTH2_USERINFO }}
   OAUTH2_USERINFO: {{ .Values.warnings.nginx.OAUTH2_USERINFO | quote }}
+{{- end }}
+{{- if .Values.warnings.nginx.JWKS_URI }}
+  JWKS_URI: {{ .Values.warnings.nginx.JWKS_URI | quote }}
+{{- end }}
+{{- if .Values.warnings.nginx.AUD_CLAIM }}
+  AUD_CLAIM: {{ .Values.warnings.nginx.AUD_CLAIM | quote }}
+{{- end }}
+{{- if .Values.warnings.nginx.AUD_CLAIM_VALUE }}
+  AUD_CLAIM_VALUE: {{ .Values.warnings.nginx.AUD_CLAIM_VALUE | quote }}
+{{- end }}
+{{- if .Values.warnings.nginx.ISS_CLAIM }}
+  ISS_CLAIM: {{ .Values.warnings.nginx.ISS_CLAIM | quote }}
+{{- end }}
+{{- if .Values.warnings.nginx.ISS_CLAIM_VALUE }}
+  ISS_CLAIM_VALUE: {{ .Values.warnings.nginx.ISS_CLAIM_VALUE | quote }}
+{{- end }}
+{{- if .Values.warnings.nginx.GEOWEB_USERNAME_CLAIM }}
+  GEOWEB_USERNAME_CLAIM: {{ .Values.warnings.nginx.GEOWEB_USERNAME_CLAIM | quote }}
 {{- end }}
 {{- if .Values.warnings.nginx.GEOWEB_REQUIRE_READ_PERMISSION }}
   GEOWEB_REQUIRE_READ_PERMISSION: {{ .Values.warnings.nginx.GEOWEB_REQUIRE_READ_PERMISSION | quote }}
@@ -15,8 +33,11 @@ data:
 {{- if .Values.warnings.nginx.GEOWEB_REQUIRE_WRITE_PERMISSION }}
   GEOWEB_REQUIRE_WRITE_PERMISSION: {{ .Values.warnings.nginx.GEOWEB_REQUIRE_WRITE_PERMISSION | quote }}
 {{- end }}
-{{- if .Values.warnings.nginx.WARNINGS_BACKEND_HOST }}
-  WARNINGS_BACKEND_HOST: {{ .Values.warnings.nginx.WARNINGS_BACKEND_HOST | quote }}
+{{- if .Values.warnings.nginx.ALLOW_ANONYMOUS_ACCESS }}
+  ALLOW_ANONYMOUS_ACCESS: {{ .Values.warnings.nginx.ALLOW_ANONYMOUS_ACCESS | quote }}
+{{- end }}
+{{- if .Values.warnings.nginx.BACKEND_HOST }}
+  BACKEND_HOST: {{ .Values.warnings.nginx.BACKEND_HOST | quote }}
 {{- end }}
 {{- if .Values.warnings.nginx.NGINX_PORT_HTTP }}
   NGINX_PORT_HTTP: {{ .Values.warnings.nginx.NGINX_PORT_HTTP | quote }}

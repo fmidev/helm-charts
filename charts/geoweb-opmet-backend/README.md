@@ -114,6 +114,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `ingress.customAnnotations`                   | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations if set |                                                                                              |
 | `ingress.ingressClassName`                    | Set ingressClassName parameter to not use default ingressClass | `nginx`                                                                                      |
 | `ingress.name`                                | Name of the ingress controller in use | `nginx-ingress-controller`                                                                   |
+| `ingress.tls`                                 | TLS configuration section for the ingress | |
 | `opmet.awsAccessKeyId`                        | AWS_ACCESS_KEY_ID for authenticating to S3 |                                                                                              |
 | `opmet.awsAccessKeySecret`                    | AWS_SECRET_ACCESS_KEY for authenticating to S3 |                                                                                              |
 | `opmet.awsDefaultRegion`                      | Region where your S3 bucket is located |                                                                                              |
@@ -159,21 +160,26 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.messageconverter.resources`            | Configure resource limits & requests | see defaults from `values.yaml`                                                              |
 | `opmet.messageconverter.version`              | Possibility to override application version | see default from `values.yaml`                                                               |
 | `opmet.name`                                  | Name of backend | `opmet`                                                                                      |
-| `opmet.nginx.ALLOW_ANONYMOUS_ACCESS`          | Allow/disallow anonymous access. Note that if an access token has been passed, it is checked even if anonymous access is allowed. | `"FALSE"` |
+| `opmet.nginx.ALLOW_ANONYMOUS_ACCESS`          | Allow/disallow anonymous access. Note that if an access token has been passed, it is checked even if anonymous access is allowed | `"FALSE"` |
+| `opmet.nginx.AUD_CLAIM`                       | Claim name used to get the token audience | `"aud"` |
+| `opmet.nginx.AUD_CLAIM_VALUE`                 | Required value for the audience claim |  |
 | `opmet.nginx.BACKEND_HOST`                    | Address where nginx accesses the backend | `localhost:8080`                                                                             |
 | `opmet.nginx.ENABLE_SSL`                      | Toggle SSL termination | `"FALSE"`                                                                                    |
 | `opmet.nginx.GEOWEB_REQUIRE_READ_PERMISSION`  | Required OAUTH claim name and value to be present in the userinfo response for read operations | `"FALSE"`                                                                                    |
 | `opmet.nginx.GEOWEB_REQUIRE_WRITE_PERMISSION` | Required OAUTH claim name and value to be present in the userinfo response for write operations | `"FALSE"`                                                                                    |
 | `opmet.nginx.GEOWEB_USERNAME_CLAIM`           | Claim name used as a user identifier in the presets-backend | `"email"`|
+| `opmet.nginx.ISS_CLAIM`                       | Issuer claim name used to get the token issuer | `"iss"` |
+| `opmet.nginx.ISS_CLAIM_VALUE`                 | Required value for the issuer claim |  |
+| `opmet.nginx.JWKS_URI`                        | JSON Web Key Set URI that points to an identity provider's public key set in JSON format |  |
 | `opmet.nginx.livenessProbe`                   | Configure libenessProbe | see defaults from `values.yaml`                                                              |
 | `opmet.nginx.name`                            | Name of nginx container | `opmet-nginx`                                                                                |
 | `opmet.nginx.NGINX_PORT_HTTP`                 | Port used for nginx | `80`                                                                                         |
 | `opmet.nginx.NGINX_PORT_HTTPS`                | Port used for nginx when SSL is enabled | `443`                                                                                        |
-| `opmet.nginx.OAUTH2_USERINFO`                 | Userinfo endpoint to retrieve consented claims, or assertions, about the logged in end-user | -                                                                                            |
+| `opmet.nginx.OAUTH2_USERINFO`                 | Userinfo endpoint to retrieve consented claims, or assertions, about the logged in end-user | |
 | `opmet.nginx.readinessProbe`                  | Configure readinessProbe | see defaults from `values.yaml`                                                              |
-| `opmet.nginx.registry`                        | Registry to fetch nginx image | `registry.gitlab.com/opengeoweb/backend-services/opmet-backend/nginx-opmet-backend`          |
-| `opmet.nginx.resources`                       | Configure resource limits & requests | see defaults from `values.yaml`                                                              |
-| `opmet.nginx.version`                         | Version of the auth container image | `v0.1.1`                                                                                     |
+| `opmet.nginx.registry`                        | Registry to fetch nginx image | `registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend`          |
+| `opmet.nginx.resources`                       | Configure resource limits & requests | see defaults from `values.yaml`|
+| `opmet.nginx.version`                         | Possibility to override Nginx version | see default from `values.yaml` |
 | `opmet.path`                                  | Path suffix added to url | `/opmet/(.*)`                                                                                |
 | `opmet.publisher.DESTINATION`                 | Folder inside publisher container where TACs are stored (used with local-publisher) | `/app/output`                                                                                |
 | `opmet.publisher.livenessProbe`               | Configure libenessProbe | see defaults from `values.yaml`                                                              |
@@ -207,4 +213,6 @@ The following table lists the configurable parameters of the Opmet backend chart
 
 | Chart version | opmet version |
 |---------------|---------------|
+| 3.4.1         | 2.9.2         |
+| 3.4.0         | 2.9.1         |
 | 3.2.0         | 2.7.0         |

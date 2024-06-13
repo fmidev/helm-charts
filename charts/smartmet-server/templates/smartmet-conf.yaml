@@ -1,0 +1,211 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smartmet-config
+data: 
+  config: |
+    logrequests = {{ default false .Values.config.logrequests }};
+    defaultlogging = {{ default true .Values.config.defaultlogging }};
+    accesslogdir = "{{ default "/var/log/smartmet" .Values.config.accesslogdir }}";
+    verbose = {{ default true .Values.config.verbose }};
+    lazylinking = {{ default false .Values.config.lazylinking }};
+    activerequests:
+    {
+      start_limit = {{ default 10 .Values.config.activerequests.start_limit }};
+      restart_limit = {{ default 50 .Values.config.activerequests.restart_limit }};
+      limit = {{ default 100 .Values.config.activerequests.limit }};
+      increase_interval = {{ default 5 .Values.config.activerequests.increase_interval }};
+      alert_limit = {{ default 80 .Values.config.activerequests.alert_limit }};
+    };
+    maxrequestsize = {{ default 131072 .Values.config.maxrequestsize }};
+    compress = {{ default true .Values.config.compress }};
+    compresslimit = {{ default 1000 .Values.config.compresslimit }};
+    stacktrace = {{ default false .Values.config.stacktrace }};
+    slowpool:
+    {
+      maxthreads = {{ default 0 .Values.config.slowpool.maxthreads }};
+      maxrequeuesize = {{ default 10 .Values.config.slowpool.maxrequeuesize }};
+    };
+    fastpool:
+    {
+      maxthreads = "{{ default "100%" .Values.config.fastpool.maxthreads }}";
+      maxrequeuesize = {{ default 20 .Values.config.fastpool.maxrequeuesize }};
+    };
+    adminpool:
+    {
+      maxthreads = {{ default 5 .Values.config.adminpool.maxthreads }};
+      maxrequeuesize = {{ default 10 .Values.config.adminpool.maxrequeuesize }};
+    };
+    engines:
+    {
+      {{- if not (default false .Values.config.engines.authentication.disabled) }}
+            authentication:
+            {
+              disabled        = {{ default false .Values.config.engines.authentication.disabled }};
+              configfile      = "/config/engines/authentication.conf";
+            };
+      {{- end }}
+      {{- if not (default false .Values.config.engines.avi.disabled) }}
+            avi:
+            {
+              disabled        = {{ default false .Values.config.engines.avi.disabled }};
+              configfile      = "/config/engines/avi.conf";
+            };
+      {{- end }}
+      {{- if not (default false .Values.config.engines.contour.disabled) }}
+            contour:
+            {
+              disabled        = {{ default false .Values.config.engines.contour.disabled }};
+              configfile      = "/config/engines/contour.conf";
+            };
+      {{- end }}
+      {{- if not (default false .Values.config.engines.geonames.disabled) }}
+            geonames:
+            {
+              disabled        = {{ default false .Values.config.engines.geonames.disabled }};
+              configfile      = "/config/engines/geonames.conf";
+            };
+      {{- end }}
+      {{- if not (default false .Values.config.engines.gis.disabled) }}
+            gis:
+            {
+              disabled        = {{ default false .Values.config.engines.gis.disabled }};
+              configfile      = "/config/engines/gis.conf";
+            };
+      {{- end }}
+      {{- if not (default false .Values.config.engines.grid.disabled) }}
+            grid:
+            {
+              disabled        = {{ default false .Values.config.engines.grid.disabled }};
+              configfile      = "/config/engines/grid-engine.conf";
+            };
+      {{- end }}
+      {{- if not (default false .Values.config.engines.observation.disabled) }}
+            observation:
+            {
+              disabled        = {{ default false .Values.config.engines.observation.disabled }};
+              configfile      = "/config/engines/observation.conf";
+            };
+      {{- end }}
+      {{- if not (default false .Values.config.engines.querydata.disabled) }}
+            querydata:
+            {
+              disabled        = {{ default false .Values.config.engines.querydata.disabled }};
+              configfile      = "/config/engines/querydata.conf";
+            };
+      {{- end }}
+            sputnik:
+            {
+              disabled        = {{ default false .Values.config.engines.sputnik.disabled }};
+              configfile      = "/config/engines/sputnik.conf";
+            };
+    };
+
+    plugins:
+    {
+      {{- if not (default false .Values.config.plugins.admin.disabled) }}
+            admin:
+            {
+              disabled        = {{ default false .Values.config.plugins.admin.disabled }};
+              configfile      = "/config/plugins/admin.conf";
+            };
+      {{- end }}
+      {{- if not (default false .Values.config.plugins.autocomplete.disabled) }}
+            autocomplete:
+            {
+              disabled        = {{ default false .Values.config.plugins.autocomplete.disabled }};
+              configfile      = "/config/plugins/autocomplete.conf";
+            };
+      {{- end }}
+      {{- if not (default false .Values.config.plugins.avi.disabled) }}
+            avi:
+            {
+              disabled        = {{ default false .Values.config.plugins.avi.disabled }};
+              configfile      = "/config/plugins/avi.conf";
+            };
+      {{- end }}
+      {{- if not (default false .Values.config.plugins.backend.disabled) }}
+            backend:
+            {
+              disabled        = {{ default false .Values.config.plugins.backend.disabled }};
+              configfile      = "/config/plugins/backend.conf";
+            };
+      {{- end }}
+      {{- if not (default false .Values.config.plugins.cross_section.disabled) }}
+            cross_section:
+            {
+              disabled        = {{ default false .Values.config.plugins.cross_section.disabled }};
+              configfile      = "/config/plugins/cross_section.conf";
+            };
+      {{- end }}
+      {{- if not (default false .Values.config.plugins.download.disabled) }}
+            download:
+            {
+              disabled        = {{ default false .Values.config.plugins.download.disabled }};
+              configfile      = "/config/plugins/download.conf";
+            };
+      {{- end }}
+      {{- if not (default false .Values.config.plugins.meta.disabled) }}
+            meta:
+            {
+              disabled        = {{ default false .Values.config.plugins.meta.disabled }};
+              configfile      = "/config/plugins/meta.conf";
+            };
+      {{- end }}
+      {{- if not (default false .Values.config.plugins.textgen.disabled) }}
+            textgen:
+            {
+              disabled        = {{ default false .Values.config.plugins.textgen.disabled }};
+              configfile      = "/config/plugins/textgen.conf";
+            };
+      {{- end }}
+      {{- if not (default false .Values.config.plugins.timeseries.disabled) }}
+            timeseries:
+            {
+              disabled        = {{ default false .Values.config.plugins.timeseries.disabled }};
+              configfile      = "/config/plugins/timeseries.conf";
+            };
+      {{- end }}
+      {{- if not (default false .Values.config.plugins.trajectory.disabled) }}
+            trajectory:
+            {
+              disabled        = {{ default false .Values.config.plugins.trajectory.disabled }};
+              configfile      = "/config/plugins/trajectory.conf";
+            };
+      {{- end }}
+      {{- if not (default false .Values.config.plugins.wms.disabled) }}
+            wms:
+            {
+              disabled        = {{ default false .Values.config.plugins.wms.disabled }};
+              configfile      = "/config/plugins/wms.conf";
+            };
+      {{- end }}
+      {{- if not (default false .Values.config.plugins.wfs.disabled) }}
+            wfs:
+            {
+              disabled        = {{ default false .Values.config.plugins.wfs.disabled }};
+              configfile      = "/config/plugins/wfs.conf";
+            };
+      {{- end }}
+      {{- if not (default false .Values.config.plugins.grid_gui.disabled) }}
+            grid-gui:
+            {
+              disabled        = {{ default false .Values.config.plugins.grid_gui.disabled }};
+              configfile      = "/config/plugins/grid-gui.conf";
+            };
+      {{- end }}
+      {{- if not (default false .Values.config.plugins.grid_admin.disabled) }}
+            grid-admin:
+            {
+              disabled        = {{ default false .Values.config.plugins.grid_admin.disabled }};
+              configfile      = "/config/plugins/grid-admin.conf";
+            };
+      {{- end }}
+      {{- if not (default false .Values.config.plugins.edr.disabled) }}
+            edr:
+            {
+              disabled        = {{ default false .Values.config.plugins.edr.disabled }};
+              configfile      = "/config/plugins/edr.conf";
+            };
+      {{- end }}
+    };

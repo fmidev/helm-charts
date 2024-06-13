@@ -138,9 +138,10 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.env.GW_FEATURE_APP_TITLE` | Application title | |
 | `frontend.env.GW_PRESET_BACKEND_URL` | Url which the application uses to connect to Presets backend | |
 | `frontend.env.GW_AUTH_LOGOUT_URL` | Url to redirect when logging out | `"http://localhost:5400"` |
-| `frontend.env.GW_AUTH_TOKEN_URL` | - | `https://gitlab.com/oauth/token` |
+| `frontend.env.GW_AUTH_TOKEN_URL` | Url to retrieve tokens | `https://gitlab.com/oauth/token` |
 | `frontend.env.GW_AUTH_LOGIN_URL` | Url to redirect when logging in | `https://gitlab.com/oauth/authorize?client_id={client_id}&response_type=code&scope=email+openid+read_repository+read_api&redirect_uri={app_url}/code&state={state}&code_challenge={code_challenge}&code_challenge_method=S256` |
-| `frontend.env.GW_INFRA_BASE_URL` | - | `https://api.opengeoweb.com` |
+| `frontend.env.GW_AUTH_ROLE_CLAIM_NAME` | The name of the ID token claim containing the security groups used with the roles | |
+| `frontend.env.GW_AUTH_ROLE_CLAIM_VALUE_PRESETS_ADMIN` | The name of the security group required for the preset-admin role | |
 | `frontend.env.GW_INITIAL_PRESETS_FILENAME` | Filename to fetch initial presets | `initialPresets.json` |
 | `frontend.env.GW_CAP_CONFIGURATION_FILENAME` | Filename to fetch CAP Warnings configured feeds | `capWarningPresets.json` |
 | `frontend.env.GW_TIMESERIES_CONFIGURATION_FILENAME` | Filename to fetch TimeSeries preset locations | `timeSeriesPresetLocations.json` |
@@ -170,7 +171,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.awsDefaultRegion` | Region where your S3 bucket is located | |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |
 | `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | `nginx` |
-| `ingress.serverSnippet` | "Extra nginx server block configuration" | See reference in `values.yaml` |
+| `ingress.tls` | TLS configuration section for the ingress | |
 | `ingress.rules` | Extra nginx configuration rules, like cache headers | See reference in `values.yaml` |
 | `ingress.customAnnotations` | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations and `frontend.auth_secret`, `frontend.auth_secretName` and `ingress.rules` can't be used if set | |
 
@@ -178,6 +179,13 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 
 | Chart version | frontend version |
 |---------------|------------------|
+| 3.11.1        | 9.19.0           |
+| 3.11.0        | 9.18.0           |
+| 3.10.2        | 9.18.0           |
+| 3.10.1        | 9.17.0           |
+| 3.10.0        | 9.14.0           |
+| 3.9.0         | 9.14.0           |
+| 3.8.1         | 9.14.0           |
 | 3.4.0         | 9.9.0            |
 | 3.3.0         | 9.6.0            |
 | 3.2.0         | 9.5.0            |

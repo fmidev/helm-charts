@@ -17,10 +17,10 @@ presets:
   secretServiceAccount: presets-service-account
   resources:
     requests:
-      memory: "250Mi"
+      memory: "384Mi"
       cpu: "50m"
     limits:
-      memory: "350Mi"
+      memory: "1024Mi"
       cpu: "1"
   livenessProbe:
     httpGet:
@@ -39,17 +39,17 @@ presets:
   nginx:
     name: nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend
-    version: "v0.2.0"
+    version: "v0.3.0"
     ENABLE_SSL: "FALSE"
     BACKEND_HOST: 0.0.0.0:8080
     NGINX_PORT_HTTP: 80
     NGINX_PORT_HTTPS: 443
     resources:
       requests:
-        memory: "10Mi"
+        memory: "150Mi"
         cpu: "10m"
       limits:
-        memory: "100Mi"
+        memory: "300Mi"
         cpu: "100m"
     livenessProbe:
       httpGet:

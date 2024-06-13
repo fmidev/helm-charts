@@ -1,0 +1,40 @@
+# Default values for himan.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+environment:
+prodType:
+cloud:
+
+image:
+  configuration:
+    enabled: false
+    git:
+      repository:
+      branch:
+
+    sshKey:
+      name:
+
+s3:
+  credentials:
+    name:
+
+radon:
+  databaseName: radon
+  host:
+  port: 5432
+  credentials:
+    name:
+
+resources:
+  limits:
+    cpu: "1"
+    memory: 2Gi
+  requests:
+    cpu: "1"
+    memory: 1Gi
+
+volumes: []
+
+volumeMounts: []

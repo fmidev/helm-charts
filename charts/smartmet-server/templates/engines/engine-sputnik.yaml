@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smartmet-engine-sputnik-config
+data: 
+  config: |
+    hostname = "localhost";
+    httpAddress = "127.0.0.1";
+    httpPort = {{ .Values.config.port }};
+    udpListenerAddress = "127.0.0.1";
+    udpListenerPort = 31337;
+    comment = "localhost docker development smartmet backend";
