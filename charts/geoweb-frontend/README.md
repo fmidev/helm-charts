@@ -152,6 +152,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.env.GW_FEATURE_MENU_VERSION` | Enable Version menu option | `false` |
 | `frontend.env.GW_FEATURE_MENU_FE_VERSION` | Enable FE Version menu option | `true` |
 | `frontend.env.GW_FEATURE_MENU_USER_DOCUMENTATION_URL` | Link to user documentation | |
+| `frontend.env.GW_FEATURE_INITIALIZE_SENTRY` | Enable Sentry in this environment | `true` |
 | `frontend.env.GW_SIGMET_BASE_URL` | Url which the application uses to connect to SIGMET backend | |
 | `frontend.env.GW_AIRMET_BASE_URL` | Url which the application uses to connect to AIRMET backend | |
 | `frontend.env.GW_FEATURE_MODULE_SIGMET_CONFIGURATION` | Configuration used by SIGMET module | |
