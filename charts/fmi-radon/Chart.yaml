@@ -1,4 +1,3 @@
-
 apiVersion: v2
 name: radondb
 description: A Helm chart for Kubernetes
