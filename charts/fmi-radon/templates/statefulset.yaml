@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "radon.fullname" . }}
+  labels:
+    app: {{ .Release.Name }}
+{{ include "radon.labels" . | indent 4 }}
+spec:
+  serviceName: {{ .Release.Name }}
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+      {{ if eq .Values.cloud "aws" }}
+      annotations:
+        openshift.io/required-scc: {{ .Values.security.sccGroup }}
+      {{ end }}
+    spec:
+      securityContext:
+        runAsUser: {{ .Values.security.userId }}
+        runAsGroup: {{ .Values.security.groupId }}
+      serviceAccountName: radondb
+      containers:
+        - name: radondb
+          image: "{{ include "radon.localImageRepository" . }}/{{ .Release.Name }}:{{ .Values.image.repository.tag }}"
+          ports:
+            - containerPort: 5432
+          env:
+            - name: PGDATA
+              value: {{ .Values.storage.mountPath }}/data
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: POSTGRES_PASSWORD
+            - name: RADON_RADON_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: RADON_RADON_ADMIN_PASSWORD
+            - name: RADON_WETODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: RADON_WETODB_PASSWORD
+            - name: RADON_RADONCLIENT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: RADON_RADONCLIENT_PASSWORD
+          volumeMounts:
+            - mountPath: {{ .Values.storage.mountPath }}
+              name: radondb
+              readOnly: false
+      volumes:
+        - name: radondb
+          persistentVolumeClaim:
+            claimName: {{ .Values.storage.persistent.claim.name }}-{{ .Values.environment }}

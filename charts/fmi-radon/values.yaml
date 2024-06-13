@@ -1,0 +1,24 @@
+environment: prod
+cloud: aws
+
+image:
+  repository:
+    host: quay.io/fmi/radon
+    tag: latest
+
+security:
+  userId: 999
+  groupId: 999
+  sccGroup: restricted-v2-uid-999
+
+storage:
+  persistent:
+    claim:
+      name: radondb-pv-claim
+  size: 128Mi
+  storageClassName: gp3-csi
+  volumeMode: Filesystem
+  mountPath: /radondb
+
+serviceAccount:
+  create: false
