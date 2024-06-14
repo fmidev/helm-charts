@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: custom-postgresql-config
+data:
+  postgresql.conf: |
+    listen_addresses = '*'
+    ssl = on
+    ssl_cert_file = '/etc/postgresql/ssl/server.crt'
+    ssl_key_file = '/etc/postgresql/ssl/server.key'
+    ssl_ciphers = 'HIGH:MEDIUM:+3DES:!aNULL'
