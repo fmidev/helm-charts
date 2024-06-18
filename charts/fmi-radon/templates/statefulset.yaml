@@ -34,6 +34,7 @@ spec:
           {{ end -}}
           ports:
             - containerPort: 5432
+          args: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
           env:
             - name: PGDATA
               value: {{ .Values.storage.mountPath }}/data
@@ -61,7 +62,19 @@ spec:
             - mountPath: {{ .Values.storage.mountPath }}
               name: radondb
               readOnly: false
+            - name: custom-config
+              mountPath: /etc/postgresql
+            - name: radon-ssl
+              mountPath: /etc/postgresql/ssl
+              readOnly: true
       volumes:
         - name: radondb
           persistentVolumeClaim:
             claimName: {{ .Values.storage.persistent.claim.name }}-{{ .Values.environment }}
+        - name: custom-config
+          configMap:
+            name: custom-postgresql-config
+        - name: radon-ssl
+          secret:
+            secretName: radon-ssl
+            defaultMode: 0600

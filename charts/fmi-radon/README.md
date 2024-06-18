@@ -17,7 +17,15 @@ provided by the cloud provider (e.g. gp3-csi for aws).
 ### Secrets
 
 Necessary passwords for the database users need to be created before creating
-the chart. Set the passwords to templates/secrets.yaml before installation.
+the chart. Set the base64 encoded passwords to templates/secrets.yaml before
+installation.
+
+Generate self-signed certificates for the server with these
+[instructions](https://www.postgresql.org/docs/15/ssl-tcp.html). 
+
+```bash
+oc create secret generic radon-ssl --from-file=server.key=ssl/server.key --from-file=server.crt=ssl/server.crt
+```
 
 ### [SCC policy](https://docs.openshift.com/container-platform/3.11/admin_guide/manage_scc.html)
 
