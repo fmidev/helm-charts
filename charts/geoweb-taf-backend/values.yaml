@@ -134,18 +134,18 @@ taf:
     livenessProbe:
       exec:
         command:
-        - python3
+        - /bin/sh
         - -c
-        - "exit(0)"
+        - "cd /app && python -c 'exit(0)'"
       initialDelaySeconds: 5
       periodSeconds: 5
       failureThreshold: 5
     readinessProbe:
       exec:
         command:
-        - python3
+        - /bin/sh
         - -c
-        - "exit(0)"
+        - "cd /app && python -c 'exit(0)'"
       initialDelaySeconds: 5
       periodSeconds: 5
       failureThreshold: 1
