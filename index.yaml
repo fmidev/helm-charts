@@ -2051,6 +2051,20 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/nowcasting-fcst-1.0.0/nowcasting-fcst-1.0.0.tgz
     version: 1.0.0
+  radondb:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2024-06-18T08:39:29.437314179Z"
+    description: A Helm chart for Kubernetes
+    digest: 3caba092e81cd910e4c68ef5130cb95f4c35e47dc742c1d62f6b1b51abc446ce
+    maintainers:
+    - email: ossi.laine@fmi.fi
+      name: osmundi
+    name: radondb
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/radondb-1.0.1/radondb-1.0.1.tgz
+    version: 1.0.1
   secrets:
   - apiVersion: v2
     appVersion: 1.0.r2-46-gf2a8f35-2023.03.21.21.55
@@ -2174,4 +2188,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2024-06-17T08:42:56.476608595Z"
+generated: "2024-06-18T08:39:29.43773839Z"
