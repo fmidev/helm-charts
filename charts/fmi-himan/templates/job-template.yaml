@@ -85,7 +85,7 @@ objects:
                  {{- end }}
             fi
           env:
-          {{ if .Values.s3.credentials.name }}
+          {{- if .Values.s3.credentials.name }}
           - name: S3_ACCESS_KEY_ID
             valueFrom:
               secretKeyRef:
