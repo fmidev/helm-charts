@@ -77,7 +77,11 @@ objects:
                  -H 'content-type: application/json' \
                  -H 'authorization: Bearer testitoken' \
                  -d "$payload" \
-                 http://$SNWC_ECFLOW_HTTP_SERVICE_HOST:$SNWC_ECFLOW_HTTP_SERVICE_PORT/v1/suites/$ECF_NAME/attributes
+                 {{- if .Values.ecflow.api.host }}
+                 {{ .Values.ecflow.api.host }}/v1/suites/${ECF_NAME}/attributes
+                 {{- else -}}
+                 http://$SNWC_ECFLOW_HTTP_SERVICE_HOST:$SNWC_ECFLOW_HTTP_SERVICE_PORT/v1/suites/${ECF_NAME}/attributes
+                 {{- end }}
             fi
           env:
           {{ if .Values.s3.credentials.name }}
