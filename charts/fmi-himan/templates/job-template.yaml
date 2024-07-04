@@ -10,7 +10,7 @@ objects:
 - apiVersion: batch/v1
   kind: Job
   metadata:
-    name: {{ .Release.Name }}-himan
+    name: ${RUN_IDENTIFIER}
   spec:
     parallelism: 1
     completions: 1
@@ -138,6 +138,8 @@ objects:
           {{- toYaml . | nindent 8 }}
         {{- end }}
 parameters:
+- description: Unique id for this run
+  name: RUN_IDENTIFIER
 - description: Configuration file name
   name: CONFIGURATION
 - description: Forecast analysis time, YYYY-MM-DD HH24:MI:SS (optional)
