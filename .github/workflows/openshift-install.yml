@@ -1,0 +1,64 @@
+name: Install chart to Openshift
+
+on: pull_request
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.14.0
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+          check-latest: true
+
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.6.1
+
+      - name: Print oc version
+        run:  oc version
+
+      - name: Login to OpenShift
+        env:
+          OPENSHIFT_SERVER_URL: ${{ secrets.OPENSHIFT_SERVER_URL }}
+          OPENSHIFT_API_TOKEN: ${{ secrets.OPENSHIFT_API_TOKEN }}
+        run: |
+          oc login $OPENSHIFT_SERVER_URL --token=$OPENSHIFT_API_TOKEN
+          oc status
+
+      - name: Run chart-testing (list-changed)
+        id: list-changed
+        run: |
+          changed=$(ct list-changed --target-branch ${{ github.event.repository.default_branch }})
+          if [[ -n "$changed" ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Custom FMI code not included in the reference implementation (https://github.com/marketplace/actions/helm-chart-testing)
+      - name: Add repos for all dependencies (only for the changed)
+        run: |
+          for chart_dir in $(ct list-changed --target-branch ${{ github.event.repository.default_branch }}); do
+            echo "processing changed chart in '${chart_dir}'" 1>&2
+            cd "${chart_dir}"
+            if [[ -e "./Chart.lock" ]]; then
+              yq --indent 0 '.dependencies | map(["helm", "repo", "add", .name, .repository] | join(" ")) | .[]' "./Chart.lock" | sh --;
+            else
+              echo "no Chart.lock found, skip repo addition" 1>&2
+            fi
+            cd - &> /dev/null
+          done
+
+      - name: Run chart-testing (install to openshift)
+        env:
+          OPENSHIFT_NAMESPACE: ${{ secrets.NAMESPACE }}
+        if: steps.list-changed.outputs.changed == 'true'
+        run: ct install --target-branch ${{ github.event.repository.default_branch }} --namespace $OPENSHIFT_NAMESPACE
