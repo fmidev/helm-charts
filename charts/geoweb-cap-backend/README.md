@@ -60,3 +60,10 @@ The following table lists the configurable parameters of the CAP backend chart a
 | `ingress.tls` | TLS configuration section for the ingress | |
 | `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | `nginx` |
 | `ingress.customAnnotations` | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations if set | |
+
+# Chart versions
+
+| Chart version | cap version |
+| ------------- | ----------- |
+| 1.4.1         | 0.8.0       |
+| 1.4.0         | 0.6.0       |
