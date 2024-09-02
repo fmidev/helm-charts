@@ -53,5 +53,5 @@ helm install myrepo-rhel8 -f values.yaml --set repo.path=path/to/myrepo/rhel/8/x
 
 ```
 curl -u USER:PASS -F file=@/path/to/some.rpm \ 
-     https://myrepo-rhel8-api.out.ock.fmi.fi
+     https://myrepo-rhel8-api.out.ock.fmi.fi/api/upload
 ```
