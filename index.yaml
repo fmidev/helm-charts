@@ -56,6 +56,16 @@ entries:
   fmi-rpm-repo-api:
   - apiVersion: v2
     appVersion: 1.1.0
+    created: "2024-09-03T05:35:12.484683903Z"
+    description: Provide Helm chart for rpm repo api
+    digest: 327efd053b534dcc51014bae766cca52132e66bca7547e4a89b27ab1113980d9
+    name: fmi-rpm-repo-api
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/fmi-rpm-repo-api-1.0.1/fmi-rpm-repo-api-1.0.1.tgz
+    version: 1.0.1
+  - apiVersion: v2
+    appVersion: 1.1.0
     created: "2023-11-01T07:37:17.076781243Z"
     description: Provide Helm chart for rpm repo api
     digest: 0333c21ddeb06e5c650fefbd705ce28f613182ed8b6e445e140bf7446e1d5cb9
@@ -2308,4 +2318,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2024-08-27T13:30:31.89250961Z"
+generated: "2024-09-03T05:35:12.48506751Z"
