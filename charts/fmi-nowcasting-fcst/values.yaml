@@ -1,6 +1,12 @@
 # Default values for nowcasting-fcst.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+#
+
+# These must be declared if this chart isin't installed as a subchart
+global:
+  environment: prod
+  prodType: prod
 
 environment: dev
 prodType: preop
@@ -22,6 +28,7 @@ job:
 s3:
   credentials:
     name: 
+    storePath: 
 
 resources:
   limits:
