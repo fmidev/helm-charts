@@ -27,8 +27,8 @@ job:
 
 s3:
   credentials:
-    name: 
-    storePath: 
+    name:
+    storePath:
 
 resources:
   limits:
