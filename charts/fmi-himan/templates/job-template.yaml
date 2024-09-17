@@ -134,13 +134,26 @@ objects:
             requests:
               cpu: ${CPU_REQUEST}
               memory: ${MEMORY_REQUEST}
-          {{- with .Values.volumeMounts }}
           volumeMounts:
+          {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 10 }}
+          {{- end }}
+          {{ if eq .Values.cloud "aws" -}}
+          - name: secrets-store-inline
+            mountPath: {{ .Values.s3.credentials.storePath }}
+            readOnly: true
           {{- end }}
         volumes:
         {{- with .Values.volumes }}
           {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{ if eq .Values.cloud "aws" -}}
+        - name: secrets-store-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: {{ .Release.Name }}-secrets
         {{- end }}
 parameters:
 - description: Unique id for this run
