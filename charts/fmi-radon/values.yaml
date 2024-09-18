@@ -1,5 +1,5 @@
 environment: prod
-cloud:
+cloud: fmi
 
 image:
   repository:
@@ -24,3 +24,8 @@ serviceAccount:
   create: true
 
 imageStream: false
+
+secrets:
+  credentials: radon-credentials
+  certificates: radon-ssl
+  storePath:

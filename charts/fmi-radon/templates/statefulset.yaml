@@ -41,22 +41,22 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: db-credentials
+                  name: {{ .Values.secrets.credentials }}
                   key: POSTGRES_PASSWORD
             - name: RADON_RADON_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: db-credentials
+                  name: {{ .Values.secrets.credentials }}
                   key: RADON_RADON_ADMIN_PASSWORD
             - name: RADON_WETODB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: db-credentials
+                  name: {{ .Values.secrets.credentials }}
                   key: RADON_WETODB_PASSWORD
             - name: RADON_RADONCLIENT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: db-credentials
+                  name: {{ .Values.secrets.credentials }}
                   key: RADON_RADONCLIENT_PASSWORD
           volumeMounts:
             - mountPath: {{ .Values.storage.mountPath }}
@@ -67,6 +67,11 @@ spec:
             - name: radon-ssl
               mountPath: /etc/postgresql/ssl
               readOnly: true
+            {{ if eq .Values.cloud "aws" -}}
+            - name: secrets-store-inline
+              mountPath: {{ .Values.secrets.storepath }}
+              readOnly: true
+            {{- end }}
       volumes:
         - name: radondb
           persistentVolumeClaim:
@@ -76,5 +81,13 @@ spec:
             name: custom-postgresql-config
         - name: radon-ssl
           secret:
-            secretName: radon-ssl
+            secretName: {{ .Values.secrets.certificates }}
             defaultMode: 0600
+        {{ if eq .Values.cloud "aws" -}}
+        - name: secrets-store-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: {{ .Release.Name }}-secrets
+        {{- end }}
