@@ -2177,6 +2177,23 @@ entries:
   nowcasting-fcst:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2024-10-01T06:51:15.009896983Z"
+    dependencies:
+    - condition: serviceaccount.enabled
+      name: job-service-account
+      repository: https://fmidev.github.io/helm-charts
+      version: 1.0.1
+    description: A Helm chart for Kubernetes
+    digest: a490273857b40d5ed732a8865c297bd08efe9ca0c65d2fafa3deb502ab81e5e8
+    maintainers:
+    - name: osmundi
+    name: nowcasting-fcst
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/nowcasting-fcst-1.0.2/nowcasting-fcst-1.0.2.tgz
+    version: 1.0.2
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2024-04-15T12:12:46.075696623Z"
     dependencies:
     - condition: serviceaccount.enabled
@@ -2342,4 +2359,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2024-09-23T13:01:55.117315517Z"
+generated: "2024-10-01T06:51:15.010192826Z"
