@@ -159,6 +159,8 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.env.GW_FEATURE_MODULE_AIRMET_CONFIGURATION` | Configuration used by AIRMET module | |
 | `frontend.env.GW_LANGUAGE` | Set language | |
 | `frontend.env.GW_FEATURE_DISPLAY_SEARCH_ON_MAP` | Enable geolocation search | |
+| `frontend.env.GW_VERSION_PROGRESS_NOTES_URL` | URL to release notes | |
+| `frontend.env.GW_TECHNICAL_RELEASE_NOTES_URL` | URL to technical changelog | |
 | `frontend.useCustomConfigurationFiles` | Use custom configurations | `false` |
 | `frontend.customConfigurationLocation` | Where custom configurations are located *(local\|s3)* | `local` |
 | `frontend.volumeAccessMode` | Permissions of the application for the custom configurations PersistentVolume used | `ReadOnlyMany` |
