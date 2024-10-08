@@ -15,6 +15,7 @@ metadata:
   {{- end }}
 spec:
   host: {{ $route.host }}
+  path: {{ $route.path }}
   port:
     targetPort: {{ $route.targetPort  }}
   to:
