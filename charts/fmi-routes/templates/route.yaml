@@ -17,7 +17,7 @@ spec:
   host: {{ $route.host }}
   {{- if $route.path }}
   path: {{ $route.path }}
-  {{ - end }}
+  {{- end }}
   port:
     targetPort: {{ $route.targetPort  }}
   to:
