@@ -53,4 +53,9 @@ spec:
   successfulBuildsHistoryLimit: 2
   triggers:
     - type: ConfigChange
+    - type: Generic
+      generic:
+        secretReference:
+          name: himan-build-trigger-secret
+        allowEnv: true
 {{- end }}
