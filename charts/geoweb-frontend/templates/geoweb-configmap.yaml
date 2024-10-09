@@ -76,9 +76,6 @@ data:
 {{- if .Values.frontend.env.GW_PRESET_BACKEND_URL }}
   GW_PRESET_BACKEND_URL: {{ .Values.frontend.env.GW_PRESET_BACKEND_URL | quote }}
 {{- end }}
-{{- if .Values.frontend.env.GW_FEATURE_MENU_USER_DOCUMENTATION_URL }}
-  GW_FEATURE_MENU_USER_DOCUMENTATION_URL: {{ .Values.frontend.env.GW_FEATURE_MENU_USER_DOCUMENTATION_URL | quote }}
-{{- end }}
 {{- if .Values.frontend.env.GW_SIGMET_BASE_URL }}
   GW_SIGMET_BASE_URL: {{ .Values.frontend.env.GW_SIGMET_BASE_URL | quote }}
 {{- end }}
