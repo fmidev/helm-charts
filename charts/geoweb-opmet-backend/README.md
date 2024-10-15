@@ -85,7 +85,7 @@ opmet:
 Execute the following for testing the chart:
 
 ```bash
-helm install geoweb-opmet-backend fmi/geoweb-opmet-backend --dry-run --debug -n geoweb --values=./values.yaml
+helm install geoweb-opmet-backend fmi/geoweb-opmet-backend --dry-run --debug --namespace geoweb --values=./values.yaml
 ```
 
 # Installing the Chart
@@ -93,7 +93,7 @@ helm install geoweb-opmet-backend fmi/geoweb-opmet-backend --dry-run --debug -n 
 Execute the following for installing the chart:
 
 ```bash
-helm install geoweb-opmet-backend fmi/geoweb-opmet-backend -n geoweb --values=./values.yaml
+helm install geoweb-opmet-backend fmi/geoweb-opmet-backend --namespace geoweb --values=./values.yaml
 ```
 
 # Deleting the Chart
@@ -101,7 +101,7 @@ Execute the following for deleting the chart:
 
 ```bash
 ## Delete the Helm Chart
-helm delete -n geoweb geoweb-opmet-backend
+helm delete --namespace geoweb geoweb-opmet-backend
 ## Delete the Namespace
 kubectl delete namespace geoweb
 ```
@@ -159,6 +159,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.messageconverter.registry`             | Registry to fetch image | `registry.gitlab.com/opengeoweb/avi-msgconverter/geoweb-knmi-avi-messageservices`            |
 | `opmet.messageconverter.resources`            | Configure resource limits & requests | see defaults from `values.yaml`                                                              |
 | `opmet.messageconverter.version`              | Possibility to override application version | see default from `values.yaml`                                                               |
+| `opmet.minPodsAvailable`                      | Minimum available pods in pod disruption budget. Value `0` omits the pdb. | `0`                                                                                          |
 | `opmet.name`                                  | Name of backend | `opmet`                                                                                      |
 | `opmet.nginx.ALLOW_ANONYMOUS_ACCESS`          | Allow/disallow anonymous access. Note that if an access token has been passed, it is checked even if anonymous access is allowed | `"FALSE"` |
 | `opmet.nginx.AUD_CLAIM`                       | Claim name used to get the token audience | `"aud"` |

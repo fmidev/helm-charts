@@ -7,6 +7,7 @@ opmet:
   path: /opmet/(.*)
   svcPort: 80
   replicas: 1
+  minPodsAvailable: 0
   db_secret: cG9zdGdyZXNxbDovL2dlb3dlYjpwb3N0Z3Jlc0Bsb2NhbGhvc3Q6NTQzMi9vcG1ldA==
   db_secretName: opmet-db
   db_secretType: secretsmanager
