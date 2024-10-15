@@ -63,7 +63,7 @@ warnings:
 Execute the following for testing the chart:
 
 ```bash
-helm install geoweb-warnings-backend fmi/geoweb-warnings-backend --dry-run --debug -n geoweb --values=./values.yaml
+helm install geoweb-warnings-backend fmi/geoweb-warnings-backend --dry-run --debug --namespace geoweb --values=./values.yaml
 ```
 
 # Installing the Chart
@@ -71,7 +71,7 @@ helm install geoweb-warnings-backend fmi/geoweb-warnings-backend --dry-run --deb
 Execute the following for installing the chart:
 
 ```bash
-helm install geoweb-warnings-backend fmi/geoweb-warnings-backend -n geoweb --values=./values.yaml
+helm install geoweb-warnings-backend fmi/geoweb-warnings-backend --namespace geoweb --values=./values.yaml
 ```
 
 # Deleting the Chart
@@ -79,7 +79,7 @@ Execute the following for deleting the chart:
 
 ```bash
 ## Delete the Helm Chart
-helm delete -n geoweb geoweb-warnings-backend
+helm delete --namespace geoweb geoweb-warnings-backend
 ## Delete the Namespace
 kubectl delete namespace geoweb
 ```
@@ -99,6 +99,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.svcPort` | Port used for service | `80` |
 | `warnings.WARNINGS_PORT_HTTP` | Port used for container | `8080` |
 | `warnings.replicas` | Amount of replicas deployed | `1` |
+| `warnings.minPodsAvailable` | Minimum available pods in pod disruption budget. Value `0` omits the pdb. | `0` | 
 | `warnings.postStartCommand` | Command to run after warnings-backend is started | `bin/admin.sh` |
 | `warnings.db_secret` | Secret containing base64 encoded Postgresql database connection string | |
 | `warnings.db_secretName` | Name of db secret | `warnings-db` |

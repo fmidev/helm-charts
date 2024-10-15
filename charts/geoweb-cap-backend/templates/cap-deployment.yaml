@@ -36,3 +36,15 @@ spec:
       {{- if .Values.cap.readinessProbe }}
         readinessProbe: {{ toYaml .Values.cap.readinessProbe | nindent 10 }}
       {{- end }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - {{ .Values.cap.name }}
+              topologyKey: topology.kubernetes.io/zone

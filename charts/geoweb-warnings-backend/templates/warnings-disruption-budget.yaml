@@ -1,0 +1,11 @@
+{{- if .Values.warnings.minPodsAvailable }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: warnings-pdb
+spec:
+  minAvailable: {{ .Values.warnings.minPodsAvailable }}
+  selector:
+    matchLabels:
+      app: {{ .Values.warnings.name }}
+{{- end }}

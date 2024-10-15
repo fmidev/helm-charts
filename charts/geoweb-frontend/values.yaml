@@ -7,6 +7,7 @@ frontend:
   svcPort: 80
   containerPort: 8080
   replicas: 1
+  minPodsAvailable: 0
   auth_secretName: geoweb-auth
   auth_secretType: secretsmanager
   client_id_secretName: geoweb-client-id

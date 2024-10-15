@@ -1,0 +1,11 @@
+{{- if .Values.frontend.minPodsAvailable }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: frontend-pdb
+spec:
+  minAvailable: {{ .Values.frontend.minPodsAvailable }}
+  selector:
+    matchLabels:
+      app: {{ .Values.frontend.name }}
+{{- end }}

@@ -77,7 +77,7 @@ frontend:
 Execute the following for testing the chart:
 
 ```bash
-helm install geoweb-frontend fmi/geoweb-frontend --dry-run --debug -n geoweb --values=./<yourvaluesfile>.yaml
+helm install geoweb-frontend fmi/geoweb-frontend --dry-run --debug --namespace geoweb --values=./<yourvaluesfile>.yaml
 ```
 
 # Installing the Chart
@@ -85,7 +85,7 @@ helm install geoweb-frontend fmi/geoweb-frontend --dry-run --debug -n geoweb --v
 Execute the following for installing the chart:
 
 ```bash
-helm install geoweb-frontend fmi/geoweb-frontend -n geoweb --values=./<yourvaluesfile>.yaml
+helm install geoweb-frontend fmi/geoweb-frontend --namespace geoweb --values=./<yourvaluesfile>.yaml
 ```
 
 # Deleting the Chart
@@ -93,7 +93,7 @@ Execute the following for deleting the chart:
 
 ```bash
 ## Delete the Helm Chart
-helm delete -n geoweb geoweb-frontend
+helm delete --namespace geoweb geoweb-frontend
 ## Delete the Namespace
 kubectl delete namespace geoweb
 ```
@@ -112,6 +112,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.svcPort` | Port used for service | `80` |
 | `frontend.containerPort` | Port used for container | `8080` |
 | `frontend.replicas` | Amount of replicas deployed | `1` |
+| `frontend.minPodsAvailable` | Minimum available pods in pod disruption budget. Value `0` omits the pdb. | `0` |   
 | `frontend.auth_secret` | Secret containing base64 encoded Basic auth secret | |
 | `frontend.auth_secretName` | Name of auth secret | `geoweb-auth` |
 | `frontend.auth_secretType` | Type of auth secret | `secretsmanager` |

@@ -17,7 +17,7 @@ cap:
 Execute the following for testing the chart:
 
 ```bash
-helm install geoweb-cap-backend fmi/geoweb-cap-backend --dry-run --debug -n geoweb --values=./values.yaml
+helm install geoweb-cap-backend fmi/geoweb-cap-backend --dry-run --debug --namespace geoweb --values=./values.yaml
 ```
 
 # Installing the Chart
@@ -25,7 +25,7 @@ helm install geoweb-cap-backend fmi/geoweb-cap-backend --dry-run --debug -n geow
 Execute the following for installing the chart:
 
 ```bash
-helm install geoweb-cap-backend fmi/geoweb-cap-backend -n geoweb --values=./values.yaml
+helm install geoweb-cap-backend fmi/geoweb-cap-backend --namespace geoweb --values=./values.yaml
 ```
 
 # Deleting the Chart
@@ -33,7 +33,7 @@ Execute the following for deleting the chart:
 
 ```bash
 ## Delete the Helm Chart
-helm delete -n geoweb geoweb-cap-backend
+helm delete --namespace geoweb geoweb-cap-backend
 ## Delete the Namespace
 kubectl delete namespace geoweb
 ```
@@ -53,6 +53,7 @@ The following table lists the configurable parameters of the CAP backend chart a
 | `cap.svcPort` | Port used for service | `80` |
 | `cap.containerPort` | Port used for container | `8080` |
 | `cap.replicas` | Amount of replicas deployed | `1` |
+| `cap.minPodsAvailable` | Minimum available pods in pod disruption budget. Value `0` omits the pdb. | `0` |
 | `cap.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `cap.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
 | `cap.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |

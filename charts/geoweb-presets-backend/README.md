@@ -84,7 +84,7 @@ presets:
 Execute the following for testing the chart:
 
 ```bash
-helm install geoweb-presets-backend fmi/geoweb-presets-backend --dry-run --debug -n geoweb --values=./values.yaml
+helm install geoweb-presets-backend fmi/geoweb-presets-backend --dry-run --debug --namespace geoweb --values=./values.yaml
 ```
 
 # Installing the Chart
@@ -92,7 +92,7 @@ helm install geoweb-presets-backend fmi/geoweb-presets-backend --dry-run --debug
 Execute the following for installing the chart:
 
 ```bash
-helm install geoweb-presets-backend fmi/geoweb-presets-backend -n geoweb --values=./values.yaml
+helm install geoweb-presets-backend fmi/geoweb-presets-backend --namespace geoweb --values=./values.yaml
 ```
 
 # Deleting the Chart
@@ -100,7 +100,7 @@ Execute the following for deleting the chart:
 
 ```bash
 ## Delete the Helm Chart
-helm delete -n geoweb geoweb-presets-backend
+helm delete --namespace geoweb geoweb-presets-backend
 ## Delete the Namespace
 kubectl delete namespace geoweb
 ```
@@ -120,6 +120,7 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.svcPort` | Port used for service | `80` |
 | `presets.PRESETS_PORT_HTTP` | Port used for presets-backend container | `8080` |
 | `presets.replicas` | Amount of replicas deployed | `1` |
+| `presets.minPodsAvailable` | Minimum available pods in pod disruption budget. Value `0` omits the pdb. | `0` | 
 | `presets.DEPLOY_ENVIRONMENT` | Environment which presets should be seeded to the database  | `open` |
 | `presets.postStartCommand` | Command to run after presets-backend is started | `bin/admin.sh` |
 | `presets.db_secret` | Secret containing base64 encoded Postgresql database connection string | |

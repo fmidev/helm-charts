@@ -1,0 +1,11 @@
+{{- if .Values.cap.minPodsAvailable }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cap-pdb
+spec:
+  minAvailable: {{ .Values.cap.minPodsAvailable }}
+  selector:
+    matchLabels:
+      app: {{ .Values.cap.name }}
+{{- end }}

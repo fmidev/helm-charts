@@ -7,6 +7,7 @@ taf:
   path: /taf/(.*)
   svcPort: 80
   replicas: 1
+  minPodsAvailable: 0
   db_secret: cG9zdGdyZXNxbDovL2dlb3dlYjpwb3N0Z3Jlc0Bsb2NhbGhvc3Q6NTQzMi90YWY=
   db_secretName: taf-db
   db_secretType: secretsmanager
