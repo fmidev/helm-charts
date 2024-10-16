@@ -67,7 +67,7 @@ taf:
 Execute the following for testing the chart:
 
 ```bash
-helm install geoweb-taf-backend fmi/geoweb-taf-backend --dry-run --debug -n geoweb --values=./<yourvaluesfile>.yaml
+helm install geoweb-taf-backend fmi/geoweb-taf-backend --dry-run --debug --namespace geoweb --values=./<yourvaluesfile>.yaml
 ```
 
 # Installing the Chart
@@ -75,7 +75,7 @@ helm install geoweb-taf-backend fmi/geoweb-taf-backend --dry-run --debug -n geow
 Execute the following for installing the chart:
 
 ```bash
-helm install geoweb-taf-backend fmi/geoweb-taf-backend -n geoweb --values=./<yourvaluesfile>.yaml
+helm install geoweb-taf-backend fmi/geoweb-taf-backend --namespace geoweb --values=./<yourvaluesfile>.yaml
 ```
 
 # Deleting the Chart
@@ -83,7 +83,7 @@ Execute the following for deleting the chart:
 
 ```bash
 ## Delete the Helm Chart
-helm delete -n geoweb geoweb-taf-backend
+helm delete --namespace geoweb geoweb-taf-backend
 ## Delete the Namespace
 kubectl delete namespace geoweb
 ```
@@ -102,6 +102,7 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.path` | Path suffix added to url | `/taf/(.*)` |
 | `taf.svcPort` | Port used for service | `80` |
 | `taf.replicas` | Amount of replicas deployed | `1` |
+| `taf.minPodsAvailable` | Minimum available pods in pod disruption budget. Value `0` omits the pdb. | `0` | 
 | `taf.db_secret` | Secret containing base64 encoded Postgresql database connection string | |
 | `taf.db_secretName` | Name of db secret | `taf-db` |
 | `taf.db_secretType` | Type to db secret | `secretsmanager` |

@@ -1,0 +1,11 @@
+{{- if .Values.opmet.minPodsAvailable }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: opmet-pdb
+spec:
+  minAvailable: {{ .Values.opmet.minPodsAvailable }}
+  selector:
+    matchLabels:
+      app: {{ .Values.opmet.name }}
+{{- end }}

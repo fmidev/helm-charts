@@ -8,6 +8,7 @@ cap:
   svcPort: 80
   containerPort: 8080
   replicas: 1
+  minPodsAvailable: 0
   resources:
     requests:
       memory: "384Mi"

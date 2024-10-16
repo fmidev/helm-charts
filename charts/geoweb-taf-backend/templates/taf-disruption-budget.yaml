@@ -1,0 +1,11 @@
+{{- if .Values.taf.minPodsAvailable }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: taf-pdb
+spec:
+  minAvailable: {{ .Values.taf.minPodsAvailable }}
+  selector:
+    matchLabels:
+      app: {{ .Values.taf.name }}
+{{- end }}

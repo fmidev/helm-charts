@@ -1,0 +1,11 @@
+{{- if .Values.presets.minPodsAvailable }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: presets-pdb
+spec:
+  minAvailable: {{ .Values.presets.minPodsAvailable }}
+  selector:
+    matchLabels:
+      app: {{ .Values.presets.name }}
+{{- end }}
