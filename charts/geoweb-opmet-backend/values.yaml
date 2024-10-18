@@ -79,14 +79,14 @@ opmet:
         cpu: "1"
     livenessProbe:
       httpGet:
-        path: /healthcheck
+        path: /openapi.json
         port: 8090
       initialDelaySeconds: 5
       periodSeconds: 5
       failureThreshold: 5
     readinessProbe:
       httpGet:
-        path: /healthcheck?readiness=true
+        path: /openapi.json
         port: 8090
       initialDelaySeconds: 5
       periodSeconds: 5
