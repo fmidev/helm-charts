@@ -22,8 +22,8 @@ spec:
     {{- if eq .Values.secretProvider "aws" }}
       serviceAccountName: {{ .Values.opmet.secretServiceAccount }}
     {{- end }}
-    {{- if and .Values.opmet.useCustomConfigurationFiles (eq .Values.opmet.customConfigurationLocation "s3")}}
       initContainers:
+    {{- if and .Values.opmet.useCustomConfigurationFiles (eq .Values.opmet.customConfigurationLocation "s3")}}
       - name: init
         image: amazon/aws-cli
         command: ["/bin/sh"]
@@ -37,6 +37,11 @@ spec:
         volumeMounts:
         - mountPath: "/opmet/"
           name: {{ .Values.opmet.name }}-volume
+    {{- end }}
+    {{- if .Values.opmet.db.useZalandoOperatorDb }}
+      - name: wait-for-db
+        image: busybox
+        command: ['sh', '-c', "until nc -z -v -w30 {{ .Values.opmet.db.name }} 5432; do echo 'Waiting for database...'; sleep 5; done"]
     {{- end }}
       containers:
       - name: {{ .Values.opmet.name }}
