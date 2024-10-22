@@ -53,6 +53,11 @@ spec:
         - mountPath: "/custom-presets/"
           name: {{ .Values.presets.name }}-custom-presets-volume
       {{- end }}
+      {{- if .Values.presets.db.useZalandoOperatorDb }}
+      - name: wait-for-db
+        image: busybox
+        command: ['sh', '-c', "until nc -z -v -w30 {{ .Values.presets.db.name }} 5432; do echo 'Waiting for database...'; sleep 5; done"]
+      {{- end }}
       containers:
       - name: {{ .Values.presets.name }}
         image: {{ .Values.presets.registry }}:{{ default .Chart.AppVersion .Values.versions.presets }}
