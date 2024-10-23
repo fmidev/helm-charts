@@ -27,14 +27,14 @@ presets:
     httpGet:
       path: /healthcheck
       port: 8080
-    initialDelaySeconds: 30
+    initialDelaySeconds: 60
     periodSeconds: 5
     failureThreshold: 5
   readinessProbe:
     httpGet:
       path: /healthcheck?readiness=true
       port: 8080
-    initialDelaySeconds: 30
+    initialDelaySeconds: 60
     periodSeconds: 5
     failureThreshold: 1
   nginx:
