@@ -70,7 +70,17 @@ spec:
             - name: filesys2smartmet-producerdef-config
               mountPath: "/config/libraries/grid-tools/producerDef.csv"
               subPath: "producerDef.csv"
+          {{- if and .Values.pvc.name .Values.pvc.mountPath }}
+            - name: {{ .Values.pvc.name }}
+              mountPath: {{ .Values.pvc.mountPath }}
+          {{- end }}
+
       volumes:
+      {{- if and .Values.pvc.name .Values.pvc.claimName }}
+        - name: {{ .Values.pvc.name }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.pvc.claimName }}
+      {{- end }}
         - name: filesys2smartmet-config
           configMap:
             name: filesys2smartmet-config

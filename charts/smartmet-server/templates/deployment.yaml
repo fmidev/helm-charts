@@ -158,7 +158,16 @@ spec:
           - name: smartmet-engine-geonames-config
             mountPath: /config/engines/geonames.conf
             subPath: geonames.conf
+          {{- if and .Values.pvc.name .Values.pvc.mountPath }}
+          - name: {{ .Values.pvc.name }}
+            mountPath: {{ .Values.pvc.mountPath }}
+          {{- end }}
       volumes:
+      {{- if and .Values.pvc.name .Values.pvc.claimName }}
+      - name: {{ .Values.pvc.name }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.pvc.claimName }}
+      {{- end }}
       - name: smartmet-main-configuration
         configMap:
           name: smartmet-config

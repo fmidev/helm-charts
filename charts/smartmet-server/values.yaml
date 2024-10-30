@@ -1,4 +1,11 @@
 # Default values
+# This applies both image and filesys2smartmet
+pvc:
+  name: "foo"
+  mountPath: "/foo"
+  claimName: "bar"
+
+# TODO image should probably be renamed to smartmet-server?
 image:
   repository: quay.io/fmi/smartmet-server
   pullPolicy: IfNotPresent
@@ -200,6 +207,7 @@ filesys2smartmet:
     repository: quay.io/fmi/smartmet-server
     pullPolicy: IfNotPresent
     tag: filesys2smartmet-0.1.0
+
   config:
     loopInterval: 60
     memoryMapper:
