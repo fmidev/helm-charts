@@ -1,9 +1,9 @@
 # Default values
 # This applies both image and filesys2smartmet
 pvc:
-  name: "foo"
-  mountPath: "/foo"
-  claimName: "bar"
+  name: ""
+  mountPath: ""
+  claimName: ""
 
 # TODO image should probably be renamed to smartmet-server?
 image:
