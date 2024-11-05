@@ -8,18 +8,10 @@ metadata:
   {{- end }}
 data:
   VERSION: {{ default .Chart.AppVersion .Values.versions.taf | quote }}
-{{- if .Values.taf.env.GEOWEB_KNMI_AVI_MESSAGESERVICES_HOST }}
-  GEOWEB_KNMI_AVI_MESSAGESERVICES_HOST: {{ .Values.taf.env.GEOWEB_KNMI_AVI_MESSAGESERVICES_HOST | quote }}
-{{- end }}
-{{- if .Values.taf.env.AVIATION_TAF_PORT_HTTP }}
-  AVIATION_TAF_PORT_HTTP: {{ .Values.taf.env.AVIATION_TAF_PORT_HTTP | quote }}
-{{- end }}
-{{- if .Values.taf.env.AVIATION_TAF_PUBLISH_HOST }}
-  AVIATION_TAF_PUBLISH_HOST: {{ .Values.taf.env.AVIATION_TAF_PUBLISH_HOST | quote }}
-{{- end }}
-{{- if .Values.taf.env.TAF_CONFIG }}
-  TAF_CONFIG: {{ .Values.taf.env.TAF_CONFIG | quote }}
-{{- end }}
-{{- if .Values.taf.messageconverter.version }}
+  {{- if .Values.taf.messageconverter.version }}
   AVI_VERSION: {{ .Values.taf.messageconverter.version | quote }}
-{{- end }}
+  {{- end }}
+  {{- range $key, $value := .Values.taf.env }}
+  {{ $key | upper }}: {{ $value | quote }}
+  {{- end }}
+ 
