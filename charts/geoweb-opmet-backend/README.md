@@ -215,6 +215,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 
 | Chart version | opmet version |
 |---------------|---------------|
+| 3.7.0         | 3.0.1         |
 | 3.6.0         | 3.0.1         |
 | 3.5.4         | 3.0.1         |
 | 3.5.3         | 3.0.0         |
