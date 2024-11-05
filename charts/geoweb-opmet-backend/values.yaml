@@ -38,6 +38,7 @@ opmet:
     MESSAGECONVERTER_URL: "http://localhost:8080"
     OPMET_BACKEND_PORT_HTTP: 8000
     PUBLISHER_URL: "http://localhost:8090/publish"
+    APPLICATION_ROOT_PATH: "/opmet"
   messageconverter:
     name: opmet-messageconverter
     registry: registry.gitlab.com/opengeoweb/avi-msgconverter/geoweb-knmi-avi-messageservices

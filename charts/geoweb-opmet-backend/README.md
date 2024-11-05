@@ -148,6 +148,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.env.BACKEND_OPMET_PORT_HTTP`           | Port used for container | `8000`                                                                                       |
 | `opmet.env.MESSAGECONVERTER_URL`              | - | `"http://localhost:8080"`                                                                    |
 | `opmet.env.PUBLISHER_URL`                     | - | `"http://localhost:8090/publish"`                                                            |
+| `opmet.env.APPLICATION_ROOT_PATH`             | Application root path for FastAPI. Generally same as `opmet.path` without the wildcard. | `/opmet`                                                                                |
 | `opmet.env.SIGMET_CONFIG`                     | Location of SIGMET configuration file that is used (application defaults to `configuration_files/sigmetConfig.json`) |                                                                                              |
 | `opmet.iamRoleARN`                            | IAM Role with permissions to access secrets |                                                                                              |
 | `opmet.imagePullPolicy`                       | Adds option to modify imagePullPolicy |                                                                                              |
@@ -214,6 +215,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 
 | Chart version | opmet version |
 |---------------|---------------|
+| 3.6.0         | 3.0.1         |
 | 3.5.4         | 3.0.1         |
 | 3.5.3         | 3.0.0         |
 | 3.5.2         | 3.0.0         |
