@@ -161,6 +161,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.env.GW_FEATURE_DISPLAY_SEARCH_ON_MAP` | Enable geolocation search | |
 | `frontend.env.GW_VERSION_PROGRESS_NOTES_URL` | URL to release notes | |
 | `frontend.env.GW_TECHNICAL_RELEASE_NOTES_URL` | URL to technical changelog | |
+| `frontend.env.GW_INITIAL_WORKSPACE_PRESET` | Name of the workspace preset that is opened initially | | 
 | `frontend.useCustomConfigurationFiles` | Use custom configurations | `false` |
 | `frontend.customConfigurationLocation` | Where custom configurations are located *(local\|s3)* | `local` |
 | `frontend.volumeAccessMode` | Permissions of the application for the custom configurations PersistentVolume used | `ReadOnlyMany` |
@@ -181,6 +182,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 
 | Chart version | frontend version |
 |---------------|------------------|
+| 3.17.0        | 9.30.0           |
 | 3.16.0        | 9.30.0           |
 | 3.15.1        | 9.30.0           |
 | 3.15.0        | 9.29.0           |
