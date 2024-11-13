@@ -33,7 +33,7 @@ spec:
         command: ['/bin/sh', '-c']
         args:
         - |
-          until echo quit | telnet {{ default "redis-master.{{ .Release.Name }}" .Values.config.redis.address }} {{ default 6379 .Values.config.redis.port }} ; do
+          until echo quit | telnet {{ default (printf "redis-master.%s" .Release.Name) .Values.config.redis.address }} {{ default 6379 .Values.config.redis.port }} ; do
             echo 'waiting for database...'
             sleep 2
           done
