@@ -5,11 +5,11 @@ keywords:
 - fmi
 - smartmet
 - smartmet-server
-dependencies:
-- name: redis
-  repository: https://charts.bitnami.com/bitnami
-  version: 18.19.2
-  condition: config.redis.enabled
+# dependencies:
+# - name: redis
+#   repository: https://charts.bitnami.com/bitnami
+#   version: 18.19.2
+#   condition: config.redis.enabled
 maintainers:
 - email: admin@weatherproof.fi
   name: fmi-build-bot
