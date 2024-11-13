@@ -16,7 +16,7 @@ secrets:
 
 serviceAccount:
   enabled: true
-  name: ptrace-sa-v1
+  name: smartmet-server-serviceaccount
 
 resources:
   requests:
