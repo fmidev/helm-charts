@@ -1,4 +1,4 @@
-#Default values
+# Default values
 image:
   repository: quay.io/fmi/smartmet-server
   pullPolicy: IfNotPresent
@@ -245,5 +245,5 @@ radon2smartmet:
       host: ""
       database: ""
     gridfiles:
-      #TODO clean this
+      # TODO clean this
       configFile: "/config/libraries/grid-files/grid-files.conf"
