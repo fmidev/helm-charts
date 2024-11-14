@@ -1,8 +1,8 @@
-{{- if .Values.filesys2smartmet.enabled }}
+{{ if .Values.radon2smartmet.enabled}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: filesys2smartmet
+  name: radon2smartmet
   labels:
     app: {{ .Release.Name }}
 spec:
@@ -39,7 +39,7 @@ spec:
           done
       {{- end }}
       containers:
-        - name: filesys2smartmet
+        - name: radon2smartmet
           securityContext:
             runAsGroup: 0
             capabilities:
@@ -52,11 +52,11 @@ spec:
             limits:
               memory: {{ default "16Gi" .Values.resources.limits.memory }}
               cpu: {{ default "2" .Values.resources.limits.cpu }}
-          image: {{ .Values.filesys2smartmet.image.repository }}:{{ .Values.filesys2smartmet.image.tag }}
-          {{- if .Values.filesys2smartmet.image.pullPolicy }}
-          imagePullPolicy: {{ .Values.filesys2smartmet.image.pullPolicy }}
+          image: {{ .Values.radon2smartmet.image.repository }}:{{ .Values.radon2smartmet.image.tag }}
+          {{- if .Values.radon2smartmet.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.radon2smartmet.image.pullPolicy }}
           {{- end }}
-          command: ["/usr/bin/fmi/filesys2smartmet", "/config/filesys2smartmet.conf", "{{ default 60 .Values.filesys2smartmet.config.loopInterval}}" ]
+          command: ["/usr/local/bin/run.sh", "{{ default 30 .Values.radon2smartmet.config.loopInterval}}" ]
           env:
             - name: REDIS_CONTENT_SERVER_ADDRESS
               value: "{{ default "redis-master.{{ .Release.Name }}" .Values.config.redis.address }}"
@@ -64,42 +64,39 @@ spec:
               value: "{{ default 6379 .Values.config.redis.port }}"
             - name: REDIS_CONTENT_SERVER_TABLE_PREFIX
               value: "{{ default "smartmet." .Values.config.redis.tablePrefix }}"
+            - name: RADON_USER
+              valueFrom:
+                secretKeyRef:
+                  name: smartmet-server-sealedsecrets
+                  key: RADON_USER
+            - name: RADON_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: smartmet-server-sealedsecrets
+                  key: RADON_PASSWORD
+            - name: RADON_HOST
+              value: "{{ default "" .Values.radon2smartmet.config.radon.host }}"
+            - name: RADON_DATABASE
+              value: "{{ default "" .Values.radon2smartmet.config.radon.database }}"
+            - name: RADON_PRODUCERFILE
+              value: "{{ default "/config/libraries/tools-grid/producers.csv" .Values.radon2smartmet.config.radon.producerfile }}"
+            - name: GRID_FILES_LIBRARY_CONFIG_FILE
+              value: "{{ default "/config/libraries/grid-files/grid-files.conf" .Values.radon2smartmet.config.gridfiles.configFile }}"
+            - name: GRID_TOOLS_CONFIG_DIR
+              value: "/config"
+            - name: CORBA_CONTENT_SERVER_IOR
+              value: ""
+            - name: HTTP_CONTENT_SERVER_URL
+              value: ""
           volumeMounts:
-            - name: filesys2smartmet-config
-              mountPath: "/config/filesys2smartmet.conf"
-              subPath: "filesys2smartmet.conf"
-            - name: smartmet-library-grid-files
-              mountPath: "/config/libraries/grid-files/grid-files.conf"
-              subPath: "grid-files.conf"
-            - name: filesys2smartmet-producerdef-config
-              mountPath: "/config/libraries/grid-tools/producerDef.csv"
-              subPath: "producerDef.csv"
-            {{- if and .Values.pvc.name .Values.pvc.mountPath }}
-            - name: {{ .Values.pvc.name }}
-              mountPath: {{ .Values.pvc.mountPath }}
-            {{- end }}
-        volumes:
-        {{- if and .Values.pvc.name .Values.pvc.claimName }}
-        - name: {{ .Values.pvc.name }}
-          persistentVolumeClaim:
-            claimName: {{ .Values.pvc.claimName }}
-        {{- end }}
-        - name: filesys2smartmet-config
+            - name: radon-to-smartmet-config
+              mountPath: "/config/radon-to-smartmet.cfg"
+              subPath: "radon-to-smartmet.cfg"
+      volumes:
+        - name: radon-to-smartmet-config
           configMap:
-            name: filesys2smartmet-config
+            name: radon-to-smartmet-config
             items:
               - key: configuration
-                path: filesys2smartmet.conf
-        - name: smartmet-library-grid-files
-          configMap:
-            name: smartmet-library-grid-files
-            items:
-              - key: config
-                path: grid-files.conf
-        - name: filesys2smartmet-producerdef-config
-          configMap:
-            name: filesys2smartmet-config
-            items:
-              - key: producerdef
-                path: producerDef.csv
+                path: radon-to-smartmet.cfg
 {{- end }}

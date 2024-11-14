@@ -1,15 +1,30 @@
 # Default values
+image:
+  repository: quay.io/fmi/smartmet-server
+  pullPolicy: IfNotPresent
+  tag: 0.1.6
+  pullSecret: fmi-openshift-pull-secret
+
 # This applies both image and filesys2smartmet
 pvc:
   name: ""
   mountPath: ""
   claimName: ""
 
-# TODO image should probably be renamed to smartmet-server?
-image:
-  repository: quay.io/fmi/smartmet-server
-  pullPolicy: IfNotPresent
-  tag: 0.1.0
+secrets:
+  name: smartmet-server-sealedsecrets
+
+serviceAccount:
+  enabled: true
+  name: smartmet-server-serviceaccount
+
+resources:
+  requests:
+    memory: 8Gi
+    cpu: 1
+  limits:
+    memory: 16Gi
+    cpu: 2
 
 config:
   locale: "fi_FI.UTF-8"
@@ -39,6 +54,9 @@ config:
     maxthreads: 5
     maxrequeuesize: 50
   redis:
+    # enable local redis
+    # if disabled must specify remote redis address and port
+    enabled: true
     address: ""
     port: 6379
     tablePrefix: "smartmet."
@@ -174,54 +192,58 @@ config:
 # reverse_mapping_function: Reverse mapping function
 # default_precision: Default precision
 mappings:
-  - name: "demo"
-    mapping_name: "TD-K"
-    parameter_id_type: 2
-    parameter_id: "TD-K"
-    geometry_id: 1110
-    level_id_type: 1
-    level_id: 6
-    level: "00002"
-    area_interpolation_method: 1
-    time_interpolation_method: 1
-    level_interpolation_method: 1
-    group_flags: 0
-    search_match: "E"
-    mapping_function: ""
-    reverse_mapping_function: ""
-    default_precision: ""
+  # - name: "demo"
+  #   mapping_name: "TD-K"
+  #   parameter_id_type: 2
+  #   parameter_id: "TD-K"
+  #   geometry_id: 1110
+  #   level_id_type: 1
+  #   level_id: 6
+  #   level: "00002"
+  #   area_interpolation_method: 1
+  #   time_interpolation_method: 1
+  #   level_interpolation_method: 1
+  #   group_flags: 0
+  #   search_match: "E"
+  #   mapping_function: ""
+  #   reverse_mapping_function: ""
+  #   default_precision: ""
 
 producers:
-  - name: "demo"
-    abbreviation: "demo"
-    title: "demo-title"
-    description: "demo-desription"
-    geometryId: 1110
+  # - name: "demo"
+  #   abbreviation: "demo"
+  #   title: "demo-title"
+  #   description: "demo-desription"
+  #   geometryId: 1110
 
 logging:
   target: "stdout"
   directory: ""
 
 filesys2smartmet:
+  enabled: false
   image:
     repository: quay.io/fmi/smartmet-server
     pullPolicy: IfNotPresent
     tag: filesys2smartmet-0.1.0
-
   config:
     loopInterval: 60
     memoryMapper:
-      enabled: true
-    redis:
-      address: ""
-      port: 6379
-      tablePrefix: "smartmet."
+      enabled: false
   data:
-    - url: "/data/"
-      patterns:
-        - "*.nc"
-        - "*.grib"
-        - "*.grib2"
-      authentication:
-        enabled: false
-      type: "FS"
+
+# requires RADON_USER and RADON_PASSWORD in sealed secret
+radon2smartmet:
+  enabled: false
+  image:
+    repository: quay.io/fmi/smartmet-server
+    pullPolicy: IfNotPresent
+    tag: radon2smartmet-0.0.1
+  config:
+    loopInterval: 30
+    radon:
+      host: ""
+      database: ""
+    gridfiles:
+      # TODO clean this
+      configFile: "/config/libraries/grid-files/grid-files.conf"

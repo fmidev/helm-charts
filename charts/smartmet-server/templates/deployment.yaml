@@ -15,25 +15,29 @@ spec:
       labels:
         app: {{ .Release.Name }}
     spec:
-      #TODO proper sa template
-      serviceAccountName: ptrace-sa-v1
+      {{- if .Values.serviceAccount.enabled }}
+      serviceAccountName: {{ default "smartmet-server-serviceaccount" .Values.serviceAccount.name }}
+      {{- end }}
       securityContext:
         runAsNonRoot: true
         runAsGroup: 0
-      # TODO proper pullsecret
+      {{- if .Values.image.pullSecret }}
       imagePullSecrets:
-        - name: fmi-openshift-pull-secret
+        - name: {{ .Values.image.pullSecret }}
+      {{- end }}
       #TODO only if using internal redis
       initContainers:
+      {{- if .Values.config.redis.enabled }}
       - name: wait-for-redis
         image: busybox
         command: ['/bin/sh', '-c']
         args:
         - |
-          until echo quit | telnet {{ default "redis-master.smartmet-server-development" .Values.filesys2smartmet.config.redis.address }} {{ default 6379 .Values.filesys2smartmet.config.redis.port }} ; do
+          until echo quit | telnet {{ default (printf "redis-master.%s" .Release.Name) .Values.config.redis.address }} {{ default 6379 .Values.config.redis.port }} ; do
             echo 'waiting for database...'
             sleep 2
           done
+      {{- end }}
       containers:
         - name: {{ .Release.Name }}
           securityContext:
@@ -45,11 +49,11 @@ spec:
               - SYS_PTRACE
           resources:
             requests:
-              memory: 2Gi
-              cpu: 0.2
+              memory: {{ default "8Gi" .Values.resources.requests.memory }}
+              cpu: {{ default "1" .Values.resources.requests.cpu }}
             limits:
-              memory: 8Gi
-              cpu: 1
+              memory: {{ default "16Gi" .Values.resources.limits.memory }}
+              cpu: {{ default "2" .Values.resources.limits.cpu }}
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
           {{- if .Values.image.pullPolicy }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -71,52 +75,52 @@ spec:
             - name: FMINAMES_USER
               valueFrom:
                 secretKeyRef:
-                  name: smartmet-server-sealedsecrets
+                  name: {{ .Values.secrets.name }}
                   key: FMINAMES_USER
             - name: FMINAMES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: smartmet-server-sealedsecrets
+                  name: {{ .Values.secrets.name }}
                   key: FMINAMES_PW
             - name: FMINAMES_HOST
               valueFrom:
                 secretKeyRef:
-                  name: smartmet-server-sealedsecrets
+                  name: {{ .Values.secrets.name }}
                   key: FMINAMES_HOST
             - name: FMINAMES_PORT
               valueFrom:
                 secretKeyRef:
-                  name: smartmet-server-sealedsecrets
+                  name: {{ .Values.secrets.name }}
                   key: FMINAMES_PORT
             - name: FMINAMES_DATABASE
               valueFrom:
                 secretKeyRef:
-                  name: smartmet-server-sealedsecrets
+                  name: {{ .Values.secrets.name }}
                   key: FMINAMES_DATABASE
             - name: GIS_USER
               valueFrom:
                 secretKeyRef:
-                  name: smartmet-server-sealedsecrets
+                  name: {{ .Values.secrets.name }}
                   key: GIS_USER
             - name: GIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: smartmet-server-sealedsecrets
+                  name: {{ .Values.secrets.name }}
                   key: GIS_PW
             - name: GIS_HOST
               valueFrom:
                 secretKeyRef:
-                  name: smartmet-server-sealedsecrets
+                  name: {{ .Values.secrets.name }}
                   key: GIS_HOST
             - name: GIS_PORT
               valueFrom:
                 secretKeyRef:
-                  name: smartmet-server-sealedsecrets
+                  name: {{ .Values.secrets.name }}
                   key: GIS_PORT
             - name: GIS_DATABASE
               valueFrom:
                 secretKeyRef:
-                  name: smartmet-server-sealedsecrets
+                  name: {{ .Values.secrets.name }}
                   key: GIS_DATABASE
           volumeMounts:
           - name: smartmet-main-configuration

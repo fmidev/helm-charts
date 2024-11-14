@@ -2,17 +2,18 @@ apiVersion: v2
 description: Helm chart for smartmet server
 home: "file"
 keywords:
-  - fmi
-  - smartmet
+- fmi
+- smartmet
+- smartmet-server
 # dependencies:
 # - name: redis
 #   repository: https://charts.bitnami.com/bitnami
 #   version: 18.19.2
-#   condition: redis.enabled
+#   condition: config.redis.enabled
 maintainers:
-  - email: admin@weatherproof.fi
-    name: fmi-build-bot
-    url: https://github.com/fmi-build-bot
+- email: admin@weatherproof.fi
+  name: fmi-build-bot
+  url: https://github.com/fmi-build-bot
 name: smartmet-server
 type: application
-version: 0.1.2
+version: 0.1.6
