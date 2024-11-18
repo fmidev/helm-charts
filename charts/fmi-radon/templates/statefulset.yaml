@@ -53,11 +53,11 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.secrets.credentials }}
                   key: RADON_WETODB_PASSWORD
-            - name: RADON_RADONCLIENT_PASSWORD
+            - name: RADON_RADON_CLIENT_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.secrets.credentials }}
-                  key: RADON_RADONCLIENT_PASSWORD
+                  key: RADON_RADON_CLIENT_PASSWORD
           volumeMounts:
             - mountPath: {{ .Values.storage.mountPath }}
               name: radondb
