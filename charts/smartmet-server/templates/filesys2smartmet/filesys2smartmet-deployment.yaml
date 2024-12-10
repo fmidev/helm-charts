@@ -72,7 +72,7 @@ spec:
               mountPath: "/config/libraries/grid-files/grid-files.conf"
               subPath: "grid-files.conf"
             - name: filesys2smartmet-producerdef-config
-              mountPath: "/config/libraries/grid-tools/producerDef.csv"
+              mountPath: "/config/libraries/tools-grid/producerDef.csv"
               subPath: "producerDef.csv"
             {{- if and .Values.pvc.name .Values.pvc.mountPath }}
             - name: {{ .Values.pvc.name }}
