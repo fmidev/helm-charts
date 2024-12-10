@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: filesys2smartmet-config
-data: 
+data:
   configuration: |
     smartmet :
     {
@@ -29,7 +29,7 @@ data:
           content-source : 
           { 
             source-id = 200
-            producerDefFile = "/config/libraries/grid-tools/producerDef.csv"
+            producerDefFile = "/config/libraries/tools-grid/producerDef.csv"
 
           {{- if .Values.filesys2smartmet.data }}
           locations = 
@@ -137,8 +137,8 @@ data:
       }#tools
     }#smartmet
   producerdef: |
-      {{- if .Values.producers }}
-      {{- range .Values.producers }}
-      {{ .abbreviation }};{{ .name }};{{ .title }};{{ .description }}
-      {{- end }}
-      {{- end }}
+    {{- if .Values.producers }}
+    {{- range .Values.producers }}
+    {{ .abbreviation }};{{ .name }};{{ .title }};{{ .description }}
+    {{- end }}
+    {{- end }}
