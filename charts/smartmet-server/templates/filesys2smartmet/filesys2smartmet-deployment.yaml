@@ -78,28 +78,28 @@ spec:
             - name: {{ .Values.pvc.name }}
               mountPath: {{ .Values.pvc.mountPath }}
             {{- end }}
-        volumes:
-        {{- if and .Values.pvc.name .Values.pvc.claimName }}
-        - name: {{ .Values.pvc.name }}
-          persistentVolumeClaim:
-            claimName: {{ .Values.pvc.claimName }}
-        {{- end }}
-        - name: filesys2smartmet-config
-          configMap:
-            name: filesys2smartmet-config
-            items:
-              - key: configuration
-                path: filesys2smartmet.conf
-        - name: smartmet-library-grid-files
-          configMap:
-            name: smartmet-library-grid-files
-            items:
-              - key: config
-                path: grid-files.conf
-        - name: filesys2smartmet-producerdef-config
-          configMap:
-            name: filesys2smartmet-config
-            items:
-              - key: producerdef
-                path: producerDef.csv
+      volumes:
+      {{- if and .Values.pvc.name .Values.pvc.claimName }}
+      - name: {{ .Values.pvc.name }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.pvc.claimName }}
+      {{- end }}
+      - name: filesys2smartmet-config
+        configMap:
+          name: filesys2smartmet-config
+          items:
+            - key: configuration
+              path: filesys2smartmet.conf
+      - name: smartmet-library-grid-files
+        configMap:
+          name: smartmet-library-grid-files
+          items:
+            - key: config
+              path: grid-files.conf
+      - name: filesys2smartmet-producerdef-config
+        configMap:
+          name: filesys2smartmet-config
+          items:
+            - key: producerdef
+              path: producerDef.csv
 {{- end }}
