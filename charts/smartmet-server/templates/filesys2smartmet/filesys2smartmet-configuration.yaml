@@ -29,7 +29,7 @@ data:
           content-source : 
           { 
             source-id = 200
-            producerDefFile = "/config/libraries/grid-tools/producerDef.csv"
+            producerDefFile = "/config/libraries/tools-grid/producerDef.csv"
 
           {{- if .Values.filesys2smartmet.data }}
           locations = 
