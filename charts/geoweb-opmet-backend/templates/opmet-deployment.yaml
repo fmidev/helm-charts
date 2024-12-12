@@ -54,6 +54,9 @@ spec:
       {{- if .Values.opmet.resources }}
         resources: {{ toYaml .Values.opmet.resources | nindent 10 }}
       {{- end }}
+      {{- if .Values.opmet.startupProbe }}
+        startupProbe: {{ toYaml .Values.opmet.startupProbe | nindent 10 }}
+      {{- end }}
       {{- if .Values.opmet.livenessProbe }}
         livenessProbe: {{ toYaml .Values.opmet.livenessProbe | nindent 10 }}
       {{- end }}
@@ -107,6 +110,9 @@ spec:
       {{- if .Values.opmet.messageconverter.resources }}
         resources: {{ toYaml .Values.opmet.messageconverter.resources | nindent 10 }}
       {{- end }}
+      {{- if .Values.opmet.messageconverter.startupProbe }}
+        startupProbe: {{ toYaml .Values.opmet.messageconverter.startupProbe | nindent 10 }}
+      {{- end }}
       {{- if .Values.opmet.messageconverter.livenessProbe }}
         livenessProbe: {{ toYaml .Values.opmet.messageconverter.livenessProbe | nindent 10 }}
       {{- end }}
@@ -125,6 +131,9 @@ spec:
         - containerPort: {{ .Values.opmet.publisher.port }}
       {{- if .Values.opmet.publisher.resources }}
         resources: {{ toYaml .Values.opmet.publisher.resources | nindent 10 }}
+      {{- end }}
+      {{- if .Values.opmet.publisher.startupProbe }}
+        startupProbe: {{ toYaml .Values.opmet.publisher.startupProbe | nindent 10 }}
       {{- end }}
       {{- if .Values.opmet.publisher.livenessProbe }}
         livenessProbe: {{ toYaml .Values.opmet.publisher.livenessProbe | nindent 10 }}
@@ -162,6 +171,9 @@ spec:
         - containerPort: {{ .Values.opmet.nginx.NGINX_PORT_HTTP }}
       {{- if .Values.opmet.nginx.resources }}
         resources: {{ toYaml .Values.opmet.nginx.resources | nindent 10 }}
+      {{- end }}
+      {{- if .Values.opmet.nginx.startupProbe }}
+        startupProbe: {{ toYaml .Values.opmet.nginx.startupProbe | nindent 10 }}
       {{- end }}
       {{- if .Values.opmet.nginx.livenessProbe }}
         livenessProbe: {{ toYaml .Values.opmet.nginx.livenessProbe | nindent 10 }}

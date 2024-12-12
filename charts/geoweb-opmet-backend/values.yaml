@@ -20,19 +20,26 @@ opmet:
     limits:
       memory: "300Mi"
       cpu: "1"
+  startupProbe:
+    httpGet:
+      path: /healthcheck?startup=true
+      port: 8000
+    periodSeconds: 10
+    timeoutSeconds: 10
+    failureThreshold: 24 # Allow 4 minutes for startup
   livenessProbe:
     httpGet:
-      path: /healthcheck
+      path: /
       port: 8000
-    initialDelaySeconds: 60
-    periodSeconds: 5
-    failureThreshold: 5
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 2
   readinessProbe:
     httpGet:
       path: /healthcheck?readiness=true
       port: 8000
-    initialDelaySeconds: 60
-    periodSeconds: 5
+    periodSeconds: 45
+    timeoutSeconds: 20
     failureThreshold: 1
   env:
     MESSAGECONVERTER_URL: "http://localhost:8080"
@@ -51,20 +58,27 @@ opmet:
       limits:
         memory: "500Mi"
         cpu: "1"
+    startupProbe:
+      httpGet:
+        path: /healthcheck?startup=true
+        port: 8080
+      periodSeconds: 10
+      timeoutSeconds: 10
+      failureThreshold: 24 # Allow 4 minutes for startup
     livenessProbe:
       httpGet:
         path: /healthcheck
         port: 8080
-      initialDelaySeconds: 30
-      periodSeconds: 5
-      failureThreshold: 5
+      periodSeconds: 10
+      timeoutSeconds: 3
+      failureThreshold: 2
     readinessProbe:
       httpGet:
         path: /healthcheck?readiness=true
         port: 8080
-      initialDelaySeconds: 30
-      periodSeconds: 5
-      failureThreshold: 1
+      periodSeconds: 10
+      timeoutSeconds: 3
+      failureThreshold: 2
   publisher:
     name: opmet-publisher
     registry: registry.gitlab.com/opengeoweb/backend-services/opmet-backend/opmet-backend-publisher-local
@@ -78,19 +92,26 @@ opmet:
       limits:
         memory: "100Mi"
         cpu: "1"
+    startupProbe:
+      httpGet:
+        path: /healthcheck?startup=true
+        port: 8090
+      periodSeconds: 10
+      timeoutSeconds: 10
+      failureThreshold: 12 # Allow 2 minutes for startup
     livenessProbe:
       httpGet:
         path: /openapi.json
         port: 8090
-      initialDelaySeconds: 5
-      periodSeconds: 5
-      failureThreshold: 5
+      periodSeconds: 10
+      timeoutSeconds: 3
+      failureThreshold: 2
     readinessProbe:
       httpGet:
-        path: /openapi.json
+        path: /healthcheck?readiness=true
         port: 8090
-      initialDelaySeconds: 5
-      periodSeconds: 5
+      periodSeconds: 45
+      timeoutSeconds: 20
       failureThreshold: 1
   nginx:
     name: opmet-nginx
@@ -107,19 +128,26 @@ opmet:
       limits:
         memory: "100Mi"
         cpu: "100m"
+    startupProbe:
+      httpGet:
+        path: /health_check?startup=true
+        port: 80
+      periodSeconds: 5
+      timeoutSeconds: 5
+      failureThreshold: 12 # Allow a minute for startup
     livenessProbe:
       httpGet:
         path: /health_check
         port: 80
-      initialDelaySeconds: 5
       periodSeconds: 5
-      failureThreshold: 5
+      timeoutSeconds: 3
+      failureThreshold: 2
     readinessProbe:
       httpGet:
         path: /health_check?readiness=true
         port: 80
-      initialDelaySeconds: 5
       periodSeconds: 5
+      timeoutSeconds: 3
       failureThreshold: 1
   db:
     enableDefaultDb: true
