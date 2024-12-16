@@ -94,6 +94,18 @@ entries:
   geoweb-cap-backend:
   - apiVersion: v2
     appVersion: v0.8.4
+    created: "2024-12-16T13:00:56.418374082Z"
+    description: A Helm chart for geoweb cap backend resources in Kubernetes
+    digest: e1b9d02ba201aba882ccb707216de2b65c63272425ae516be4ca17320e941e0d
+    maintainers:
+    - name: Jusaa
+    name: geoweb-cap-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-cap-backend-1.6.0/geoweb-cap-backend-1.6.0.tgz
+    version: 1.6.0
+  - apiVersion: v2
+    appVersion: v0.8.4
     created: "2024-11-28T11:39:27.069536277Z"
     description: A Helm chart for geoweb cap backend resources in Kubernetes
     digest: b56258d877c8bf19ecd33b178401ed199e159e15a8d00b2a0d1febe131edf68c
@@ -3004,4 +3016,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2024-12-12T14:18:04.473380196Z"
+generated: "2024-12-16T13:00:56.418843247Z"
