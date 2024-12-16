@@ -8,7 +8,6 @@ warnings:
   svcPort: 80
   replicas: 1
   minPodsAvailable: 0
-  WARNINGS_PORT_HTTP: 8080
   postStartCommand: bin/admin.sh
   db_secret: cG9zdGdyZXNxbDovL2dlb3dlYjpwb3N0Z3Jlc0Bsb2NhbGhvc3Q6NTQzMi93YXJuaW5ncw==
   db_secretName: warnings-db
@@ -36,6 +35,9 @@ warnings:
     initialDelaySeconds: 30
     periodSeconds: 5
     failureThreshold: 1
+  env:
+    WARNINGS_PORT_HTTP: 8080
+    APPLICATION_ROOT_PATH: "/warnings"
   nginx:
     name: warnings-nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend

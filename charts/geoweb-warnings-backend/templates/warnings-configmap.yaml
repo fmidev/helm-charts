@@ -8,6 +8,6 @@ metadata:
   {{- end }}
 data:
   VERSION: {{ default .Chart.AppVersion .Values.versions.warnings | quote }}
-{{- if .Values.warnings.WARNINGS_PORT_HTTP }}
-  WARNINGS_PORT_HTTP: {{ .Values.warnings.WARNINGS_PORT_HTTP | quote }}
-{{- end }}
+  {{- range $key, $value := .Values.warnings.env }}
+  {{ $key | upper }}: {{ $value | quote }}
+  {{- end }}

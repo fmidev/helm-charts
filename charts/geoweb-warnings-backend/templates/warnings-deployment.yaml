@@ -56,7 +56,7 @@ spec:
               command: ["/bin/sh", "-c", {{ .Values.warnings.postStartCommand | quote }}]
       {{- end }}
         ports:
-        - containerPort: {{ .Values.warnings.WARNINGS_PORT_HTTP }}
+        - containerPort: {{ .Values.warnings.env.WARNINGS_PORT_HTTP }}
       {{- if .Values.warnings.resources }}
         resources: {{ toYaml .Values.warnings.resources | nindent 10 }}
       {{- end }}
