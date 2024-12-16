@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.cap.name }}
+  annotations:
+  {{- if .Values.cap.commitHash }}
+    commitHash: {{ .Values.cap.commitHash }}
+  {{- end }}
+data:
+  {{- range $key, $value := .Values.cap.env }}
+  {{ $key | upper }}: {{ $value | quote }}
+  {{- end }}
