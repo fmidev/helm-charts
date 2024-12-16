@@ -111,7 +111,6 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
 | `warnings.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
 | `warnings.env.WARNINGS_PORT_HTTP` | Port used for container | `8080` |
-| `warnings.env.APPLICATION_ROOT_PATH` | Application root path for FastAPI. Generally same as `warnings.path` without the wildcard. | `/warnings`                                                                                |
 | `secretProvider` | Option to use secret provider instead of passing base64 encoded database connection string as warnings.db_secret *(aws\|azure\|gcp\|vault)* | |
 | `secretProviderParameters` | Option to add custom parameters to the secretProvider, for example with aws you can specify region | |
 | `warnings.nginx.name` | Name of nginx container | `nginx` |
@@ -158,6 +157,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 
 | Chart version | warnings version |
 |---------------|------------------|
+| 1.0.1         | 1.5.3            |
 | 1.0.0         | 1.5.3            |
 | 0.7.3         | 1.5.3            |
 | 0.7.2         | 1.5.0            |
