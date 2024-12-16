@@ -57,6 +57,7 @@ The following table lists the configurable parameters of the CAP backend chart a
 | `cap.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `cap.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
 | `cap.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
+| `cap.env.APPLICATION_ROOT_PATH` | Application root path for FastAPI. Generally same as `cap.path` without the wildcard. | `/cap`
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |
 | `ingress.tls` | TLS configuration section for the ingress | |
 | `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | `nginx` |
@@ -66,6 +67,7 @@ The following table lists the configurable parameters of the CAP backend chart a
 
 | Chart version | cap version |
 |---------------|-------------|
+| 1.6.0         | 0.8.4       |
 | 1.5.2         | 0.8.4       |
 | 1.5.1         | 0.8.3       |
 | 1.4.1         | 0.8.0       |

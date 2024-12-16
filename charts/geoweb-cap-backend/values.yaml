@@ -30,6 +30,8 @@ cap:
     initialDelaySeconds: 5
     periodSeconds: 5
     failureThreshold: 1
+  env:
+    APPLICATION_ROOT_PATH: "/cap"
 
 ingress:
   name: nginx-ingress-controller
