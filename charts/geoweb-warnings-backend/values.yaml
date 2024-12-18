@@ -4,7 +4,7 @@ versions:
 warnings:
   name: warnings
   registry: registry.gitlab.com/opengeoweb/backend-services/warnings-backend/warnings-backend
-  path: /warnings/(.*)
+  path: /warnings-backend/(.*)
   svcPort: 80
   replicas: 1
   minPodsAvailable: 0
@@ -37,6 +37,7 @@ warnings:
     failureThreshold: 1
   env:
     WARNINGS_PORT_HTTP: 8080
+    APPLICATION_ROOT_PATH: /warnings-backend
   nginx:
     name: warnings-nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend
