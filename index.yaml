@@ -2850,6 +2850,24 @@ entries:
     version: 1.0.0
   smartmet-server:
   - apiVersion: v2
+    created: "2024-12-18T07:07:38.184582305Z"
+    description: Helm chart for smartmet server
+    digest: c83d2a1d34bd717148a95b7d6f2b162cc62613b8bae68e071fc01203f0f1ca25
+    home: file
+    keywords:
+    - fmi
+    - smartmet
+    - smartmet-server
+    maintainers:
+    - email: admin@weatherproof.fi
+      name: fmi-build-bot
+      url: https://github.com/fmi-build-bot
+    name: smartmet-server
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/smartmet-server-0.1.11/smartmet-server-0.1.11.tgz
+    version: 0.1.11
+  - apiVersion: v2
     created: "2024-12-11T07:11:34.097317395Z"
     description: Helm chart for smartmet server
     digest: 545e32e08a919309e7b40a15ae9c24835becb93cf0f639c220f1e68e897604a4
@@ -3064,4 +3082,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2024-12-16T16:04:31.487410553Z"
+generated: "2024-12-18T07:07:38.184994659Z"
