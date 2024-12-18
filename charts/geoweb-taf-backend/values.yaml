@@ -4,7 +4,7 @@ versions:
 taf:
   name: taf
   registry: registry.gitlab.com/opengeoweb/backend-services/aviation-taf-backend/aviation-taf-backend
-  path: /taf/(.*)
+  path: /taf-backend/(.*)
   svcPort: 80
   replicas: 1
   minPodsAvailable: 0
@@ -40,6 +40,7 @@ taf:
     AVIATION_TAF_PORT_HTTP: 8000
     AVIATION_TAF_PUBLISH_HOST: "localhost:8090"
     TAF_CONFIG: config.ini
+    APPLICATION_ROOT_PATH: "/taf-backend"
   messageconverter:
     name: taf-messageconverter
     registry: registry.gitlab.com/opengeoweb/avi-msgconverter/geoweb-knmi-avi-messageservices

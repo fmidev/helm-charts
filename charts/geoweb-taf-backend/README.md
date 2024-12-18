@@ -99,7 +99,7 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.commitHash` | Adds commitHash annotation to the deployment | |
 | `taf.imagePullPolicy` | Adds option to modify imagePullPolicy | |
 | `taf.url` | Url which the application can be accessed | |
-| `taf.path` | Path suffix added to url | `/taf/(.*)` |
+| `taf.path` | Path suffix added to url | `/taf-backend/(.*)` |
 | `taf.svcPort` | Port used for service | `80` |
 | `taf.replicas` | Amount of replicas deployed | `1` |
 | `taf.minPodsAvailable` | Minimum available pods in pod disruption budget. Value `0` omits the pdb. | `0` | 
@@ -119,6 +119,7 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.env.GEOWEB_KNMI_AVI_MESSAGESERVICES_HOST` | - | `"localhost:8081"` |
 | `taf.env.AVIATION_TAF_PUBLISH_HOST` | - | `"localhost:8090"` |
 | `taf.env.TAF_CONFIG` | Location of configuration file that is used | `config.ini` |
+| `taf.env.APPLICATION_ROOT_PATH` | Application root path for FastAPI. Generally same as `taf.path` without the wildcard. | `/taf-backend`
 | `taf.useCustomConfigurationFiles` | Use custom configurations | `false` |
 | `taf.customConfigurationLocation` | Where custom configurations are located *(local\|s3)* | `local` |
 | `taf.volumeAccessMode` | Permissions of the application for the custom configurations PersistentVolume used | `ReadOnlyMany` |
@@ -186,6 +187,7 @@ The following table lists the configurable parameters of the Taf backend chart a
 
 | Chart version | taf version |
 |---------------|-------------|
+| 0.9.0         | 1.0.5       |
 | 0.8.1         | 1.0.5       |
 | 0.8.0         | 1.0.5       |
 | 0.7.1         | 1.0.5       |
