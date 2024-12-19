@@ -133,6 +133,7 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `presets.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
 | `presets.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
+| `presets.env.APPLICATION_ROOT_PATH` | Application root path for FastAPI. Generally same as `presets.path` without the wildcard. | `/presets` |
 | `secretProvider` | Option to use secret provider instead of passing base64 encoded database connection string as presets.db_secret *(aws\|azure\|gcp\|vault)* | |
 | `secretProviderParameters` | Option to add custom parameters to the secretProvider, for example with aws you can specify region | |
 | `presets.nginx.name` | Name of nginx container | `nginx` |
@@ -185,6 +186,7 @@ The following table lists the configurable parameters of the Presets backend cha
 
 | Chart version | presets version |
 |---------------|-----------------|
+| 2.13.0        | 3.21.1          |
 | 2.12.5        | 3.21.1          |
 | 2.12.4        | 3.19.1          |
 | 2.12.3        | 3.19.0          |

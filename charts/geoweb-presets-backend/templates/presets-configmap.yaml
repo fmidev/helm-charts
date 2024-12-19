@@ -8,9 +8,12 @@ metadata:
   {{- end }}
 data:
   VERSION: {{ default .Chart.AppVersion .Values.versions.presets | quote }}
-{{- if .Values.presets.PRESETS_PORT_HTTP }}
+  {{- if .Values.presets.PRESETS_PORT_HTTP }}
   PRESETS_PORT_HTTP: {{ .Values.presets.PRESETS_PORT_HTTP | quote }}
-{{- end }}
-{{- if .Values.presets.DEPLOY_ENVIRONMENT }}
+  {{- end }}
+  {{- if .Values.presets.DEPLOY_ENVIRONMENT }}
   DEPLOY_ENVIRONMENT: {{ .Values.presets.DEPLOY_ENVIRONMENT | quote }}
-{{- end }}
+  {{- end }}
+  {{- range $key, $value := .Values.presets.env }}
+  {{ $key | upper }}: {{ $value | quote }}
+  {{- end }}

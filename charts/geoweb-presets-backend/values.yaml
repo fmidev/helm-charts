@@ -37,6 +37,8 @@ presets:
     initialDelaySeconds: 60
     periodSeconds: 5
     failureThreshold: 1
+  env:
+    APPLICATION_ROOT_PATH: "/presets"
   nginx:
     name: nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend
