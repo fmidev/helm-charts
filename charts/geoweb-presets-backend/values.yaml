@@ -29,7 +29,7 @@ presets:
       port: 8080
     periodSeconds: 10
     timeoutSeconds: 10
-    failureThreshold: 24 # Allow 4 minutes for startup
+    failureThreshold: 24  # Allow 4 minutes for startup
   livenessProbe:
     httpGet:
       path: /
@@ -67,7 +67,7 @@ presets:
         port: 80
       periodSeconds: 5
       timeoutSeconds: 5
-      failureThreshold: 12 # Allow a minute for startup
+      failureThreshold: 12  # Allow a minute for startup
     livenessProbe:
       httpGet:
         path: /health_check
