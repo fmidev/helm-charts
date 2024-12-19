@@ -75,6 +75,9 @@ spec:
       {{- if .Values.presets.resources }}
         resources: {{ toYaml .Values.presets.resources | nindent 10 }}
       {{- end }}
+      {{- if .Values.presets.startupProbe }}
+        startupProbe: {{ toYaml .Values.presets.startupProbe | nindent 10 }}
+      {{- end }}
       {{- if .Values.presets.livenessProbe }}
         livenessProbe: {{ toYaml .Values.presets.livenessProbe | nindent 10 }}
       {{- end }}
@@ -125,6 +128,9 @@ spec:
         - containerPort: {{ .Values.presets.nginx.NGINX_PORT_HTTP }}
       {{- if .Values.presets.nginx.resources }}
         resources: {{ toYaml .Values.presets.nginx.resources | nindent 10 }}
+      {{- end }}
+      {{- if .Values.presets.nginx.startupProbe }}
+        startupProbe: {{ toYaml .Values.presets.nginx.startupProbe | nindent 10 }}
       {{- end }}
       {{- if .Values.presets.nginx.livenessProbe }}
         livenessProbe: {{ toYaml .Values.presets.nginx.livenessProbe | nindent 10 }}
