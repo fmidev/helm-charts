@@ -19,21 +19,21 @@ cap:
   startupProbe:
     httpGet:
       path: /healthcheck?startup=true
-      port: 8000
+      port: 8080
     periodSeconds: 10
     timeoutSeconds: 10
     failureThreshold: 24  # Allow 4 minutes for startup
   livenessProbe:
     httpGet:
       path: /
-      port: 8000
+      port: 8080
     periodSeconds: 10
     timeoutSeconds: 3
     failureThreshold: 2
   readinessProbe:
     httpGet:
       path: /healthcheck?readiness=true
-      port: 8000
+      port: 8080
     periodSeconds: 20
     timeoutSeconds: 10
     failureThreshold: 1
