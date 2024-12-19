@@ -111,8 +111,9 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.iamRoleARN` | IAM Role with permissions to access db_secret secret | |
 | `taf.secretServiceAccount` | Service Account created for handling secrets | `taf-service-account` |
 | `taf.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
-| `taf.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
-| `taf.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
+| `taf.startupProbe` | Configure main container startupProbe | see defaults from `values.yaml` |
+| `taf.livenessProbe` | Configure main container livenessProbe | see defaults from `values.yaml` |
+| `taf.readinessProbe` | Configure main container readinessProbe | see defaults from `values.yaml` |
 | `secretProvider` | Option to use secret provider instead of passing base64 encoded database connection string as taf.db_secret *(aws\|azure\|gcp\|vault)* | |
 | `secretProviderParameters` | Option to add custom parameters to the secretProvider, for example with aws you can specify region | |
 | `taf.env.AVIATION_TAF_PORT_HTTP` | Port used for container | `8000` |
@@ -135,8 +136,9 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.messageconverter.version` | Possibility to override application version | see default from `values.yaml` |
 | `taf.messageconverter.port` | Port used for messageconverter | `8080` |
 | `taf.messageconverter.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
-| `taf.messageconverter.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
-| `taf.messageconverter.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
+| `taf.messageconverter.startupProbe` | Configure message converter startupProbe | see defaults from `values.yaml` |
+| `taf.messageconverter.livenessProbe` | Configure message converter livenessProbe | see defaults from `values.yaml` |
+| `taf.messageconverter.readinessProbe` | Configure message converter readinessProbe | see defaults from `values.yaml` |
 | `taf.nginx.name` | Name of nginx container | `taf-nginx` |
 | `taf.nginx.registry` | Registry to fetch nginx image | `registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend` |
 | `taf.nginx.version` | Possibility to override Nginx version | see default from `values.yaml` |
@@ -155,8 +157,9 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.nginx.NGINX_PORT_HTTP` | Port used for Nginx reverse proxy | `80` |
 | `taf.nginx.NGINX_PORT_HTTPS` | Port used for Nginx reverse proxy when SSL is enabled | `443` |
 | `taf.nginx.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
-| `taf.nginx.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
-| `taf.nginx.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
+| `taf.nginx.startupProbe` | Configure nginx container startupProbe | see defaults from `values.yaml` |
+| `taf.nginx.livenessProbe` | Configure nginx container livenessProbe | see defaults from `values.yaml` |
+| `taf.nginx.readinessProbe` | Configure nginx container readinessProbe | see defaults from `values.yaml` |
 | `taf.publisher.name` | Name of publisher container  | `taf-publisher` |
 | `taf.publisher.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/aviation-taf-backend/aviation-taf-backend-publisher-local` |
 | `taf.publisher.port` | Port used for publisher | `8090`|
@@ -169,8 +172,9 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.placeholder.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/aviation-taf-backend/tafplaceholder-aviation-taf-backend` |
 | `taf.placeholder.TAFPLACEHOLDER_KEEPRUNNING` | - | `TRUE` |
 | `taf.placeholder.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
-| `taf.placeholder.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
-| `taf.placeholder.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
+| `taf.placeholder.startupProbe` | Configure placeholder container startupProbe | see defaults from `values.yaml` |
+| `taf.placeholder.livenessProbe` | Configure placeholder container livenessProbe | see defaults from `values.yaml` |
+| `taf.placeholder.readinessProbe` | Configure placeholder container readinessProbe | see defaults from `values.yaml` |
 | `taf.db.enableDefaultDb` | Enable default postgres database | `true` |
 | `taf.db.name` | Default postgres database container name | `postgres` |
 | `taf.db.image` | Default postgres database image | `postgres` |
@@ -187,6 +191,7 @@ The following table lists the configurable parameters of the Taf backend chart a
 
 | Chart version | taf version |
 |---------------|-------------|
+| 1.0.0         | 1.0.5       |
 | 0.9.0         | 1.0.5       |
 | 0.8.1         | 1.0.5       |
 | 0.8.0         | 1.0.5       |
