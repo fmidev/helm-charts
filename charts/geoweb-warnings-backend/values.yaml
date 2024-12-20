@@ -21,19 +21,26 @@ warnings:
     limits:
       memory: "1024Mi"
       cpu: "1"
+  startupProbe:
+    httpGet:
+      path: /healthcheck?startup=true
+      port: 8080
+    periodSeconds: 10
+    timeoutSeconds: 10
+    failureThreshold: 24  # Allow 4 minutes for startup
   livenessProbe:
     httpGet:
-      path: /healthcheck
+      path: /
       port: 8080
-    initialDelaySeconds: 30
-    periodSeconds: 5
-    failureThreshold: 5
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 2
   readinessProbe:
     httpGet:
       path: /healthcheck?readiness=true
       port: 8080
-    initialDelaySeconds: 30
-    periodSeconds: 5
+    periodSeconds: 30
+    timeoutSeconds: 10
     failureThreshold: 1
   env:
     WARNINGS_PORT_HTTP: 8080
@@ -53,19 +60,26 @@ warnings:
       limits:
         memory: "100Mi"
         cpu: "100m"
+    startupProbe:
+      httpGet:
+        path: /health_check?startup=true
+        port: 80
+      periodSeconds: 5
+      timeoutSeconds: 5
+      failureThreshold: 12  # Allow a minute for startup
     livenessProbe:
       httpGet:
         path: /health_check
         port: 80
-      initialDelaySeconds: 5
       periodSeconds: 5
-      failureThreshold: 5
+      timeoutSeconds: 3
+      failureThreshold: 2
     readinessProbe:
       httpGet:
         path: /health_check?readiness=true
         port: 80
-      initialDelaySeconds: 5
       periodSeconds: 5
+      timeoutSeconds: 3
       failureThreshold: 1
   db:
     enableDefaultDb: true
