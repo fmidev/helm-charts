@@ -4,7 +4,7 @@ versions:
 taf:
   name: taf
   registry: registry.gitlab.com/opengeoweb/backend-services/aviation-taf-backend/aviation-taf-backend
-  path: /taf/(.*)
+  path: /taf-backend/(.*)
   svcPort: 80
   replicas: 1
   minPodsAvailable: 0
@@ -21,25 +21,33 @@ taf:
     limits:
       memory: "1024Mi"
       cpu: "1"
+  startupProbe:
+    httpGet:
+      path: /healthcheck?startup=true
+      port: 8000
+    periodSeconds: 10
+    timeoutSeconds: 10
+    failureThreshold: 24  # Allow 4 minutes for startup
   livenessProbe:
     httpGet:
-      path: /healthcheck
+      path: /
       port: 8000
-    initialDelaySeconds: 60
-    periodSeconds: 5
-    failureThreshold: 5
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 2
   readinessProbe:
     httpGet:
       path: /healthcheck?readiness=true
       port: 8000
-    initialDelaySeconds: 60
-    periodSeconds: 5
+    periodSeconds: 45
+    timeoutSeconds: 20
     failureThreshold: 1
   env:
     GEOWEB_KNMI_AVI_MESSAGESERVICES_HOST: "localhost:8081"
     AVIATION_TAF_PORT_HTTP: 8000
     AVIATION_TAF_PUBLISH_HOST: "localhost:8090"
     TAF_CONFIG: config.ini
+    APPLICATION_ROOT_PATH: "/taf-backend"
   messageconverter:
     name: taf-messageconverter
     registry: registry.gitlab.com/opengeoweb/avi-msgconverter/geoweb-knmi-avi-messageservices
@@ -52,20 +60,27 @@ taf:
       limits:
         memory: "1024Mi"
         cpu: "1"
+    startupProbe:
+      httpGet:
+        path: /healthcheck?startup=true
+        port: 8081
+      periodSeconds: 10
+      timeoutSeconds: 10
+      failureThreshold: 24  # Allow 4 minutes for startup
     livenessProbe:
       httpGet:
         path: /healthcheck
         port: 8081
-      initialDelaySeconds: 30
-      periodSeconds: 5
-      failureThreshold: 5
+      periodSeconds: 10
+      timeoutSeconds: 3
+      failureThreshold: 2
     readinessProbe:
       httpGet:
         path: /healthcheck?readiness=true
         port: 8081
-      initialDelaySeconds: 30
-      periodSeconds: 5
-      failureThreshold: 1
+      periodSeconds: 10
+      timeoutSeconds: 3
+      failureThreshold: 2
   publisher:
     name: taf-publisher
     registry: registry.gitlab.com/opengeoweb/backend-services/aviation-taf-backend/aviation-taf-backend-publisher-local
@@ -78,19 +93,26 @@ taf:
       limits:
         memory: "512Mi"
         cpu: "1"
+    startupProbe:
+      httpGet:
+        path: /healthcheck?startup=true
+        port: 8090
+      periodSeconds: 10
+      timeoutSeconds: 10
+      failureThreshold: 12  # Allow 2 minutes for startup
     livenessProbe:
       httpGet:
-        path: /healthcheck
+        path: /openapi.json
         port: 8090
-      initialDelaySeconds: 5
-      periodSeconds: 5
-      failureThreshold: 5
+      periodSeconds: 10
+      timeoutSeconds: 3
+      failureThreshold: 2
     readinessProbe:
       httpGet:
         path: /healthcheck?readiness=true
         port: 8090
-      initialDelaySeconds: 5
-      periodSeconds: 5
+      periodSeconds: 45
+      timeoutSeconds: 20
       failureThreshold: 1
   nginx:
     name: taf-nginx
@@ -107,19 +129,26 @@ taf:
       limits:
         memory: "100Mi"
         cpu: "100m"
+    startupProbe:
+      httpGet:
+        path: /health_check?startup=true
+        port: 80
+      periodSeconds: 5
+      timeoutSeconds: 5
+      failureThreshold: 12  # Allow a minute for startup
     livenessProbe:
       httpGet:
         path: /health_check
         port: 80
-      initialDelaySeconds: 5
       periodSeconds: 5
-      failureThreshold: 5
+      timeoutSeconds: 3
+      failureThreshold: 2
     readinessProbe:
       httpGet:
         path: /health_check?readiness=true
         port: 80
-      initialDelaySeconds: 5
       periodSeconds: 5
+      timeoutSeconds: 3
       failureThreshold: 1
   placeholder:
     name: taf-placeholder
@@ -132,13 +161,21 @@ taf:
       limits:
         memory: "512Mi"
         cpu: "1"
+    startupProbe:
+      exec:
+        command:
+        - /bin/sh
+        - -c
+        - "cd /app && python -c 'exit(0)'"
+      periodSeconds: 5
+      timeoutSeconds: 5
+      failureThreshold: 12  # Allow a minute for startup
     livenessProbe:
       exec:
         command:
         - /bin/sh
         - -c
         - "cd /app && python -c 'exit(0)'"
-      initialDelaySeconds: 5
       periodSeconds: 5
       failureThreshold: 5
     readinessProbe:
@@ -147,7 +184,6 @@ taf:
         - /bin/sh
         - -c
         - "cd /app && python -c 'exit(0)'"
-      initialDelaySeconds: 5
       periodSeconds: 5
       failureThreshold: 1
   db:

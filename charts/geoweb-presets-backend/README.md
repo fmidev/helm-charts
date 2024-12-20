@@ -129,10 +129,12 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.db_secretPath` | Path to db secret | |
 | `presets.db_secretKey` | Key of db secret | |
 | `presets.iamRoleARN` | IAM Role with permissions to access db_secret secret | |
-| `presets.secretServiceAccount` | Service Account created for handling secrets | `presets-service-account` |
+| `presets.livenessProbe` | Configure main container livenessProbe | see defaults from `values.yaml` |
+| `presets.readinessProbe` | Configure main container readinessProbe | see defaults from `values.yaml` |
 | `presets.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
-| `presets.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
-| `presets.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
+| `presets.secretServiceAccount` | Service Account created for handling secrets | `presets-service-account` |
+| `presets.startupProbe` | Configure main container startupProbe | see defaults from `values.yaml` |
+| `presets.env.APPLICATION_ROOT_PATH` | Application root path for FastAPI. Generally same as `presets.path` without the wildcard. | `/presets` |
 | `secretProvider` | Option to use secret provider instead of passing base64 encoded database connection string as presets.db_secret *(aws\|azure\|gcp\|vault)* | |
 | `secretProviderParameters` | Option to add custom parameters to the secretProvider, for example with aws you can specify region | |
 | `presets.nginx.name` | Name of nginx container | `nginx` |
@@ -154,9 +156,10 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.nginx.BACKEND_HOST` | Presets-backend container address where Nginx reverse proxy forwards the requests | `0.0.0.0:8080` |
 | `presets.nginx.NGINX_PORT_HTTP` | Port used for Nginx reverse proxy| `80` |
 | `presets.nginx.NGINX_PORT_HTTPS` | Port used for Nginx reverse proxy when SSL is enabled | `443` |
+| `presets.nginx.livenessProbe` | Configure nginx container livenessProbe | see defaults from `values.yaml` |
+| `presets.nginx.readinessProbe` | Configure nginx container readinessProbe | see defaults from `values.yaml` |
 | `presets.nginx.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
-| `presets.nginx.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
-| `presets.nginx.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
+| `presets.nginx.startupProbe` | Configure nginx container startupProbe | see defaults from `values.yaml` |
 | `presets.db.enableDefaultDb` | Enable default postgres database | `true` |
 | `presets.db.name` | Default postgres database container name | `postgres` |
 | `presets.db.image` | Default postgres database image | `postgres` |
@@ -185,6 +188,8 @@ The following table lists the configurable parameters of the Presets backend cha
 
 | Chart version | presets version |
 |---------------|-----------------|
+| 2.14.0        | 3.21.1          |
+| 2.13.0        | 3.21.1          |
 | 2.12.5        | 3.21.1          |
 | 2.12.4        | 3.19.1          |
 | 2.12.3        | 3.19.0          |

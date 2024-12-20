@@ -16,4 +16,4 @@ maintainers:
   url: https://github.com/fmi-build-bot
 name: smartmet-server
 type: application
-version: 0.1.10
+version: 0.1.11

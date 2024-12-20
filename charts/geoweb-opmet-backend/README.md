@@ -152,13 +152,14 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.env.SIGMET_CONFIG`                     | Location of SIGMET configuration file that is used (application defaults to `configuration_files/sigmetConfig.json`) |                                                                                              |
 | `opmet.iamRoleARN`                            | IAM Role with permissions to access secrets |                                                                                              |
 | `opmet.imagePullPolicy`                       | Adds option to modify imagePullPolicy |                                                                                              |
-| `opmet.livenessProbe`                         | Configure libenessProbe | see defaults from `values.yaml`                                                              |
-| `opmet.messageconverter.livenessProbe`        | Configure libenessProbe | see defaults from `values.yaml`                                                              |
+| `opmet.livenessProbe`                         | Configure main container livenessProbe | see defaults from `values.yaml`                                                              |
+| `opmet.messageconverter.livenessProbe`        | Configure message converter livenessProbe | see defaults from `values.yaml`                                                              |     |
 | `opmet.messageconverter.name`                 | Name of messageconverter container | `opmet-messageconverter`                                                                     |
 | `opmet.messageconverter.port`                 | Port used for messageconverter | `8080`                                                                                       |
-| `opmet.messageconverter.readinessProbe`       | Configure readinessProbe | see defaults from `values.yaml`                                                              |
+| `opmet.messageconverter.readinessProbe`       | Configure message converter readinessProbe | see defaults from `values.yaml`                                                         
 | `opmet.messageconverter.registry`             | Registry to fetch image | `registry.gitlab.com/opengeoweb/avi-msgconverter/geoweb-knmi-avi-messageservices`            |
 | `opmet.messageconverter.resources`            | Configure resource limits & requests | see defaults from `values.yaml`                                                              |
+| `opmet.messageconverter.startupProbe`         | Configure message converter startupProbe | see defaults from `values.yaml`                                                            
 | `opmet.messageconverter.version`              | Possibility to override application version | see default from `values.yaml`                                                               |
 | `opmet.minPodsAvailable`                      | Minimum available pods in pod disruption budget. Value `0` omits the pdb. | `0`                                                                                          |
 | `opmet.name`                                  | Name of backend | `opmet`                                                                                      |
@@ -173,28 +174,30 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.nginx.ISS_CLAIM`                       | Issuer claim name used to get the token issuer | `"iss"` |
 | `opmet.nginx.ISS_CLAIM_VALUE`                 | Required value for the issuer claim |  |
 | `opmet.nginx.JWKS_URI`                        | JSON Web Key Set URI that points to an identity provider's public key set in JSON format |  |
-| `opmet.nginx.livenessProbe`                   | Configure libenessProbe | see defaults from `values.yaml`                                                              |
+| `opmet.nginx.livenessProbe`                   | Configure nginx container livenessProbe | see defaults from `values.yaml`                                                              |
 | `opmet.nginx.name`                            | Name of nginx container | `opmet-nginx`                                                                                |
 | `opmet.nginx.NGINX_PORT_HTTP`                 | Port used for nginx | `80`                                                                                         |
 | `opmet.nginx.NGINX_PORT_HTTPS`                | Port used for nginx when SSL is enabled | `443`                                                                                        |
 | `opmet.nginx.OAUTH2_USERINFO`                 | Userinfo endpoint to retrieve consented claims, or assertions, about the logged in end-user | |
-| `opmet.nginx.readinessProbe`                  | Configure readinessProbe | see defaults from `values.yaml`                                                              |
+| `opmet.nginx.readinessProbe`                  | Configure nginx container readinessProbe | see defaults from `values.yaml`                                                              |
 | `opmet.nginx.registry`                        | Registry to fetch nginx image | `registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend`          |
 | `opmet.nginx.resources`                       | Configure resource limits & requests | see defaults from `values.yaml`|
+| `opmet.nginx.startupProbe  `                  | Configure nginx container startupProbe | see defaults from `values.yaml`                                                              |
 | `opmet.nginx.version`                         | Possibility to override Nginx version | see default from `values.yaml` |
 | `opmet.path`                                  | Path suffix added to url | `/opmet/(.*)`                                                                                |
 | `opmet.publisher.DESTINATION`                 | Folder inside publisher container where TACs are stored (used with local-publisher) | `/app/output`                                                                                |
-| `opmet.publisher.livenessProbe`               | Configure libenessProbe | see defaults from `values.yaml`                                                              |
+| `opmet.publisher.livenessProbe`               | Configure publisher livenessProbe | see defaults from `values.yaml`                                                              |
 | `opmet.publisher.name`                        | Name of publisher container  | `opmet-publisher`                                                                            |
 | `opmet.publisher.port`                        | Port used for publisher | `8090`                                                                                       |
-| `opmet.publisher.readinessProbe`              | Configure readinessProbe | see defaults from `values.yaml`                                                              |
+| `opmet.publisher.readinessProbe`              | Configure publisher readinessProbe | see defaults from `values.yaml`                                                              |
 | `opmet.publisher.registry`                    | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/opmet-backend/opmet-backend-publisher-local` |
 | `opmet.publisher.resources`                   | Configure resource limits & requests | see defaults from `values.yaml`                                                              |
 | `opmet.publisher.S3_BUCKET_NAME`              | S3 Bucket used to publish files to |                                                                                              |
 | `opmet.publisher.SERVERS`                     | List of configuration options used to access SFTP server. List of jsons. Note that ssh secrets get mounted to `/mnt/secrets-store`. Details https://gitlab.com/opengeoweb/backend-services/opmet-backend#sftp-publisher |                                                                                              |
+| `opmet.publisher.startupProbe`              | Configure publisher startupProbe | see defaults from `values.yaml`                                                              |
 | `opmet.publisher.version`                     | Publisher version | defaults to Chart.AppVersion                                                                 |
 | `opmet.publisher.volumeOptions`               | yaml including the definition of the volume where TACs are published to, for example: <pre>hostPath:<br>&nbsp;&nbsp; path: /test/path</pre> or <pre>emptyDir:<br>&nbsp;&nbsp;</pre>| `emptyDir:`                                                                                  |
-| `opmet.readinessProbe`                        | Configure readinessProbe | see defaults from `values.yaml`                                                              |
+| `opmet.readinessProbe`                        | Configure main container readinessProbe | see defaults from `values.yaml`                                                              |
 | `opmet.registry`                              | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/opmet-backend`                              |
 | `opmet.replicas`                              | Amount of replicas deployed | `1`                                                                                          |
 | `opmet.resources`                             | Configure resource limits & requests | see defaults from `values.yaml`                                                              |
@@ -202,6 +205,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.secretServiceAccount`                  | Service Account created for handling secrets | `opmet-service-account`                                                                      |
 | `opmet.ssh_passphrase_secrets`                | Map to configure which ssh private key passphrase secrets you want with multiples supported, map can use values of `secret`, `name`, `type` (only aws + azure), `path` (only gcp and vault) and `key` (only vault) |                                                                                              |
 | `opmet.ssh_secrets`                           | Map to configure which ssh private key secrets you want with multiples supported, map can use values of `secret`, `name`, `type` (only aws + azure), `path` (only gcp and vault) and `key` (only vault) |                                                                                              |
+| `opmet.startupProbe`                          | Configure main container startupProbe | see defaults from `values.yaml`                                                              |  |
 | `opmet.svcPort`                               | Port used for service | `80`                                                                                         |
 | `opmet.url`                                   | Url which the application can be accessed |                                                                                              |
 | `opmet.useCustomConfigurationFiles`           | Use custom configurations | `false`                                                                                      |

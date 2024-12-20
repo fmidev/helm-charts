@@ -30,6 +30,9 @@ spec:
       {{- if .Values.cap.resources }}
         resources: {{ toYaml .Values.cap.resources | nindent 10 }}
       {{- end }}
+      {{- if .Values.cap.startupProbe }}
+        startupProbe: {{ toYaml .Values.cap.startupProbe | nindent 10 }}
+      {{- end }}
       {{- if .Values.cap.livenessProbe }}
         livenessProbe: {{ toYaml .Values.cap.livenessProbe | nindent 10 }}
       {{- end }}
