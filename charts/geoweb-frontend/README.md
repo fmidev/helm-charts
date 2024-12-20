@@ -126,7 +126,8 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.iamRoleARN` | IAM Role with permissions to access secrets | |
 | `frontend.secretServiceAccount` | Service Account created for handling secrets | `geoweb-service-account` |
 | `frontend.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
-| `frontend.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
+| `frontend.startupProbe` | Configure startupProbe | see defaults from `values.yaml` |
+| `frontend.livenessProbe` | Configure livenessProbe | see defaults from `values.yaml` |
 | `frontend.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
 | `secretProvider` | Option to use secret provider instead of passing base64 encoded Client ID as opmet.db_secret *(aws\|azure\|gcp\|vault)* | |
 | `secretProviderParameters` | Option to add custom parameters to the secretProvider, for example with aws you can specify region | |
@@ -182,6 +183,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 
 | Chart version | frontend version |
 |---------------|------------------|
+| 3.17.0        | 9.34.0           |
 | 3.16.2        | 9.34.0           |
 | 3.16.1        | 9.31.0           |
 | 3.16.0        | 9.30.0           |

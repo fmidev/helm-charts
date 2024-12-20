@@ -21,19 +21,26 @@ frontend:
     limits:
       memory: "200Mi"
       cpu: "1"
+  startupProbe:
+    httpGet:
+      path: /assets/config.json?startup=true
+      port: 8080
+    periodSeconds: 5
+    timeoutSeconds: 5
+    failureThreshold: 12  # Allow a minute for startup
   livenessProbe:
     httpGet:
       path: /assets/config.json
       port: 8080
-    initialDelaySeconds: 5
     periodSeconds: 5
-    failureThreshold: 5
+    timeoutSeconds: 3
+    failureThreshold: 2
   readinessProbe:
     httpGet:
       path: /assets/config.json?readiness=true
       port: 8080
-    initialDelaySeconds: 5
     periodSeconds: 5
+    timeoutSeconds: 3
     failureThreshold: 1
   env:
     GW_AUTH_LOGOUT_URL: "{app_url}"
