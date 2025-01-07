@@ -8,7 +8,6 @@ warnings:
   svcPort: 80
   replicas: 1
   minPodsAvailable: 0
-  postStartCommand: bin/admin.sh
   db_secret: cG9zdGdyZXNxbDovL2dlb3dlYjpwb3N0Z3Jlc0Bsb2NhbGhvc3Q6NTQzMi93YXJuaW5ncw==
   db_secretName: warnings-db
   db_secretType: secretsmanager

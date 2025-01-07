@@ -99,7 +99,6 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.svcPort` | Port used for service | `80` |
 | `warnings.replicas` | Amount of replicas deployed | `1` |
 | `warnings.minPodsAvailable` | Minimum available pods in pod disruption budget. Value `0` omits the pdb. | `0` | 
-| `warnings.postStartCommand` | Command to run after warnings-backend is started | `bin/admin.sh` |
 | `warnings.db_secret` | Secret containing base64 encoded Postgresql database connection string | |
 | `warnings.db_secretName` | Name of db secret | `warnings-db` |
 | `warnings.db_secretType` | Type to db secret | `secretsmanager` |

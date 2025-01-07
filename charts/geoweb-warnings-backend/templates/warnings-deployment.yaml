@@ -49,12 +49,10 @@ spec:
       {{- if .Values.warnings.imagePullPolicy }}
         imagePullPolicy: {{ .Values.warnings.imagePullPolicy }}
       {{- end }}
-      {{- if .Values.warnings.postStartCommand }}
-        lifecycle:
-          postStart:
-            exec:
-              command: ["/bin/sh", "-c", {{ .Values.warnings.postStartCommand | quote }}]
-      {{- end }}
+        command: 
+          - /bin/sh
+          - -c
+          - bin/admin.sh && exec bin/start.sh
         ports:
         - containerPort: {{ .Values.warnings.env.WARNINGS_PORT_HTTP }}
       {{- if .Values.warnings.resources }}
