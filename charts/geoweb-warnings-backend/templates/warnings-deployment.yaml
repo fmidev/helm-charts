@@ -38,11 +38,6 @@ spec:
         - mountPath: "/warnings/"
           name: {{ .Values.warnings.name }}-volume
     {{- end }}
-    {{- if .Values.warnings.db.useZalandoOperatorDb }}
-      - name: wait-for-db
-        image: busybox
-        command: ['sh', '-c', "until nc -z -v -w30 {{ .Values.warnings.db.name }} 5432; do echo 'Waiting for database...'; sleep 5; done"]
-    {{- end }}
       containers:
       - name: {{ .Values.warnings.name }}
         image: {{ .Values.warnings.registry }}:{{ default .Chart.AppVersion .Values.versions.warnings }}
@@ -50,9 +45,18 @@ spec:
         imagePullPolicy: {{ .Values.warnings.imagePullPolicy }}
       {{- end }}
         command: 
-          - /bin/sh
-          - -c
-          - bin/admin.sh && exec bin/start.sh
+        - /bin/sh
+        - -c
+        - |
+          while ! python3 -c "
+          import os
+          from sqlalchemy import create_engine
+          engine = create_engine(os.environ['WARNINGS_BACKEND_DB'])
+          engine.connect()
+          " 2>/dev/null; do
+            echo "Waiting for database connection..."
+            sleep 5
+          done && bin/admin.sh && exec bin/start.sh
         ports:
         - containerPort: {{ .Values.warnings.env.WARNINGS_PORT_HTTP }}
       {{- if .Values.warnings.resources }}
