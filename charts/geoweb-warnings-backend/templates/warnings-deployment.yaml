@@ -38,27 +38,32 @@ spec:
         - mountPath: "/warnings/"
           name: {{ .Values.warnings.name }}-volume
     {{- end }}
-    {{- if .Values.warnings.db.useZalandoOperatorDb }}
-      - name: wait-for-db
-        image: busybox
-        command: ['sh', '-c', "until nc -z -v -w30 {{ .Values.warnings.db.name }} 5432; do echo 'Waiting for database...'; sleep 5; done"]
-    {{- end }}
       containers:
       - name: {{ .Values.warnings.name }}
         image: {{ .Values.warnings.registry }}:{{ default .Chart.AppVersion .Values.versions.warnings }}
       {{- if .Values.warnings.imagePullPolicy }}
         imagePullPolicy: {{ .Values.warnings.imagePullPolicy }}
       {{- end }}
-      {{- if .Values.warnings.postStartCommand }}
-        lifecycle:
-          postStart:
-            exec:
-              command: ["/bin/sh", "-c", {{ .Values.warnings.postStartCommand | quote }}]
-      {{- end }}
+        command: 
+        - /bin/sh
+        - -c
+        - |
+          while ! python3 -c "
+          import os
+          from sqlalchemy import create_engine
+          engine = create_engine(os.environ['WARNINGS_BACKEND_DB'])
+          engine.connect()
+          " 2>/dev/null; do
+            echo "Waiting for database connection..."
+            sleep 5
+          done && bin/admin.sh && exec bin/start.sh
         ports:
         - containerPort: {{ .Values.warnings.env.WARNINGS_PORT_HTTP }}
       {{- if .Values.warnings.resources }}
         resources: {{ toYaml .Values.warnings.resources | nindent 10 }}
+      {{- end }}
+      {{- if .Values.warnings.startupProbe }}
+        startupProbe: {{ toYaml .Values.warnings.startupProbe | nindent 10 }}
       {{- end }}
       {{- if .Values.warnings.livenessProbe }}
         livenessProbe: {{ toYaml .Values.warnings.livenessProbe | nindent 10 }}
@@ -106,6 +111,9 @@ spec:
         - containerPort: {{ .Values.warnings.nginx.NGINX_PORT_HTTP }}
       {{- if .Values.warnings.nginx.resources }}
         resources: {{ toYaml .Values.warnings.nginx.resources | nindent 10 }}
+      {{- end }}
+      {{- if .Values.warnings.nginx.startupProbe }}
+        startupProbe: {{ toYaml .Values.warnings.nginx.startupProbe | nindent 10 }}
       {{- end }}
       {{- if .Values.warnings.nginx.livenessProbe }}
         livenessProbe: {{ toYaml .Values.warnings.nginx.livenessProbe | nindent 10 }}
