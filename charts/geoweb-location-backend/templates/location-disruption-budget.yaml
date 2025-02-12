@@ -1,0 +1,11 @@
+{{- if .Values.location.minPodsAvailable }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: location-pdb
+spec:
+  minAvailable: {{ .Values.location.minPodsAvailable }}
+  selector:
+    matchLabels:
+      app: {{ .Values.location.name }}
+{{- end }}
