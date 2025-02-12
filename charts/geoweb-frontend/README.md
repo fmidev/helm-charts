@@ -135,6 +135,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.env.GW_DRAWINGS_BASE_URL` | Url which the application uses to connect to Drawings backend | |
 | `frontend.env.GW_TAF_BASE_URL` | Url which the application uses to connect to TAF backend | |
 | `frontend.env.GW_SW_BASE_URL` | Url which the application uses to connect to Space Weather backend | |
+| `frontend.env.GW_LOCATION_BASE_URL` | Url which the application uses to connect to location backend | |
 | `frontend.env.GW_APP_URL` | Url which the application can be accessed | |
 | `frontend.env.GW_DEFAULT_THEME` | Default theme: lightMode or darkMode | |
 | `frontend.env.GW_FEATURE_APP_TITLE` | Application title | |
