@@ -3,7 +3,7 @@ versions:
 
 cap:
   name: cap
-  registry: registry.gitlab.com/opengeoweb/backend-services/cap-backend
+  registry: registry.gitlab.com/opengeoweb/backend-services/cap-backend/cap-backend
   path: /cap/(.*)
   svcPort: 80
   containerPort: 8080
