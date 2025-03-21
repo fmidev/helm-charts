@@ -2,6 +2,23 @@ apiVersion: v1
 entries:
   fmi-nodeport:
   - apiVersion: v2
+    created: "2025-03-21T10:59:42.476698852Z"
+    description: Helm chart for defining api nodeport
+    digest: af20ae886efc19c230ca93d3139077c2859b2249289b2b8c4ebc69ae961c6463
+    home: https://github.com/fmidev/fmi-public-helm-charts
+    keywords:
+    - fmi
+    - nodeport
+    maintainers:
+    - email: admin@weatherproof.fi
+      name: fmi-build-bot
+      url: https://github.com/fmi-build-bot
+    name: fmi-nodeport
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/fmi-nodeport-0.0.3/fmi-nodeport-0.0.3.tgz
+    version: 0.0.3
+  - apiVersion: v2
     created: "2023-10-04T09:19:46.946709432Z"
     description: Helm chart for defining api nodeport
     digest: 67c1c8111400c9703e2775b325864777d32904a77687453b16a962f4102b4cee
@@ -3457,4 +3474,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2025-03-06T14:25:06.809206174Z"
+generated: "2025-03-21T10:59:42.47721077Z"
