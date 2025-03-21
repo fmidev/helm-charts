@@ -2,7 +2,7 @@ apiVersion: v2
 name: fmi-nodeport
 description: Helm chart for defining api nodeport
 type: application
-version: 0.0.2
+version: 0.0.3
 keywords:
   - fmi
   - nodeport
