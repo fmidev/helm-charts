@@ -2,8 +2,10 @@
 image:
   repository: quay.io/fmi/smartmet-server
   pullPolicy: IfNotPresent
-  tag: 0.1.6
-  pullSecret: fmi-openshift-pull-secret
+  tag: 0.1.10
+  pullSecrets:
+    - fmi-openshift-pull-secret
+    - fmi-dockerhub-pull-secret
 
 # This applies both image and filesys2smartmet
 pvc:
