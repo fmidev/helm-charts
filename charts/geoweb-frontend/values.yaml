@@ -68,10 +68,10 @@ frontend:
           defaultMapSettings:
             proj:
               bbox:
-                top: 7342085.640241
-                left: -450651.2255879827
-                right: 1428345.8183648037
-                bottom: 6393842.957153378
+                left: 58703.6377
+                bottom: 6408480.4514
+                right: 3967387.5161
+                top: 11520588.9031
               srs: "EPSG:3857"
             layers:
               - name: "WorldMap_Light_Grey_Canvas"
