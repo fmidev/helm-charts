@@ -10,3 +10,8 @@ data:
   {{- range $key, $value := .Values.frontend.env }}
   {{ $key | upper }}: {{ $value | quote }}
   {{- end }}
+  {{- if .Values.frontend.customConfiguration.enabled }}
+  {{- range $filename, $content := .Values.frontend.customConfiguration.files }}
+  {{ $filename }}: {{ $content | toJson | quote }}
+  {{- end }}
+  {{- end }}  

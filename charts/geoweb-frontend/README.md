@@ -73,6 +73,20 @@ frontend:
   awsDefaultRegion: <AWS_DEFAULT_REGION>
 ```
 
+* Generating initial presets JSON file from values.yaml
+```yaml
+frontend:
+  url: geoweb.example.com
+  env:
+    GW_INITIAL_PRESETS_FILENAME: custom/initialPresets.json
+  customConfiguration:
+    enabled: true
+    files:
+      "initialPresets.json":
+        key1: value1
+        key2: value2 
+```
+
 # Testing the Chart
 Execute the following for testing the chart:
 
