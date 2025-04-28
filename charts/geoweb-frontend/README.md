@@ -73,6 +73,20 @@ frontend:
   awsDefaultRegion: <AWS_DEFAULT_REGION>
 ```
 
+* Generating initial presets JSON file from values.yaml
+```yaml
+frontend:
+  url: geoweb.example.com
+  env:
+    GW_INITIAL_PRESETS_FILENAME: custom/initialPresets.json
+  customConfiguration:
+    enabled: true
+    files:
+      "initialPresets.json":
+        key1: value1
+        key2: value2 
+```
+
 # Testing the Chart
 Execute the following for testing the chart:
 
@@ -166,6 +180,8 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.env.GW_INITIAL_WORKSPACE_PRESET` | Name of the workspace preset that is opened initially | | 
 | `frontend.useCustomConfigurationFiles` | Use custom configurations | `false` |
 | `frontend.customConfigurationLocation` | Where custom configurations are located *(local\|s3)* | `local` |
+| `frontend.customConfiguration.files` | Map of filename to JSON content structured as YAML | `{}` |
+| `frontend.customConfiguration.files."initialPresets.json"` | Configuration for map presets, services, layers, etc. | See example in `values.yaml` |
 | `frontend.volumeAccessMode` | Permissions of the application for the custom configurations PersistentVolume used | `ReadOnlyMany` |
 | `frontend.volumeSize` | Size of the custom configurations PersistentVolume | `100Mi` |
 | `frontend.customConfigurationFolderPath` | Path to the folder which contains custom configurations | |
