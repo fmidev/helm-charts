@@ -58,7 +58,7 @@ frontend:
   volumeAccessMode: ReadOnlyMany
   volumeSize: 100Mi
   customConfiguration:
-    enabled: false #  Set to true to generate the custom initialPresets JSON file
+    enabled: false  # Set to true to generate the custom initialPresets JSON file
     files:
       "initialPresets.json":  # This file will be generated and available at /usr/share/nginx/html/assets/custom/
         # Configure all the settings below you want to be included in the custom initialPresets JSON file
