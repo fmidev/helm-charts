@@ -83,11 +83,10 @@ frontend:
   env:
     GW_INITIAL_PRESETS_FILENAME: custom/initialPresets.json  # Configure app to use the generated custom configuration JSON
   customConfiguration:
-    enabled: false #  Set to true to generate the custom initialPresets JSON file
+    enabled: true  # Enable initialPresets JSON generation from YAML values
     files:
-      "initialPresets.json":  # This file will be generated and available at /usr/share/nginx/html/assets/custom/
-        # Configure all the settings below you want to be included in the custom initialPresets JSON file
-        # IMPORTANT: Also configure the app to use this file, set env.GW_INITIAL_PRESETS_FILENAME: custom/initialPresets.json
+      "initialPresets.json":  # File will be available at /usr/share/nginx/html/assets/custom/
+        # All the settings configured below will be included in the generated initialPresets JSON file
         preset:
           presetType: "mapPreset"
           presetId: "mapPreset-1"
