@@ -73,18 +73,48 @@ frontend:
   awsDefaultRegion: <AWS_DEFAULT_REGION>
 ```
 
-* Generating initial presets JSON file from values.yaml
+* Generate custom initialPresets.json from YAML values
+  * The configuration will be converted to JSON and mounted into the containers filesystem
+  * The structure of the JSON file should conform to the InitialAppPresetProps type, see https://opengeoweb.gitlab.io/opengeoweb/typescript-docs/core/interfaces/InitialAppPresetProps.html
+  * See also the default initialPresets.json file https://gitlab.com/opengeoweb/opengeoweb/-/blob/master/apps/geoweb/src/assets/initialPresets.json?ref_type=heads
 ```yaml
 frontend:
   url: geoweb.example.com
   env:
-    GW_INITIAL_PRESETS_FILENAME: custom/initialPresets.json
+    GW_INITIAL_PRESETS_FILENAME: custom/initialPresets.json  # Configure app to use the generated custom configuration JSON
   customConfiguration:
-    enabled: true
+    enabled: true  # Enable initialPresets JSON generation from YAML values
     files:
-      "initialPresets.json":
-        key1: value1
-        key2: value2 
+      "initialPresets.json":  # File will be available at /usr/share/nginx/html/assets/custom/
+        # All the settings configured below will be included in the generated initialPresets JSON file
+        preset:
+          presetType: "mapPreset"
+          presetId: "mapPreset-1"
+          presetName: "Layer manager preset"
+          defaultMapSettings:
+            proj:
+              bbox:
+                left: 58703.6377
+                bottom: 6408480.4514
+                right: 3967387.5161
+                top: 11520588.9031
+              srs: "EPSG:3857"
+            layers:
+              - name: "WorldMap_Light_Grey_Canvas"
+                type: "twms"
+                enabled: true
+                layerType: "baseLayer"
+              - service: "https://geoservices.knmi.nl/wms?DATASET=baselayers"
+                name: "countryborders"
+                format: "image/png"
+                enabled: true
+                layerType: "overLayer"
+          # Additional sections can be specified here including
+          # timeSeriesServices:
+          # soundingsCollections:
+          # services:
+          # baseServices:
+          # layers:
 ```
 
 # Testing the Chart
@@ -200,6 +230,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 
 | Chart version | frontend version |
 |---------------|------------------|
+| 3.19.0        | 12.3.0           |
 | 3.18.1        | 12.3.0           |
 | 3.18.0        | 12.1.2           |
 | 3.17.4        | 12.1.2           |

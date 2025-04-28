@@ -58,9 +58,11 @@ frontend:
   volumeAccessMode: ReadOnlyMany
   volumeSize: 100Mi
   customConfiguration:
-    enabled: false
+    enabled: false  # Set to true to generate the custom initialPresets JSON file
     files:
-      "initialPresets.json":
+      "initialPresets.json":  # This file will be generated and available at /usr/share/nginx/html/assets/custom/
+        # Configure all the settings below you want to be included in the custom initialPresets JSON file
+        # IMPORTANT: Also configure the app to use this file, set env.GW_INITIAL_PRESETS_FILENAME: custom/initialPresets.json
         preset:
           presetType: "mapPreset"
           presetId: "mapPreset-1"
@@ -83,128 +85,12 @@ frontend:
                 format: "image/png"
                 enabled: true
                 layerType: "overLayer"
-          timeSeriesServices:
-            - name: "FMI"
-              url: "https://opendata.fmi.fi/edr"
-              id: "fmi"
-              description: "FMI EDR"
-              type: "EDR"
-              scope: "system"
-            - name: "KNMI OBS"
-              url: "https://gw-edr.pub.knmi.cloud/edr"
-              id: "knmi"
-              description: "KNMI EDR"
-              type: "EDR"
-              scope: "system"
-            - name: "KNMI Geoservices"
-              url: "https://geoservices.knmi.nl/edr"
-              id: "knmi_geoservices_edr"
-              description: "KNMI EDR on geoservices with UWCW HA43 DINI"
-              type: "EDR"
-              scope: "system"
-            - name: "MET Norway"
-              url: "https://interpol.met.no"
-              id: "METNorway"
-              description: "MET Norway EDR"
-              type: "EDR"
-              scope: "system"
-          soundingsCollections:
-            - name: "Harmonie scandinavia hybrid"
-              id: "harmonie_scandinavia_hybrid"
-              url: "https://opendata.fmi.fi/edr"
-              description: "MEPS/vertical coordinate model level"
-            - name: "Harmonie scandinavia pressure"
-              id: "harmonie_scandinavia_pressure"
-              url: "https://opendata.fmi.fi/edr"
-              description: "MEPS/vertical coordinate pressure"
-            - name: "ECMWF painepinta"
-              id: "ecmwf_painepinta"
-              url: "https://opendata.fmi.fi/edr"
-              description: "ECMWF/vertical coordinate pressure"
-          services:
-            - name: "KNMI Radar"
-              url: "https://geoservices.knmi.nl/adagucserver?dataset=RADAR"
-              id: "knmi-radar"
-            - name: "FMI"
-              url: "https://openwms.fmi.fi/geoserver/wms?"
-              id: "fmi"
-            - name: "MET Norway"
-              url: "https://halo-wms.met.no/halo/default.map?"
-              id: "met-no"
-            - name: "Harmonie HA43 DINI"
-              url: "https://geoservices.knmi.nl/adagucserver?dataset=uwcw_ha43_dini_5p5km&"
-              id: "knmi_uwcw_ha43_dini_5p5km"
-            - name: "Harmonie HA43 NL"
-              url: "https://geoservices.knmi.nl/adagucserver?dataset=uwcw_ha43_nl_2km&"
-              id: "knmi_uwcw_ha43_nl_2km"
-            - name: "KNMI Observations"
-              url: "https://geoservices.knmi.nl/adagucserver?dataset=OBS"
-              id: "knmi-obs"
-            - name: "DWD"
-              url: "https://maps.dwd.de/geoserver/ows?"
-              id: "dwd"
-            - name: "EUMETSAT"
-              url: "https://view.eumetsat.int/geoserver/wms?"
-              id: "eumetsat"
-            - name: "ECMWF"
-              url: "https://eccharts.ecmwf.int/wms/?token=public"
-              id: "ecmwf"
-            - name: "NOAA Tropical Cyclones"
-              url: "https://mapservices.weather.noaa.gov/tropical/services/tropical/NHC_tropical_weather/MapServer/WMSServer?"
-              id: "noaatropicalcyclones"
-          baseServices:
-            - name: "KNMI Radar"
-              url: "https://geoservices.knmi.nl/adagucserver?dataset=RADAR"
-              id: "knmi-radar"
-            - name: "FMI"
-              url: "https://openwms.fmi.fi/geoserver/wms?"
-              id: "fmi"
-            - name: "MET Norway"
-              url: "https://halo-wms.met.no/halo/default.map?"
-              id: "met-no"
-            - name: "Harmonie HA43 DINI"
-              url: "https://geoservices.knmi.nl/adagucserver?dataset=uwcw_ha43_dini_5p5km&"
-              id: "knmi_uwcw_ha43_dini_5p5km"
-            - name: "Harmonie HA43 NL"
-              url: "https://geoservices.knmi.nl/adagucserver?dataset=uwcw_ha43_nl_2km&"
-              id: "knmi_uwcw_ha43_nl_2km"
-            - name: "KNMI Observations"
-              url: "https://geoservices.knmi.nl/adagucserver?dataset=OBS"
-              id: "knmi-obs"
-            - name: "DWD"
-              url: "https://maps.dwd.de/geoserver/ows?"
-              id: "dwd"
-            - name: "EUMETSAT"
-              url: "https://view.eumetsat.int/geoserver/wms?"
-              id: "eumetsat"
-            - name: "ECMWF"
-              url: "https://eccharts.ecmwf.int/wms/?token=public"
-              id: "ecmwf"
-            - name: "NOAA Tropical Cyclones"
-              url: "https://mapservices.weather.noaa.gov/tropical/services/tropical/NHC_tropical_weather/MapServer/WMSServer?"
-              id: "noaatropicalcyclones"
-          layers:
-            - id: "base-layer-1"
-              name: "WorldMap_Light_Grey_Canvas"
-              type: "twms"
-              layerType: "baseLayer"
-            - id: "base-layer-2"
-              name: "OpenStreetMap_NL"
-              type: "twms"
-              layerType: "baseLayer"
-              enabled: true
-            - id: "base-layer-3"
-              service: "https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/"
-              name: "arcGisCanvas"
-              type: "twms"
-              layerType: "baseLayer"
-              enabled: true
-            - service: "https://geoservices.knmi.nl/wms?DATASET=baselayers"
-              name: "countryborders"
-              id: "countryborders"
-              format: "image/png"
-              enabled: true
-              layerType: "overLayer"
+          # Additional sections can be specified here including
+          # timeSeriesServices:
+          # soundingsCollections:
+          # services:
+          # baseServices:
+          # layers:
 
 ingress:
   name: nginx-ingress-controller
