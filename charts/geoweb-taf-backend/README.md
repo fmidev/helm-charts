@@ -119,7 +119,6 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.env.AVIATION_TAF_PORT_HTTP` | Port used for container | `8000` |
 | `taf.env.GEOWEB_KNMI_AVI_MESSAGESERVICES_HOST` | - | `"localhost:8081"` |
 | `taf.env.AVIATION_TAF_PUBLISH_HOST` | - | `"localhost:8090"` |
-| `taf.env.TAF_CONFIG` | Location of configuration file that is used | `config.ini` |
 | `taf.env.APPLICATION_ROOT_PATH` | Application root path for FastAPI. Generally same as `taf.path` without the wildcard. | `/taf-backend`
 | `taf.useCustomConfigurationFiles` | Use custom configurations | `false` |
 | `taf.customConfigurationLocation` | Where custom configurations are located *(local\|s3)* | `local` |
