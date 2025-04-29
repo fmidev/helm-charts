@@ -30,8 +30,6 @@ taf:
 * Using custom configuration files stored locally
 ```yaml
 taf:
-  env:
-    TAF_CONFIG: custom/config.ini
   url: geoweb.example.com
   useCustomConfigurationFiles: true
   customConfigurationFolderPath: /example/path/
@@ -41,8 +39,6 @@ taf:
 ```yaml
 taf:
   url: geoweb.example.com
-  env:
-    TAF_CONFIG: custom/config.ini
   useCustomConfigurationFiles: true
   customConfigurationLocation: s3
   s3bucketName: example-bucket
