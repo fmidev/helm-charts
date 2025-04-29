@@ -46,7 +46,6 @@ taf:
     GEOWEB_KNMI_AVI_MESSAGESERVICES_HOST: "localhost:8081"
     AVIATION_TAF_PORT_HTTP: 8000
     AVIATION_TAF_PUBLISH_HOST: "localhost:8090"
-    TAF_CONFIG: config.ini
     APPLICATION_ROOT_PATH: "/taf-backend"
   messageconverter:
     name: taf-messageconverter
@@ -117,7 +116,7 @@ taf:
   nginx:
     name: taf-nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend
-    version: "v0.4.2"
+    version: "v0.5.0"
     ENABLE_SSL: "FALSE"
     NGINX_PORT_HTTP: 80
     NGINX_PORT_HTTPS: 443
