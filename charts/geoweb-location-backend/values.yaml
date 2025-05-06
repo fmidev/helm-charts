@@ -22,7 +22,7 @@ location:
       port: 8080
     periodSeconds: 10
     timeoutSeconds: 10
-    failureThreshold: 24 # Allow 4 minutes for startup
+    failureThreshold: 24  # Allow 4 minutes for startup
   livenessProbe:
     httpGet:
       path: /
