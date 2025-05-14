@@ -14,7 +14,7 @@ pvc:
   claimName: ""
 
 secrets:
-  name: smartmet-server-sealedsecrets
+  name: ext-seaheat-smartmet-server-sealedsecrets
 
 serviceAccount:
   enabled: true
