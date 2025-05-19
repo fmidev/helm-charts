@@ -2,6 +2,12 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+global:
+  # typically these are set by the parent chart
+  environment: dev
+  prodType: preop
+  cloud: fmi
+
 image:
   repository:
     address: quay.io/fmi/snwc_bc
