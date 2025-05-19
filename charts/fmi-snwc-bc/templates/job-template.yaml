@@ -39,7 +39,8 @@ objects:
                              --ws_data ${INPUT_DIR}/FF-MS.grib2 \
                              --rh_data ${INPUT_DIR}/RH-0TO1.grib2 \
                              --output ${OUTPUT_FILE} \
-                             --parameter ${PARAM}
+                             --parameter ${PARAM} \
+                             --grib_options ${GRIB_OPTIONS}
 
           env:
           {{ if .Values.s3.credentials.name }}
@@ -82,6 +83,10 @@ parameters:
 - description: Parameter name
   name: PARAM
   required: true
+- description: Grib options for the output grib file
+  name: GRIB_OPTIONS
+  required: false
+  value: "None"
 - description: s3 endpoint
   name: S3_HOSTNAME
   required: false
