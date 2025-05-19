@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.location.name }}
+  labels:
+    app: {{ .Values.location.name }}
+spec:
+  replicas: {{ .Values.location.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.location.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.location.name }}
+      annotations:
+        eks.amazonaws.com/compute-type: ec2
+      {{- if .Values.location.commitHash }}
+        commitHash: {{ .Values.location.commitHash }}
+      {{- end }}
+    spec:
+      containers:
+      - name: {{ .Values.location.name }}
+        image: {{ .Values.location.registry }}:{{ default .Chart.AppVersion .Values.versions.location }}
+      {{- if .Values.location.imagePullPolicy }}
+        imagePullPolicy: {{ .Values.location.imagePullPolicy }}
+      {{- end }}
+        ports:
+        - containerPort: {{ .Values.location.containerPort}}
+      {{- if .Values.location.resources }}
+        resources: {{ toYaml .Values.location.resources | nindent 10 }}
+      {{- end }}
+      {{- if .Values.location.startupProbe }}
+        startupProbe: {{ toYaml .Values.location.startupProbe | nindent 10 }}
+      {{- end }}
+      {{- if .Values.location.livenessProbe }}
+        livenessProbe: {{ toYaml .Values.location.livenessProbe | nindent 10 }}
+      {{- end }}
+      {{- if .Values.location.readinessProbe }}
+        readinessProbe: {{ toYaml .Values.location.readinessProbe | nindent 10 }}
+      {{- end }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Values.location.name }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - {{ .Values.location.name }}
+              topologyKey: topology.kubernetes.io/zone

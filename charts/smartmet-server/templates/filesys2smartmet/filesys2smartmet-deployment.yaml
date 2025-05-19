@@ -22,9 +22,11 @@ spec:
       securityContext:
         runAsNonRoot: true
         runAsGroup: 0
-      {{- if .Values.image.pullSecret }}
+      {{- if .Values.image.pullSecrets }}
       imagePullSecrets:
-        - name: {{ .Values.image.pullSecret }}
+      {{- range .Values.image.pullSecrets }}
+        - name: {{ . }}
+      {{- end }}
       {{- end }}
       initContainers:
       {{- if .Values.config.redis.enabled }}

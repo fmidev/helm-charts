@@ -26,7 +26,7 @@ opmet:
       port: 8000
     periodSeconds: 10
     timeoutSeconds: 10
-    failureThreshold: 24 # Allow 4 minutes for startup
+    failureThreshold: 24  # Allow 4 minutes for startup
   livenessProbe:
     httpGet:
       path: /
@@ -64,7 +64,7 @@ opmet:
         port: 8080
       periodSeconds: 10
       timeoutSeconds: 10
-      failureThreshold: 24 # Allow 4 minutes for startup
+      failureThreshold: 24  # Allow 4 minutes for startup
     livenessProbe:
       httpGet:
         path: /healthcheck
@@ -98,7 +98,7 @@ opmet:
         port: 8090
       periodSeconds: 10
       timeoutSeconds: 10
-      failureThreshold: 12 # Allow 2 minutes for startup
+      failureThreshold: 12  # Allow 2 minutes for startup
     livenessProbe:
       httpGet:
         path: /openapi.json
@@ -116,7 +116,7 @@ opmet:
   nginx:
     name: opmet-nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend
-    version: "v0.2.0"
+    version: "v0.4.2"
     ENABLE_SSL: "FALSE"
     NGINX_PORT_HTTP: 80
     NGINX_PORT_HTTPS: 443
@@ -134,7 +134,7 @@ opmet:
         port: 80
       periodSeconds: 5
       timeoutSeconds: 5
-      failureThreshold: 12 # Allow a minute for startup
+      failureThreshold: 12  # Allow a minute for startup
     livenessProbe:
       httpGet:
         path: /health_check

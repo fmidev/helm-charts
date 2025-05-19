@@ -99,7 +99,6 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.svcPort` | Port used for service | `80` |
 | `warnings.replicas` | Amount of replicas deployed | `1` |
 | `warnings.minPodsAvailable` | Minimum available pods in pod disruption budget. Value `0` omits the pdb. | `0` | 
-| `warnings.postStartCommand` | Command to run after warnings-backend is started | `bin/admin.sh` |
 | `warnings.db_secret` | Secret containing base64 encoded Postgresql database connection string | |
 | `warnings.db_secretName` | Name of db secret | `warnings-db` |
 | `warnings.db_secretType` | Type to db secret | `secretsmanager` |
@@ -108,8 +107,9 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.iamRoleARN` | IAM Role with permissions to access db_secret secret | |
 | `warnings.secretServiceAccount` | Service Account created for handling secrets | `warnings-service-account` |
 | `warnings.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
-| `warnings.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
-| `warnings.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
+| `warnings.startupProbe` | Configure main container startupProbe | see defaults from `values.yaml` |
+| `warnings.livenessProbe` | Configure main container livenessProbe | see defaults from `values.yaml` |
+| `warnings.readinessProbe` | Configure main container readinessProbe | see defaults from `values.yaml` |
 | `warnings.env.WARNINGS_PORT_HTTP` | Port used for container | `8080` |
 | `warnings.env.APPLICATION_ROOT_PATH` | Application root path for FastAPI. Generally same as `warnings.path` without the wildcard. | `/warnings-backend` |
 | `secretProvider` | Option to use secret provider instead of passing base64 encoded database connection string as warnings.db_secret *(aws\|azure\|gcp\|vault)* | |
@@ -132,8 +132,9 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.nginx.NGINX_PORT_HTTP` | Port used for Nginx reverse proxy | `80` |
 | `warnings.nginx.NGINX_PORT_HTTPS` | Port used for Nginx reverse proxy when SSL is enabled | `443` |
 | `warnings.nginx.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
-| `warnings.nginx.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
-| `warnings.nginx.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
+| `warnings.nginx.startupProbe` | Configure nginx container startupProbe | see defaults from `values.yaml` |
+| `warnings.nginx.livenessProbe` | Configure nginx container livenessProbe | see defaults from `values.yaml` |
+| `warnings.nginx.readinessProbe` | Configure nginx container readinessProbe | see defaults from `values.yaml` |
 | `warnings.db.enableDefaultDb` | Enable default postgres database | `true` |
 | `warnings.db.name` | Default postgres database container name | `postgres` |
 | `warnings.db.image` | Default postgres database image | `postgres` |
@@ -158,6 +159,10 @@ The following table lists the configurable parameters of the Warnings backend ch
 
 | Chart version | warnings version |
 |---------------|------------------|
+| 1.2.3         | 1.10.0           |
+| 1.2.2         | 1.8.1            |
+| 1.2.1         | 1.7.1            |
+| 1.2.0         | 1.7.1            |
 | 1.1.0         | 1.5.3            |
 | 1.0.1         | 1.5.3            |
 | 1.0.0         | 1.5.3            |

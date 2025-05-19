@@ -45,7 +45,7 @@ The following table lists the configurable parameters of the CAP backend chart a
 | - | - | - |
 | `versions.cap` | Possibility to override application version | |
 | `cap.name` | Name of backend | `cap` |
-| `cap.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/cap-backend` |
+| `cap.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/cap-backend/cap-backend` |
 | `cap.commitHash` | Adds commitHash annotation to the deployment | |
 | `cap.imagePullPolicy` | Adds option to modify imagePullPolicy | |
 | `cap.url` | Url which the application can be accessed | |
@@ -68,6 +68,10 @@ The following table lists the configurable parameters of the CAP backend chart a
 
 | Chart version | cap version |
 |---------------|-------------|
+| 1.7.4         | 0.10.5      |
+| 1.7.3         | 0.10.2      |
+| 1.7.2         | 0.10.0      |
+| 1.7.1         | 0.10.0      |
 | 1.7.0         | 0.8.4       |
 | 1.6.0         | 0.8.4       |
 | 1.5.2         | 0.8.4       |

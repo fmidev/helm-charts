@@ -73,6 +73,50 @@ frontend:
   awsDefaultRegion: <AWS_DEFAULT_REGION>
 ```
 
+* Generate custom initialPresets.json from YAML values
+  * The configuration will be converted to JSON and mounted into the containers filesystem
+  * The structure of the JSON file should conform to the InitialAppPresetProps type, see https://opengeoweb.gitlab.io/opengeoweb/typescript-docs/core/interfaces/InitialAppPresetProps.html
+  * See also the default initialPresets.json file https://gitlab.com/opengeoweb/opengeoweb/-/blob/master/apps/geoweb/src/assets/initialPresets.json?ref_type=heads
+```yaml
+frontend:
+  url: geoweb.example.com
+  env:
+    GW_INITIAL_PRESETS_FILENAME: custom/initialPresets.json  # Configure app to use the generated custom configuration JSON
+  customConfiguration:
+    enabled: true  # Enable initialPresets JSON generation from YAML values
+    files:
+      "initialPresets.json":  # File will be available at /usr/share/nginx/html/assets/custom/
+        # All the settings configured below will be included in the generated initialPresets JSON file
+        preset:
+          presetType: "mapPreset"
+          presetId: "mapPreset-1"
+          presetName: "Layer manager preset"
+          defaultMapSettings:
+            proj:
+              bbox:
+                left: 58703.6377
+                bottom: 6408480.4514
+                right: 3967387.5161
+                top: 11520588.9031
+              srs: "EPSG:3857"
+            layers:
+              - name: "WorldMap_Light_Grey_Canvas"
+                type: "twms"
+                enabled: true
+                layerType: "baseLayer"
+              - service: "https://geoservices.knmi.nl/wms?DATASET=baselayers"
+                name: "countryborders"
+                format: "image/png"
+                enabled: true
+                layerType: "overLayer"
+          # Additional sections can be specified here including
+          # timeSeriesServices:
+          # soundingsCollections:
+          # services:
+          # baseServices:
+          # layers:
+```
+
 # Testing the Chart
 Execute the following for testing the chart:
 
@@ -126,7 +170,8 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.iamRoleARN` | IAM Role with permissions to access secrets | |
 | `frontend.secretServiceAccount` | Service Account created for handling secrets | `geoweb-service-account` |
 | `frontend.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
-| `frontend.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
+| `frontend.startupProbe` | Configure startupProbe | see defaults from `values.yaml` |
+| `frontend.livenessProbe` | Configure livenessProbe | see defaults from `values.yaml` |
 | `frontend.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
 | `secretProvider` | Option to use secret provider instead of passing base64 encoded Client ID as opmet.db_secret *(aws\|azure\|gcp\|vault)* | |
 | `secretProviderParameters` | Option to add custom parameters to the secretProvider, for example with aws you can specify region | |
@@ -134,6 +179,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.env.GW_DRAWINGS_BASE_URL` | Url which the application uses to connect to Drawings backend | |
 | `frontend.env.GW_TAF_BASE_URL` | Url which the application uses to connect to TAF backend | |
 | `frontend.env.GW_SW_BASE_URL` | Url which the application uses to connect to Space Weather backend | |
+| `frontend.env.GW_LOCATION_BASE_URL` | Url which the application uses to connect to location backend | |
 | `frontend.env.GW_APP_URL` | Url which the application can be accessed | |
 | `frontend.env.GW_DEFAULT_THEME` | Default theme: lightMode or darkMode | |
 | `frontend.env.GW_FEATURE_APP_TITLE` | Application title | |
@@ -164,6 +210,8 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.env.GW_INITIAL_WORKSPACE_PRESET` | Name of the workspace preset that is opened initially | | 
 | `frontend.useCustomConfigurationFiles` | Use custom configurations | `false` |
 | `frontend.customConfigurationLocation` | Where custom configurations are located *(local\|s3)* | `local` |
+| `frontend.customConfiguration.files` | Map of filename to JSON content structured as YAML | `{}` |
+| `frontend.customConfiguration.files."initialPresets.json"` | Configuration for map presets, services, layers, etc. | See example in `values.yaml` |
 | `frontend.volumeAccessMode` | Permissions of the application for the custom configurations PersistentVolume used | `ReadOnlyMany` |
 | `frontend.volumeSize` | Size of the custom configurations PersistentVolume | `100Mi` |
 | `frontend.customConfigurationFolderPath` | Path to the folder which contains custom configurations | |
@@ -182,6 +230,15 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 
 | Chart version | frontend version |
 |---------------|------------------|
+| 3.19.1        | 12.4.2           |
+| 3.19.0        | 12.3.0           |
+| 3.18.1        | 12.3.0           |
+| 3.18.0        | 12.1.2           |
+| 3.17.4        | 12.1.2           |
+| 3.17.3        | 11.0.0           |
+| 3.17.2        | 10.0.0           |
+| 3.17.1        | 9.37.0           |
+| 3.17.0        | 9.34.0           |
 | 3.16.2        | 9.34.0           |
 | 3.16.1        | 9.31.0           |
 | 3.16.0        | 9.30.0           |

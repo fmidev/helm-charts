@@ -15,7 +15,13 @@ spec:
     protocol: TCP
     targetPort: {{ $nodeport.targetPodPort }}
   selector:
+    {{- if $nodeport.selector }}
+    app: {{ $nodeport.selector.app }}
+    component: {{ $nodeport.selector.component }}
+    release: {{ $nodeport.selector.release }}
+    {{- else }}
     app.kubernetes.io/instance: {{ $.Release.Namespace }}
+    {{- end }}
   type: NodePort
 {{- end }}
 {{- end }}

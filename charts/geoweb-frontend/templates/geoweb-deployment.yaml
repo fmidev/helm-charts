@@ -49,6 +49,9 @@ spec:
       {{- if .Values.frontend.resources }}
         resources: {{ toYaml .Values.frontend.resources | nindent 10 }}
       {{- end }}
+      {{- if .Values.frontend.startupProbe }}
+        startupProbe: {{ toYaml .Values.frontend.startupProbe | nindent 10 }}
+      {{- end }}
       {{- if .Values.frontend.livenessProbe }}
         livenessProbe: {{ toYaml .Values.frontend.livenessProbe | nindent 10 }}
       {{- end }}
@@ -76,6 +79,10 @@ spec:
         - mountPath: {{ .Values.frontend.customConfigurationMountPath }}
           name: {{ .Values.frontend.name }}-volume
       {{- end }}
+      {{- if .Values.frontend.customConfiguration.enabled }}
+        - name: generated-configs
+          mountPath: {{ .Values.frontend.customConfigurationMountPath }}
+      {{- end }}
       volumes:
     {{- if .Values.frontend.useCustomConfigurationFiles }}
       - name: {{ .Values.frontend.name }}-volume
@@ -86,6 +93,16 @@ spec:
           claimName: {{ .Values.frontend.name }}-claim
       {{- end }}
     {{- end }}
+    {{- if .Values.frontend.customConfiguration.enabled }}
+      - name: generated-configs
+        configMap:
+          name: {{ .Values.frontend.name }}
+          items:
+          {{- range $filename, $content := .Values.frontend.customConfiguration.files }}
+          - key: {{ $filename }}
+            path: {{ $filename }}
+          {{- end }}
+    {{- end }}    
       - name: secrets-store-inline
       {{- if .Values.secretProvider }}
         csi:

@@ -1,10 +1,10 @@
 versions:
-  cap:
+  location:
 
-cap:
-  name: cap
-  registry: registry.gitlab.com/opengeoweb/backend-services/cap-backend/cap-backend
-  path: /cap/(.*)
+location:
+  name: location
+  registry: registry.gitlab.com/opengeoweb/backend-services/location-backend/location-backend
+  path: /location-backend/(.*)
   svcPort: 80
   containerPort: 8080
   replicas: 1
@@ -38,7 +38,12 @@ cap:
     timeoutSeconds: 10
     failureThreshold: 1
   env:
-    APPLICATION_ROOT_PATH: "/cap"
+    APPLICATION_DOC_ROOT: "/api"
+    APPLICATION_ROOT_PATH: "/location-backend"
+    LOCALDATA: "True"
+    MAX_RESULTS: 100
+    DEFAULT_TIMEOUT: 15
+    LOG_LEVEL: "INFO"
 
 ingress:
   name: nginx-ingress-controller
