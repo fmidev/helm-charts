@@ -37,6 +37,23 @@ entries:
     version: 0.0.2
   fmi-routes:
   - apiVersion: v2
+    created: "2025-05-20T09:27:52.919127433Z"
+    description: Helm chart for defining multiple routes
+    digest: ce21ed4006f75b19b48739bfbd5fcd478ab16bef8f54c74dbc759d029a3df669
+    home: https://github.com/fmidev/helm-charts
+    keywords:
+    - fmi
+    - route
+    maintainers:
+    - email: admin@weatherproof.fi
+      name: fmi-build-bot
+      url: https://github.com/fmi-build-bot
+    name: fmi-routes
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/fmi-routes-0.1.1/fmi-routes-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
     created: "2024-10-08T12:45:26.330467213Z"
     description: Helm chart for defining multiple routes
     digest: 68b84977a3698cf4f3acaf7153bdb75e68e9999bfc81b054652c9f7c1071889d
@@ -3756,4 +3773,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2025-05-19T09:03:42.291625027Z"
+generated: "2025-05-20T09:27:52.919713693Z"
