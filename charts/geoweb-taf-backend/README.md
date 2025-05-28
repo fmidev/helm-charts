@@ -155,6 +155,7 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.nginx.startupProbe` | Configure nginx container startupProbe | see defaults from `values.yaml` |
 | `taf.nginx.livenessProbe` | Configure nginx container livenessProbe | see defaults from `values.yaml` |
 | `taf.nginx.readinessProbe` | Configure nginx container readinessProbe | see defaults from `values.yaml` |
+| `taf.nginx.ENV_VAR_STRICT_MODE` | Enable check if all necessary variables for authentication and authorization are set | `true` |
 | `taf.publisher.name` | Name of publisher container  | `taf-publisher` |
 | `taf.publisher.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/aviation-taf-backend/aviation-taf-backend-publisher-local` |
 | `taf.publisher.port` | Port used for publisher | `8090`|

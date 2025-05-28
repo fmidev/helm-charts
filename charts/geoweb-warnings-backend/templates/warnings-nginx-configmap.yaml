@@ -45,3 +45,6 @@ data:
 {{- if .Values.warnings.nginx.NGINX_PORT_HTTPS }}
   NGINX_PORT_HTTPS: {{ .Values.warnings.nginx.NGINX_PORT_HTTPS | quote }}
 {{- end }}
+{{- if .Values.warnings.nginx.ENV_VAR_STRICT_MODE }}
+  ENV_VAR_STRICT_MODE: {{ .Values.warnings.nginx.ENV_VAR_STRICT_MODE | quote }}
+{{- end }}

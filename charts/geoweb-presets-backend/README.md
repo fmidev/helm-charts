@@ -160,6 +160,7 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.nginx.readinessProbe` | Configure nginx container readinessProbe | see defaults from `values.yaml` |
 | `presets.nginx.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `presets.nginx.startupProbe` | Configure nginx container startupProbe | see defaults from `values.yaml` |
+| `presets.nginx.ENV_VAR_STRICT_MODE` | Enable check if all necessary variables for authentication and authorization are set | `true` |
 | `presets.db.enableDefaultDb` | Enable default postgres database | `true` |
 | `presets.db.name` | Default postgres database container name | `postgres` |
 | `presets.db.image` | Default postgres database image | `postgres` |

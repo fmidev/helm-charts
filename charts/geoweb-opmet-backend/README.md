@@ -184,6 +184,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.nginx.resources`                       | Configure resource limits & requests | see defaults from `values.yaml`|
 | `opmet.nginx.startupProbe  `                  | Configure nginx container startupProbe | see defaults from `values.yaml`                                                              |
 | `opmet.nginx.version`                         | Possibility to override Nginx version | see default from `values.yaml` |
+| `opmet.nginx.ENV_VAR_STRICT_MODE`             | Enable check if all necessary variables for authentication and authorization are set | `true` |
 | `opmet.path`                                  | Path suffix added to url | `/opmet/(.*)`                                                                                |
 | `opmet.publisher.DESTINATION`                 | Folder inside publisher container where TACs are stored (used with local-publisher) | `/app/output`                                                                                |
 | `opmet.publisher.livenessProbe`               | Configure publisher livenessProbe | see defaults from `values.yaml`                                                              |

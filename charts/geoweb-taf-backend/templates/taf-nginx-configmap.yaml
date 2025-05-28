@@ -49,3 +49,6 @@ data:
 {{- if .Values.taf.nginx.NGINX_PORT_HTTPS }}
   NGINX_PORT_HTTPS: {{ .Values.taf.nginx.NGINX_PORT_HTTPS | quote }}
 {{- end }}
+{{- if .Values.taf.nginx.ENV_VAR_STRICT_MODE }}
+  ENV_VAR_STRICT_MODE: {{ .Values.taf.nginx.ENV_VAR_STRICT_MODE | quote }}
+{{- end }}

@@ -135,6 +135,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.nginx.startupProbe` | Configure nginx container startupProbe | see defaults from `values.yaml` |
 | `warnings.nginx.livenessProbe` | Configure nginx container livenessProbe | see defaults from `values.yaml` |
 | `warnings.nginx.readinessProbe` | Configure nginx container readinessProbe | see defaults from `values.yaml` |
+| `warnings.nginx.ENV_VAR_STRICT_MODE` | Enable check if all necessary variables for authentication and authorization are set | `true` |
 | `warnings.db.enableDefaultDb` | Enable default postgres database | `true` |
 | `warnings.db.name` | Default postgres database container name | `postgres` |
 | `warnings.db.image` | Default postgres database image | `postgres` |
