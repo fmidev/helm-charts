@@ -11,11 +11,11 @@ cap:
   minPodsAvailable: 0
   resources:
     requests:
-      memory: "384Mi"
+      memory: "512Mi"
       cpu: "50m"
     limits:
       memory: "1024Mi"
-      cpu: "1"
+      cpu: "100m"
   startupProbe:
     httpGet:
       path: /healthcheck?startup=true
