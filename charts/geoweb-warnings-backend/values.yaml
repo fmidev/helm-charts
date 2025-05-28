@@ -15,11 +15,11 @@ warnings:
   secretServiceAccount: warnings-service-account
   resources:
     requests:
-      memory: "250Mi"
-      cpu: "50m"
+      memory: "386Mi"
+      cpu: "25m"
     limits:
       memory: "1024Mi"
-      cpu: "1"
+      cpu: "100m"
   startupProbe:
     httpGet:
       path: /healthcheck?startup=true
@@ -54,10 +54,10 @@ warnings:
     NGINX_PORT_HTTPS: 443
     resources:
       requests:
-        memory: "10Mi"
-        cpu: "10m"
+        memory: "32Mi"
+        cpu: "25m"
       limits:
-        memory: "100Mi"
+        memory: "128Mi"
         cpu: "100m"
     startupProbe:
       httpGet:

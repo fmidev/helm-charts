@@ -19,10 +19,10 @@ presets:
   resources:
     requests:
       memory: "384Mi"
-      cpu: "50m"
+      cpu: "25m"
     limits:
       memory: "2048Mi"
-      cpu: "1"
+      cpu: "100m"
   startupProbe:
     httpGet:
       path: /healthcheck?startup=true
@@ -56,10 +56,10 @@ presets:
     NGINX_PORT_HTTPS: 443
     resources:
       requests:
-        memory: "150Mi"
-        cpu: "10m"
+        memory: "32Mi"
+        cpu: "25m"
       limits:
-        memory: "300Mi"
+        memory: "128Mi"
         cpu: "100m"
     startupProbe:
       httpGet:
