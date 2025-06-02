@@ -16,8 +16,8 @@ taf:
   secretServiceAccount: taf-service-account
   resources:
     requests:
-      memory: "250Mi"
-      cpu: "50m"
+      memory: "512Mi"
+      cpu: "15m"
     limits:
       memory: "1024Mi"
       cpu: "1"
@@ -54,8 +54,8 @@ taf:
     port: 8081
     resources:
       requests:
-        memory: "250Mi"
-        cpu: "50m"
+        memory: "512Mi"
+        cpu: "10m"
       limits:
         memory: "1024Mi"
         cpu: "1"
@@ -87,10 +87,10 @@ taf:
     PUBLISH_DIR: /app/output
     resources:
       requests:
-        memory: "50Mi"
+        memory: "64Mi"
         cpu: "50m"
       limits:
-        memory: "512Mi"
+        memory: "128Mi"
         cpu: "1"
     startupProbe:
       httpGet:
@@ -116,18 +116,19 @@ taf:
   nginx:
     name: taf-nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend
-    version: "v0.4.2"
+    version: "v0.6.0"
     ENABLE_SSL: "FALSE"
     NGINX_PORT_HTTP: 80
     NGINX_PORT_HTTPS: 443
     BACKEND_HOST: localhost:8000
+    ENV_VAR_STRICT_MODE: "FALSE"
     resources:
       requests:
-        memory: "10Mi"
-        cpu: "10m"
+        memory: "16Mi"
+        cpu: "5m"
       limits:
-        memory: "100Mi"
-        cpu: "100m"
+        memory: "32Mi"
+        cpu: "1"
     startupProbe:
       httpGet:
         path: /health_check?startup=true
@@ -155,10 +156,10 @@ taf:
     TAFPLACEHOLDER_KEEPRUNNING: true
     resources:
       requests:
-        memory: "50Mi"
-        cpu: "50m"
+        memory: "128Mi"
+        cpu: "25m"
       limits:
-        memory: "512Mi"
+        memory: "364Mi"
         cpu: "1"
     startupProbe:
       exec:
