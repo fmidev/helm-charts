@@ -15,7 +15,7 @@ opmet:
   secretServiceAccount: opmet-service-account
   resources:
     requests:
-      memory: "128Mi"
+      memory: "256Mi"
       cpu: "15m"
     limits:
       memory: "512Mi"
@@ -54,7 +54,7 @@ opmet:
     resources:
       requests:
         memory: "512Mi"
-        cpu: "15m"
+        cpu: "10m"
       limits:
         memory: "1024Mi"
         cpu: "1"
@@ -88,7 +88,7 @@ opmet:
     resources:
       requests:
         memory: "64Mi"
-        cpu: "100m"
+        cpu: "50m"
       limits:
         memory: "128Mi"
         cpu: "1"
@@ -127,7 +127,7 @@ opmet:
         memory: "16Mi"
         cpu: "5m"
       limits:
-        memory: "64Mi"
+        memory: "32Mi"
         cpu: "1"
     startupProbe:
       httpGet:
