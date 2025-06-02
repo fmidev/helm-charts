@@ -53,10 +53,10 @@ opmet:
     port: 8080
     resources:
       requests:
-        memory: "384Mi"
+        memory: "512Mi"
         cpu: "50m"
       limits:
-        memory: "1024Mi"
+        memory: "2048Mi"
         cpu: "100m"
     startupProbe:
       httpGet:
