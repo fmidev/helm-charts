@@ -19,7 +19,7 @@ presets:
   resources:
     requests:
       memory: "384Mi"
-      cpu: "50m"
+      cpu: "15m"
     limits:
       memory: "2048Mi"
       cpu: "1"
@@ -49,18 +49,19 @@ presets:
   nginx:
     name: nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend
-    version: "v0.4.2"
+    version: "v0.6.0"
     ENABLE_SSL: "FALSE"
     BACKEND_HOST: 0.0.0.0:8080
     NGINX_PORT_HTTP: 80
     NGINX_PORT_HTTPS: 443
+    ENV_VAR_STRICT_MODE: "FALSE"
     resources:
       requests:
-        memory: "150Mi"
-        cpu: "10m"
+        memory: "16Mi"
+        cpu: "5m"
       limits:
-        memory: "300Mi"
-        cpu: "100m"
+        memory: "32Mi"
+        cpu: "1"
     startupProbe:
       httpGet:
         path: /health_check?startup=true
