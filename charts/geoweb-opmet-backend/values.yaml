@@ -15,11 +15,11 @@ opmet:
   secretServiceAccount: opmet-service-account
   resources:
     requests:
-      memory: "256Mi"
-      cpu: "50m"
+      memory: "128Mi"
+      cpu: "15m"
     limits:
       memory: "512Mi"
-      cpu: "100m"
+      cpu: "1"
   startupProbe:
     httpGet:
       path: /healthcheck?startup=true
@@ -53,11 +53,11 @@ opmet:
     port: 8080
     resources:
       requests:
-        memory: "1024Mi"
-        cpu: "50m"
+        memory: "512Mi"
+        cpu: "15m"
       limits:
-        memory: "2048Mi"
-        cpu: "100m"
+        memory: "1024Mi"
+        cpu: "1"
     startupProbe:
       httpGet:
         path: /healthcheck?startup=true
@@ -88,10 +88,10 @@ opmet:
     resources:
       requests:
         memory: "64Mi"
-        cpu: "50m"
+        cpu: "100m"
       limits:
         memory: "128Mi"
-        cpu: "100m"
+        cpu: "1"
     startupProbe:
       httpGet:
         path: /healthcheck?startup=true
@@ -124,11 +124,11 @@ opmet:
     BACKEND_HOST: 0.0.0.0:8000
     resources:
       requests:
-        memory: "32Mi"
-        cpu: "25m"
+        memory: "16Mi"
+        cpu: "5m"
       limits:
-        memory: "128Mi"
-        cpu: "100m"
+        memory: "64Mi"
+        cpu: "1"
     startupProbe:
       httpGet:
         path: /health_check?startup=true
