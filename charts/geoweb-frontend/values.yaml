@@ -16,11 +16,11 @@ frontend:
   secretServiceAccount: geoweb-service-account
   resources:
     requests:
-      memory: "64Mi"
-      cpu: "25m"
-    limits:
       memory: "128Mi"
-      cpu: "50m"
+      cpu: "15m"
+    limits:
+      memory: "256Mi"
+      cpu: "1"
   startupProbe:
     httpGet:
       path: /assets/config.json?startup=true
