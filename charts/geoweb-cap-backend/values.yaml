@@ -11,7 +11,7 @@ cap:
   minPodsAvailable: 0
   resources:
     requests:
-      memory: "512Mi"
+      memory: "384Mi"
       cpu: "50m"
     limits:
       memory: "1024Mi"
