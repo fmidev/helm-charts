@@ -20,7 +20,6 @@ frontend:
       cpu: "15m"
     limits:
       memory: "256Mi"
-      cpu: "1"
   startupProbe:
     httpGet:
       path: /assets/config.json?startup=true
