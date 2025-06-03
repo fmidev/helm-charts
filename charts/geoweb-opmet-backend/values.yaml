@@ -19,7 +19,6 @@ opmet:
       cpu: "15m"
     limits:
       memory: "512Mi"
-      cpu: "1"
   startupProbe:
     httpGet:
       path: /healthcheck?startup=true
@@ -57,7 +56,6 @@ opmet:
         cpu: "10m"
       limits:
         memory: "1024Mi"
-        cpu: "1"
     startupProbe:
       httpGet:
         path: /healthcheck?startup=true
@@ -91,7 +89,6 @@ opmet:
         cpu: "50m"
       limits:
         memory: "128Mi"
-        cpu: "1"
     startupProbe:
       httpGet:
         path: /healthcheck?startup=true
@@ -128,7 +125,6 @@ opmet:
         cpu: "5m"
       limits:
         memory: "32Mi"
-        cpu: "1"
     startupProbe:
       httpGet:
         path: /health_check?startup=true
