@@ -19,7 +19,6 @@ warnings:
       cpu: "15m"
     limits:
       memory: "1024Mi"
-      cpu: "1"
   startupProbe:
     httpGet:
       path: /healthcheck?startup=true
@@ -59,7 +58,6 @@ warnings:
         cpu: "5m"
       limits:
         memory: "32Mi"
-        cpu: "1"
     startupProbe:
       httpGet:
         path: /health_check?startup=true
