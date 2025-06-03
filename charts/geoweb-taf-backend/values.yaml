@@ -20,7 +20,6 @@ taf:
       cpu: "15m"
     limits:
       memory: "1024Mi"
-      cpu: "1"
   startupProbe:
     httpGet:
       path: /healthcheck?startup=true
@@ -58,7 +57,6 @@ taf:
         cpu: "10m"
       limits:
         memory: "1024Mi"
-        cpu: "1"
     startupProbe:
       httpGet:
         path: /healthcheck?startup=true
@@ -91,7 +89,6 @@ taf:
         cpu: "50m"
       limits:
         memory: "128Mi"
-        cpu: "1"
     startupProbe:
       httpGet:
         path: /healthcheck?startup=true
@@ -128,7 +125,6 @@ taf:
         cpu: "5m"
       limits:
         memory: "32Mi"
-        cpu: "1"
     startupProbe:
       httpGet:
         path: /health_check?startup=true
@@ -160,7 +156,6 @@ taf:
         cpu: "25m"
       limits:
         memory: "256Mi"
-        cpu: "1"
     startupProbe:
       exec:
         command:
