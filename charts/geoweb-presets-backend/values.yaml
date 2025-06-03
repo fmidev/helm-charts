@@ -22,7 +22,6 @@ presets:
       cpu: "15m"
     limits:
       memory: "2048Mi"
-      cpu: "1"
   startupProbe:
     httpGet:
       path: /healthcheck?startup=true
@@ -61,7 +60,6 @@ presets:
         cpu: "5m"
       limits:
         memory: "32Mi"
-        cpu: "1"
     startupProbe:
       httpGet:
         path: /health_check?startup=true
