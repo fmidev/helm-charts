@@ -15,11 +15,10 @@ warnings:
   secretServiceAccount: warnings-service-account
   resources:
     requests:
-      memory: "250Mi"
-      cpu: "50m"
+      memory: "512Mi"
+      cpu: "15m"
     limits:
       memory: "1024Mi"
-      cpu: "1"
   startupProbe:
     httpGet:
       path: /healthcheck?startup=true
@@ -47,18 +46,18 @@ warnings:
   nginx:
     name: warnings-nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend
-    version: "v0.4.2"
+    version: "v0.6.0"
     ENABLE_SSL: "FALSE"
     BACKEND_HOST: 0.0.0.0:8080
     NGINX_PORT_HTTP: 80
     NGINX_PORT_HTTPS: 443
+    ENV_VAR_STRICT_MODE: "FALSE"
     resources:
       requests:
-        memory: "10Mi"
-        cpu: "10m"
+        memory: "16Mi"
+        cpu: "5m"
       limits:
-        memory: "100Mi"
-        cpu: "100m"
+        memory: "32Mi"
     startupProbe:
       httpGet:
         path: /health_check?startup=true
