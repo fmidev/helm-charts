@@ -51,3 +51,6 @@ data:
 {{- if .Values.presets.nginx.NGINX_PORT_HTTPS }}
   NGINX_PORT_HTTPS: {{ .Values.presets.nginx.NGINX_PORT_HTTPS | quote }}
 {{- end }}
+{{- if .Values.presets.nginx.ENV_VAR_STRICT_MODE }}
+  ENV_VAR_STRICT_MODE: {{ .Values.presets.nginx.ENV_VAR_STRICT_MODE | quote }}
+{{- end }}
