@@ -427,6 +427,18 @@ entries:
   geoweb-frontend:
   - apiVersion: v2
     appVersion: v12.6.0
+    created: "2025-06-04T05:15:34.993483945Z"
+    description: A Helm chart for geoweb application frontend in Kubernetes
+    digest: 0431622264d87716f74dabefb40542fb4d381eedb04a66a2d01f8948044bbeba
+    maintainers:
+    - name: Jusaa
+    name: geoweb-frontend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-frontend-3.20.0/geoweb-frontend-3.20.0.tgz
+    version: 3.20.0
+  - apiVersion: v2
+    appVersion: v12.6.0
     created: "2025-06-02T11:35:46.7541092Z"
     description: A Helm chart for geoweb application frontend in Kubernetes
     digest: 4fe82da45871ead5534aac10ee90607955a84dfe78402370baa7583179aa44c6
@@ -3869,4 +3881,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2025-06-04T05:14:02.425073731Z"
+generated: "2025-06-04T05:15:34.994042662Z"
