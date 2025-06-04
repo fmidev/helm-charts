@@ -45,3 +45,6 @@ data:
 {{- if .Values.opmet.nginx.NGINX_PORT_HTTPS }}
   NGINX_PORT_HTTPS: {{ .Values.opmet.nginx.NGINX_PORT_HTTPS | quote }}
 {{- end }}
+{{- if .Values.opmet.nginx.ENV_VAR_STRICT_MODE }}
+  ENV_VAR_STRICT_MODE: {{ .Values.opmet.nginx.ENV_VAR_STRICT_MODE | quote }}
+{{- end }}

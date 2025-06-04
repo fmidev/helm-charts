@@ -15,11 +15,10 @@ opmet:
   secretServiceAccount: opmet-service-account
   resources:
     requests:
-      memory: "150Mi"
-      cpu: "50m"
+      memory: "256Mi"
+      cpu: "15m"
     limits:
-      memory: "300Mi"
-      cpu: "1"
+      memory: "512Mi"
   startupProbe:
     httpGet:
       path: /healthcheck?startup=true
@@ -49,15 +48,14 @@ opmet:
   messageconverter:
     name: opmet-messageconverter
     registry: registry.gitlab.com/opengeoweb/avi-msgconverter/geoweb-knmi-avi-messageservices
-    version: "v0.11.0"
+    version: "v1.0.0"
     port: 8080
     resources:
       requests:
-        memory: "250Mi"
-        cpu: "50m"
+        memory: "512Mi"
+        cpu: "10m"
       limits:
-        memory: "500Mi"
-        cpu: "1"
+        memory: "1024Mi"
     startupProbe:
       httpGet:
         path: /healthcheck?startup=true
@@ -87,11 +85,10 @@ opmet:
     DESTINATION: /app/output
     resources:
       requests:
-        memory: "50Mi"
+        memory: "64Mi"
         cpu: "50m"
       limits:
-        memory: "100Mi"
-        cpu: "1"
+        memory: "128Mi"
     startupProbe:
       httpGet:
         path: /healthcheck?startup=true
@@ -116,18 +113,18 @@ opmet:
   nginx:
     name: opmet-nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend
-    version: "v0.4.2"
+    version: "v0.6.0"
+    ENV_VAR_STRICT_MODE: "FALSE"
     ENABLE_SSL: "FALSE"
     NGINX_PORT_HTTP: 80
     NGINX_PORT_HTTPS: 443
     BACKEND_HOST: 0.0.0.0:8000
     resources:
       requests:
-        memory: "10Mi"
-        cpu: "10m"
+        memory: "16Mi"
+        cpu: "5m"
       limits:
-        memory: "100Mi"
-        cpu: "100m"
+        memory: "32Mi"
     startupProbe:
       httpGet:
         path: /health_check?startup=true
