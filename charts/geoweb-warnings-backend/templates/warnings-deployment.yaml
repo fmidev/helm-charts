@@ -25,7 +25,7 @@ spec:
       initContainers:
     {{- if and .Values.warnings.useCustomConfigurationFiles (eq .Values.warnings.customConfigurationLocation "s3")}}
       - name: init
-        image: amazon/aws-cli
+        image: public.ecr.aws/aws-cli/aws-cli:2.15.17
         command: ["/bin/sh"]
         args:
           - -c
