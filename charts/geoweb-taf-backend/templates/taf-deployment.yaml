@@ -25,7 +25,7 @@ spec:
       initContainers:
     {{- if and .Values.taf.useCustomConfigurationFiles (eq .Values.taf.customConfigurationLocation "s3")}}
       - name: init
-        image: public.ecr.aws/aws-cli/aws-cli:2.15.17
+        image: public.ecr.aws/aws-cli/aws-cli:2.27.29
         command: ["/bin/sh"]
         args:
           - -c
