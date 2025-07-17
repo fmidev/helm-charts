@@ -1,0 +1,20 @@
+image:
+  pullSecret: ""
+  pullPolicy: IfNotPresent
+  repository: quay.io/fmi/obsapi
+  tag: latest
+resources:
+  requests:
+    memory: 200Mi
+    cpu: 0.1
+  limits:
+    memory: 1Gi
+    cpu: 0.5
+configMaps:
+  - name: tnsnames-configmap
+    filepath: "/app/app/config"
+    filename: "tnsnames.ora"
+  - name: logging-configmap
+    filepath: "/app/app/config"
+    filename: "logging.conf"
+environment_secrets:
