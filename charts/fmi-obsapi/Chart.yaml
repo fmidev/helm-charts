@@ -9,6 +9,6 @@ maintainers:
 - email: lassi.virtanen@fmi.fi
   name: fmi-build-bot
   url: https://github.com/fmi-build-bot
-name:  obsapi
+name: obsapi
 type: application
 version: 0.0.1
