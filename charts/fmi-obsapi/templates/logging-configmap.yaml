@@ -3,8 +3,8 @@ metadata:
   name: logging-configmap
 data:
   config: |
-    {{- with .Values.logging }}
-    {{- $log_level := default "INFO" .level | upper }}
+    {{- $log := .Values.logging | default (dict "level" "INFO") -}}
+    {{- $log_level := (default "INFO" $log.level) | upper }} 
     [loggers]
     keys=root,traffic-logger,router-logger,json-logger
 
@@ -56,5 +56,4 @@ data:
     [formatter_jsonFormatter]
     format=%(message)s %(levelname)s %(name)s %(asctime)s
     class=pythonjsonlogger.jsonlogger.JsonFormatter
-    {{- end }}
 kind: ConfigMap
