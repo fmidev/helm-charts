@@ -17,15 +17,12 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: true
-        runAsGroup: 0
       {{- if .Values.image.pullSecret }}
       imagePullSecrets:
         - name: {{ .Values.image.pullSecret }}
       {{- end }}
       containers:
         - name: {{ .Release.Name }}
-          securityContext:
-            runAsGroup: 0
           env:
             {{- range .Values.environment }}
             - name: {{ .name }}
