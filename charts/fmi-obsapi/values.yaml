@@ -18,3 +18,5 @@ configMaps:
     filepath: "/app/app/config"
     filename: "logging.conf"
 environment_secrets:
+tnsnames:
+  entries: {}
