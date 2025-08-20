@@ -3,6 +3,8 @@ metadata:
   name: logging-configmap
 data:
   config: |
+    {{- with .Values.logging }}
+    {{- $log_level := default "INFO" .level | upper }}
     [loggers]
     keys=root,traffic-logger,router-logger,json-logger
 
@@ -13,38 +15,38 @@ data:
     keys=consoleFormatter,jsonFormatter
 
     [logger_root]
-    level=INFO
+    level={{ $log_level }}
     handlers=consoleHandler
     qualname=root
     propagate=0
 
     [logger_traffic-logger]
-    level=INFO
+    level={{ $log_level }}
     handlers=consoleHandler
     qualname=traffic-logger
     propagate=0
 
     [logger_router-logger]
-    level=INFO
+    level={{ $log_level }}
     handlers=consoleHandler
     qualname=router-logger
     propagate=0
 
     [logger_json-logger]
-    level=INFO
+    level={{ $log_level }}
     handlers=jsonHandler
     qualname=json-logger
     propagate=0
 
     [handler_consoleHandler]
     class=StreamHandler
-    level=INFO
+    level={{ $log_level }}
     formatter=consoleFormatter
     args=(sys.stdout,)
 
     [handler_jsonHandler]
     class=StreamHandler
-    level=INFO
+    level={{ $log_level }}
     formatter=jsonFormatter
     args=(sys.stdout,)
 
@@ -54,4 +56,5 @@ data:
     [formatter_jsonFormatter]
     format=%(message)s %(levelname)s %(name)s %(asctime)s
     class=pythonjsonlogger.jsonlogger.JsonFormatter
+    {{- end }}
 kind: ConfigMap

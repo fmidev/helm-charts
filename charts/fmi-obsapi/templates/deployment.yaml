@@ -49,9 +49,6 @@ spec:
               mountPath: "{{ .filepath }}/{{ .filename }}"
               subPath: {{ .filename | quote }}
             {{- end }}
-            - name: oracle-db-parameter-secret
-              mountPath: /app/app/config/.env
-              subPath: .env
           resources:
             requests:
               memory: {{ default "200Mi" .Values.resources.requests.memory }}
@@ -73,10 +70,4 @@ spec:
               - key: config
                 path: {{ .filename }}
       {{- end }}
-        - name: oracle-db-parameter-secret
-          secret:
-            secretName: oracle-db-parameter-secret
-            items:
-              - key: .env
-                path: .env
 
