@@ -1,0 +1,42 @@
+apiVersion: v1
+metadata:
+  name: tnsnames-configmap
+data:
+  config: |
+    {{- with .Values.tnsnames.entries }}
+    {{- $host := default "db.dummy" .host }}
+    {{- $host_b := default "db.dummy_b" .host_b }}
+    {{- $prod := default "production" .service_name_production }}
+    {{- $dev := default "development" .service_name_development }}
+    {{- $port := default 1521 .port }}
+    {{ $prod | upper }} =
+      (DESCRIPTION =
+        (ADDRESS = (PROTOCOL = TCP)(HOST = {{ $host }})(PORT = {{ $port }}))
+        (ADDRESS = (PROTOCOL = TCP)(HOST = {{ $host_b }})(PORT = {{ $port }}))
+        (CONNECT_DATA =
+          (SERVER = DEDICATED)
+          (SERVICE_NAME = {{ $prod }})
+          (FAILOVER_MODE =
+            (TYPE=select)
+            (METHOD=basic)
+              (RETRIES=20)
+              (DELAY=3)
+            )
+          )
+        )
+    {{ $dev | upper }} =
+      (DESCRIPTION =
+        (ADDRESS = (PROTOCOL = TCP)(HOST = {{ $host }})(PORT = {{ $port }}))
+        (CONNECT_DATA =
+          (SERVER = DEDICATED)
+          (SERVICE_NAME = {{ $dev }})
+          (FAILOVER_MODE =
+            (TYPE=select)
+            (METHOD=basic)
+              (RETRIES=20)
+              (DELAY=3)
+            )
+          )
+        )
+    {{- end }}
+kind: ConfigMap

@@ -1,0 +1,14 @@
+apiVersion: v2
+description: Helm chart for obsapi
+home: "file"
+keywords:
+- fmi
+- hav
+- obsapi
+maintainers:
+- email: lassi.virtanen@fmi.fi
+  name: fmi-build-bot
+  url: https://github.com/fmi-build-bot
+name: obsapi
+type: application
+version: 0.0.1

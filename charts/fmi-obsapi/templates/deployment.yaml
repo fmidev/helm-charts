@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Release.Name }}
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      {{- if .Values.image.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecret }}
+      {{- end }}
+      containers:
+        - name: {{ .Release.Name }}
+          env:
+            {{- range .Values.environment }}
+            - name: {{ .name }}
+              value: "{{ .value }}"
+            {{- end }}
+            {{- if .Values.environment_secrets }}
+            {{- range .Values.environment_secrets }}
+            {{- $secretName := .name }}
+            {{- range .keys }}
+            - name: {{ . }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secretName }}
+                  key: {{ . }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
+          volumeMounts:
+            {{- range .Values.configMaps}}
+            - name: {{ .name }}
+              mountPath: "{{ .filepath }}/{{ .filename }}"
+              subPath: {{ .filename | quote }}
+            {{- end }}
+          resources:
+            requests:
+              memory: {{ default "200Mi" .Values.resources.requests.memory }}
+              cpu: {{ default "0.1" .Values.resources.requests.cpu }}
+            limits:
+              memory: {{ default "1Gi" .Values.resources.limits.memory }}
+              cpu: {{ default "0.5" .Values.resources.limits.cpu }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          {{- if .Values.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- end }}
+          command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+      volumes:
+      {{- range .Values.configMaps}}
+        - name: {{ .name }}
+          configMap:
+            name: {{ .name }}
+            items:
+              - key: config
+                path: {{ .filename }}
+      {{- end }}
+
