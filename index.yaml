@@ -3578,6 +3578,25 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/nowcasting-fcst-1.0.0/nowcasting-fcst-1.0.0.tgz
     version: 1.0.0
+  obsapi:
+  - apiVersion: v2
+    created: "2025-08-21T04:11:43.540155478Z"
+    description: Helm chart for obsapi
+    digest: a1956d683329ed569f6bc6df950275e66baf1fc6b9643d540527e76cd38eb370
+    home: file
+    keywords:
+    - fmi
+    - hav
+    - obsapi
+    maintainers:
+    - email: lassi.virtanen@fmi.fi
+      name: fmi-build-bot
+      url: https://github.com/fmi-build-bot
+    name: obsapi
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/obsapi-0.0.1/obsapi-0.0.1.tgz
+    version: 0.0.1
   radondb:
   - apiVersion: v2
     appVersion: 1.0.0
@@ -3941,4 +3960,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2025-06-04T05:28:23.486366041Z"
+generated: "2025-08-21T04:11:43.540685114Z"
