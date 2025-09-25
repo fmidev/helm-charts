@@ -1,12 +1,22 @@
 {{- if .Values.ingress.enabled }}
+{{- if not .Values.ingress.hosts }}
+{{- fail "ingress.hosts must be provided when ingress is enabled" }}
+{{- end }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ .Values.smartmetserver.name }}-{{ .Values.ingress.name }}
-  {{- with .Values.ingress.tls.issuerRef }}
+  name: {{ include "smartmetserver.fullname" . }}-ingress
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "smartmetserver.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ingress
   annotations:
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.ingress.tls.issuerRef }}
     cert-manager.io/{{ .kind | lower }}: {{ .name | quote }}
-  {{- end }}
+    {{- end }}
 spec:
   {{- if .Values.ingress.ingressClassName }}
   ingressClassName: {{ .Values.ingress.ingressClassName }}
@@ -26,12 +36,14 @@ spec:
     - host: {{ . | quote }}
       http:
         paths:
-          - path: /
-            pathType: Prefix
+          {{- range $.Values.ingress.paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
             backend:
               service:
                 name: {{ $.Values.smartmetserver.name }}
                 port:
                   number: {{ $.Values.smartmetserver.svcPort }}
+          {{- end }}
     {{- end }}
 {{- end }}

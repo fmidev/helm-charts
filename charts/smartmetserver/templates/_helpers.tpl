@@ -1,21 +1,21 @@
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "mychart.chart" -}}
+{{- define "smartmetserver.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "mychart.name" -}}
+{{- define "smartmetserver.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Create a default fully qualified app name.
 */}}
-{{- define "mychart.fullname" -}}
+{{- define "smartmetserver.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -31,9 +31,9 @@ Create a default fully qualified app name.
 {{/*
 Common labels
 */}}
-{{- define "mychart.labels" -}}
-helm.sh/chart: {{ include "mychart.chart" . }}
-{{ include "mychart.selectorLabels" . }}
+{{- define "smartmetserver.labels" -}}
+helm.sh/chart: {{ include "smartmetserver.chart" . }}
+{{ include "smartmetserver.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -43,7 +43,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "mychart.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "mychart.name" . }}
+{{- define "smartmetserver.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "smartmetserver.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
