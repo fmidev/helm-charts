@@ -36,6 +36,17 @@ ingress:
   enabled: false
   name: nginx-ingress
   ingressClassName: ""
+  # List of hosts for the ingress
+  hosts: []
+    # - smartmetserver.example.com
+  # Custom annotations for the ingress
+  annotations: {}
+    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+  # Custom paths configuration
+  paths:
+    - path: /
+      pathType: Prefix
   tls:
     enabled: false
     secretName: smartmetserver-ingress-tls

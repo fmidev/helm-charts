@@ -51,7 +51,9 @@ The following table lists the configurable parameters of the Smartmetserver char
 | `ingress.enabled` | Whether ingress is enabled | `false` |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress` |
 | `ingress.ingressClassName` | Configure ingressClassName if needed | `""` |
-| `ingress.hosts` | List of hosts for ingress | `[]` |
+| `ingress.hosts` | List of hosts for ingress (required when enabled) | `[]` |
+| `ingress.annotations` | Custom annotations for the ingress | `{}` |
+| `ingress.paths` | List of path configurations for the ingress | `[{path: "/", pathType: "Prefix"}]` |
 | `ingress.tls.enabled` | Whether TLS is enabled for ingress | `false` |
 | `ingress.tls.secretName` | Secret name for TLS certificate | `smartmetserver-ingress-tls` |
 | `ingress.tls.issuerRef.kind` | Certificate issuer kind | `ClusterIssuer` |
