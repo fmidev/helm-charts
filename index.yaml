@@ -3997,6 +3997,18 @@ entries:
   smartmetserver:
   - apiVersion: v2
     appVersion: 25.08.25
+    created: "2025-09-25T10:41:20.283275886Z"
+    description: A Helm chart to deploy SmartMet Server for Kubernetes
+    digest: 9c358bfb00cc5a526458c0ea2190507ab3f7f352c05fce7b664031c9b7eb4df7
+    maintainers:
+    - name: mrauhala
+    name: smartmetserver
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/smartmetserver-1.4.0/smartmetserver-1.4.0.tgz
+    version: 1.4.0
+  - apiVersion: v2
+    appVersion: 25.08.25
     created: "2025-09-25T10:31:08.609121249Z"
     description: A Helm chart to deploy SmartMet Server for Kubernetes
     digest: 34dcb78c45235b2f95cba7e4602a4713e52871580661d5b56bf92a6cc722833b
@@ -4104,4 +4116,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2025-09-25T10:31:08.609949117Z"
+generated: "2025-09-25T10:41:20.283839778Z"
