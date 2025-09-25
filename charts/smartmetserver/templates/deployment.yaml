@@ -21,7 +21,6 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: true
-        allowPrivilegeEscalation: false
         seLinuxOptions:
           level: "s0"
       containers:
@@ -33,6 +32,7 @@ spec:
         command: ["/usr/sbin/smartmetd"]
         securityContext:
           readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
         ports:
         - containerPort: {{ .Values.smartmetserver.containerPort }}
         volumeMounts:
@@ -44,23 +44,28 @@ spec:
           name: smartmet-configuration
         - mountPath: "/var/smartmet/cache"
           name: cache-volume
+        - mountPath: "/var/smartmet/archivecache"
+          name: archivecache-volume
+        - mountPath: "/etc/smartmet/engines/querydata.conf"
+          subPath: "querydata.conf"
+          name: smartmet-querydata-config
         livenessProbe:
-          httpGet:
-            path: /info?what=qengine
+          tcpSocket:
             port: {{ .Values.smartmetserver.containerPort }}
+          initialDelaySeconds: {{ .Values.smartmetserver.livenessProbe.initialDelaySeconds }}
           periodSeconds: {{ .Values.smartmetserver.livenessProbe.periodSeconds }}
         readinessProbe:
-          httpGet:
-            path: /wms?request=getCapabilities&service=WMS
+          tcpSocket:
             port: {{ .Values.smartmetserver.containerPort }}
-          failureThreshold: {{ .Values.smartmetserver.readinessProbe.failureThreshold }}
+          initialDelaySeconds: {{ .Values.smartmetserver.readinessProbe.initialDelaySeconds }}
           periodSeconds: {{ .Values.smartmetserver.readinessProbe.periodSeconds }}
+          failureThreshold: {{ .Values.smartmetserver.readinessProbe.failureThreshold }}
         startupProbe:
-          httpGet:
-            path: /info?what=qengine
+          tcpSocket:
             port: {{ .Values.smartmetserver.containerPort }}
-          failureThreshold: {{ .Values.smartmetserver.startupProbe.failureThreshold }}
+          initialDelaySeconds: {{ .Values.smartmetserver.startupProbe.initialDelaySeconds }}
           periodSeconds: {{ .Values.smartmetserver.startupProbe.periodSeconds }}
+          failureThreshold: {{ .Values.smartmetserver.startupProbe.failureThreshold }}
       volumes:
       - name: smartmetserver-volume
         {{- if eq .Values.volume.type "cephfs" }}
@@ -80,5 +85,10 @@ spec:
       - name: smartmet-configuration
         configMap:
           name: {{ include "smartmetserver.fullname" . }}-config
+      - name: smartmet-querydata-config
+        configMap:
+          name: {{ include "smartmetserver.fullname" . }}-querydata-config
       - name: cache-volume
+        emptyDir: {}
+      - name: archivecache-volume
         emptyDir: {}

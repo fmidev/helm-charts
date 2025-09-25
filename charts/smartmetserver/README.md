@@ -286,6 +286,7 @@ The following table lists the configurable parameters of the Smartmetserver char
 | `smartmetConf.pools.fastpool.maxrequeuesize` | Maximum requeue size for fast pool | `100` |
 | `smartmetConf.engines` | List of engines to enable | `[sputnik, contour, geonames, gis, querydata, grid]` |
 | `smartmetConf.plugins` | List of plugins to enable | `[autocomplete, download, edr, timeseries, wms]` |
+| `smartmetConf.querydata` | Custom querydata.conf content (optional) | `null` |
 
 
 ## SmartMet Configuration
