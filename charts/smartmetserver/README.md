@@ -43,26 +43,32 @@ The following table lists the configurable parameters of the Smartmetserver char
 | `smartmetserver.containerPort` | Port used for container | `8080` |
 | `smartmetserver.svcPort` | Port used for service | `8080` |
 | `smartmetserver.replicas` | Amount of replicas deployed | `2` |
-| `smartmetserver.livenessProbe.periodSeconds` | Liveness probe's delay between probing attemps | `30` |
-| `smartmetserver.readinessProbe.failureThreshold` | How many times the probe attemps before restarting the container | `5` |
-| `smartmetserver.readinessProbe.periodSeconds` | Readiness probe's delay between probing attemps | `60` |
-| `smartmetserver.startupProbe.failureThreshold` | How many times the probe attemps before restarting the container | `5` |
-| `smartmetserver.startupProbe.periodSeconds` | Startup probe's delay between probing attemps | `60` |
+| `smartmetserver.livenessProbe.periodSeconds` | Liveness probe's delay between probing attempts | `30` |
+| `smartmetserver.readinessProbe.failureThreshold` | How many times the probe attempts before restarting the container | `5` |
+| `smartmetserver.readinessProbe.periodSeconds` | Readiness probe's delay between probing attempts | `60` |
+| `smartmetserver.startupProbe.failureThreshold` | How many times the probe attempts before restarting the container | `5` |
+| `smartmetserver.startupProbe.periodSeconds` | Startup probe's delay between probing attempts | `60` |
+| `ingress.enabled` | Whether ingress is enabled | `false` |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress` |
 | `ingress.ingressClassName` | Configure ingressClassName if needed | `""` |
-| `pv.enable` | If persisten volume is created | `true` |
+| `ingress.hosts` | List of hosts for ingress | `[]` |
+| `ingress.tls.enabled` | Whether TLS is enabled for ingress | `false` |
+| `ingress.tls.secretName` | Secret name for TLS certificate | `smartmetserver-ingress-tls` |
+| `ingress.tls.issuerRef.kind` | Certificate issuer kind | `ClusterIssuer` |
+| `ingress.tls.issuerRef.name` | Certificate issuer name | `letsencrypt` |
+| `pv.enable` | If persistent volume is created | `true` |
 | `pv.name` | Name of the persistent volume that is created | `pv` |
-| `pv.path` | Path for the hostPath location which persisten volume uses | `/tmp/smartmet-data` |
+| `pv.path` | Path for the hostPath location which persistent volume uses | `/tmp/smartmet-data` |
 | `pvc.name` | Name of the persistent volume claim in use | `pvc` |
-| `pvc.storageClassName` | Name of storageClassName of volume pvc is tryoing to bound to | `local` |
-| `pvc.accessModes` | Type of access modes persistent volume claim supports  | `ReadWriteOnce` |
-| `pvc.storage` | The amount of storage for persistent volume claim  | `1Gi` |
-| `hpa.name` | Name for horizontal pod autoscaler  | `hpa` |
-| `hpa.minReplicas` | Minimum amount of replicas for horizontal pod autoscaler  | `1` |
-| `hpa.maxReplicas` | Maximum amount of replicas for horizontal pod autoscaler  | `6` |
-| `hpa.targetCPUUtilizationPercentage` | Target cpu percentage for horizontal pod autoscaler  | `60` |
-| `smartmetConfCm.name` | Name of the configmap that is created  | `smartmet-cnf` |
-| `smartmetConfCm.smartmetConf` | Data for the configmap which matches `smartmet.conf` default config  | `smartmet.conf` default content |
+| `pvc.storageClassName` | Name of storageClassName of volume pvc is trying to bound to | `hostpath-smartmet` |
+| `pvc.accessModes` | Type of access modes persistent volume claim supports | `ReadWriteOnce` |
+| `pvc.storage` | The amount of storage for persistent volume claim | `1Gi` |
+| `hpa.name` | Name for horizontal pod autoscaler | `hpa` |
+| `hpa.minReplicas` | Minimum amount of replicas for horizontal pod autoscaler | `2` |
+| `hpa.maxReplicas` | Maximum amount of replicas for horizontal pod autoscaler | `6` |
+| `hpa.targetCPUUtilizationPercentage` | Target cpu percentage for horizontal pod autoscaler | `60` |
+| `smartmetConfCm.name` | Name of the configmap that is created | `smartmet-cnf` |
+| `smartmetConfCm.smartmetConf` | Data for the configmap which matches `smartmet.conf` default config | `smartmet.conf` default content |
 
 
 ## smartmet.conf

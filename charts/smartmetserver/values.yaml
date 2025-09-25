@@ -18,8 +18,15 @@ smartmetserver:
     periodSeconds: 60
 
 ingress:
+  enabled: false
   name: nginx-ingress
   ingressClassName: ""
+  tls:
+    enabled: false
+    secretName: smartmetserver-ingress-tls
+    issuerRef:
+      kind: ClusterIssuer
+      name: letsencrypt
 
 pv:
   enable: true
@@ -34,7 +41,7 @@ pvc:
 
 hpa:
   name: hpa
-  minReplicas: 1
+  minReplicas: 2
   maxReplicas: 6
   targetCPUUtilizationPercentage: 60
 
@@ -104,10 +111,6 @@ smartmetConfCm:
 
     plugins:
     {
-            admin:
-            {
-                    configfile = "plugins/admin.conf";
-            };
             autocomplete:
             {
                     configfile = "plugins/autocomplete.conf";
