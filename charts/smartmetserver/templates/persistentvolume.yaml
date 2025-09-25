@@ -1,17 +1,52 @@
-{{- if .Values.pv.enable }}
+{{- if and (eq .Values.volume.provisioning "static") (eq .Values.volume.type "cephfs") }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ .Values.smartmetserver.name }}-{{ .Values.pv.name }}
+  name: {{ .Values.volume.cephfs.pv.name }}
+  labels:
+    {{- include "smartmetserver.labels" . | nindent 4 }}
+    app.kubernetes.io/component: storage
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Name }}
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
 spec:
-  storageClassName: {{ .Values.pvc.storageClassName }}
   capacity:
-    storage: {{ .Values.pvc.storage }}
+    storage: {{ .Values.volume.cephfs.pv.capacity }}
+  accessModes: ["ReadOnlyMany"]
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""  # Empty string for static provisioning
+  mountOptions:
+    - context=system_u:object_r:container_file_t:s0
+  csi:
+    driver: cephfs.csi.ceph.com
+    volumeHandle: cephfs-smartmet-data
+    volumeAttributes:
+      staticVolume: "true"
+      fsName: {{ .Values.volume.cephfs.pv.fsName }}
+      rootPath: {{ .Values.volume.cephfs.pv.rootPath }}
+      clusterID: {{ .Values.volume.cephfs.pv.clusterID }}
+    nodeStageSecretRef:
+      name: {{ .Values.volume.cephfs.pv.secretName }}
+      namespace: {{ .Values.volume.cephfs.pv.secretNamespace }}
+{{- else if and (eq .Values.volume.provisioning "static") (eq .Values.volume.type "hostPath") }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.volume.hostPath.pv.name }}
+  labels:
+    {{- include "smartmetserver.labels" . | nindent 4 }}
+    app.kubernetes.io/component: storage
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Name }}
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
+spec:
+  capacity:
+    storage: {{ .Values.volume.hostPath.pvc.storage }}
   accessModes:
-    - {{ .Values.pvc.accessModes }}
-  claimRef:
-    namespace: {{ .Release.Namespace }}
-    name: {{ .Values.smartmetserver.name }}-{{ .Values.pvc.name }}
+    - {{ .Values.volume.hostPath.pvc.accessModes }}
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: {{ .Values.volume.hostPath.pv.storageClassName }}
   hostPath:
-    path: {{ .Values.pv.path | quote }}
+    path: {{ .Values.volume.hostPath.path | quote }}
+    type: DirectoryOrCreate
 {{- end }}

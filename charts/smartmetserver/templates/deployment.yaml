@@ -1,18 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.smartmetserver.name }}
+  name: {{ include "smartmetserver.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
   labels:
-    app: {{ .Values.smartmetserver.name }}
+    {{- include "smartmetserver.labels" . | nindent 4 }}
+    app.kubernetes.io/component: application
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Name }}
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
 spec:
   replicas: {{ .Values.smartmetserver.replicas }}
   selector:
     matchLabels:
-      app: {{ .Values.smartmetserver.name }}
+      {{- include "smartmetserver.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app: {{ .Values.smartmetserver.name }}
+        {{- include "smartmetserver.selectorLabels" . | nindent 8 }}
     spec:
       securityContext:
         runAsNonRoot: true
@@ -33,6 +38,7 @@ spec:
         volumeMounts:
         - mountPath: "/smartmet/data"
           name: smartmetserver-volume
+          readOnly: {{ .Values.volume.readOnly }}
         - mountPath: "/etc/smartmet/smartmet.conf"
           subPath: "smartmet.conf"
           name: smartmet-configuration
@@ -57,10 +63,22 @@ spec:
           periodSeconds: {{ .Values.smartmetserver.startupProbe.periodSeconds }}
       volumes:
       - name: smartmetserver-volume
+        {{- if eq .Values.volume.type "cephfs" }}
         persistentVolumeClaim:
-          claimName: {{ .Values.smartmetserver.name }}-{{ .Values.pvc.name }}
+          claimName: {{ .Values.volume.cephfs.pvc.name }}
+        {{- else if eq .Values.volume.type "nfs" }}
+        nfs:
+          server: {{ .Values.volume.nfs.server }}
+          path: {{ .Values.volume.nfs.path }}
+          readOnly: {{ .Values.volume.readOnly }}
+        {{- else if eq .Values.volume.type "hostPath" }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.volume.hostPath.pvc.name }}
+        {{- else }}
+        {{- fail "volume.type must be one of: cephfs, nfs, hostPath" }}
+        {{- end }}
       - name: smartmet-configuration
         configMap:
-          name: {{ .Values.smartmetserver.name }}-{{ .Values.smartmetConfCm.name }}
+          name: {{ include "smartmetserver.fullname" . }}-config
       - name: cache-volume
         emptyDir: {}

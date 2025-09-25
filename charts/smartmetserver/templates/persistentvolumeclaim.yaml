@@ -1,11 +1,54 @@
+{{- if eq .Values.volume.type "cephfs" }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Values.smartmetserver.name }}-{{ .Values.pvc.name }}
+  name: {{ .Values.volume.cephfs.pvc.name }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "smartmetserver.labels" . | nindent 4 }}
+    app.kubernetes.io/component: storage
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Name }}
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
 spec:
-  storageClassName: {{ .Values.pvc.storageClassName }}
-  accessModes:
-    - {{ .Values.pvc.accessModes }}
+  {{- if eq .Values.volume.provisioning "static" }}
+  accessModes: ["ReadOnlyMany"]
+  storageClassName: ""  # Empty string for static binding to specific PV
   resources:
     requests:
-      storage: {{ .Values.pvc.storage }}
+      storage: {{ .Values.volume.cephfs.pvc.capacity }}
+  volumeName: {{ .Values.volume.cephfs.pv.name }}
+  {{- else if eq .Values.volume.provisioning "dynamic" }}
+  accessModes: ["ReadWriteMany"]
+  storageClassName: {{ .Values.volume.cephfs.pvc.storageClassName }}
+  resources:
+    requests:
+      storage: {{ .Values.volume.cephfs.pvc.capacity }}
+  {{- end }}
+{{- else if eq .Values.volume.type "hostPath" }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.volume.hostPath.pvc.name }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "smartmetserver.labels" . | nindent 4 }}
+    app.kubernetes.io/component: storage
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Name }}
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
+spec:
+  accessModes:
+    - {{ .Values.volume.hostPath.pvc.accessModes }}
+  {{- if eq .Values.volume.provisioning "static" }}
+  storageClassName: ""  # Empty string for static binding to specific PV
+  {{- else }}
+  storageClassName: {{ .Values.volume.hostPath.pvc.storageClassName }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.volume.hostPath.pvc.storage }}
+  {{- if eq .Values.volume.provisioning "static" }}
+  volumeName: {{ .Values.volume.hostPath.pv.name }}
+  {{- end }}
+{{- end }}
