@@ -16,6 +16,9 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: true
+        allowPrivilegeEscalation: false
+        seLinuxOptions:
+          level: "s0"
       containers:
       - name: {{.Values.smartmetserver.name }}
         image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
@@ -24,7 +27,6 @@ spec:
         {{- end }}
         command: ["/usr/sbin/smartmetd"]
         securityContext:
-          allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
         ports:
         - containerPort: {{ .Values.smartmetserver.containerPort }}
@@ -38,7 +40,7 @@ spec:
           name: cache-volume
         livenessProbe:
           httpGet:
-            path: /admin?what=qengine
+            path: /info?what=qengine
             port: {{ .Values.smartmetserver.containerPort }}
           periodSeconds: {{ .Values.smartmetserver.livenessProbe.periodSeconds }}
         readinessProbe:
@@ -49,7 +51,7 @@ spec:
           periodSeconds: {{ .Values.smartmetserver.readinessProbe.periodSeconds }}
         startupProbe:
           httpGet:
-            path: /admin?what=qengine
+            path: /info?what=qengine
             port: {{ .Values.smartmetserver.containerPort }}
           failureThreshold: {{ .Values.smartmetserver.startupProbe.failureThreshold }}
           periodSeconds: {{ .Values.smartmetserver.startupProbe.periodSeconds }}
