@@ -1,12 +1,19 @@
+# Default values for smartmetserver chart.
+
+# Chart name overrides
+nameOverride: ""
+fullnameOverride: ""
+
 image:
   repository: fmidev/smartmetserver
   pullPolicy: IfNotPresent
-  tag: latest
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
 
 smartmetserver:
   name: smartmetserver
   containerPort: 8080
-  svcPort: 8080
+  svcPort: 80
   replicas: 2
   livenessProbe:
     periodSeconds: 30
@@ -16,6 +23,14 @@ smartmetserver:
   startupProbe:
     failureThreshold: 5
     periodSeconds: 60
+
+# Service configuration
+service:
+  type: ClusterIP
+  portName: http
+  targetPort: 8080
+  annotations: {}
+  # sessionAffinity: ClientIP
 
 ingress:
   enabled: false
