@@ -272,97 +272,109 @@ The following table lists the configurable parameters of the Smartmetserver char
 | `hpa.behavior` | Advanced scaling behavior configuration (optional) | `null` |
 | `hpa.behavior.scaleDown` | Scale down behavior policies and stabilization | `null` |
 | `hpa.behavior.scaleUp` | Scale up behavior policies and stabilization | `null` |
-| `smartmetConfCm.smartmetConf` | SmartMet server configuration content for smartmet.conf | `smartmet.conf` default content |
+| `smartmetConf.server.port` | SmartMet server port | `8080` |
+| `smartmetConf.server.defaultlogging` | Enable default logging | `false` |
+| `smartmetConf.server.logrequests` | Log HTTP requests | `true` |
+| `smartmetConf.server.verbose` | Verbose output during startup | `true` |
+| `smartmetConf.server.debug` | Enable debug information | `true` |
+| `smartmetConf.server.lazylinking` | Enable lazy linking | `true` |
+| `smartmetConf.server.compress` | Compress HTTP responses | `true` |
+| `smartmetConf.server.compresslimit` | Do not compress responses smaller than this | `1000` |
+| `smartmetConf.pools.slowpool.maxthreads` | Maximum threads for slow pool | `24` |
+| `smartmetConf.pools.slowpool.maxrequeuesize` | Maximum requeue size for slow pool | `100` |
+| `smartmetConf.pools.fastpool.maxthreads` | Maximum threads for fast pool | `24` |
+| `smartmetConf.pools.fastpool.maxrequeuesize` | Maximum requeue size for fast pool | `100` |
+| `smartmetConf.engines` | List of engines to enable | `[sputnik, contour, geonames, gis, querydata, grid]` |
+| `smartmetConf.plugins` | List of plugins to enable | `[autocomplete, download, edr, timeseries, wms]` |
 
 
-## smartmet.conf
+## SmartMet Configuration
+
+The SmartMet server configuration is now generated dynamically from structured YAML values instead of a static configuration file. This makes it much easier to customize which engines and plugins to enable.
+
+### Engine and Plugin Configuration
+
+You can easily customize which engines and plugins are enabled by modifying the lists in values.yaml:
+
+```yaml
+smartmetConf:
+  # Available engines: sputnik, contour, geonames, gis, querydata, grid
+  engines:
+    - sputnik
+    - querydata
+    - gis
+  
+  # Available plugins: autocomplete, download, edr, timeseries, wms, admin
+  plugins:
+    - timeseries
+    - download
 ```
-// Bind to port
-port            = 8080;
 
-// Print access log
-defaultlogging  = false;
-logrequests     = true;
-accesslogdir    = "/var/log/smartmet";
+### Complete Configuration Example
 
-// Print configuration information when starting
-verbose         = true;
+```yaml
+smartmetConf:
+  server:
+    port: 8080
+    verbose: true
+    compress: true
+  pools:
+    slowpool:
+      maxthreads: 16
+    fastpool: 
+      maxthreads: 8
+  engines:
+    - querydata
+    - gis
+  plugins:
+    - timeseries
+    - edr
+```
 
-// Print debug infromation
-debug           = true;
+### Generated smartmet.conf
 
-lazylinking     = true;
-
-// Compress HTTP responses if possible
+The above configuration will generate a smartmet.conf like this:
+```
+// SmartMet Server Configuration
+port = 8080;
+defaultlogging = false;
+verbose = true;
 compress = true;
-
-// Do not compress small responses
 compresslimit = 1000;
 
 slowpool:
 {
-    maxthreads = 24;
+    maxthreads = 16;
     maxrequeuesize = 100;
 };
+
 fastpool:
 {
-    maxthreads = 24;
+    maxthreads = 8;
     maxrequeuesize = 100;
 };
 
 engines:
 {
-    sputnik:
+    querydata:
     {
-            configfile = "engines/sputnik.conf";
-    }
-    contour:
-    {
-            configfile = "engines/contour.conf";
-    };
-    geonames:
-    {
-            configfile = "engines/geonames.conf";
+        configfile = "engines/querydata.conf";
     };
     gis:
     {
-            configfile = "engines/gis.conf";
-    };
-    querydata:
-    {
-            configfile = "engines/querydata.conf";
-    };
-    grid:
-    {
-            configfile = "engines/grid.conf";
+        configfile = "engines/gis.conf";
     };
 };
 
 plugins:
 {
-    admin:
+    timeseries:
     {
-            configfile = "plugins/admin.conf";
-    };
-    autocomplete:
-    {
-            configfile = "plugins/autocomplete.conf";
-    };
-    download:
-    {
-            configfile = "plugins/download.conf";
+        configfile = "plugins/timeseries.conf";
     };
     edr:
     {
-            configfile = "plugins/edr.conf";
-    };
-    timeseries:
-    {
-            configfile = "plugins/timeseries.conf";
-    };
-    wms:
-    {
-            configfile = "plugins/wms.conf";
+        configfile = "plugins/edr.conf";
     };
 };
 ```

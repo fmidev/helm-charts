@@ -120,88 +120,40 @@ hpa:
   #         value: 100
   #         periodSeconds: 15
 
-smartmetConfCm:
-  smartmetConf: |
-    // Bind to port f
-    port 		= 8080;
-
-    // Print access log
-    defaultlogging  = false;
-    logrequests     = true;
-
-    // Print configuration information when starting
-    verbose		= true;
-
-    // Print debug infromation
-    debug	       	= true;
-
-    lazylinking     = true;
-
-    // Compress HTTP responses if possible
-    compress = true;
-
-    // Do not compress small responses
-    compresslimit = 1000;
-
+smartmetConf:
+  # Basic server configuration
+  server:
+    port: 8080
+    defaultlogging: false
+    logrequests: true
+    verbose: true
+    debug: true
+    lazylinking: true
+    compress: true
+    compresslimit: 1000
+  
+  # Thread pool configuration
+  pools:
     slowpool:
-    {
-            maxthreads = 24;
-            maxrequeuesize = 100;
-    };
+      maxthreads: 24
+      maxrequeuesize: 100
     fastpool:
-    {
-            maxthreads = 24;
-            maxrequeuesize = 100;
-    };
-
-    engines:
-    {
-      sputnik:
-      {
-        configfile = "engines/sputnik.conf";
-      }
-      contour:
-      {
-        configfile = "engines/contour.conf";
-      };
-      geonames:
-      {
-        configfile = "engines/geonames.conf";
-      };
-      gis:
-      {
-        configfile = "engines/gis.conf";
-      };
-      querydata:
-      {
-        configfile = "engines/querydata.conf";
-      };
-      grid:
-      {
-        configfile = "engines/grid.conf";
-      };
-    };
-
-    plugins: 
-    {
-      autocomplete:
-      {
-        configfile = "plugins/autocomplete.conf";
-      };
-      download:
-      {
-        configfile = "plugins/download.conf";
-      };
-      edr:
-      {
-        configfile = "plugins/edr.conf";
-      };
-      timeseries:
-      {
-        configfile = "plugins/timeseries.conf";
-      };
-      wms:
-      {
-        configfile = "plugins/wms.conf";
-      };
-    };
+      maxthreads: 24
+      maxrequeuesize: 100
+  
+  # List of engines to enable
+  engines:
+    - sputnik
+    - contour
+    - geonames
+    - gis
+    - querydata
+    - grid
+  
+  # List of plugins to enable
+  plugins:
+    - autocomplete
+    - download
+    - edr
+    - timeseries
+    - wms
