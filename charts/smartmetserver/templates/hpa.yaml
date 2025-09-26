@@ -1,13 +1,44 @@
-apiVersion: autoscaling/v1
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ .Values.smartmetserver.name }}-{{ .Values.hpa.name }}
-  namespace: {{ .Release.Namespace }}
+  name: {{ include "smartmetserver.fullname" . }}-hpa
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "smartmetserver.labels" . | nindent 4 }}
+    app.kubernetes.io/component: autoscaling
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Name }}
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: smartmetserver
+    name: {{ include "smartmetserver.fullname" . }}
   minReplicas: {{ .Values.hpa.minReplicas }}
-  maxReplicas: {{ .Values.hpa.maxReplicas}}
-  targetCPUUtilizationPercentage: {{ .Values.hpa.targetCPUUtilizationPercentage }}
+  maxReplicas: {{ .Values.hpa.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.hpa.targetCPUUtilizationPercentage }}
+    {{- if .Values.hpa.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.hpa.targetMemoryUtilizationPercentage }}
+    {{- end }}
+  {{- if .Values.hpa.behavior }}
+  behavior:
+    {{- if .Values.hpa.behavior.scaleDown }}
+    scaleDown:
+      {{- toYaml .Values.hpa.behavior.scaleDown | nindent 6 }}
+    {{- end }}
+    {{- if .Values.hpa.behavior.scaleUp }}
+    scaleUp:
+      {{- toYaml .Values.hpa.behavior.scaleUp | nindent 6 }}
+    {{- end }}
+  {{- end }}

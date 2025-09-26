@@ -16,13 +16,16 @@ smartmetserver:
   svcPort: 80
   replicas: 2
   livenessProbe:
-    periodSeconds: 30
+    initialDelaySeconds: 10
+    periodSeconds: 10
   readinessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 10
     failureThreshold: 5
-    periodSeconds: 60
   startupProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 10
     failureThreshold: 5
-    periodSeconds: 60
 
 # Service configuration
 service:
@@ -38,11 +41,15 @@ ingress:
   ingressClassName: ""
   # List of hosts for the ingress
   hosts: []
-    # - smartmetserver.example.com
+  # Example:
+  # hosts:
+  #   - smartmetserver.example.com
   # Custom annotations for the ingress
   annotations: {}
-    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+  # Example:
+  # annotations:
+  #   nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  #   nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
   # Custom paths configuration
   paths:
     - path: /
@@ -54,107 +61,125 @@ ingress:
       kind: ClusterIssuer
       name: letsencrypt
 
-pv:
-  enable: true
-  name: pv
-  path: /tmp/smartmet-data
+# Volume configuration for smartmet data
+volume:
+  # Volume type: "cephfs", "nfs", or "hostPath"
+  type: hostPath
+  # Whether the volume should be mounted as read-only
+  readOnly: true
+  # Provisioning mode: "static" (use existing PV) or "dynamic" (create new PV)
+  provisioning: dynamic
 
-pvc:
-  name: pvc
-  storageClassName: hostpath-smartmet
-  accessModes: ReadWriteOnce
-  storage: 1Gi
+  # hostPath configuration (for local directory on node)
+  hostPath:
+    path: /tmp/smartmet-data
+    # PV/PVC configuration for hostPath
+    pv:
+      name: smartmet-data-pv
+      storageClassName: ""
+    pvc:
+      name: smartmet-data-pvc
+      accessModes: ReadWriteOnce
+      storage: 1Gi
+      # For dynamic provisioning, specify storageClassName (empty = use default)
+      storageClassName: ""
+
+  # NFS configuration
+  nfs:
+    server: 10.12.12.66
+    path: /smartmet/data
+
+  # CephFS configuration
+  cephfs:
+    # PV/PVC configuration for CephFS
+    pv:
+      name: smartmet-data-pv
+      capacity: 10Ti  # Metadata only for existing volumes - adjust to match your actual volume size
+      fsName: smartmet_data
+      rootPath: /
+      clusterID: smartmet-ceph
+      secretName: cephfs-secret
+      secretNamespace: ceph-csi
+    pvc:
+      name: smartmet-data-pvc
+      capacity: 10Ti  # Must match PV capacity - adjust to match your actual volume size
+      # For dynamic provisioning, specify storageClassName
+      storageClassName: csi-cephfs
 
 hpa:
-  name: hpa
   minReplicas: 2
   maxReplicas: 6
   targetCPUUtilizationPercentage: 60
+  # Optional memory utilization target (uncomment to enable)
+  # targetMemoryUtilizationPercentage: 70
+  # Optional behavior configuration for fine-tuned scaling
+  # behavior:
+  #   scaleDown:
+  #     stabilizationWindowSeconds: 300
+  #     policies:
+  #       - type: Percent
+  #         value: 50
+  #         periodSeconds: 60
+  #   scaleUp:
+  #     stabilizationWindowSeconds: 60
+  #     policies:
+  #       - type: Percent
+  #         value: 100
+  #         periodSeconds: 15
 
-smartmetConfCm:
-  name: smartmet-cnf
-  smartmetConf: |
-    // Bind to port
-    port            = 8080;
+smartmetConf:
+  # Basic server configuration
+  server:
+    port: 8080
+    defaultlogging: false
+    logrequests: true
+    verbose: true
+    debug: true
+    lazylinking: true
+    compress: true
+    compresslimit: 1000
 
-    // Print access log
-    defaultlogging  = false;
-    logrequests     = true;
-    accesslogdir    = "/var/log/smartmet";
-
-    // Print configuration information when starting
-    verbose         = true;
-
-    // Print debug infromation
-    debug           = true;
-
-    lazylinking     = true;
-
-    // Compress HTTP responses if possible
-    compress = true;
-
-    // Do not compress small responses
-    compresslimit = 1000;
-
+  # Thread pool configuration
+  pools:
     slowpool:
-    {
-            maxthreads = 24;
-            maxrequeuesize = 100;
-    };
+      maxthreads: 24
+      maxrequeuesize: 100
     fastpool:
-    {
-            maxthreads = 24;
-            maxrequeuesize = 100;
-    };
+      maxthreads: 24
+      maxrequeuesize: 100
 
-    engines:
-    {
-            sputnik:
-            {
-                    configfile = "engines/sputnik.conf";
-            }
-            contour:
-            {
-                    configfile = "engines/contour.conf";
-            };
-            geonames:
-            {
-                    configfile = "engines/geonames.conf";
-            };
-            gis:
-            {
-                    configfile = "engines/gis.conf";
-            };
-            querydata:
-            {
-                    configfile = "engines/querydata.conf";
-            };
-            grid:
-            {
-                    configfile = "engines/grid.conf";
-            };
-    };
+  # List of engines to enable
+  engines:
+    - sputnik
+    - contour
+    - geonames
+    - gis
+    - querydata
+    - grid
 
-    plugins:
+  # List of plugins to enable
+  plugins:
+    - autocomplete
+    - download
+    - edr
+    - timeseries
+    - wms
+
+  # QueryData engine configuration (optional)
+  # If not provided, a default template will be generated
+  querydata: |
+    @include "querydata/translations.conf"
+    verbose = true;
+    valid_points_cache_dir = "/var/smartmet/cache/validpoints";
+    producers = ["demo_surface"];
+    demo_surface:
     {
-            autocomplete:
-            {
-                    configfile = "plugins/autocomplete.conf";
-            };
-            download:
-            {
-                    configfile = "plugins/download.conf";
-            };
-            edr:
-            {
-                    configfile = "plugins/edr.conf";
-            };
-            timeseries:
-            {
-                    configfile = "plugins/timeseries.conf";
-            };
-            wms:
-            {
-                    configfile = "plugins/wms.conf";
-            };
+        directory = "/smartmet/data/demo/surface/querydata";
+        pattern = ".*demo.*\.sqd$";
+        forecast = true;
+        type = "grid";
+        leveltype = "surface";
+        refresh_interval_secs = 60;
+        number_to_keep = 1;
+        multifile = false;
     };
