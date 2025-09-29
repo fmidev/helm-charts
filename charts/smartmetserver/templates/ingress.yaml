@@ -41,7 +41,7 @@ spec:
             pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ $.Values.smartmetserver.name }}
+                name: {{ include "smartmetserver.fullname" $ }}
                 port:
                   number: {{ $.Values.smartmetserver.svcPort }}
           {{- end }}
