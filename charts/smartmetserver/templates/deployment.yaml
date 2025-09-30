@@ -66,6 +66,10 @@ spec:
           initialDelaySeconds: {{ .Values.smartmetserver.startupProbe.initialDelaySeconds }}
           periodSeconds: {{ .Values.smartmetserver.startupProbe.periodSeconds }}
           failureThreshold: {{ .Values.smartmetserver.startupProbe.failureThreshold }}
+        {{- if .Values.smartmetserver.resources }}
+        resources:
+          {{- toYaml .Values.smartmetserver.resources | nindent 10 }}
+        {{- end }}
       volumes:
       - name: smartmetserver-volume
         {{- if eq .Values.volume.type "cephfs" }}
