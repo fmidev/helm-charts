@@ -287,7 +287,62 @@ The following table lists the configurable parameters of the Smartmetserver char
 | `smartmetConf.engines` | List of engines to enable | `[sputnik, contour, geonames, gis, querydata, grid]` |
 | `smartmetConf.plugins` | List of plugins to enable | `[autocomplete, download, edr, timeseries, wms]` |
 | `smartmetConf.querydata` | Custom querydata.conf content (optional) | `null` |
+| `smartmetserver.resources` | Resource limits and requests for the container | See below |
+| `smartmetserver.resources.limits.memory` | Memory limit for the container | `4Gi` |
+| `smartmetserver.resources.limits.cpu` | CPU limit for the container | `2` |
+| `smartmetserver.resources.requests.memory` | Memory request for the container | `2Gi` |
+| `smartmetserver.resources.requests.cpu` | CPU request for the container | `0.5` |
 
+
+## Resource Configuration
+
+The chart includes default resource limits and requests optimized for typical SmartMet Server workloads. You can customize these values based on your specific requirements:
+
+### Default Resource Configuration
+
+```yaml
+smartmetserver:
+  resources:
+    limits:
+      memory: 4Gi
+      cpu: "2"
+    requests:
+      cpu: "0.5"
+      memory: 2Gi
+```
+
+### Custom Resource Configuration
+
+**Helm Command:**
+```bash
+helm upgrade --install smartmetserver fmi/smartmetserver \
+  --namespace smartmetserver --create-namespace \
+  --set smartmetserver.resources.limits.memory=8Gi \
+  --set smartmetserver.resources.limits.cpu=4 \
+  --set smartmetserver.resources.requests.memory=4Gi \
+  --set smartmetserver.resources.requests.cpu=1
+```
+
+**Values YAML:**
+```yaml
+smartmetserver:
+  resources:
+    limits:
+      memory: 8Gi
+      cpu: "4"
+    requests:
+      memory: 4Gi
+      cpu: "1"
+```
+
+### Disabling Resource Constraints
+
+To disable resource limits and requests entirely:
+
+```yaml
+smartmetserver:
+  resources: {}
+```
 
 ## SmartMet Configuration
 

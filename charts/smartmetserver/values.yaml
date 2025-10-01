@@ -26,6 +26,14 @@ smartmetserver:
     initialDelaySeconds: 10
     periodSeconds: 10
     failureThreshold: 5
+  # Resource limits and requests for the container
+  resources:
+    limits:
+      memory: 4Gi
+      cpu: "2"
+    requests:
+      cpu: "0.5"
+      memory: 2Gi
 
 # Service configuration
 service:
