@@ -1,0 +1,325 @@
+---
+# Source: smartmetserver/templates/smartmet-conf.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smartmetserver-config
+  namespace: "smartmetserver"
+  labels:
+    app.kubernetes.io/name: smartmetserver
+    app.kubernetes.io/instance: smartmetserver
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: configuration
+  annotations:
+    meta.helm.sh/release-name: smartmetserver
+    meta.helm.sh/release-namespace: smartmetserver
+data:
+  smartmet.conf: |
+    // Bind to port
+    port            = 8080;
+    
+    // Print access log
+    defaultlogging  = false;
+    logrequests     = true;
+    accesslogdir    = "/var/log/smartmet";
+    
+    // Print configuration information when starting
+    verbose         = true;
+    
+    // Print debug infromation
+    debug           = true;
+    
+    lazylinking     = true;
+    
+    // Compress HTTP responses if possible
+    compress = true;
+    
+    // Do not compress small responses
+    compresslimit = 1000;
+    
+    slowpool:
+    {
+            maxthreads = 24;
+            maxrequeuesize = 100;
+    };
+    fastpool:
+    {
+            maxthreads = 24;
+            maxrequeuesize = 100;
+    };
+    
+    engines:
+    {
+            sputnik:
+            {
+                    configfile = "engines/sputnik.conf";
+            }
+            contour:
+            {
+                    configfile = "engines/contour.conf";
+            };
+            geonames:
+            {
+                    configfile = "engines/geonames.conf";
+            };
+            gis:
+            {
+                    configfile = "engines/gis.conf";
+            };
+            querydata:
+            {
+                    configfile = "engines/querydata.conf";
+            };
+            grid:
+            {
+                    configfile = "engines/grid.conf";
+            };
+    };
+    
+    plugins:
+    {
+            autocomplete:
+            {
+                    configfile = "plugins/autocomplete.conf";
+            };
+            download:
+            {
+                    configfile = "plugins/download.conf";
+            };
+            edr:
+            {
+                    configfile = "plugins/edr.conf";
+            };
+            timeseries:
+            {
+                    configfile = "plugins/timeseries.conf";
+            };
+            wms:
+            {
+                    configfile = "plugins/wms.conf";
+            };
+    };
+---
+# Source: smartmetserver/templates/persistentvolume.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: smartmet-data-pv
+  labels:
+    helm.sh/chart: smartmetserver-1.4.0
+    app.kubernetes.io/name: smartmetserver
+    app.kubernetes.io/instance: smartmetserver
+    app.kubernetes.io/version: "25.08.25"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: storage
+  annotations:
+    meta.helm.sh/release-name: smartmetserver
+    meta.helm.sh/release-namespace: smartmetserver
+spec:
+  capacity:
+    storage: 10Ti
+  accessModes: ["ReadOnlyMany"]
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""  # Empty string for static provisioning
+  mountOptions:
+    - context=system_u:object_r:container_file_t:s0
+  csi:
+    driver: cephfs.csi.ceph.com
+    volumeHandle: cephfs-smartmet-data
+    volumeAttributes:
+      staticVolume: "true"
+      fsName: smartmet_data
+      rootPath: /
+      clusterID: smartmet-ceph
+    nodeStageSecretRef:
+      name: cephfs-secret
+      namespace: ceph-csi
+---
+# Source: smartmetserver/templates/persistentvolumeclaim.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: smartmet-data-pvc
+  namespace: "smartmetserver"
+  labels:
+    helm.sh/chart: smartmetserver-1.4.0
+    app.kubernetes.io/name: smartmetserver
+    app.kubernetes.io/instance: smartmetserver
+    app.kubernetes.io/version: "25.08.25"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: storage
+  annotations:
+    meta.helm.sh/release-name: smartmetserver
+    meta.helm.sh/release-namespace: smartmetserver
+spec:
+  accessModes: ["ReadOnlyMany"]
+  storageClassName: ""  # Empty string for static binding to specific PV
+  resources:
+    requests:
+      storage: 10Ti
+  volumeName: smartmet-data-pv
+---
+# Source: smartmetserver/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: smartmetserver
+  namespace: "smartmetserver"
+  labels:
+    helm.sh/chart: smartmetserver-1.4.0
+    app.kubernetes.io/name: smartmetserver
+    app.kubernetes.io/instance: smartmetserver
+    app.kubernetes.io/version: "25.08.25"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: smartmetserver
+    app.kubernetes.io/instance: smartmetserver
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8080
+---
+# Source: smartmetserver/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smartmetserver
+  namespace: "smartmetserver"
+  labels:
+    helm.sh/chart: smartmetserver-1.4.0
+    app.kubernetes.io/name: smartmetserver
+    app.kubernetes.io/instance: smartmetserver
+    app.kubernetes.io/version: "25.08.25"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: application
+  annotations:
+    meta.helm.sh/release-name: smartmetserver
+    meta.helm.sh/release-namespace: smartmetserver
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: smartmetserver
+      app.kubernetes.io/instance: smartmetserver
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: smartmetserver
+        app.kubernetes.io/instance: smartmetserver
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        allowPrivilegeEscalation: false
+        seLinuxOptions:
+          level: "s0"
+      containers:
+      - name: smartmetserver
+        image: "fmidev/smartmetserver:25.08.25"
+        imagePullPolicy: IfNotPresent
+        command: ["/usr/sbin/smartmetd"]
+        securityContext:
+          readOnlyRootFilesystem: true
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - mountPath: "/smartmet/data"
+          name: smartmetserver-volume
+          readOnly: true
+        - mountPath: "/etc/smartmet/smartmet.conf"
+          subPath: "smartmet.conf"
+          name: smartmet-configuration
+        - mountPath: "/var/smartmet/cache"
+          name: cache-volume
+        livenessProbe:
+          httpGet:
+            path: /info?what=qengine
+            port: 8080
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /wms?request=getCapabilities&service=WMS
+            port: 8080
+          failureThreshold: 5
+          periodSeconds: 60
+        startupProbe:
+          httpGet:
+            path: /info?what=qengine
+            port: 8080
+          failureThreshold: 5
+          periodSeconds: 60
+      volumes:
+      - name: smartmetserver-volume
+        persistentVolumeClaim:
+          claimName: smartmet-data-pvc
+      - name: smartmet-configuration
+        configMap:
+          name: smartmetserver-config
+      - name: cache-volume
+        emptyDir: {}
+---
+# Source: smartmetserver/templates/hpa.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: smartmetserver-hpa
+  namespace: "smartmetserver"
+  labels:
+    helm.sh/chart: smartmetserver-1.4.0
+    app.kubernetes.io/name: smartmetserver
+    app.kubernetes.io/instance: smartmetserver
+    app.kubernetes.io/version: "25.08.25"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: autoscaling
+  annotations:
+    meta.helm.sh/release-name: smartmetserver
+    meta.helm.sh/release-namespace: smartmetserver
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: smartmetserver
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 60
+---
+# Source: smartmetserver/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: smartmetserver-ingress
+  namespace: "smartmetserver"
+  labels:
+    helm.sh/chart: smartmetserver-1.4.0
+    app.kubernetes.io/name: smartmetserver
+    app.kubernetes.io/instance: smartmetserver
+    app.kubernetes.io/version: "25.08.25"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: ingress
+  annotations:
+    cert-manager.io/clusterissuer: "letsencrypt"
+spec:
+  tls:
+    - hosts:
+        - "data.meteo.go.ke"
+      secretName: "smartmetserver-ingress-tls"
+
+  rules:
+    - host: "data.meteo.go.ke"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: smartmetserver
+                port:
+                  number: 80

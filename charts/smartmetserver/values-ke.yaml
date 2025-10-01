@@ -1,0 +1,23 @@
+volume:
+  type: cephfs
+ingress:
+  enabled: true
+  hosts:
+    - data.meteo.go.ke
+  tls:
+    enabled: true
+
+smartmetConf:
+  engines:
+    - contour
+    - geonames
+    - gis
+    - grid
+    - querydata
+    - sputnik
+  plugins:
+    - autocomplete
+    - download
+    - edr
+    - timeseries
+    - wms

@@ -201,6 +201,80 @@ ingress:
     nginx.ingress.kubernetes.io/rewrite-target: /
 ```
 
+## High Availability Configuration
+
+### PodDisruptionBudget for Service Continuity
+
+SmartMetServer includes PodDisruptionBudget (PDB) support to ensure high availability during cluster maintenance, node upgrades, and voluntary disruptions.
+
+**Enable PodDisruptionBudget:**
+```bash
+helm upgrade --install smartmetserver fmi/smartmetserver \
+  --namespace smartmetserver --create-namespace \
+  --set podDisruptionBudget.enabled=true \
+  --set podDisruptionBudget.minAvailable=1
+```
+
+**Values YAML:**
+```yaml
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1  # Keep at least 1 pod running during disruptions
+```
+
+**Alternative configurations:**
+```yaml
+# Option 1: Specify minimum available pods
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2  # Always keep 2 pods running
+
+# Option 2: Specify maximum unavailable pods  
+podDisruptionBudget:
+  enabled: true
+  maxUnavailable: 1  # Allow max 1 pod to be down
+
+# Option 3: Use percentages (for larger deployments)
+podDisruptionBudget:
+  enabled: true
+  minAvailable: "50%"  # Keep at least 50% of pods running
+```
+
+### Horizontal Pod Autoscaler (HPA)
+
+The chart includes HPA support for automatic scaling based on CPU and memory usage:
+
+```yaml
+hpa:
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 60
+  # Optional memory targeting
+  targetMemoryUtilizationPercentage: 70
+```
+
+**Combined HA Strategy:**
+```yaml
+# Recommended high availability configuration
+smartmetserver:
+  replicas: 2  # Base replica count
+
+hpa:
+  minReplicas: 2  # HPA minimum (matches base replicas)
+  maxReplicas: 6  # Scale up to 6 pods under load
+  targetCPUUtilizationPercentage: 60
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1  # Always keep at least 1 pod during maintenance
+```
+
+This configuration ensures:
+- ✅ **Base availability**: 2 pods running normally
+- ✅ **Auto-scaling**: Up to 6 pods during high load
+- ✅ **Maintenance protection**: At least 1 pod during cluster operations
+- ✅ **Zero downtime**: Service remains available during updates
+
 # Deleting the Chart
 Execute the following for deleting the chart:
 
@@ -272,6 +346,9 @@ The following table lists the configurable parameters of the Smartmetserver char
 | `hpa.behavior` | Advanced scaling behavior configuration (optional) | `null` |
 | `hpa.behavior.scaleDown` | Scale down behavior policies and stabilization | `null` |
 | `hpa.behavior.scaleUp` | Scale up behavior policies and stabilization | `null` |
+| `podDisruptionBudget.enabled` | Whether PodDisruptionBudget is enabled for high availability | `true` |
+| `podDisruptionBudget.minAvailable` | Minimum number/percentage of pods that must remain available | `1` |
+| `podDisruptionBudget.maxUnavailable` | Maximum number/percentage of pods that can be unavailable (alternative to minAvailable) | `null` |
 | `smartmetConf.server.port` | SmartMet server port | `8080` |
 | `smartmetConf.server.defaultlogging` | Enable default logging | `false` |
 | `smartmetConf.server.logrequests` | Log HTTP requests | `true` |
