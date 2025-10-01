@@ -8,8 +8,7 @@ metadata:
   name: {{ include "smartmetserver.fullname" . }}-ingress
   namespace: {{ .Release.Namespace | quote }}
   labels:
-    {{- include "smartmetserver.labels" . | nindent 4 }}
-    app.kubernetes.io/component: ingress
+    {{- include "smartmetserver.labels.component" (merge (dict "component" "ingress") .) | nindent 4 }}
   annotations:
     {{- with .Values.ingress.annotations }}
     {{- toYaml . | nindent 4 }}

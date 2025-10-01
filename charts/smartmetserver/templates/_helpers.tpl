@@ -38,6 +38,15 @@ helm.sh/chart: {{ include "smartmetserver.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/part-of: {{ include "smartmetserver.name" . }}
+{{- end }}
+
+{{/*
+Common labels with component
+*/}}
+{{- define "smartmetserver.labels.component" -}}
+{{ include "smartmetserver.labels" . }}
+app.kubernetes.io/component: {{ .component }}
 {{- end }}
 
 {{/*

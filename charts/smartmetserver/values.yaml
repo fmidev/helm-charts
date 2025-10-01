@@ -135,6 +135,16 @@ hpa:
   #         value: 100
   #         periodSeconds: 15
 
+# Pod Disruption Budget configuration for high availability
+podDisruptionBudget:
+  enabled: true
+  # Minimum number of pods that must remain available during voluntary disruptions
+  # Use either minAvailable OR maxUnavailable, not both
+  minAvailable: 1
+  # Alternative: specify maximum unavailable pods
+  # maxUnavailable: 1
+  # maxUnavailable: "50%"  # Can also use percentages
+
 smartmetConf:
   # Basic server configuration
   server:
