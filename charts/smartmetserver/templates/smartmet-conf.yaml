@@ -4,10 +4,7 @@ metadata:
   name: {{ include "smartmetserver.fullname" . }}-config
   namespace: {{ .Release.Namespace | quote }}
   labels:
-    app.kubernetes.io/name: {{ include "smartmetserver.name" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/component: configuration
+    {{- include "smartmetserver.labels.component" (dict "Chart" .Chart "Release" .Release "Values" .Values "component" "configuration") | nindent 4 }}
   annotations:
     meta.helm.sh/release-name: {{ .Release.Name }}
     meta.helm.sh/release-namespace: {{ .Release.Namespace }}

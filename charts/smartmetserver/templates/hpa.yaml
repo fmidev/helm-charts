@@ -4,8 +4,7 @@ metadata:
   name: {{ include "smartmetserver.fullname" . }}-hpa
   namespace: {{ .Release.Namespace | quote }}
   labels:
-    {{- include "smartmetserver.labels" . | nindent 4 }}
-    app.kubernetes.io/component: autoscaling
+    {{- include "smartmetserver.labels.component" (dict "Chart" .Chart "Release" .Release "Values" .Values "component" "autoscaling") | nindent 4 }}
   annotations:
     meta.helm.sh/release-name: {{ .Release.Name }}
     meta.helm.sh/release-namespace: {{ .Release.Namespace }}

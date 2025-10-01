@@ -4,7 +4,7 @@ metadata:
   name: {{ include "smartmetserver.fullname" . }}
   namespace: {{ .Release.Namespace | quote }}
   labels:
-    {{- include "smartmetserver.labels" . | nindent 4 }}
+    {{- include "smartmetserver.labels.component" (dict "Chart" .Chart "Release" .Release "Values" .Values "component" "network") | nindent 4 }}
   {{- with .Values.service.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
