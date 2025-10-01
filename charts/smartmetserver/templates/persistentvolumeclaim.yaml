@@ -5,7 +5,7 @@ metadata:
   name: {{ .Values.volume.cephfs.pvc.name }}
   namespace: {{ .Release.Namespace | quote }}
   labels:
-    {{- include "smartmetserver.labels.component" (dict "Chart" .Chart "Release" .Release "Values" .Values "component" "storage") | nindent 4 }}
+    {{- include "smartmetserver.labels.component" (merge (dict "component" "storage") .) | nindent 4 }}
   annotations:
     meta.helm.sh/release-name: {{ .Release.Name }}
     meta.helm.sh/release-namespace: {{ .Release.Namespace }}
@@ -31,7 +31,7 @@ metadata:
   name: {{ .Values.volume.hostPath.pvc.name }}
   namespace: {{ .Release.Namespace | quote }}
   labels:
-    {{- include "smartmetserver.labels.component" (dict "Chart" .Chart "Release" .Release "Values" .Values "component" "storage") | nindent 4 }}
+    {{- include "smartmetserver.labels.component" (merge (dict "component" "storage") .) | nindent 4 }}
   annotations:
     meta.helm.sh/release-name: {{ .Release.Name }}
     meta.helm.sh/release-namespace: {{ .Release.Namespace }}

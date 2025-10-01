@@ -5,7 +5,7 @@ metadata:
   name: {{ include "smartmetserver.fullname" . }}-pdb
   namespace: {{ .Release.Namespace | quote }}
   labels:
-    {{- include "smartmetserver.labels.component" (dict "Chart" .Chart "Release" .Release "Values" .Values "component" "availability") | nindent 4 }}
+    {{- include "smartmetserver.labels.component" (merge (dict "component" "availability") .) | nindent 4 }}
   annotations:
     meta.helm.sh/release-name: {{ .Release.Name }}
     meta.helm.sh/release-namespace: {{ .Release.Namespace }}
