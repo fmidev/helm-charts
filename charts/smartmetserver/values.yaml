@@ -145,6 +145,21 @@ podDisruptionBudget:
   # maxUnavailable: 1
   # maxUnavailable: "50%"  # Can also use percentages
 
+# Security context configuration for pods and containers
+securityContext:
+  # Pod-level security context
+  pod:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+    seLinuxOptions:
+      level: "s0"
+  # Container-level security context
+  container:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+
 smartmetConf:
   # Basic server configuration
   server:
