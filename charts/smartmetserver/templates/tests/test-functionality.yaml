@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "smartmetserver.fullname" . }}-test-functionality"
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "smartmetserver.labels.component" (merge (dict "component" "test") .) | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-weight": "2"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  restartPolicy: Never
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65534
+    fsGroup: 65534
+  containers:
+  - name: functionality-test
+    image: curlimages/curl:latest
+    imagePullPolicy: IfNotPresent
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
+    command:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        echo "Testing SmartMet Server functionality..."
+        
+        BASE_URL="http://{{ include "smartmetserver.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.smartmetserver.svcPort }}"
+        
+        # Test plugin availability
+        echo "1. Testing plugin availability..."
+        
+        # Check if autocomplete plugin is available
+        echo "  - Testing autocomplete plugin..."
+        curl -f -s --max-time 30 "${BASE_URL}/autocomplete" || {
+          echo "Warning: Autocomplete plugin may not be available"
+        }
+        
+        # Check if download plugin is available  
+        echo "  - Testing download plugin..."
+        curl -f -s --max-time 30 "${BASE_URL}/download" || {
+          echo "Warning: Download plugin may not be available"
+        }
+        
+        # Check if timeseries plugin is available
+        echo "  - Testing timeseries plugin..."
+        curl -f -s --max-time 30 "${BASE_URL}/timeseries" || {
+          echo "Warning: Timeseries plugin may not be available"
+        }
+        
+        # Test engine status
+        echo "2. Testing engine status..."
+        QENGINE_STATUS=$(curl -f -s --max-time 30 "${BASE_URL}/admin?what=qengine" | head -n 1)
+        echo "Query engine status: $QENGINE_STATUS"
+        
+        # Test configuration endpoints
+        echo "3. Testing configuration access..."
+        curl -f -s --max-time 30 "${BASE_URL}/admin?what=engines" >/dev/null || {
+          echo "Warning: Could not retrieve engine configuration"
+        }
+        
+        curl -f -s --max-time 30 "${BASE_URL}/admin?what=plugins" >/dev/null || {
+          echo "Warning: Could not retrieve plugin configuration"
+        }
+        
+        echo "Functionality tests completed!"
+    resources:
+      limits:
+        memory: 128Mi
+        cpu: 100m
+      requests:
+        memory: 64Mi
+        cpu: 50m

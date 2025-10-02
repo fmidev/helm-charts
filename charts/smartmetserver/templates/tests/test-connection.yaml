@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "smartmetserver.fullname" . }}-test-connection"
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "smartmetserver.labels.component" (merge (dict "component" "test") .) | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  restartPolicy: Never
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65534
+    fsGroup: 65534
+  containers:
+  - name: connection-test
+    image: curlimages/curl:latest
+    imagePullPolicy: IfNotPresent
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
+    command:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        echo "Testing SmartMet Server connection..."
+        
+        # Test basic connectivity
+        echo "1. Testing basic HTTP connectivity..."
+        curl -f -s --max-time 30 http://{{ include "smartmetserver.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.smartmetserver.svcPort }}/ || {
+          echo "Failed to connect to SmartMet Server"
+          exit 1
+        }
+        
+        # Test admin endpoint for health check
+        echo "2. Testing admin health check..."
+        curl -f -s --max-time 30 "http://{{ include "smartmetserver.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.smartmetserver.svcPort }}/admin?what=qengine" || {
+          echo "Failed to get query engine status"
+          exit 1
+        }
+        
+        # Test version endpoint
+        echo "3. Testing version endpoint..."
+        curl -f -s --max-time 30 "http://{{ include "smartmetserver.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.smartmetserver.svcPort }}/admin?what=version" || {
+          echo "Failed to get version information"
+          exit 1
+        }
+        
+        echo "All connection tests passed successfully!"
+    resources:
+      limits:
+        memory: 128Mi
+        cpu: 100m
+      requests:
+        memory: 64Mi
+        cpu: 50m
