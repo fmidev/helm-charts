@@ -35,6 +35,38 @@ smartmetserver:
       cpu: "0.5"
       memory: 2Gi
 
+# Security configuration
+securityContext:
+  # Pod-level security context
+  pod:
+    runAsNonRoot: true
+    runAsUser: 65534
+    runAsGroup: 65534
+    fsGroup: 65534
+    seLinuxOptions:
+      level: "s0"
+
+  # Container-level security context (for container-specific settings)
+  container:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+
+# Service Account configuration
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the
+  # fullname template
+  name: ""
+  # Automatically mount a ServiceAccount's API credentials
+  automountServiceAccountToken: false
+
 # Service configuration
 service:
   type: ClusterIP
@@ -102,7 +134,9 @@ volume:
     # PV/PVC configuration for CephFS
     pv:
       name: smartmet-data-pv
-      capacity: 10Ti  # Metadata only for existing volumes - adjust to match your actual volume size
+      # Metadata only for existing volumes - adjust to match your actual
+      # volume size
+      capacity: 10Ti
       fsName: smartmet_data
       rootPath: /
       clusterID: smartmet-ceph
@@ -110,7 +144,8 @@ volume:
       secretNamespace: ceph-csi
     pvc:
       name: smartmet-data-pvc
-      capacity: 10Ti  # Must match PV capacity - adjust to match your actual volume size
+      # Must match PV capacity - adjust to match your actual volume size
+      capacity: 10Ti
       # For dynamic provisioning, specify storageClassName
       storageClassName: csi-cephfs
 
@@ -138,8 +173,8 @@ hpa:
 # Pod Disruption Budget configuration for high availability
 podDisruptionBudget:
   enabled: true
-  # Minimum number of pods that must remain available during voluntary disruptions
-  # Use either minAvailable OR maxUnavailable, not both
+  # Minimum number of pods that must remain available during voluntary
+  # disruptions. Use either minAvailable OR maxUnavailable, not both
   minAvailable: 1
   # Alternative: specify maximum unavailable pods
   # maxUnavailable: 1

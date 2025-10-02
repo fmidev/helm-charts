@@ -56,3 +56,14 @@ Selector labels
 app.kubernetes.io/name: {{ include "smartmetserver.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "smartmetserver.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "smartmetserver.fullname" .) .Values.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.serviceAccount.name }}
+{{- end }}
+{{- end }}

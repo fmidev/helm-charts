@@ -18,10 +18,9 @@ spec:
       labels:
         {{- include "smartmetserver.selectorLabels" . | nindent 8 }}
     spec:
+      serviceAccountName: {{ include "smartmetserver.serviceAccountName" . }}
       securityContext:
-        runAsNonRoot: true
-        seLinuxOptions:
-          level: "s0"
+        {{- toYaml .Values.securityContext.pod | nindent 8 }}
       containers:
       - name: {{.Values.smartmetserver.name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -30,8 +29,7 @@ spec:
         {{- end }}
         command: ["/usr/sbin/smartmetd"]
         securityContext:
-          readOnlyRootFilesystem: true
-          allowPrivilegeEscalation: false
+          {{- toYaml .Values.securityContext.container | nindent 10 }}
         ports:
         - containerPort: {{ .Values.smartmetserver.containerPort }}
         volumeMounts:
