@@ -46,13 +46,10 @@ securityContext:
     seLinuxOptions:
       level: "s0"
   
-  # Container-level security context
+  # Container-level security context (for container-specific settings)
   container:
     readOnlyRootFilesystem: true
     allowPrivilegeEscalation: false
-    runAsNonRoot: true
-    runAsUser: 65534
-    runAsGroup: 65534
     capabilities:
       drop:
         - ALL

@@ -376,9 +376,6 @@ The following table lists the configurable parameters of the Smartmetserver char
 | `securityContext.pod.seLinuxOptions.level` | SELinux security level | `s0` |
 | `securityContext.container.readOnlyRootFilesystem` | Make container root filesystem read-only | `true` |
 | `securityContext.container.allowPrivilegeEscalation` | Allow privilege escalation | `false` |
-| `securityContext.container.runAsNonRoot` | Enforce non-root execution at container level | `true` |
-| `securityContext.container.runAsUser` | User ID for container security context | `65534` |
-| `securityContext.container.runAsGroup` | Group ID for container security context | `65534` |
 | `securityContext.container.capabilities.drop` | Linux capabilities to drop | `["ALL"]` |
 | `serviceAccount.create` | Create a dedicated ServiceAccount | `true` |
 | `serviceAccount.automountServiceAccountToken` | Automatically mount ServiceAccount token | `false` |
@@ -412,9 +409,6 @@ securityContext:
   container:
     readOnlyRootFilesystem: true      # Prevents root filesystem writes
     allowPrivilegeEscalation: false   # Blocks privilege escalation
-    runAsNonRoot: true                # Container-level non-root enforcement
-    runAsUser: 65534                  # Container user ID
-    runAsGroup: 65534                 # Container group ID
     capabilities:
       drop: ["ALL"]                   # Drops all Linux capabilities
 ```
@@ -440,9 +434,7 @@ You can customize security settings for your specific requirements:
 helm upgrade --install smartmetserver fmi/smartmetserver \
   --namespace smartmetserver --create-namespace \
   --set securityContext.pod.runAsUser=1001 \
-  --set securityContext.pod.runAsGroup=1001 \
-  --set securityContext.container.runAsUser=1001 \
-  --set securityContext.container.runAsGroup=1001
+  --set securityContext.pod.runAsGroup=1001
 ```
 
 **Using Existing ServiceAccount:**
@@ -461,8 +453,10 @@ securityContext:
     runAsGroup: 1001
     fsGroup: 1001
   container:
-    runAsUser: 1001
-    runAsGroup: 1001
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop: ["ALL"]
 
 serviceAccount:
   create: true
