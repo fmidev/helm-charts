@@ -35,6 +35,40 @@ smartmetserver:
       cpu: "0.5"
       memory: 2Gi
 
+# Security configuration
+securityContext:
+  # Pod-level security context
+  pod:
+    runAsNonRoot: true
+    runAsUser: 65534
+    runAsGroup: 65534
+    fsGroup: 65534
+    seLinuxOptions:
+      level: "s0"
+  
+  # Container-level security context
+  container:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    runAsUser: 65534
+    runAsGroup: 65534
+    capabilities:
+      drop:
+        - ALL
+
+# Service Account configuration
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+  # Automatically mount a ServiceAccount's API credentials
+  automountServiceAccountToken: false
+
 # Service configuration
 service:
   type: ClusterIP
