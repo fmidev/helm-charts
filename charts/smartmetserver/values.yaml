@@ -18,14 +18,26 @@ smartmetserver:
   livenessProbe:
     initialDelaySeconds: 10
     periodSeconds: 10
+    # HTTP health check configuration (disabled by default for backward compatibility)
+    httpGet:
+      enabled: false
+      path: /admin?what=qengine
   readinessProbe:
     initialDelaySeconds: 10
     periodSeconds: 10
     failureThreshold: 5
+    # HTTP health check configuration (disabled by default for backward compatibility)
+    httpGet:
+      enabled: false
+      path: /admin?what=qengine
   startupProbe:
     initialDelaySeconds: 10
     periodSeconds: 10
     failureThreshold: 5
+    # HTTP health check configuration (disabled by default for backward compatibility)
+    httpGet:
+      enabled: false
+      path: /admin?what=qengine
   # Resource limits and requests for the container
   resources:
     limits:

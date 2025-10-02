@@ -369,6 +369,29 @@ The following table lists the configurable parameters of the Smartmetserver char
 | `smartmetserver.resources.limits.cpu` | CPU limit for the container | `2` |
 | `smartmetserver.resources.requests.memory` | Memory request for the container | `2Gi` |
 | `smartmetserver.resources.requests.cpu` | CPU request for the container | `0.5` |
+| `serviceMonitor.enabled` | Enable Prometheus ServiceMonitor for metrics collection | `false` |
+| `serviceMonitor.interval` | Prometheus scraping interval | `30s` |
+| `serviceMonitor.scrapeTimeout` | Prometheus scraping timeout | `10s` |
+| `serviceMonitor.path` | Metrics endpoint path | `/metrics` |
+| `serviceMonitor.honorLabels` | Honor labels from the target | `false` |
+| `serviceMonitor.labels` | Additional labels for the ServiceMonitor | `{}` |
+| `serviceMonitor.annotations` | Additional annotations for the ServiceMonitor | `{}` |
+| `serviceMonitor.metricRelabelings` | Metric relabelings to apply | `[]` |
+| `serviceMonitor.relabelings` | Target relabelings to apply | `[]` |
+| `serviceMonitor.targetLabels` | Target labels to add to scraped metrics | `[]` |
+| `serviceMonitor.namespaceSelector` | Namespace selector for cross-namespace monitoring | `{}` |
+| `networkPolicy.enabled` | Enable NetworkPolicy for network security | `false` |
+| `networkPolicy.annotations` | Additional annotations for the NetworkPolicy | `{}` |
+| `networkPolicy.ingress.enabled` | Enable ingress rules in NetworkPolicy | `true` |
+| `networkPolicy.ingress.rules` | Custom ingress rules (uses sensible defaults if empty) | `[]` |
+| `networkPolicy.egress.enabled` | Enable egress rules in NetworkPolicy | `true` |
+| `networkPolicy.egress.rules` | Custom egress rules (uses sensible defaults if empty) | `[]` |
+| `smartmetserver.livenessProbe.httpGet.enabled` | Enable HTTP health checks for liveness probe | `false` |
+| `smartmetserver.livenessProbe.httpGet.path` | HTTP path for liveness probe | `/admin?what=qengine` |
+| `smartmetserver.readinessProbe.httpGet.enabled` | Enable HTTP health checks for readiness probe | `false` |
+| `smartmetserver.readinessProbe.httpGet.path` | HTTP path for readiness probe | `/admin?what=qengine` |
+| `smartmetserver.startupProbe.httpGet.enabled` | Enable HTTP health checks for startup probe | `false` |
+| `smartmetserver.startupProbe.httpGet.path` | HTTP path for startup probe | `/admin?what=qengine` |
 
 
 ## Resource Configuration
@@ -510,4 +533,253 @@ plugins:
         configfile = "plugins/edr.conf";
     };
 };
+```
+
+## Observability and Monitoring
+
+The SmartMet Server chart includes comprehensive observability features for production monitoring and operational excellence.
+
+### ServiceMonitor for Prometheus
+
+Enable Prometheus metrics collection with ServiceMonitor:
+
+**Helm Command:**
+```bash
+helm upgrade --install smartmetserver fmi/smartmetserver \
+  --namespace smartmetserver --create-namespace \
+  --set serviceMonitor.enabled=true \
+  --set serviceMonitor.interval=30s \
+  --set serviceMonitor.path=/metrics
+```
+
+**Values YAML:**
+```yaml
+serviceMonitor:
+  enabled: true
+  interval: 30s          # Scraping interval
+  scrapeTimeout: 10s     # Scraping timeout
+  path: /metrics         # Metrics endpoint path
+  honorLabels: false     # Honor labels from target
+  # Additional labels for the ServiceMonitor
+  labels:
+    team: weather-services
+  # Metric relabelings to modify scraped metrics
+  metricRelabelings:
+    - sourceLabels: [__name__]
+      regex: 'unwanted_metric.*'
+      action: drop
+```
+
+### Network Security with NetworkPolicy
+
+Control network traffic with NetworkPolicy:
+
+**Helm Command:**
+```bash
+helm upgrade --install smartmetserver fmi/smartmetserver \
+  --namespace smartmetserver --create-namespace \
+  --set networkPolicy.enabled=true
+```
+
+**Values YAML:**
+```yaml
+networkPolicy:
+  enabled: true
+  ingress:
+    enabled: true
+    # Custom ingress rules (optional - defaults provided)
+    rules:
+      - from:
+          - podSelector:
+              matchLabels:
+                app: api-gateway
+        ports:
+          - protocol: TCP
+            port: 8080
+  egress:
+    enabled: true
+    # Custom egress rules (optional - defaults provided)
+    rules:
+      - to: []
+        ports:
+          - protocol: TCP
+            port: 443  # HTTPS
+```
+
+### HTTP Health Checks
+
+Enable HTTP-based health checks for better monitoring:
+
+**Helm Command:**
+```bash
+helm upgrade --install smartmetserver fmi/smartmetserver \
+  --namespace smartmetserver --create-namespace \
+  --set smartmetserver.livenessProbe.httpGet.enabled=true \
+  --set smartmetserver.readinessProbe.httpGet.enabled=true \
+  --set smartmetserver.startupProbe.httpGet.enabled=true
+```
+
+**Values YAML:**
+```yaml
+smartmetserver:
+  livenessProbe:
+    httpGet:
+      enabled: true
+      path: /admin?what=qengine  # SmartMet health endpoint
+  readinessProbe:
+    httpGet:
+      enabled: true
+      path: /admin?what=qengine
+  startupProbe:
+    httpGet:
+      enabled: true
+      path: /admin?what=qengine
+```
+
+### Grafana Dashboard
+
+The chart includes a pre-configured Grafana dashboard for monitoring SmartMet Server:
+
+- **Location**: `dashboards/smartmetserver-dashboard.json`
+- **Features**: CPU/Memory usage, pod status, container restarts
+- **Variables**: Namespace selector for multi-environment support
+
+Import the dashboard into Grafana or use it with dashboard provisioning:
+
+```yaml
+# Grafana dashboard provisioning
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smartmetserver-dashboard
+  namespace: monitoring
+data:
+  smartmetserver-dashboard.json: |
+    {{ .Files.Get "dashboards/smartmetserver-dashboard.json" | indent 4 }}
+```
+
+### Automated Testing
+
+The chart includes comprehensive test suites:
+
+**Run Connection Tests:**
+```bash
+helm test smartmetserver --namespace smartmetserver
+```
+
+**Test Templates:**
+- `test-connection.yaml`: Basic connectivity and health endpoint testing
+- `test-functionality.yaml`: Plugin availability and API endpoint validation
+
+**Custom Test Configuration:**
+```yaml
+# Tests are enabled by default and include:
+# - HTTP connectivity testing
+# - Health endpoint validation (/admin?what=qengine)
+# - Version endpoint testing (/admin?what=version)
+# - Plugin availability checks
+```
+
+### Complete Observability Setup
+
+**Production-Ready Monitoring:**
+```yaml
+# Complete observability configuration
+serviceMonitor:
+  enabled: true
+  interval: 15s
+  path: /metrics
+  labels:
+    team: weather-services
+    environment: production
+
+networkPolicy:
+  enabled: true
+  ingress:
+    enabled: true
+  egress:
+    enabled: true
+
+smartmetserver:
+  livenessProbe:
+    httpGet:
+      enabled: true
+      path: /admin?what=qengine
+  readinessProbe:
+    httpGet:
+      enabled: true
+      path: /admin?what=qengine
+  startupProbe:
+    httpGet:
+      enabled: true
+      path: /admin?what=qengine
+
+# High availability for monitoring
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+hpa:
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 60
+```
+
+### Post-Installation Validation
+
+After installation, the NOTES.txt template provides:
+
+1. **Service Access Instructions**: How to connect to SmartMet Server
+2. **Health Check Commands**: Verify service is running correctly
+3. **API Endpoint Documentation**: Available SmartMet Server endpoints
+4. **Monitoring Information**: ServiceMonitor and dashboard details
+5. **Configuration Details**: ConfigMap and volume information
+
+**Example NOTES.txt Output:**
+```
+1. Get the application URL by running these commands:
+   export POD_NAME=$(kubectl get pods --namespace smartmetserver -l "app.kubernetes.io/name=smartmetserver" -o jsonpath="{.items[0].metadata.name}")
+   kubectl --namespace smartmetserver port-forward $POD_NAME 8080:8080
+
+2. SmartMet Server API endpoints:
+   - Health check: GET /admin?what=qengine
+   - Version info: GET /admin?what=version
+   - Time series data: GET /timeseries?...
+
+3. Monitoring:
+   - Prometheus ServiceMonitor is enabled for metrics collection
+   - Metrics endpoint: /metrics
+```
+
+## Troubleshooting
+
+### Common Observability Issues
+
+**ServiceMonitor not discovered:**
+```bash
+# Check ServiceMonitor labels match Prometheus selector
+kubectl get servicemonitor -n smartmetserver -o yaml
+
+# Verify Prometheus has access to the namespace
+kubectl get rolebinding -n smartmetserver
+```
+
+**NetworkPolicy blocking traffic:**
+```bash
+# Check NetworkPolicy rules
+kubectl get networkpolicy -n smartmetserver -o yaml
+
+# Test connectivity from allowed sources
+kubectl run test-pod --image=curlimages/curl -it --rm -- \
+  curl -f smartmetserver.smartmetserver.svc.cluster.local:80/admin?what=version
+```
+
+**Health checks failing:**
+```bash
+# Check pod logs for health check errors
+kubectl logs -f deployment/smartmetserver -n smartmetserver
+
+# Test health endpoints manually
+kubectl port-forward svc/smartmetserver 8080:80 -n smartmetserver
+curl http://localhost:8080/admin?what=qengine
 ```
