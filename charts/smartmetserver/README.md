@@ -369,7 +369,117 @@ The following table lists the configurable parameters of the Smartmetserver char
 | `smartmetserver.resources.limits.cpu` | CPU limit for the container | `2` |
 | `smartmetserver.resources.requests.memory` | Memory request for the container | `2Gi` |
 | `smartmetserver.resources.requests.cpu` | CPU request for the container | `0.5` |
+| `securityContext.pod.runAsNonRoot` | Enforce non-root execution at pod level | `true` |
+| `securityContext.pod.runAsUser` | User ID for pod security context | `65534` |
+| `securityContext.pod.runAsGroup` | Group ID for pod security context | `65534` |
+| `securityContext.pod.fsGroup` | File system group for volume permissions | `65534` |
+| `securityContext.pod.seLinuxOptions.level` | SELinux security level | `s0` |
+| `securityContext.container.readOnlyRootFilesystem` | Make container root filesystem read-only | `true` |
+| `securityContext.container.allowPrivilegeEscalation` | Allow privilege escalation | `false` |
+| `securityContext.container.runAsNonRoot` | Enforce non-root execution at container level | `true` |
+| `securityContext.container.runAsUser` | User ID for container security context | `65534` |
+| `securityContext.container.runAsGroup` | Group ID for container security context | `65534` |
+| `securityContext.container.capabilities.drop` | Linux capabilities to drop | `["ALL"]` |
+| `serviceAccount.create` | Create a dedicated ServiceAccount | `true` |
+| `serviceAccount.automountServiceAccountToken` | Automatically mount ServiceAccount token | `false` |
+| `serviceAccount.annotations` | Annotations for the ServiceAccount | `{}` |
+| `serviceAccount.name` | Name of the ServiceAccount (uses generated name if empty) | `""` |
 
+
+## Security Configuration
+
+The SmartMetServer chart implements comprehensive security hardening following Kubernetes Pod Security Standards and security best practices. All security settings are configurable via values.yaml with secure defaults.
+
+### Default Security Context
+
+The chart applies restrictive security contexts at both pod and container levels:
+
+**Pod Level Security:**
+```yaml
+securityContext:
+  pod:
+    runAsNonRoot: true     # Enforces non-root execution
+    runAsUser: 65534       # Uses 'nobody' user (non-privileged)
+    runAsGroup: 65534      # Uses 'nobody' group  
+    fsGroup: 65534         # File system group for volume permissions
+    seLinuxOptions:
+      level: "s0"          # SELinux security level
+```
+
+**Container Level Security:**
+```yaml
+securityContext:
+  container:
+    readOnlyRootFilesystem: true      # Prevents root filesystem writes
+    allowPrivilegeEscalation: false   # Blocks privilege escalation
+    runAsNonRoot: true                # Container-level non-root enforcement
+    runAsUser: 65534                  # Container user ID
+    runAsGroup: 65534                 # Container group ID
+    capabilities:
+      drop: ["ALL"]                   # Drops all Linux capabilities
+```
+
+### Dedicated ServiceAccount
+
+The chart creates a dedicated ServiceAccount with minimal permissions:
+
+```yaml
+serviceAccount:
+  create: true                           # Creates dedicated ServiceAccount
+  automountServiceAccountToken: false   # Disables token auto-mounting for security
+  annotations: {}                        # Optional annotations
+  name: ""                              # Uses generated name by default
+```
+
+### Custom Security Configuration
+
+You can customize security settings for your specific requirements:
+
+**Custom User/Group IDs:**
+```bash
+helm upgrade --install smartmetserver fmi/smartmetserver \
+  --namespace smartmetserver --create-namespace \
+  --set securityContext.pod.runAsUser=1001 \
+  --set securityContext.pod.runAsGroup=1001 \
+  --set securityContext.container.runAsUser=1001 \
+  --set securityContext.container.runAsGroup=1001
+```
+
+**Using Existing ServiceAccount:**
+```bash
+helm upgrade --install smartmetserver fmi/smartmetserver \
+  --namespace smartmetserver --create-namespace \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=my-existing-serviceaccount
+```
+
+**Values YAML Configuration:**
+```yaml
+securityContext:
+  pod:
+    runAsUser: 1001
+    runAsGroup: 1001
+    fsGroup: 1001
+  container:
+    runAsUser: 1001
+    runAsGroup: 1001
+
+serviceAccount:
+  create: true
+  annotations:
+    iam.gke.io/gcp-service-account: "smartmet@project.iam.gserviceaccount.com"
+```
+
+### Security Benefits
+
+The implemented security configuration provides:
+
+- **Zero-privilege execution**: Containers run as non-root user with no Linux capabilities
+- **Filesystem protection**: Read-only root filesystem prevents runtime modifications  
+- **Identity isolation**: Dedicated ServiceAccount with no API token access
+- **Volume security**: Proper file system group ownership for mounted data
+- **Defense in depth**: Security enforced at both pod and container levels
+- **Compliance ready**: Follows Kubernetes Pod Security Standards (Restricted profile)
 
 ## Resource Configuration
 
