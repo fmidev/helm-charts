@@ -3,6 +3,34 @@
 ## Repository Overview
 This repository contains organization-wide Helm charts for deploying applications to Kubernetes clusters. All charts should follow industry-standard best practices for both Helm and Kubernetes deployments, with a strong emphasis on readability, maintainability, and security.
 
+## Development Workflow and Tool Usage
+
+### Required Tools and Setup
+- **Helm 3.x**: Use `helm version` to verify installation
+- **kubectl**: For Kubernetes cluster interaction
+- **yq**: For YAML processing in CI/CD workflows
+- **chart-testing (ct)**: For automated chart testing
+- **helm-unittest**: For unit testing chart templates
+
+### Preferred Development Commands
+When working with charts, always use these commands:
+```bash
+# Install dependencies before testing
+helm dependency update charts/[chart-name]/
+
+# Lint charts before committing
+helm lint charts/[chart-name]/
+
+# Test template rendering
+helm template [release-name] charts/[chart-name]/ --debug
+
+# Validate with dry-run
+helm install [release-name] charts/[chart-name]/ --dry-run --debug
+
+# Run unit tests (if helm-unittest is available)
+helm unittest charts/[chart-name]/
+```
+
 ## Chart Development Guidelines
 
 ### Chart Structure Standards
@@ -196,7 +224,47 @@ Create a default fully qualified app name.
 {{- end }}
 {{- end }}
 {{- end }}
+
+{{/*
+Create chart version as used by the chart label.
+*/}}
+{{- define "chart.chart" -}}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Common labels
+*/}}
+{{- define "chart.labels" -}}
+helm.sh/chart: {{ include "chart.chart" . }}
+{{ include "chart.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "chart.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "chart.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "chart.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "chart.fullname" .) .Values.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.serviceAccount.name }}
+{{- end }}
+{{- end }}
 ```
+
+**Note**: Many existing charts in this repository may not have `_helpers.tpl` files yet. When updating charts, gradually migrate to use these standard helper functions for consistency.
 
 ### Validation and Testing
 
@@ -234,6 +302,44 @@ When creating or modifying charts:
 6. **Plan for Scale**: Design for horizontal scaling and high availability
 7. **Maintain Compatibility**: Ensure backward compatibility when possible
 
+### Automation and Tool Integration
+
+#### Scaffolding New Charts
+When creating new charts, use Helm's scaffolding:
+```bash
+# Create new chart with standard structure
+helm create charts/[chart-name]
+
+# Remove example files and customize for FMI standards
+rm charts/[chart-name]/templates/tests/test-connection.yaml
+```
+
+#### Dependency Management
+Always use Helm's dependency management:
+```bash
+# Add dependencies to Chart.yaml, then run:
+helm dependency update charts/[chart-name]/
+
+# Lock specific versions in Chart.lock for reproducible builds
+```
+
+#### Validation Workflow
+Before committing changes:
+```bash
+# 1. Lint the chart
+helm lint charts/[chart-name]/
+
+# 2. Test template rendering
+helm template test-release charts/[chart-name]/ --debug
+
+# 3. Validate with multiple value sets
+helm template test-release charts/[chart-name]/ -f charts/[chart-name]/values.yaml
+helm template test-release charts/[chart-name]/ -f charts/[chart-name]/values-prod.yaml
+
+# 4. Check for security issues (if tools available)
+# Use tools like kubesec, kube-score, or polaris for additional validation
+```
+
 ## Common Anti-Patterns to Avoid
 
 - Hard-coded values in templates
@@ -262,3 +368,50 @@ Before submitting charts for review:
 - [ ] NOTES.txt provides useful information
 
 This repository aims to provide reliable, secure, and maintainable Helm charts that follow industry best practices and enable efficient application deployment across our Kubernetes infrastructure.
+
+## Troubleshooting and Debugging
+
+### Common Issues and Solutions
+
+#### Template Rendering Problems
+```bash
+# Debug template issues with verbose output
+helm template [release-name] charts/[chart-name]/ --debug --dry-run
+
+# Check specific template files
+helm template [release-name] charts/[chart-name]/ -s templates/deployment.yaml
+```
+
+#### Dependency Issues
+```bash
+# Clean and rebuild dependencies
+rm charts/[chart-name]/Chart.lock
+rm -rf charts/[chart-name]/charts/
+helm dependency update charts/[chart-name]/
+```
+
+#### Value Validation
+```bash
+# Test with specific values
+helm template [release-name] charts/[chart-name]/ --set key=value
+
+# Validate values file syntax
+yq eval '.' charts/[chart-name]/values.yaml
+```
+
+### Development Best Practices for Copilot
+
+- **Always test changes incrementally**: Run `helm template` after each template modification
+- **Use descriptive variable names**: Make template logic self-documenting
+- **Validate YAML syntax**: Use `yq` or `yamllint` to catch syntax errors early
+- **Check resource limits**: Ensure all containers have proper resource constraints
+- **Test edge cases**: Validate behavior with minimal and maximal configurations
+- **Document assumptions**: Add comments explaining complex template logic
+
+### Repository-Specific Patterns
+
+- **OpenShift Compatibility**: Many charts support both Kubernetes and OpenShift
+- **FMI Standards**: Follow organization naming conventions and security policies
+- **Environment Flexibility**: Support multiple deployment environments (dev/staging/prod)
+- **Monitoring Integration**: Include ServiceMonitor templates for Prometheus
+- **Security Context**: Always use restrictive security contexts with non-root users
