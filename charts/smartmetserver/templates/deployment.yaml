@@ -49,19 +49,40 @@ spec:
           subPath: "querydata.conf"
           name: smartmet-querydata-config
         livenessProbe:
+          {{- if .Values.smartmetserver.livenessProbe.httpGet.enabled }}
+          httpGet:
+            path: {{ .Values.smartmetserver.livenessProbe.httpGet.path }}
+            port: {{ .Values.smartmetserver.containerPort }}
+            scheme: HTTP
+          {{- else }}
           tcpSocket:
             port: {{ .Values.smartmetserver.containerPort }}
+          {{- end }}
           initialDelaySeconds: {{ .Values.smartmetserver.livenessProbe.initialDelaySeconds }}
           periodSeconds: {{ .Values.smartmetserver.livenessProbe.periodSeconds }}
         readinessProbe:
+          {{- if .Values.smartmetserver.readinessProbe.httpGet.enabled }}
+          httpGet:
+            path: {{ .Values.smartmetserver.readinessProbe.httpGet.path }}
+            port: {{ .Values.smartmetserver.containerPort }}
+            scheme: HTTP
+          {{- else }}
           tcpSocket:
             port: {{ .Values.smartmetserver.containerPort }}
+          {{- end }}
           initialDelaySeconds: {{ .Values.smartmetserver.readinessProbe.initialDelaySeconds }}
           periodSeconds: {{ .Values.smartmetserver.readinessProbe.periodSeconds }}
           failureThreshold: {{ .Values.smartmetserver.readinessProbe.failureThreshold }}
         startupProbe:
+          {{- if .Values.smartmetserver.startupProbe.httpGet.enabled }}
+          httpGet:
+            path: {{ .Values.smartmetserver.startupProbe.httpGet.path }}
+            port: {{ .Values.smartmetserver.containerPort }}
+            scheme: HTTP
+          {{- else }}
           tcpSocket:
             port: {{ .Values.smartmetserver.containerPort }}
+          {{- end }}
           initialDelaySeconds: {{ .Values.smartmetserver.startupProbe.initialDelaySeconds }}
           periodSeconds: {{ .Values.smartmetserver.startupProbe.periodSeconds }}
           failureThreshold: {{ .Values.smartmetserver.startupProbe.failureThreshold }}

@@ -1,0 +1,66 @@
+1. Get the application URL by running these commands:
+{{- if .Values.ingress.enabled }}
+{{- range $host := .Values.ingress.hosts }}
+  {{- range .paths }}
+  http{{ if $.Values.ingress.tls.enabled }}s{{ end }}://{{ $host }}{{ .path }}
+  {{- end }}
+{{- end }}
+{{- else if contains "NodePort" .Values.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "smartmetserver.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.service.type }}
+     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+           You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "smartmetserver.fullname" . }}'
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "smartmetserver.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$SERVICE_IP:{{ .Values.smartmetserver.svcPort }}
+{{- else if contains "ClusterIP" .Values.service.type }}
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "{{ include "smartmetserver.selectorLabels" . | replace "\n" "," | replace " " "" }}" -o jsonpath="{.items[0].metadata.name}")
+  export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+  echo "Visit http://127.0.0.1:8080 to use your application"
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
+{{- end }}
+
+2. Check the SmartMet Server status:
+   kubectl get pods -l "{{ include "smartmetserver.selectorLabels" . | replace "\n" "," | replace " " "" }}" -n {{ .Release.Namespace }}
+
+3. View application logs:
+   kubectl logs -f -l "{{ include "smartmetserver.selectorLabels" . | replace "\n" "," | replace " " "" }}" -n {{ .Release.Namespace }}
+
+4. SmartMet Server API endpoints:
+   Once the service is accessible, you can explore these common endpoints:
+   - Health check: GET /admin?what=qengine
+   - Version info: GET /admin?what=version
+   - Time series data: GET /timeseries?...
+   - WMS services: GET /wms?...
+   - Download services: GET /download?...
+
+5. Configuration:
+   - SmartMet configuration is mounted from ConfigMap: {{ include "smartmetserver.fullname" . }}-config
+   - QueryData configuration is mounted from ConfigMap: {{ include "smartmetserver.fullname" . }}-querydata-config
+   - Data volume: {{ .Values.volume.type }} ({{ if .Values.volume.readOnly }}read-only{{ else }}read-write{{ end }})
+
+{{- if .Values.serviceMonitor.enabled }}
+6. Monitoring:
+   - Prometheus ServiceMonitor is enabled for metrics collection
+   - Metrics endpoint: {{ .Values.serviceMonitor.path | default "/metrics" }}
+{{- end }}
+
+{{- if .Values.networkPolicy.enabled }}
+7. Network Security:
+   - NetworkPolicy is enabled to control pod network traffic
+   - Review the policy configuration in values.yaml for ingress/egress rules
+{{- end }}
+
+{{- if .Values.podDisruptionBudget.enabled }}
+8. High Availability:
+   - Pod Disruption Budget is configured with minAvailable: {{ .Values.podDisruptionBudget.minAvailable | default "1" }}
+   - Horizontal Pod Autoscaler scales between {{ .Values.hpa.minReplicas }}-{{ .Values.hpa.maxReplicas }} replicas
+{{- end }}
+
+For more information about SmartMet Server, visit:
+- Documentation: https://github.com/fmidev/smartmet-server
+- Chart repository: {{ .Chart.Home | default "https://github.com/fmidev/helm-charts" }}
+
+To uninstall this release:
+  helm uninstall {{ .Release.Name }} -n {{ .Release.Namespace }}

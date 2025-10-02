@@ -18,14 +18,26 @@ smartmetserver:
   livenessProbe:
     initialDelaySeconds: 10
     periodSeconds: 10
+    # HTTP health check configuration (disabled by default for backward compatibility)
+    httpGet:
+      enabled: false
+      path: /admin?what=qengine
   readinessProbe:
     initialDelaySeconds: 10
     periodSeconds: 10
     failureThreshold: 5
+    # HTTP health check configuration (disabled by default for backward compatibility)
+    httpGet:
+      enabled: false
+      path: /admin?what=qengine
   startupProbe:
     initialDelaySeconds: 10
     periodSeconds: 10
     failureThreshold: 5
+    # HTTP health check configuration (disabled by default for backward compatibility)
+    httpGet:
+      enabled: false
+      path: /admin?what=qengine
   # Resource limits and requests for the container
   resources:
     limits:
@@ -144,6 +156,61 @@ podDisruptionBudget:
   # Alternative: specify maximum unavailable pods
   # maxUnavailable: 1
   # maxUnavailable: "50%"  # Can also use percentages
+
+# ServiceMonitor configuration for Prometheus metrics collection
+serviceMonitor:
+  enabled: false
+  # Prometheus scraping interval
+  interval: 30s
+  # Scraping timeout
+  scrapeTimeout: 10s
+  # Metrics endpoint path
+  path: /metrics
+  # Honor labels from the target
+  honorLabels: false
+  # Additional labels for the ServiceMonitor
+  labels: {}
+  # Additional annotations for the ServiceMonitor
+  annotations: {}
+  # Metric relabelings
+  metricRelabelings: []
+  # Target relabelings
+  relabelings: []
+  # Target labels to add to scraped metrics
+  targetLabels: []
+  # Namespace selector for cross-namespace monitoring
+  namespaceSelector: {}
+
+# NetworkPolicy configuration for network security
+networkPolicy:
+  enabled: false
+  # Additional annotations for the NetworkPolicy
+  annotations: {}
+  # Ingress rules configuration
+  ingress:
+    enabled: true
+    # Custom ingress rules (if not specified, sensible defaults will be used)
+    rules: []
+    # Example custom rules:
+    # rules:
+    #   - from:
+    #       - podSelector:
+    #           matchLabels:
+    #             app: allowed-app
+    #     ports:
+    #       - protocol: TCP
+    #         port: 8080
+  # Egress rules configuration
+  egress:
+    enabled: true
+    # Custom egress rules (if not specified, sensible defaults will be used)
+    rules: []
+    # Example custom rules:
+    # rules:
+    #   - to: []
+    #     ports:
+    #       - protocol: TCP
+    #         port: 443
 
 smartmetConf:
   # Basic server configuration
