@@ -224,39 +224,26 @@ smartmetConf:
   # 
   # 1. Structured configuration (recommended) - Define producers with levels:
   #
-  # querydata:
-  #   # Global settings
-  #   basePath: "/smartmet/data"        # Default base directory
-  #   defaultArea: "world"               # Default geographical area
-  #   
-  #   # Global defaults for all producers
-  #   defaults:
-  #     forecast: true
-  #     type: "grid"
-  #     refresh_interval_secs: 60
-  #     number_to_keep: 4
-  #     multifile: false
-  #     alias: ""                        # Empty string = no alias line
-  #   
-  #   # Producer definitions
-  #   producers:
-  #     - name: ecmwf
-  #       area: "kenya"                  # Override default area
-  #       forecast: true                 # Optional producer-level override
-  #       levels:
-  #         surface:
-  #           alias: ["ecmwf"]           # Can be string or array
-  #           number_to_keep: 4          # Level-specific override
-  #         pressure:
-  #           alias: "ecmwf_pressure"
-  #           number_to_keep: 2
-  #           multifile: null            # null = omit multifile line
-  #     
-  #     - name: gfs
-  #       levels:
-  #         surface:
-  #           alias: ["gfs"]
-  #         pressure: {}                 # Uses all defaults
+  querydata:
+    # Global settings
+    basePath: "/smartmet/data"
+    defaultArea: "world"
+    
+    # Global defaults for all producers
+    defaults:
+      forecast: true
+      type: "grid"
+      refresh_interval_secs: 60
+      number_to_keep: 4
+      multifile: false
+      alias: ""  # Empty string = no alias line
+    
+    # Producer definitions
+    producers:
+      - name: demo
+        levels:
+          surface:
+            number_to_keep: 1
   #
   # 2. Raw configuration - Provide complete config as a string:
   #
@@ -273,19 +260,19 @@ smartmetConf:
   #
   # 3. Legacy string format (backward compatible):
   #
-  querydata: |
-    @include "querydata/translations.conf"
-    verbose = true;
-    valid_points_cache_dir = "/var/smartmet/cache/validpoints";
-    producers = ["demo_surface"];
-    demo_surface:
-    {
-        directory = "/smartmet/data/demo/surface/querydata";
-        pattern = ".*demo.*\.sqd$";
-        forecast = true;
-        type = "grid";
-        leveltype = "surface";
-        refresh_interval_secs = 60;
-        number_to_keep = 1;
-        multifile = false;
-    };
+  # querydata: |
+  #   @include "querydata/translations.conf"
+  #   verbose = true;
+  #   valid_points_cache_dir = "/var/smartmet/cache/validpoints";
+  #   producers = ["demo_surface"];
+  #   demo_surface:
+  #   {
+  #       directory = "/smartmet/data/demo/surface/querydata";
+  #       pattern = ".*demo.*\.sqd$";
+  #       forecast = true;
+  #       type = "grid";
+  #       leveltype = "surface";
+  #       refresh_interval_secs = 60;
+  #       number_to_keep = 1;
+  #       multifile = false;
+  #   };

@@ -363,7 +363,17 @@ The following table lists the configurable parameters of the Smartmetserver char
 | `smartmetConf.pools.fastpool.maxrequeuesize` | Maximum requeue size for fast pool | `100` |
 | `smartmetConf.engines` | List of engines to enable | `[sputnik, contour, geonames, gis, querydata, grid]` |
 | `smartmetConf.plugins` | List of plugins to enable | `[autocomplete, download, edr, timeseries, wms]` |
-| `smartmetConf.querydata` | Custom querydata.conf content (optional) | `null` |
+| `smartmetConf.querydata` | QueryData engine configuration (supports structured, raw, or legacy string format) | See below |
+| `smartmetConf.querydata.basePath` | Base directory path for querydata files | `"/smartmet/data"` |
+| `smartmetConf.querydata.defaultArea` | Default geographical area for producers | `"world"` |
+| `smartmetConf.querydata.defaults.forecast` | Default forecast setting for all producers | `true` |
+| `smartmetConf.querydata.defaults.type` | Default type for all producers | `"grid"` |
+| `smartmetConf.querydata.defaults.refresh_interval_secs` | Default refresh interval in seconds | `60` |
+| `smartmetConf.querydata.defaults.number_to_keep` | Default number of files to keep | `4` |
+| `smartmetConf.querydata.defaults.multifile` | Default multifile setting | `false` |
+| `smartmetConf.querydata.defaults.alias` | Default alias (empty string = no alias line) | `""` |
+| `smartmetConf.querydata.producers` | List of producer configurations | `[{name: demo, levels: {surface: {number_to_keep: 1}}}]` |
+| `smartmetConf.querydata.raw` | Raw querydata configuration string (alternative to structured config) | `null` |
 | `smartmetserver.resources` | Resource limits and requests for the container | See below |
 | `smartmetserver.resources.limits.memory` | Memory limit for the container | `4Gi` |
 | `smartmetserver.resources.limits.cpu` | CPU limit for the container | `2` |
