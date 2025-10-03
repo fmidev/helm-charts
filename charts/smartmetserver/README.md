@@ -615,3 +615,144 @@ plugins:
     };
 };
 ```
+
+## QueryData Engine Configuration
+
+The QueryData engine configuration supports three different configuration methods, allowing you to choose the approach that best fits your needs.
+
+### Method 1: Structured Configuration (Recommended)
+
+The structured configuration approach allows you to define producers and levels using YAML structures, with automatic generation of the configuration file. This is the recommended approach as it's more maintainable and easier to understand.
+
+**Example:**
+```yaml
+smartmetConf:
+  querydata:
+    # Global settings
+    basePath: "/smartmet/data"
+    defaultArea: "world"
+    
+    # Global defaults for all producers
+    defaults:
+      forecast: true
+      type: "grid"
+      refresh_interval_secs: 60
+      number_to_keep: 4
+      multifile: false
+      alias: ""  # Empty = no alias line generated
+    
+    # Producer definitions
+    producers:
+      - name: ecmwf
+        area: "kenya"
+        levels:
+          surface:
+            alias: ["ecmwf"]
+            number_to_keep: 4
+          pressure:
+            alias: "ecmwf_kenya_pressure"
+            number_to_keep: 2
+            multifile: null  # null = omit multifile line
+      
+      - name: gfs
+        levels:
+          surface:
+            alias: ["gfs"]
+          pressure:
+            alias: ["gfs_pressure"]
+      
+      - name: icon
+        area: "europe"
+        forecast: false
+        levels:
+          surface: {}  # Uses all defaults
+```
+
+**Generated Configuration:**
+```
+producers = ["ecmwf_pressure", "ecmwf_surface", "gfs_pressure", "gfs_surface", "icon_surface"];
+
+ecmwf_surface:
+{
+    alias = ["ecmwf"];
+    directory = "/smartmet/data/ecmwf/kenya/surface/querydata";
+    pattern = ".*_ecmwf_.*_surface\.sqd$";
+    forecast = true;
+    type = "grid";
+    leveltype = "surface";
+    refresh_interval_secs = 60;
+    number_to_keep = 4;
+    multifile = false;
+};
+
+ecmwf_pressure:
+{
+    alias = "ecmwf_kenya_pressure";
+    directory = "/smartmet/data/ecmwf/kenya/pressure/querydata";
+    pattern = ".*_ecmwf_.*_pressure\.sqd$";
+    forecast = true;
+    type = "grid";
+    leveltype = "pressure";
+    refresh_interval_secs = 60;
+    number_to_keep = 2;
+};
+```
+
+#### Configuration Priority
+
+Settings are resolved with the following priority (highest to lowest):
+1. Level-specific setting
+2. Producer-specific setting
+3. Global default
+
+#### Alias Handling
+
+- **Empty string** (`alias: ""`): No alias line is generated
+- **String** (`alias: "ecmwf"`): Generates `alias = "ecmwf";`
+- **Array** (`alias: ["ecmwf"]`): Generates `alias = ["ecmwf"];`
+- **Null** (`alias: null`): Uses parent or global default
+
+#### Multifile Handling
+
+- **Set to value** (`multifile: false`): Generates `multifile = false;`
+- **Set to null** (`multifile: null`): Omits the multifile line entirely
+- **Not set**: Inherits from producer or global defaults
+
+### Method 2: Raw Configuration
+
+Provide the complete configuration as a raw string. Useful for complex configurations or when migrating from existing setups.
+
+```yaml
+smartmetConf:
+  querydata:
+    raw: |
+      @include "querydata/translations.conf"
+      verbose = true;
+      valid_points_cache_dir = "/var/smartmet/cache/validpoints";
+      producers = ["custom_surface"];
+      custom_surface:
+      {
+          directory = "/custom/path/querydata";
+          pattern = ".*custom.*\.sqd$";
+          forecast = true;
+          type = "grid";
+          leveltype = "surface";
+      };
+```
+
+### Method 3: Legacy String Format (Backward Compatible)
+
+The original string-based configuration format is still supported for backward compatibility:
+
+```yaml
+smartmetConf:
+  querydata: |
+    @include "querydata/translations.conf"
+    verbose = true;
+    producers = ["demo_surface"];
+    demo_surface:
+    {
+        directory = "/smartmet/data/demo/surface/querydata";
+        pattern = ".*demo.*\.sqd$";
+    };
+```
