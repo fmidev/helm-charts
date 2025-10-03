@@ -219,16 +219,16 @@ smartmetConf:
     - wms
 
   # QueryData engine configuration
-  # 
+  #
   # You can configure querydata in three ways:
-  # 
+  #
   # 1. Structured configuration (recommended) - Define producers with levels:
   #
   querydata:
     # Global settings
     basePath: "/smartmet/data"
     defaultArea: "world"
-    
+
     # Global defaults for all producers
     defaults:
       forecast: true
@@ -237,7 +237,7 @@ smartmetConf:
       number_to_keep: 4
       multifile: false
       alias: ""  # Empty string = no alias line
-    
+
     # Producer definitions
     producers:
       - name: demo
