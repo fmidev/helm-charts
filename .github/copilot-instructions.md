@@ -18,6 +18,9 @@ When working with charts, always use these commands:
 # Install dependencies before testing
 helm dependency update charts/[chart-name]/
 
+# Lint YAML files for formatting issues (REQUIRED before committing)
+yamllint charts/[chart-name]/
+
 # Lint charts before committing
 helm lint charts/[chart-name]/
 
@@ -30,6 +33,15 @@ helm install [release-name] charts/[chart-name]/ --dry-run --debug
 # Run unit tests (if helm-unittest is available)
 helm unittest charts/[chart-name]/
 ```
+
+### YAML Formatting Requirements
+**CRITICAL:** All YAML files must pass yamllint validation before committing:
+- **No trailing spaces**: Remove all trailing whitespace from lines
+- **Consistent indentation**: Use 2 spaces for indentation
+- **No tabs**: Only use spaces, never tabs
+- **Line length**: Keep lines under 160 characters where possible
+
+Always run `yamllint charts/[chart-name]/` to check for formatting issues before committing changes.
 
 ## Chart Development Guidelines
 

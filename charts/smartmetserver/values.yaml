@@ -218,21 +218,61 @@ smartmetConf:
     - timeseries
     - wms
 
-  # QueryData engine configuration (optional)
-  # If not provided, a default template will be generated
-  querydata: |
-    @include "querydata/translations.conf"
-    verbose = true;
-    valid_points_cache_dir = "/var/smartmet/cache/validpoints";
-    producers = ["demo_surface"];
-    demo_surface:
-    {
-        directory = "/smartmet/data/demo/surface/querydata";
-        pattern = ".*demo.*\.sqd$";
-        forecast = true;
-        type = "grid";
-        leveltype = "surface";
-        refresh_interval_secs = 60;
-        number_to_keep = 1;
-        multifile = false;
-    };
+  # QueryData engine configuration
+  #
+  # You can configure querydata in three ways:
+  #
+  # 1. Structured configuration (recommended) - Define producers with levels:
+  #
+  querydata:
+    # Global settings
+    basePath: "/smartmet/data"
+    defaultArea: "world"
+
+    # Global defaults for all producers
+    defaults:
+      forecast: true
+      type: "grid"
+      refresh_interval_secs: 60
+      number_to_keep: 4
+      multifile: false
+      alias: ""  # Empty string = no alias line
+
+    # Producer definitions
+    producers:
+      - name: demo
+        levels:
+          surface:
+            number_to_keep: 1
+  #
+  # 2. Raw configuration - Provide complete config as a string:
+  #
+  # querydata:
+  #   raw: |
+  #     @include "querydata/translations.conf"
+  #     verbose = true;
+  #     producers = ["custom"];
+  #     custom:
+  #     {
+  #         directory = "/custom/path";
+  #         pattern = ".*\.sqd$";
+  #     };
+  #
+  # 3. Legacy string format (backward compatible):
+  #
+  # querydata: |
+  #   @include "querydata/translations.conf"
+  #   verbose = true;
+  #   valid_points_cache_dir = "/var/smartmet/cache/validpoints";
+  #   producers = ["demo_surface"];
+  #   demo_surface:
+  #   {
+  #       directory = "/smartmet/data/demo/surface/querydata";
+  #       pattern = ".*demo.*\.sqd$";
+  #       forecast = true;
+  #       type = "grid";
+  #       leveltype = "surface";
+  #       refresh_interval_secs = 60;
+  #       number_to_keep = 1;
+  #       multifile = false;
+  #   };
