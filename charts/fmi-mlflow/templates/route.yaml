@@ -1,11 +1,11 @@
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: mlflow
+  name: {{ include "mlflow.fullname" . }}
 spec:
-  host: mlflow-test.apps.ock.fmi.fi
+  host: {{ .Release.Namespace }}.apps.{{ include "environment" . }}.fmi.fi
   port:
-    targetPort: 5000
+    targetPort: {{ .Values.mlflow.servicePort }}
   to:
     kind: Service
     name: mlflow
