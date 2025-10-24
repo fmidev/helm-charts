@@ -23,11 +23,16 @@ objects:
             image: image-registry.openshift-image-registry.svc:5000/mlflow-test/mlflow:v3.4.0
             imagePullPolicy: Always
             env:
-            - name: BACKEND_STORE_URI
+            - name: POSTGRESQL_USER
               valueFrom:
                 secretKeyRef:
-                  name: pg-cluster-app
-                  key: uri
+                  name: {{ .Values.postgresql.secretName }}
+                  key: username
+            - name: POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.postgresql.secretName }}
+                  key: password
             - name: MLFLOW_AUTH_CONFIG_PATH
               value: "/opt/basic-auth.ini"
 
@@ -41,8 +46,8 @@ objects:
               - sh
               - -c
               - |
-                mlflow db upgrade ${BACKEND_STORE_URI}
-                # mlflow db upgrade ${BACKEND_STORE_URI} # NOTE: does users table need updating also?
+                mlflow db upgrade postgresql://$(POSTGRESQL_USER):$(POSTGRESQL_PASSWORD)@{{ .Values.postgresql.clusterName }}-rw.{{ .Release.Namespace }}:5432/{{ .Values.postgresql.database }}
+                # NOTE: does users table need separate migration?
 
             volumeMounts:
               - name: auth-config
