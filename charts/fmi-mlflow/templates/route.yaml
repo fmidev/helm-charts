@@ -1,0 +1,14 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: mlflow
+spec:
+  host: mlflow-test.apps.ock.fmi.fi
+  port:
+    targetPort: 5000
+  to:
+    kind: Service
+    name: mlflow
+    weight: 100
+  tls:
+    termination: edge

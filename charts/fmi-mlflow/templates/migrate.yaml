@@ -1,0 +1,56 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: {{ include "mlflow.fullname" . }}
+  labels:
+    {{- include "mlflow.labels" . | nindent 4 }}
+  annotations:
+    description: Template to upgrade database
+objects:
+- apiVersion: batch/v1
+  kind: Job
+  metadata:
+    {{- include "mlflow.labels" . | nindent 4 }}
+  spec:
+    parallelism: 1
+    completions: 1
+    backoffLimit: 0
+    template:
+      spec:
+        restartPolicy: Never
+        containers:
+          - name: {{ include "mlflow.fullname" . }}
+            image: image-registry.openshift-image-registry.svc:5000/mlflow-test/mlflow:v3.4.0
+            imagePullPolicy: Always
+            env:
+            - name: BACKEND_STORE_URI
+              valueFrom:
+                secretKeyRef:
+                  name: pg-cluster-app
+                  key: uri
+            - name: MLFLOW_AUTH_CONFIG_PATH
+              value: "/opt/basic-auth.ini"
+
+            resources:
+              requests:
+                memory: "1Gi"
+              limits:
+                memory: "2Gi"
+
+            command:
+              - sh
+              - -c
+              - |
+                mlflow db upgrade ${BACKEND_STORE_URI}
+                # mlflow db upgrade ${BACKEND_STORE_URI} # NOTE: does users table need updating also?
+
+            volumeMounts:
+              - name: auth-config
+                mountPath: /opt/
+                readOnly: true
+                #subPath: basic-auth.ini
+
+        volumes:
+          - name: auth-config
+            secret:
+              secretName: mlflow-auth-config # manually created for now

@@ -1,0 +1,1 @@
+echo "MlFlow tracking server installed"

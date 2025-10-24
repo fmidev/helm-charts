@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mlflow.fullname" . }}
+spec:
+  replicas: {{ .Values.mlflow.replicas | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "mlflow.selectorLabels" . | nindent 6 }}
+
+  template:
+    metadata:
+      labels:
+        {{- include "mlflow.labels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ include "mlflow.fullname" . }}
+          image: image-registry.openshift-image-registry.svc:5000/{{ .Release.Namespace }}/{{ include "mlflow.name" . }}:{{ .Values.mlflow.image.tag | default "latest" }}
+          imagePullPolicy: {{ .Values.mlflow.image.pullPolicy | default "Always" }}
+          ports:
+            - containerPort: {{ .Values.mlflow.containerPort | default 5000 }}
+
+          env:
+            - name: POSTGRESQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.postgresql.secretName }}
+                  key: username
+            - name: POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.postgresql.secretName }}
+                  key: password
+
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: s3-credentials
+                  # name: {{ include "mlflow.fullname" . }}
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: s3-credentials
+                  # name: {{ include "mlflow.fullname" . }}
+                  key: AWS_SECRET_ACCESS_KEY
+
+            - name: MLFLOW_S3_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "mlflow.fullname" . }}-config
+                  key: BUCKET_NAME
+            - name: MLFLOW_S3_ENDPOINT_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "mlflow.fullname" . }}-config
+                  key: S3_ENDPOINT_URL
+
+            # this is needed for the old s3
+            - name: AWS_REQUEST_CHECKSUM_CALCULATION
+              value: "WHEN_REQUIRED"
+
+            - name: MLFLOW_FLASK_SERVER_SECRET_KEY
+              value: "my-secret-key"
+
+            - name: MLFLOW_AUTH_CONFIG_PATH
+              value: "/opt/basic-auth.ini"
+
+
+          command: ["mlflow", "server"]
+          args:
+            [
+              "--backend-store-uri", "postgresql://$(POSTGRESQL_USER):$(POSTGRESQL_PASSWORD)@{{ .Values.postgresql.clusterName }}-rw.{{ .Release.Namespace }}:5432/{{ .Values.postgresql.database }}",
+              "--artifacts-destination", "s3://$(MLFLOW_S3_BUCKET)/test/", # PROXY artifacts to/from S3 through tracking server
+              "--serve-artifacts",
+              "--host", "0.0.0.0",
+              "--port", "5000",
+              "--app-name", "basic-auth"
+            ]
+
+          resources:
+            {{- toYaml .Values.mlflow.resources | nindent 12 }}
+
+          volumeMounts:
+            - name: auth-config
+              mountPath: /opt/
+              readOnly: true
+              #subPath: basic-auth.ini
+
+      volumes:
+        - name: auth-config
+          secret:
+            secretName: mlflow-auth-config # manually created for now
