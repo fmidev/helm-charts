@@ -4120,6 +4120,33 @@ entries:
       artifacthub.io/operator: "false"
       artifacthub.io/prerelease: "false"
     apiVersion: v2
+    appVersion: 25.10.24
+    created: "2025-10-24T16:11:44.19304266Z"
+    description: A Helm chart to deploy SmartMet Server for Kubernetes
+    digest: b7375a0620dac163fb9bc7a37e71cb022ebf2d58b43a226994317e3b4a0514ee
+    home: https://github.com/fmidev/helm-charts
+    keywords:
+    - smartmet
+    - weather
+    - meteorology
+    - forecast
+    - api
+    maintainers:
+    - email: mikko.rauhala@fmi.fi
+      name: mrauhala
+    name: smartmetserver
+    sources:
+    - https://github.com/fmidev/helm-charts
+    - https://github.com/fmidev/smartmet-server
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/smartmetserver-1.9.2/smartmetserver-1.9.2.tgz
+    version: 1.9.2
+  - annotations:
+      artifacthub.io/category: web-applications
+      artifacthub.io/operator: "false"
+      artifacthub.io/prerelease: "false"
+    apiVersion: v2
     appVersion: 25.10.15
     created: "2025-10-23T14:49:34.672353244Z"
     description: A Helm chart to deploy SmartMet Server for Kubernetes
@@ -4425,4 +4452,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2025-10-24T09:51:13.420736176Z"
+generated: "2025-10-24T16:11:44.193610232Z"
