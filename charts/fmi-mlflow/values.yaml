@@ -30,6 +30,8 @@ objectStorage:
   s3:
     bucketName:
     endpointUrl:
+    artifactPath:
+    backupPath:
 
 postgresql:
   clusterName: pg-cluster

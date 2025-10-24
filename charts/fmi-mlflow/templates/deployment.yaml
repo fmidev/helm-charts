@@ -71,7 +71,7 @@ spec:
           args:
             [
               "--backend-store-uri", "postgresql://$(POSTGRESQL_USER):$(POSTGRESQL_PASSWORD)@{{ .Values.postgresql.clusterName }}-rw.{{ .Release.Namespace }}:5432/{{ .Values.postgresql.database }}",
-              "--artifacts-destination", "s3://$(MLFLOW_S3_BUCKET)/test/", # PROXY artifacts to/from S3 through tracking server
+              "--artifacts-destination", "s3://$(MLFLOW_S3_BUCKET)/{{ .Values.objectStorage.s3.artifactPath }}/", # PROXY artifacts to/from S3 through tracking server
               "--serve-artifacts",
               "--host", "0.0.0.0",
               "--port", "5000",

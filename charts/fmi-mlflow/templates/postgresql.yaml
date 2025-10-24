@@ -30,3 +30,28 @@ spec:
 
   resources:
     {{- toYaml .Values.postgresql.resources | nindent 4 }}
+
+  backup:
+    retentionPolicy: "30d"
+    target: "prefer-standby"
+    barmanObjectStore:
+      destinationPath: "s3://{{ .Values.objectStorage.s3.bucketName }}/{{ .Values.objectStorage.s3.backupPath }}"
+      endpointURL: {{ .Values.objectStorage.s3.endpointUrl }}
+      s3Credentials:
+        accessKeyId:
+          name: s3-credentials
+          key: AWS_ACCESS_KEY_ID
+        secretAccessKey:
+          name: s3-credentials
+          key: AWS_SECRET_ACCESS_KEY
+      wal:
+        encryption:
+        compression: "gzip"
+
+    volumeSnapshot:
+      className: "ocs-storagecluster-rbdplugin-snapclass"
+      online: true
+      onlineConfiguration:
+        immediateCheckpoint: false
+        waitForArchive: true
+      snapshotOwnerReference: "backup"
