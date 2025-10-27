@@ -3,6 +3,7 @@ kind: Cluster
 metadata:
   name: {{ .Values.postgresql.clusterName }}
 spec:
+  imageName: {{ .Values.postgresql.imageName | default "ghcr.io/cloudnative-pg/postgresql" }}
   instances: {{ .Values.postgresql.instances | default 1 }}
   storage:
     size: {{ .Values.postgresql.storageSize | default "1Gi" }}
@@ -16,21 +17,37 @@ spec:
       shared_buffers: {{ .Values.postgresql.parameters.sharedBuffers }}
 
   superuserSecret:
-    name: postgresql-superuser-secret
+    name: {{ .Values.postgresql.secrets.admin | default "postgresql-superuser-secret" }}
 
   bootstrap:
+    {{- if .Values.recovery.enabled }}
+    recovery:
+      database: {{ .Values.postgresql.database | default "app" }}
+      owner: {{ .Values.postgresql.owner | default "app" }}
+      secret:
+        name: postgresql-mlflow-secret
+
+      {{- if .Values.recovery.ondemand }}
+      backup:
+        name: {{ .Values.recovery.name }}
+      {{- else }}
+      source: {{ .Values.recovery.source }}
+      {{- end }}
+
+    {{- else }}
     initdb:
       dataChecksums: true # https://cloudnative-pg.io/documentation/1.19/bootstrap/
       database: {{ .Values.postgresql.database | default "app" }}
       owner: {{ .Values.postgresql.owner | default "app" }}
       secret:
-        name: postgresql-mlflow-secret
+        name: {{ .Values.postgresql.secrets.mlflow | default "postgresql-mlflow-secret" }}
 
       # create separate database 'users' for user management
       postInitSQL:
         - CREATE database users;
         - GRANT CONNECT ON DATABASE users TO app;
         - ALTER DATABASE users OWNER TO app;
+    {{- end }}
 
   resources:
     {{- toYaml .Values.postgresql.resources | nindent 4 }}
@@ -43,10 +60,10 @@ spec:
       endpointURL: {{ .Values.objectStorage.s3.endpointUrl }}
       s3Credentials:
         accessKeyId:
-          name: s3-credentials
+          name: {{ .Values.objectStorage.s3.secretName }}
           key: AWS_ACCESS_KEY_ID
         secretAccessKey:
-          name: s3-credentials
+          name: {{ .Values.objectStorage.s3.secretName }}
           key: AWS_SECRET_ACCESS_KEY
       wal:
         encryption:
@@ -59,3 +76,22 @@ spec:
         immediateCheckpoint: false
         waitForArchive: true
       snapshotOwnerReference: "backup"
+
+  {{- if not .Values.recovery.ondemand }}
+  externalClusters:
+    - name: {{ .Values.recovery.source }}
+      barmanObjectStore:
+        destinationPath: "s3://{{ .Values.objectStorage.s3.bucketName }}/{{ .Values.objectStorage.s3.backupPath }}/"
+        endpointURL: {{ .Values.objectStorage.s3.endpointUrl }}
+        serverName: {{ .Values.recovery.serverName }}
+        s3Credentials:
+          accessKeyId:
+            name: {{ .Values.objectStorage.s3.secretName }}
+            key: AWS_ACCESS_KEY_ID
+          secretAccessKey:
+            name: {{ .Values.objectStorage.s3.secretName }}
+            key: AWS_SECRET_ACCESS_KEY
+        wal:
+          compression: gzip
+  {{- end }}
+

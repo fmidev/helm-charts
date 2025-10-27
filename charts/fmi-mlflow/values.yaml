@@ -2,7 +2,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-environment:
+environment: # test/prod
 
 mlflow:
   replicas: 1
@@ -24,18 +24,36 @@ mlflow:
     build:
       resources:
         limits:
-          memory: 4Gi
+          memory: "4Gi"
         requests:
-          memory: 2Gi
+          memory: "2Gi"
 
+# Backups
+recovery:
+  enabled: false
+
+  # ondemand backups use (recovering from a Backup object):
+  # https://cloudnative-pg.io/documentation/1.27/recovery/#recovery-from-a-backup-object
+  ondemand: false
+  name: # name of the manually created backup resource
+
+  # scheduled backups use:
+  # https://cloudnative-pg.io/documentation/1.27/appendixes/backup_barmanobjectstore/#recovery-from-an-object-store
+  source: external-source # dont change this
+  serverName: pg-cluster # name of the source cluster (where the backups are taken from)
+
+# S3 storage for artifacts and backups
 objectStorage:
   s3:
+    secretName: s3-credentials
     bucketName:
     endpointUrl:
     artifactPath:
     backupPath:
 
+# Cloudnative-pg configurations
 postgresql:
+  imageName: ghcr.io/cloudnative-pg/postgresql:17.6
   clusterName: pg-cluster
   database: app
   owner: app
@@ -52,4 +70,6 @@ postgresql:
       cpu: "500m"
       memory: "512Mi"
 
-  secretName: postgresql-mlflow-secret
+  secrets:
+    admin: postgresql-superuser-secret
+    mlflow: postgresql-mlflow-secret
