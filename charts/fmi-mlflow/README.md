@@ -5,6 +5,8 @@
 
 MlFlow tracking server with potgresql cluster.
 
+https://mlflow.org/docs/3.4.0/ml/tracking/server/
+
 ## Preconditions
 
 The following secrets needs to be created before deploying the helm chart.

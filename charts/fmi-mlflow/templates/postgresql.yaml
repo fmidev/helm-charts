@@ -7,6 +7,10 @@ spec:
   storage:
     size: {{ .Values.postgresql.storageSize | default "1Gi" }}
 
+  env:
+  - name: AWS_REQUEST_CHECKSUM_CALCULATION
+    value: "WHEN_REQUIRED"
+
   postgresql:
     parameters:
       shared_buffers: {{ .Values.postgresql.parameters.sharedBuffers }}
