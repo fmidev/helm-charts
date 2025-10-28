@@ -1,17 +1,17 @@
 
-# Helm chart MLFlow 
+# Helm chart for installing MLflow and CloudNativePG in OpenShift
 
 ## Contents
 
 MlFlow tracking server with potgresql cluster.
 
-https://mlflow.org/docs/3.4.0/ml/tracking/server/
+https://mlflow.org/docs/latest/self-hosting/architecture/tracking-server/
 
 ## Preconditions
 
 The following secrets needs to be created before deploying the helm chart.
 
-* basi-auth.ini
+* basi-auth.ini (contains configurations for the authentication plugin)
 * s3 credentials
 
 ```
@@ -19,11 +19,21 @@ oc create secret generic s3-credentials --from-env-file=env/s3-credentials
 oc create secret generic mlflow-auth-config --from-file=basic-auth.ini=env/basic-auth.ini
 ```
 
+## Installing
+
+After the secrets are in place install the chart with:
+
+```
+helm create himan . -f values.yaml
+oc start-build mlflow
+oc scale deployment/mlflow --replicas=1
+```
+
 ## Image
 
 Use the official mlflow image as a base image. Latest images can be found from [here](https://github.com/mlflow/mlflow/pkgs/container/mlflow).
 
-All the necessary dependencies except s3 components and database drivers are baked into the image.
+All the necessary dependencies except s3 components and database drivers are baked into the official image. Missing parts are handled by templates/build-config.yaml.
 
 ### Upgrading mlflow version
 
@@ -53,6 +63,23 @@ oc start-build mlflow
 oc process mlflow-migrate | oc apply -f -
 ```
 
+NOTE:
+No need to update users database while doing migrations, there is only one version from it currently (and trying to make the migration fails).
+https://github.com/mlflow/mlflow/tree/2e9f23c8e5f82ade41cc524752fbce66bbb0665b/mlflow/server/auth/db/migrations/versions
+
+But if you need to update users database at some point, you need to modify the alembic directory path in the migration script as follows:
+```
+The alembic directory is by default store/db_migrations while the auth alembic files are stored in server/auth/db/migrations.
+
+    final_alembic_dir = (
+        os.path.join(_get_package_dir(), "store", "db_migrations")
+        if alembic_dir is None
+        else alembic_dir
+    )
+
+ref. https://github.com/mlflow/mlflow/blob/fad68cc2848e9c5da4992a3b08010818cf6d365f/mlflow/store/db/utils.py#L201
+```
+
 5. Restart the server.
 ```
 oc rollout restart deployment/mlflow
@@ -63,12 +90,6 @@ NOTE:
 MLflow tracking server works with the older version of the SDK, up to one major version difference (e.g., 2.x to 3.x).
 MLflow tracking server may not work with the newer version of the SDK.
 
-
-## Create the helm release
-
-```
-helm create himan . -f values.yaml
-```
 
 ## Backups
 
@@ -98,8 +119,4 @@ oc create secret generic mlflow-auth-config --from-file=basic-auth.ini=basic-aut
 oc scale deployment/mlflow --replicas=1
 ```
 8. Verify that the data is restored correctly.
-
-
-
-
 
