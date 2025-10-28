@@ -1,7 +1,7 @@
 apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
-  name: {{ include "mlflow.fullname" . }}
+  name: {{ include "mlflow.fullname" . }}-migrate
   labels:
     {{- include "mlflow.labels" . | nindent 4 }}
   annotations:
@@ -10,6 +10,7 @@ objects:
 - apiVersion: batch/v1
   kind: Job
   metadata:
+    name: {{ include "mlflow.fullname" . }}-migrate-job
     {{- include "mlflow.labels" . | nindent 4 }}
   spec:
     parallelism: 1
@@ -20,8 +21,8 @@ objects:
         restartPolicy: Never
         containers:
           - name: {{ include "mlflow.fullname" . }}
-            image: image-registry.openshift-image-registry.svc:5000/mlflow-test/mlflow:v3.4.0
-            imagePullPolicy: Always
+            image: image-registry.openshift-image-registry.svc:5000/{{ .Release.Namespace }}/{{ include "mlflow.name" . }}:{{ .Values.mlflow.image.tag | default "latest" }}
+            imagePullPolicy: {{ .Values.mlflow.image.pullPolicy | default "Always" }}
             env:
             - name: POSTGRESQL_USER
               valueFrom:
@@ -42,12 +43,11 @@ objects:
               limits:
                 memory: "2Gi"
 
-            command:
-              - sh
-              - -c
+            command: ["sh", "-c"]
+            args:
               - |
                 mlflow db upgrade postgresql://$(POSTGRESQL_USER):$(POSTGRESQL_PASSWORD)@{{ .Values.postgresql.clusterName }}-rw.{{ .Release.Namespace }}:5432/{{ .Values.postgresql.database }}
-                # NOTE: does users table need separate migration?
+                # NOTE: no need to run migrations to users database for now! (mlflow db upgrade postgresql://$(POSTGRESQL_USER):$(POSTGRESQL_PASSWORD)@{{ .Values.postgresql.clusterName }}-rw.{{ .Release.Namespace }}:5432/users)
 
             volumeMounts:
               - name: auth-config

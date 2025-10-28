@@ -73,7 +73,8 @@ spec:
               "--serve-artifacts",
               "--host", "0.0.0.0",
               "--port", "5000",
-              "--app-name", "basic-auth"
+              "--app-name", "basic-auth",
+              "--allowed-hosts", '{{ .Release.Namespace }}.out.{{ include "environment" . }}.fmi.fi'
             ]
 
           resources:

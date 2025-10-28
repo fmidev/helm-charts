@@ -15,8 +15,8 @@ The following secrets needs to be created before deploying the helm chart.
 * s3 credentials
 
 ```
-oc create secret generic s3-credentials --from-env-file=aws.env
-oc create secret generic mlflow-auth-config --from-file=basic-auth.ini=basic-auth.ini
+oc create secret generic s3-credentials --from-env-file=env/s3-credentials
+oc create secret generic mlflow-auth-config --from-file=basic-auth.ini=env/basic-auth.ini
 ```
 
 ## Image
@@ -33,15 +33,27 @@ Ref. https://mlflow.org/docs/3.5.0/self-hosting/migration
 ```
 oc scale deployment/mlflow --replicas=0
 ```
-2. Upgrade the package version in the environment:
-Change the mlflow.image.tag in the `values.yaml` file to the desired version and a new build should trigger automatically after upgrading charts.
-
-3. Run database migrations (if database backend is used):
+2. Upgrade the new mlflow version in values.yaml. New build should trigger automatically after upgrading charts.
 ```
-oc process migrate-db -p IMAGE=<new-image-with-migrations> | oc apply -f -
+mlflow:
+  image:
+    repository: ghcr.io/mlflow/mlflow
+    tag: <new-version>
+
+helm upgrade mlflow -f values.yaml .
 ```
 
-4. Restart the server.
+3. If build doesn't trigger automatically, create a new build manually:
+```
+oc start-build mlflow
+```
+
+4. Run database migrations:
+```
+oc process mlflow-migrate | oc apply -f -
+```
+
+5. Restart the server.
 ```
 oc rollout restart deployment/mlflow
 oc scale deployment/mlflow --replicas=1
