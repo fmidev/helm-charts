@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "mlflow.fullname" . }}
 spec:
-  replicas: {{ .Values.mlflow.replicas | default 1 }}
+  replicas: {{ .Values.mlflow.replicas }}
   selector:
     matchLabels:
       {{- include "mlflow.selectorLabels" . | nindent 6 }}
@@ -24,25 +24,23 @@ spec:
             - name: POSTGRESQL_USER
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.postgresql.secretName }}
+                  name: {{ .Values.postgresql.secrets.mlflow }}
                   key: username
             - name: POSTGRESQL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.postgresql.secretName }}
+                  name: {{ .Values.postgresql.secrets.mlflow }}
                   key: password
 
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: s3-credentials
-                  # name: {{ include "mlflow.fullname" . }}
+                  name: {{ .Values.objectStorage.s3.secretName }}
                   key: AWS_ACCESS_KEY_ID
             - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: s3-credentials
-                  # name: {{ include "mlflow.fullname" . }}
+                  name: {{ .Values.objectStorage.s3.secretName }}
                   key: AWS_SECRET_ACCESS_KEY
 
             - name: MLFLOW_S3_BUCKET

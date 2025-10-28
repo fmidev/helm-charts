@@ -55,7 +55,8 @@ spec:
   backup:
     retentionPolicy: "30d"
     target: "prefer-standby"
-    barmanObjectStore:
+    barmanObjectStore: &barmanObjectStore
+      serverName: {{ .Values.postgresql.clusterName }}
       destinationPath: "s3://{{ .Values.objectStorage.s3.bucketName }}/{{ .Values.objectStorage.s3.backupPath }}"
       endpointURL: {{ .Values.objectStorage.s3.endpointUrl }}
       s3Credentials:
@@ -66,7 +67,6 @@ spec:
           name: {{ .Values.objectStorage.s3.secretName }}
           key: AWS_SECRET_ACCESS_KEY
       wal:
-        encryption:
         compression: "gzip"
 
     volumeSnapshot:
@@ -81,17 +81,7 @@ spec:
   externalClusters:
     - name: {{ .Values.recovery.source }}
       barmanObjectStore:
-        destinationPath: "s3://{{ .Values.objectStorage.s3.bucketName }}/{{ .Values.objectStorage.s3.backupPath }}/"
-        endpointURL: {{ .Values.objectStorage.s3.endpointUrl }}
+        <<: *barmanObjectStore
         serverName: {{ .Values.recovery.serverName }}
-        s3Credentials:
-          accessKeyId:
-            name: {{ .Values.objectStorage.s3.secretName }}
-            key: AWS_ACCESS_KEY_ID
-          secretAccessKey:
-            name: {{ .Values.objectStorage.s3.secretName }}
-            key: AWS_SECRET_ACCESS_KEY
-        wal:
-          compression: gzip
   {{- end }}
 

@@ -26,12 +26,12 @@ objects:
             - name: POSTGRESQL_USER
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.postgresql.secretName }}
+                  name: {{ .Values.postgresql.secrets.mlflow }}
                   key: username
             - name: POSTGRESQL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.postgresql.secretName }}
+                  name: {{ .Values.postgresql.secrets.mlflow }}
                   key: password
             - name: MLFLOW_AUTH_CONFIG_PATH
               value: "/opt/basic-auth.ini"

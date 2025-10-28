@@ -58,3 +58,36 @@ MLflow tracking server may not work with the newer version of the SDK.
 helm create himan . -f values.yaml
 ```
 
+## Backups
+
+There are daily backups (at 00:00 UTC) of the database to s3 bucket. Also the WAL is saved, so point in time recovery is also possible. 
+By default the latest version will be restored. Backups have 30 days retention.
+
+### Recovery
+
+1. Change postgresql.clusterName in the `values.yaml` to a new name, e.g. pg-cluster-v2. 
+2. Change revocery.serverName to the current cluster name, e.g. pg-cluster-v1. The serverName is used to identify the backups to restore from.
+3. Change mlflow.replicas to 0 to avoid connection issues during recovery.
+4. Update cluster with:
+```
+helm upgrade mlflow -f values.yaml .
+```
+5. Update basic-auth.ini which contains the database uri for users table. The database host needs to be changed to the new cluster name.
+```
+sed "s/pg-cluster-v1/$(oc get cluster -o name | sed 's|.*/||')/" env/basic-auth.ini
+```
+6. Delete secret mlflow-auth-config which contains this basic-auth.ini. And recreate it with the updated file.
+```
+oc delete secret mlflow-auth-config
+oc create secret generic mlflow-auth-config --from-file=basic-auth.ini=basic-auth.ini
+```
+7. Scale the mlflow deployment back to 1.
+```
+oc scale deployment/mlflow --replicas=1
+```
+8. Verify that the data is restored correctly.
+
+
+
+
+

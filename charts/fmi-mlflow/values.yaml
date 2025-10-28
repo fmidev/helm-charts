@@ -40,7 +40,7 @@ recovery:
   # scheduled backups use:
   # https://cloudnative-pg.io/documentation/1.27/appendixes/backup_barmanobjectstore/#recovery-from-an-object-store
   source: external-source # dont change this
-  serverName: pg-cluster # name of the source cluster (where the backups are taken from)
+  serverName: pg-cluster-source # name of the source cluster (where the backups are taken from)
 
 # S3 storage for artifacts and backups
 objectStorage:
