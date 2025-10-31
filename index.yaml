@@ -451,6 +451,18 @@ entries:
   geoweb-frontend:
   - apiVersion: v2
     appVersion: v14.0.1
+    created: "2025-10-31T12:19:58.27204603Z"
+    description: A Helm chart for geoweb application frontend in Kubernetes
+    digest: 5a1a5866c401f230859c96f4cbe0b1023b5d61b2c88a2f66c640bf7be6a97776
+    maintainers:
+    - name: Jusaa
+    name: geoweb-frontend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-frontend-3.20.5/geoweb-frontend-3.20.5.tgz
+    version: 3.20.5
+  - apiVersion: v2
+    appVersion: v14.0.1
     created: "2025-10-24T09:51:13.042985355Z"
     description: A Helm chart for geoweb application frontend in Kubernetes
     digest: add667305cf051da37d2bd734d50ff670fe857f25e767c5211aa7deb57981e7a
@@ -1307,6 +1319,18 @@ entries:
   geoweb-opmet-backend:
   - apiVersion: v2
     appVersion: v5.4.0
+    created: "2025-10-31T12:19:58.498513738Z"
+    description: A Helm chart for geoweb opmet backend resources in Kubernetes
+    digest: 59c0f54caa49d96d9e955af3238862d562ee0da3f1f26b8c7af93a131461ccf2
+    maintainers:
+    - name: Jusaa
+    name: geoweb-opmet-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-opmet-backend-3.10.5/geoweb-opmet-backend-3.10.5.tgz
+    version: 3.10.5
+  - apiVersion: v2
+    appVersion: v5.4.0
     created: "2025-10-24T09:51:13.259650731Z"
     description: A Helm chart for geoweb opmet backend resources in Kubernetes
     digest: 94903244626e1cb21138cd614d04dd62d89a0c5a1504aa92bd2d85d5d2fc8a59
@@ -2104,6 +2128,18 @@ entries:
   geoweb-presets-backend:
   - apiVersion: v2
     appVersion: v3.32.0
+    created: "2025-10-31T12:19:58.722576473Z"
+    description: A Helm chart for geoweb presets backend resources in Kubernetes
+    digest: abff4a5057e14bb95c48003595d1e7d92dc9fd4e2c1bf70dc6e692e9726c4a97
+    maintainers:
+    - name: Jusaa
+    name: geoweb-presets-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-presets-backend-2.15.5/geoweb-presets-backend-2.15.5.tgz
+    version: 2.15.5
+  - apiVersion: v2
+    appVersion: v3.32.0
     created: "2025-10-24T09:51:13.419950257Z"
     description: A Helm chart for geoweb presets backend resources in Kubernetes
     digest: 6bdc1a96344b1503a2c6c89b1401cab35346683096d0463a3e2cd7b11b7eae2e
@@ -2842,6 +2878,18 @@ entries:
   geoweb-taf-backend:
   - apiVersion: v2
     appVersion: v3.1.1
+    created: "2025-10-31T12:19:58.916692523Z"
+    description: A Helm chart for geoweb taf backend resources in Kubernetes
+    digest: 1f617f87ca98aed07c768171f17fa219ac527e125a0c2372fd332b9a6336eb9f
+    maintainers:
+    - name: Jusaa
+    name: geoweb-taf-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-taf-backend-1.2.3/geoweb-taf-backend-1.2.3.tgz
+    version: 1.2.3
+  - apiVersion: v2
+    appVersion: v3.1.1
     created: "2025-10-20T10:46:33.746168145Z"
     description: A Helm chart for geoweb taf backend resources in Kubernetes
     digest: dc3de55be42048ab71cd66950f4ebe733f2e2e41d480646f1f87078fc6538edc
@@ -3317,6 +3365,18 @@ entries:
     - https://github.com/fmidev/helm-charts/releases/download/geoweb-taf-backend-0.0.1/geoweb-taf-backend-0.0.1.tgz
     version: 0.0.1
   geoweb-warnings-backend:
+  - apiVersion: v2
+    appVersion: v1.15.0
+    created: "2025-10-31T12:19:59.167358247Z"
+    description: A Helm chart for geoweb warnings backend resources in Kubernetes
+    digest: f410692b0ffecc98b42c8c67b6c77080e513e779d4c2e850fbfdcaf4d9242abf
+    maintainers:
+    - name: Jusaa
+    name: geoweb-warnings-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-warnings-backend-1.3.3/geoweb-warnings-backend-1.3.3.tgz
+    version: 1.3.3
   - apiVersion: v2
     appVersion: v1.15.0
     created: "2025-10-20T10:46:33.931670797Z"
@@ -4452,4 +4512,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2025-10-24T16:11:44.193610232Z"
+generated: "2025-10-31T12:19:59.168567378Z"
