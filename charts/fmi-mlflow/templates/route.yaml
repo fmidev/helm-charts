@@ -5,7 +5,7 @@ metadata:
   labels:
     type: external
 spec:
-  host: {{ .Release.Namespace }}.out.{{ include "environment" . }}.fmi.fi
+  host: {{ .Release.Namespace }}.out.{{ include "environment" . }}.{{ .Values.host }}
   port:
     targetPort: {{ .Values.mlflow.servicePort }}
   to:

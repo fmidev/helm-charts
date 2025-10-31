@@ -74,7 +74,7 @@ spec:
               "--host", "0.0.0.0",
               "--port", "5000",
               "--app-name", "basic-auth",
-              "--allowed-hosts", '{{ .Release.Namespace }}.out.{{ include "environment" . }}.fmi.fi'
+              "--allowed-hosts", '{{ .Release.Namespace }}.out.{{ include "environment" . }}.{{ .Values.host }}',
             ]
 
           resources:
