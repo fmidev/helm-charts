@@ -21,7 +21,7 @@ CloudnativePG operator needs to be installed in the OpenShift cluster before dep
 
 The following secrets needs to be created before deploying the helm chart.
 
-* basi-auth.ini (contains configurations for the mlflow authentication plugin)
+* basi-auth.ini (contains configurations for the mlflow authentication plugin, overrides [defaults](https://github.com/mlflow/mlflow/blob/0a26232b25033a367ffcfb8907069482ac8bc13a/mlflow/server/auth/basic_auth.ini))
 * s3 credentials (for storing mlflow artifacts and database backups)
 
 ```
