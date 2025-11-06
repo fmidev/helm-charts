@@ -23,10 +23,14 @@ The following secrets needs to be created before deploying the helm chart.
 
 * basi-auth.ini (contains configurations for the mlflow authentication plugin, overrides [defaults](https://github.com/mlflow/mlflow/blob/0a26232b25033a367ffcfb8907069482ac8bc13a/mlflow/server/auth/basic_auth.ini))
 * s3 credentials (for storing mlflow artifacts and database backups)
+* postgresql-mlflow-secret (postgresql credentials for mlflow database)
+* postgresql-superuser-secret (postgresql admin credentials)
 
 ```
 oc create secret generic s3-credentials --from-env-file=env/s3-credentials
 oc create secret generic mlflow-auth-config --from-file=basic-auth.ini=env/basic-auth.ini
+oc create secret generic postgresql-mlflow-secret --from-env-file=env/postgresql-mlflow-secret
+oc create secret generic postgresql-superuser-secret --from-env-file=env/postgresql-superuser-secret
 ```
 
 ## Installing
