@@ -160,6 +160,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 
 | Chart version | warnings version |
 |---------------|------------------|
+| 1.3.4         | 1.16.1           |
 | 1.3.2         | 1.15.0           |
 | 1.3.1         | 1.10.6           |
 | 1.3.0         | 1.10.4           |
