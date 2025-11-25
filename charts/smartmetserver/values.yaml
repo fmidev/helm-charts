@@ -209,6 +209,7 @@ smartmetConf:
     - gis
     - querydata
     - grid
+    - observation
 
   # List of plugins to enable
   plugins:
