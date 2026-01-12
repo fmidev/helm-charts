@@ -4684,6 +4684,18 @@ entries:
   snwc-bc:
   - apiVersion: v2
     appVersion: 1.0.2
+    created: "2026-01-12T15:52:24.201757477Z"
+    description: A Helm chart for Kubernetes
+    digest: cc03e0151a3284caed4e3ab1c89557eb4981c17ee5b99923f9cee1d15b42289d
+    maintainers:
+    - name: fmi-build-bot
+    name: snwc-bc
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.6/snwc-bc-1.0.6.tgz
+    version: 1.0.6
+  - apiVersion: v2
+    appVersion: 1.0.2
     created: "2026-01-12T15:18:39.860904627Z"
     description: A Helm chart for Kubernetes
     digest: 78d969f421c2c9cf0563d890c32053476ab963340ea06e4184415221b7d7b191
@@ -4758,4 +4770,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2026-01-12T15:18:39.861460159Z"
+generated: "2026-01-12T15:52:24.202496471Z"
