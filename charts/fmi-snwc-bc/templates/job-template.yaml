@@ -76,10 +76,10 @@ objects:
           resources:
             limits:
               cpu: "2"
-              memory: 4Gi
+              memory: 32Gi
             requests:
               cpu: "2"
-              memory: 2Gi
+              memory: 8Gi
 parameters:
 - description: Input data directory name
   name: INPUT_DIR
