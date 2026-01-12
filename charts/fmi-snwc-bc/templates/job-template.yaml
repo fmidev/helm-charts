@@ -75,10 +75,10 @@ objects:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           resources:
             limits:
-              cpu: "2"
+              cpu: "8"
               memory: 32Gi
             requests:
-              cpu: "2"
+              cpu: "4"
               memory: 8Gi
 parameters:
 - description: Input data directory name
