@@ -203,6 +203,7 @@ smartmetConf:
 
   # List of engines to enable
   engines:
+    - avi
     - sputnik
     - contour
     - geonames
