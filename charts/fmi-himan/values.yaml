@@ -19,6 +19,7 @@ image:
 s3:
   credentials:
     name:
+    storePath: /mnt/secretstore
 
 radon:
   databaseName: radon
@@ -34,6 +35,10 @@ resources:
   requests:
     cpu: "1"
     memory: 1Gi
+
+ecflow:
+  api:
+    host:
 
 volumes: []
 
