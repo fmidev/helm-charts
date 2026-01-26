@@ -65,6 +65,7 @@ The following table lists the configurable parameters of the location backend ch
 | `location.env.PDOK_LOOKUP_URL` | PDOK lookup URL. Set empty string to disable. | Default value is set in the application |
 | `location.env.GEONAMES_SEARCH_URL` | GeoNames search URL. Set empty string to disable. | Default value is set in the application |
 | `location.env.GEONAMES_LOOKUP_URL` | GeoNames lookup URL. Set empty string to disable. | Default value is set in the application |
+| `location.env.SMARTMET_AUTOCOMPLETE_URL` | SMARTMET autocomplete URL. | `` |
 | `location.env.MAX_RESULTS` | Maximum amount of returned search results per source | `100` |
 | `location.env.DEFAULT_TIMEOUT` | Application-wide value for request time-outs in seconds | `15` |
 | `location.env.LOG_LEVEL` | Set the log level. Options are `DEBUG`, `INFO`, `WARNING`, `ERROR` | `INFO` |
@@ -77,6 +78,7 @@ The following table lists the configurable parameters of the location backend ch
 
 | Chart version | location version |
 |---------------|------------------|
+| 1.1.5         | 0.2.0           |
 | 1.1.4         | 0.0.16           |
 | 1.1.3         | 0.0.15           |
 | 1.1.2         | 0.0.13           |
