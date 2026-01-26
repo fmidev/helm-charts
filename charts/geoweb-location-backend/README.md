@@ -78,6 +78,7 @@ The following table lists the configurable parameters of the location backend ch
 
 | Chart version | location version |
 |---------------|------------------|
+| 1.1.5         | 0.2.0           |
 | 1.1.4         | 0.0.16           |
 | 1.1.3         | 0.0.15           |
 | 1.1.2         | 0.0.13           |
