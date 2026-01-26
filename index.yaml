@@ -1285,6 +1285,18 @@ entries:
     version: 1.0.0
   geoweb-location-backend:
   - apiVersion: v2
+    appVersion: v0.2.0
+    created: "2026-01-26T11:04:26.961980658Z"
+    description: A Helm chart for geoweb location backend resources in Kubernetes
+    digest: ea5c711f2d377fb51f32a46c7fbdbc1a1ff028a462b0c317d4920ac0308f6744
+    maintainers:
+    - name: FMI
+    name: geoweb-location-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-location-backend-1.1.5/geoweb-location-backend-1.1.5.tgz
+    version: 1.1.5
+  - apiVersion: v2
     appVersion: v0.0.16
     created: "2025-12-16T13:48:29.642755692Z"
     description: A Helm chart for geoweb location backend resources in Kubernetes
@@ -4797,4 +4809,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2026-01-14T11:26:19.776724343Z"
+generated: "2026-01-26T11:04:26.963077474Z"
