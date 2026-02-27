@@ -1,0 +1,50 @@
+{{- $root := . -}}
+{{- range $idx, $job := .Values.cronjobs }}
+{{- if $job.enabled }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ $job.name }}
+  namespace: {{ $root.Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ $job.name }}
+    app.kubernetes.io/instance: {{ $root.Release.Name }}
+    app.kubernetes.io/managed-by: {{ $root.Chart.Name }}
+    app.kubernetes.io/component: cronjob
+  {{- if $job.annotations }}
+  annotations:
+    {{- toYaml $job.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  schedule: {{ $job.schedule | quote }}
+  timeZone: {{ $job.timeZone | default "Europe/Helsinki" | quote }}
+  successfulJobsHistoryLimit: {{ $job.successfulJobsHistoryLimit | default 1 }}
+  failedJobsHistoryLimit: {{ $job.failedJobsHistoryLimit | default 3 }}
+  concurrencyPolicy: {{ $job.concurrencyPolicy | default "Forbid" }}
+  jobTemplate:
+    spec:
+      backoffLimit: {{ $job.backoffLimit | default 5 }}
+      template:
+        spec:
+          restartPolicy: {{ $job.restartPolicy | default "Never" }}
+          {{- if $job.image.pullSecrets }}
+          imagePullSecrets:
+            {{- toYaml $job.image.pullSecrets | nindent 12 }}
+          {{- end }}
+          containers:
+            - name: {{ $job.name }}-runner
+              image: "{{ $job.image.repository }}:{{ $job.image.tag }}"
+              imagePullPolicy: {{ $job.image.pullPolicy | default "IfNotPresent" }}
+              {{- if $job.command }}
+              command: {{ toJson $job.command }}
+              {{- end }}
+              {{- if $job.args }}
+              args: {{ toJson $job.args }}
+              {{- end }}
+              {{ include "app.renderEnv" $job.env | nindent 14 }}
+              {{ include "app.renderResources" (dict "job" $job) | nindent 14 }}
+              {{ include "app.renderVolumeMounts" (dict "mounts" ($job.mounts | default (list)) "tmp" ($job.tmp | default (dict))) | nindent 14 }}
+          {{ include "app.renderVolumes" (dict "mounts" ($job.mounts | default (list)) "tmp" ($job.tmp | default (dict))) | nindent 10 }}
+{{- end -}}
+{{- end -}}
