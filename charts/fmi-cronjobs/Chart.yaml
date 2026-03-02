@@ -1,0 +1,18 @@
+apiVersion: v2
+name: fmi-cronjobs
+description: Helm chart for defining multiple cronjobs
+type: application
+version: 0.0.1
+keywords:
+  - fmi
+  - cronjob
+home: https://github.com/fmidev/helm-charts
+maintainers:
+  - name: fmi-build-bot
+    email: admin@weatherproof.fi
+    url: https://github.com/fmi-build-bot
+
+dependencies:
+  - name: fmi-cronjob
+    version: 0.0.1
+    repository: "https://fmidev.github.io/helm-charts"

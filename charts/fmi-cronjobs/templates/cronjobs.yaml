@@ -1,0 +1,4 @@
+{{- $defaults := .Values.defaults | default (dict) -}}
+{{- range $idx, $job := (.Values.cronjobs | default (list)) -}}
+{{ include "fmi-cronjob.render" (dict "root" $ "job" $job "defaults" $defaults) }}
+{{- end -}}
