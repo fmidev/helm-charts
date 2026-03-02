@@ -1,1 +1,6 @@
+defaults:
+  pullSecret: ""
+  pullPolicy: IfNotPresent
+  timeZone: Europe/Helsinki
+
 cronjobs: []

@@ -11,3 +11,8 @@ maintainers:
   - name: fmi-build-bot
     email: admin@weatherproof.fi
     url: https://github.com/fmi-build-bot
+
+dependencies:
+  - name: fmi-cronjob
+    version: 0.0.1
+    repository: "https://fmidev.github.io/helm-charts"
