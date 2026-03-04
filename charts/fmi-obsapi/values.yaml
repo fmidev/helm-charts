@@ -19,6 +19,10 @@ configMaps:
   - name: logging-configmap
     filepath: "/app/app/config"
     filename: "logging.conf"
+securityContext:
+  include: false
+  runAsNonRoot: true
+  runAsGroup: 0
 app:
   reload: false
 environment_secrets:

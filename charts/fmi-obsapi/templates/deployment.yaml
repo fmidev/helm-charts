@@ -18,9 +18,15 @@ spec:
         fmi-elk: {{ .Values.labels.fmi_elk }}
         {{- end }}
     spec:
+      {{- if .Values.securityContext.include }}
       securityContext:
-        runAsNonRoot: true
-        runAsGroup: 0
+        {{- if .Values.securityContext.runAsNonRoot }}
+        runAsNonRoot: {{ .Values.securityContext.runAsNonRoot }}
+        {{- end }}
+        {{- if .Values.securityContext.runAsGroup }}
+        runAsGroup: {{ .Values.securityContext.runAsGroup }}
+        {{- end }}
+      {{- end }}
       {{- if .Values.image.pullSecret }}
       imagePullSecrets:
         - name: {{ .Values.image.pullSecret }}
