@@ -14,15 +14,21 @@ spec:
     metadata:
       labels:
         app: {{ .Release.Name }}
+        {{- if .Values.labels.fmi_elk }}
+        fmi-elk: {{ .Values.labels.fmi_elk }}
+        {{- end }}
     spec:
       securityContext:
         runAsNonRoot: true
+        runAsGroup: 0
       {{- if .Values.image.pullSecret }}
       imagePullSecrets:
         - name: {{ .Values.image.pullSecret }}
       {{- end }}
       containers:
         - name: {{ .Release.Name }}
+          securityContext:
+            runAsGroup: 0
           env:
             {{- range .Values.environment }}
             - name: {{ .name }}
@@ -57,7 +63,7 @@ spec:
           {{- if .Values.image.pullPolicy }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- end }}
-          command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+          command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"{{ if .Values.app.reload }}, "--reload"{{ end }}]
       volumes:
       {{- range .Values.configMaps}}
         - name: {{ .name }}
