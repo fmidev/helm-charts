@@ -47,7 +47,9 @@ objects:
             args:
               - |
                 mlflow db upgrade postgresql://$(POSTGRESQL_USER):$(POSTGRESQL_PASSWORD)@{{ .Values.postgresql.clusterName }}-rw.{{ .Release.Namespace }}:5432/{{ .Values.postgresql.database }}
-                # NOTE: no need to run migrations to users database for now! (mlflow db upgrade postgresql://$(POSTGRESQL_USER):$(POSTGRESQL_PASSWORD)@{{ .Values.postgresql.clusterName }}-rw.{{ .Release.Namespace }}:5432/users)
+                # NOTE: no need to run migrations to users database for now! 
+                # https://mlflow.org/docs/latest/self-hosting/security/basic-http-auth/#permissions-database
+                # python -m mlflow.server.auth db upgrade --url postgresql://$(POSTGRESQL_USER):$(POSTGRESQL_PASSWORD)@{{ .Values.postgresql.clusterName }}-rw.{{ .Release.Namespace }}:5432/users
 
             volumeMounts:
               - name: auth-config
