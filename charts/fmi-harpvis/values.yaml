@@ -56,7 +56,7 @@ sftp:
 
   image:
     name: sftp-puller
-    tag: "3.23" # latest alpine version
+    tag: "3.23"  # latest alpine version
 
   job:
     name: sftp-pull
