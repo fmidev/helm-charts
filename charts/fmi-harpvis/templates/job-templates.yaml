@@ -1,7 +1,7 @@
 apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
-  name: sftp-pull-job
+  name: {{ .Values.sftp.job.name }}-job
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "sftp-puller.labels" . | nindent 4 }}
@@ -9,7 +9,7 @@ objects:
 - apiVersion: batch/v1
   kind: Job
   metadata:
-    name: sftp-pull-${TIMESTAMP}
+    name: {{ .Values.sftp.job.name }}-${TIMESTAMP}
     namespace: {{ .Release.Namespace }}
   spec:
     ttlSecondsAfterFinished: {{ .Values.sftp.job.ttlSecondsAfterFinished }}
@@ -17,8 +17,8 @@ objects:
       spec:
         restartPolicy: Never
         containers:
-        - name: sftp-pull
-          image: sftp-puller:latest
+        - name: {{ .Values.sftp.job.name }}
+          image: {{ .Values.sftp.image.name }}:latest
           command:
           - sh
           - -c
