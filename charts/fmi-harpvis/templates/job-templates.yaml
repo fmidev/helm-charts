@@ -1,0 +1,59 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: sftp-pull-job
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sftp-puller.labels" . | nindent 4 }}
+objects:
+- apiVersion: batch/v1
+  kind: Job
+  metadata:
+    name: sftp-pull-${TIMESTAMP}
+    namespace: {{ .Release.Namespace }}
+  spec:
+    ttlSecondsAfterFinished: {{ .Values.sftp.job.ttlSecondsAfterFinished }}
+    template:
+      spec:
+        restartPolicy: Never
+        containers:
+        - name: sftp-pull
+          image: sftp-puller:latest
+          command:
+          - sh
+          - -c
+          - |
+            sftp -o StrictHostKeyChecking=no \
+                 -o BatchMode=yes \
+                 -i /secrets/ssh-key \
+                 {{ .Values.sftp.user }}@{{ .Values.sftp.host }}:{{ .Values.sftp.remoteBasePath }}/${FILENAME} \
+                 {{ .Values.sftp.localPath }}/${FILENAME}
+          volumeMounts:
+          - name: persistent-storage
+            mountPath: {{ .Values.sftp.localPath }}
+          - name: ssh-secret
+            mountPath: /secrets
+            readOnly: true
+          resources:
+            requests:
+              cpu: {{ .Values.sftp.job.resources.requests.cpu }}
+              memory: {{ .Values.sftp.job.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.sftp.job.resources.limits.cpu }}
+              memory: {{ .Values.sftp.job.resources.limits.memory }}
+        volumes:
+        - name: persistent-storage
+          persistentVolumeClaim:
+            claimName: {{ .Values.sftp.pvcName }}
+        - name: ssh-secret
+          secret:
+            secretName: {{ .Values.sftp.sshSecretName }}
+            defaultMode: 0400
+parameters:
+- name: FILENAME
+  description: Name of the file to fetch from SFTP
+  required: true
+- name: TIMESTAMP
+  description: Unique suffix to avoid job name collisions
+  generate: expression
+  from: '[a-z0-9]{8}'

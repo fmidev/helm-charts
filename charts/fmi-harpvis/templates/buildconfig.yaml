@@ -1,0 +1,22 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: sftp-puller
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sftp-puller.labels" . | nindent 4 }}
+spec:
+  source:
+    type: Dockerfile
+    dockerfile: |
+      FROM alpine:{{ .Values.sftp.image.tag }}
+      RUN apk add --no-cache openssh-client
+  strategy:
+    type: Docker
+    dockerStrategy: {}
+  output:
+    to:
+      kind: ImageStreamTag
+      name: sftp-puller:latest
+  triggers:
+  - type: ConfigChange

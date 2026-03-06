@@ -1,0 +1,29 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: {{ include "harp.fullname" . }}
+  labels:
+    {{- include "harp.labels" . | nindent 4 }}
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+    - name: {{ .Values.image.tag | default "latest" | quote }}
+      from:
+        kind: DockerImage
+        name: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "latest" }}"
+      importPolicy:
+        scheduled: {{ .Values.imageStream.scheduled }}
+      referencePolicy:
+        type: Local
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: sftp-puller
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sftp-puller.labels" . | nindent 4 }}
+spec:
+  lookupPolicy:
+    local: true
