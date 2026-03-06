@@ -203,12 +203,14 @@ smartmetConf:
 
   # List of engines to enable
   engines:
+    - avi
     - sputnik
     - contour
     - geonames
     - gis
     - querydata
     - grid
+    - observation
 
   # List of plugins to enable
   plugins:

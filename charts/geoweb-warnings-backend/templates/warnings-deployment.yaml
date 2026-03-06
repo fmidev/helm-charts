@@ -32,7 +32,7 @@ spec:
           - |
             export AWS_ACCESS_KEY_ID={{ .Values.warnings.awsAccessKeyId }};
             export AWS_SECRET_ACCESS_KEY={{ .Values.warnings.awsAccessKeySecret }};
-            AWS_DEFAULT_REGION={{ .Values.warnings.awsDefaultRegion }};
+            export AWS_DEFAULT_REGION={{ .Values.warnings.awsDefaultRegion }};
             aws s3 cp --recursive --exclude "*/*" s3://{{ .Values.warnings.s3bucketName }}{{ .Values.warnings.customConfigurationFolderPath }} /warnings;
         volumeMounts:
         - mountPath: "/warnings/"
