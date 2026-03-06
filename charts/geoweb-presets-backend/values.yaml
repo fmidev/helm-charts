@@ -48,7 +48,7 @@ presets:
   nginx:
     name: nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend
-    version: "v0.6.0"
+    version: "v0.7.0"
     ENABLE_SSL: "FALSE"
     BACKEND_HOST: 0.0.0.0:8080
     NGINX_PORT_HTTP: 80

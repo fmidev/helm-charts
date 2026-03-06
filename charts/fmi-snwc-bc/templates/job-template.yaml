@@ -73,6 +73,13 @@ objects:
           name: snwc-bc
           image: {{ include "snwc_bc.localImageRepository" . }}-snwc-bc:{{- include "snwc_bc.imageTag" . | trim }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            limits:
+              cpu: "8"
+              memory: 32Gi
+            requests:
+              cpu: "4"
+              memory: 8Gi
 parameters:
 - description: Input data directory name
   name: INPUT_DIR

@@ -68,6 +68,9 @@ The following table lists the configurable parameters of the CAP backend chart a
 
 | Chart version | cap version |
 |---------------|-------------|
+| 1.8.5         | 0.10.17     |
+| 1.8.4         | 0.10.15     |
+| 1.8.3         | 0.10.14     |
 | 1.8.2         | 0.10.13     |
 | 1.8.1         | 0.10.11     |
 | 1.8.0         | 0.10.9      |

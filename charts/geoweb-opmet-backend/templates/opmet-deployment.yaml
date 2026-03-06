@@ -32,7 +32,7 @@ spec:
           - |
             export AWS_ACCESS_KEY_ID={{ .Values.opmet.awsAccessKeyId }};
             export AWS_SECRET_ACCESS_KEY={{ .Values.opmet.awsAccessKeySecret }};
-            AWS_DEFAULT_REGION={{ .Values.opmet.awsDefaultRegion }};
+            export AWS_DEFAULT_REGION={{ .Values.opmet.awsDefaultRegion }};
             aws s3 cp --recursive --exclude "*/*" s3://{{ .Values.opmet.s3bucketName }}{{ .Values.opmet.customConfigurationFolderPath }} /opmet;
         volumeMounts:
         - mountPath: "/opmet/"

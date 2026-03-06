@@ -156,7 +156,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.svcPort` | Port used for service | `80` |
 | `frontend.containerPort` | Port used for container | `8080` |
 | `frontend.replicas` | Amount of replicas deployed | `1` |
-| `frontend.minPodsAvailable` | Minimum available pods in pod disruption budget. Value `0` omits the pdb. | `0` |   
+| `frontend.minPodsAvailable` | Minimum available pods in pod disruption budget. Value `0` omits the pdb. | `0` |
 | `frontend.auth_secret` | Secret containing base64 encoded Basic auth secret | |
 | `frontend.auth_secretName` | Name of auth secret | `geoweb-auth` |
 | `frontend.auth_secretType` | Type of auth secret | `secretsmanager` |
@@ -207,7 +207,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.env.GW_FEATURE_DISPLAY_SEARCH_ON_MAP` | Enable geolocation search | |
 | `frontend.env.GW_VERSION_PROGRESS_NOTES_URL` | URL to release notes | |
 | `frontend.env.GW_TECHNICAL_RELEASE_NOTES_URL` | URL to technical changelog | |
-| `frontend.env.GW_INITIAL_WORKSPACE_PRESET` | Name of the workspace preset that is opened initially | | 
+| `frontend.env.GW_INITIAL_WORKSPACE_PRESET` | Name of the workspace preset that is opened initially | |
 | `frontend.useCustomConfigurationFiles` | Use custom configurations | `false` |
 | `frontend.customConfigurationLocation` | Where custom configurations are located *(local\|s3)* | `local` |
 | `frontend.customConfiguration.files` | Map of filename to JSON content structured as YAML | `{}` |
@@ -230,6 +230,11 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 
 | Chart version | frontend version |
 |---------------|------------------|
+| 3.20.10       | 15.2.0           |
+| 3.20.9        | 15.0.0           |
+| 3.20.8        | 14.4.0           |
+| 3.20.7        | 14.3.0           |
+| 3.20.6        | 14.1.0           |
 | 3.20.4        | 14.0.1           |
 | 3.20.3        | 13.1.0           |
 | 3.20.2        | 13.0.0           |
