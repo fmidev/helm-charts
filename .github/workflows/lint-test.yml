@@ -60,6 +60,8 @@ jobs:
         run: |
           kubectl apply --filename=openshift-crds/imagestream.yaml
           kubectl apply --filename=openshift-crds/template.yaml
+          kubectl apply --filename=openshift-crds/buildconfig.yaml
+          kubectl apply --filename=openshift-crds/route.yaml
           # TODO: Add more stubs here if your charts need them
 
       - name: Run chart-testing (install)
