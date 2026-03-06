@@ -60,7 +60,7 @@ postgresql:
   owner: app
   instances: 3
   storageSize: 3Gi
-  parameters:
+  parameters: {}
     # 1/4 of memory as suggested in https://www.postgresql.org/docs/current/runtime-config-resource.html
   resources:
     requests:

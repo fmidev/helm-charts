@@ -1,1 +1,1 @@
-echo "MlFlow tracking server installed"
+MLflow tracking server installed

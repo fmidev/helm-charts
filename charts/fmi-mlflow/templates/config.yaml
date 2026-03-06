@@ -5,5 +5,5 @@ metadata:
   labels:
     {{- include "mlflow.labels" . | nindent 4 }}
 data:
-  BUCKET_NAME: {{ .Values.objectStorage.s3.bucketName }}
-  S3_ENDPOINT_URL: {{ .Values.objectStorage.s3.endpointUrl }}
+  BUCKET_NAME: {{ .Values.objectStorage.s3.bucketName | quote }}
+  S3_ENDPOINT_URL: {{ .Values.objectStorage.s3.endpointUrl | quote }}

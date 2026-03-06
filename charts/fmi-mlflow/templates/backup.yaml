@@ -1,7 +1,7 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: ScheduledBackup
 metadata:
-  name: {{ .Values.postgresql.clusterName}}-s3-backup
+  name: {{ .Values.postgresql.clusterName }}-s3-backup
 spec:
   schedule: "0 0 0 * * *"
   backupOwnerReference: self

@@ -10,7 +10,7 @@ spec:
     targetPort: {{ .Values.mlflow.servicePort }}
   to:
     kind: Service
-    name: mlflow
+    name: {{ include "mlflow.fullname" . }}
     weight: 100
   tls:
     termination: edge

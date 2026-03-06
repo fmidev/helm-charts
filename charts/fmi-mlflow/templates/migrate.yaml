@@ -11,7 +11,8 @@ objects:
   kind: Job
   metadata:
     name: {{ include "mlflow.fullname" . }}-migrate-job
-    {{- include "mlflow.labels" . | nindent 4 }}
+    labels:
+      {{- include "mlflow.labels" . | nindent 6 }}
   spec:
     parallelism: 1
     completions: 1

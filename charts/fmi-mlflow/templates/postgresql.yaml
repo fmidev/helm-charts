@@ -29,7 +29,7 @@ spec:
       database: {{ .Values.postgresql.database | default "app" }}
       owner: {{ .Values.postgresql.owner | default "app" }}
       secret:
-        name: postgresql-mlflow-secret
+        name: {{ .Values.postgresql.secrets.mlflow | default "postgresql-mlflow-secret" }}
 
       {{- if .Values.recovery.ondemand }}
       backup:
