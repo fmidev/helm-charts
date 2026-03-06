@@ -62,7 +62,6 @@ postgresql:
   storageSize: 3Gi
   parameters:
     # 1/4 of memory as suggested in https://www.postgresql.org/docs/current/runtime-config-resource.html
-    sharedBuffers: "128MB"
   resources:
     requests:
       cpu: "200m"
