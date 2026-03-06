@@ -49,6 +49,9 @@ objects:
           secret:
             secretName: {{ .Values.sftp.sshSecretName }}
             defaultMode: 0400
+            items:
+              - key: {{ default "ssh-key" .Values.sftp.sshKeyKey }}
+                path: ssh-key
 parameters:
 - name: FILENAME
   description: Name of the file to fetch from SFTP
