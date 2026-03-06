@@ -2,8 +2,8 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-environment: # test/prod
-host: 
+environment:
+host:
 
 mlflow:
   replicas: 1
@@ -36,12 +36,12 @@ recovery:
   # ondemand backups use (recovering from a Backup object):
   # https://cloudnative-pg.io/documentation/1.27/recovery/#recovery-from-a-backup-object
   ondemand: false
-  name: # name of the manually created backup resource
+  name:  # name of the manually created backup resource
 
   # scheduled backups use:
   # https://cloudnative-pg.io/documentation/1.27/appendixes/backup_barmanobjectstore/#recovery-from-an-object-store
-  source: external-source # dont change this
-  serverName: pg-cluster-source # name of the source cluster (where the backups are taken from)
+  source: external-source  # dont change this
+  serverName: pg-cluster-source  # name of the source cluster (where the backups are taken from)
 
 # S3 storage for artifacts and backups
 objectStorage:
