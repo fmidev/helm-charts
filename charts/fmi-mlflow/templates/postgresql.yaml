@@ -14,7 +14,11 @@ spec:
 
   postgresql:
     parameters:
-      shared_buffers: {{ .Values.postgresql.parameters.sharedBuffers }}
+      {{- toYaml .Values.postgresql.parameters | nindent 6 }}
+
+  replicationSlots:
+    synchronizeReplicas:
+      enabled: false
 
   superuserSecret:
     name: {{ .Values.postgresql.secrets.admin | default "postgresql-superuser-secret" }}
