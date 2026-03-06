@@ -59,7 +59,10 @@ spec:
               value: "WHEN_REQUIRED"
 
             - name: MLFLOW_FLASK_SERVER_SECRET_KEY
-              value: "my-secret-key"
+              valueFrom:
+                secretKeyRef:
+                  name: flask-secret
+                  key: SECRET_KEY
 
             - name: MLFLOW_AUTH_CONFIG_PATH
               value: "/opt/basic-auth.ini"
