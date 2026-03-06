@@ -3,7 +3,7 @@
 
 ## Contents
 
-MlFlow tracking server with potgresql cluster.
+MLflow tracking server with PostgreSQL cluster.
 
 * [MLflow tracking server](https://mlflow.org/docs/latest/self-hosting/architecture/tracking-server/)
 * [CloudNativePG](https://cloudnative-pg.io/documentation/1.27/)
@@ -21,7 +21,7 @@ CloudnativePG operator needs to be installed in the OpenShift cluster before dep
 
 The following secrets needs to be created before deploying the helm chart.
 
-* basi-auth.ini (contains configurations for the mlflow authentication plugin, overrides [defaults](https://github.com/mlflow/mlflow/blob/0a26232b25033a367ffcfb8907069482ac8bc13a/mlflow/server/auth/basic_auth.ini))
+* basic-auth.ini (contains configurations for the mlflow authentication plugin, overrides [defaults](https://github.com/mlflow/mlflow/blob/0a26232b25033a367ffcfb8907069482ac8bc13a/mlflow/server/auth/basic_auth.ini))
 * s3 credentials (for storing mlflow artifacts and database backups)
 * postgresql-mlflow-secret (postgresql credentials for mlflow database)
 * postgresql-superuser-secret (postgresql admin credentials)
@@ -37,7 +37,7 @@ oc create secret generic postgresql-superuser-secret --from-env-file=env/postgre
 
 After the secrets are in place install the chart with:
 ```
-helm create mlflow . -f values.yaml
+helm install mlflow . -f values.yaml
 oc start-build mlflow
 oc scale deployment/mlflow --replicas=1
 ```
