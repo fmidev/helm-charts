@@ -1,0 +1,4 @@
+harpVis has been deployed.
+
+Get the application URL by running:
+  oc get route --namespace {{ .Release.Namespace }} {{ include "harp.fullname" . }} -o jsonpath='{.spec.host}'
