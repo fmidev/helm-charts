@@ -21,9 +21,6 @@ service:
   type: ClusterIP
   port: 8080
 
-serviceAccount:
-  name: file-uploader
-
 route:
   host: "harp.apps.ocp.fmi.fi"
   annotations: {}
@@ -52,7 +49,6 @@ sftp:
   localPath: /data
   pvcName: verification-data
   sshSecretName: sftp-ssh-key
-  ttlSecondsAfterFinished: 3600
 
   image:
     name: sftp-puller
@@ -60,6 +56,7 @@ sftp:
 
   job:
     name: sftp-pull
+    ttlSecondsAfterFinished: 3600
     resources:
       requests:
         cpu: 100m
