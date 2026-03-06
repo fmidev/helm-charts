@@ -1,0 +1,64 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: {{ include "mlflow.fullname" . }}-migrate
+  labels:
+    {{- include "mlflow.labels" . | nindent 4 }}
+  annotations:
+    description: Template to upgrade database
+objects:
+- apiVersion: batch/v1
+  kind: Job
+  metadata:
+    name: {{ include "mlflow.fullname" . }}-migrate-job
+    labels:
+      {{- include "mlflow.labels" . | nindent 6 }}
+  spec:
+    parallelism: 1
+    completions: 1
+    backoffLimit: 0
+    template:
+      spec:
+        restartPolicy: Never
+        containers:
+          - name: {{ include "mlflow.fullname" . }}
+            image: image-registry.openshift-image-registry.svc:5000/{{ .Release.Namespace }}/{{ include "mlflow.name" . }}:{{ .Values.mlflow.image.tag | default "latest" }}
+            imagePullPolicy: {{ .Values.mlflow.image.pullPolicy | default "Always" }}
+            env:
+            - name: POSTGRESQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.postgresql.secrets.mlflow }}
+                  key: username
+            - name: POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.postgresql.secrets.mlflow }}
+                  key: password
+            - name: MLFLOW_AUTH_CONFIG_PATH
+              value: "/opt/basic-auth.ini"
+
+            resources:
+              requests:
+                memory: "1Gi"
+              limits:
+                memory: "2Gi"
+
+            command: ["sh", "-c"]
+            args:
+              - |
+                mlflow db upgrade postgresql://$(POSTGRESQL_USER):$(POSTGRESQL_PASSWORD)@{{ .Values.postgresql.clusterName }}-rw.{{ .Release.Namespace }}:5432/{{ .Values.postgresql.database }}
+                # NOTE: no need to run migrations to users database for now! 
+                # https://mlflow.org/docs/latest/self-hosting/security/basic-http-auth/#permissions-database
+                # python -m mlflow.server.auth db upgrade --url postgresql://$(POSTGRESQL_USER):$(POSTGRESQL_PASSWORD)@{{ .Values.postgresql.clusterName }}-rw.{{ .Release.Namespace }}:5432/users
+
+            volumeMounts:
+              - name: auth-config
+                mountPath: /opt/
+                readOnly: true
+                #subPath: basic-auth.ini
+
+        volumes:
+          - name: auth-config
+            secret:
+              secretName: mlflow-auth-config # manually created for now
