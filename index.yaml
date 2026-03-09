@@ -4077,6 +4077,19 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/geoweb-warnings-backend-0.0.1/geoweb-warnings-backend-0.0.1.tgz
     version: 0.0.1
+  harp:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-03-09T08:02:13.428796623Z"
+    description: Helm chart for deploying harpVis web service on OpenShift
+    digest: eae19394f9818cba4d1d3d7f26e033ec933fc65d009ca02aa0bcb7ae7a85862b
+    maintainers:
+    - name: osmundi
+    name: harp
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/harp-0.1.0/harp-0.1.0.tgz
+    version: 0.1.0
   himan:
   - apiVersion: v2
     appVersion: 1.0.0
@@ -4929,4 +4942,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2026-02-23T13:15:51.096792096Z"
+generated: "2026-03-09T08:02:13.42940913Z"
