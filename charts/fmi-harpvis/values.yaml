@@ -3,7 +3,7 @@
 replicaCount: 1
 
 image:
-  repository: quay.io/fmi/harp
+  repository: quay.io/fmi/harpvis
   tag: latest
   pullPolicy: IfNotPresent
 
