@@ -21,7 +21,7 @@ helm upgrade --install smartmetserver fmi/smartmetserver --namespace smartmetser
 
 ## Volume Configuration Examples
 
-The chart supports four different volume types for smartmet data storage with both static and dynamic provisioning:
+The chart supports four different volume types for smartmet data storage: CephFS and hostPath volumes use static or dynamic PV/PVC provisioning, while NFS and directHostPath are inline volumes without PV/PVC provisioning:
 
 ### 1. Direct HostPath Volume (Testing)
 
