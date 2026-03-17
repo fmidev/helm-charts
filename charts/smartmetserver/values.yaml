@@ -103,14 +103,21 @@ ingress:
 
 # Volume configuration for smartmet data
 volume:
-  # Volume type: "cephfs", "nfs", or "hostPath"
+  # Volume type: "cephfs", "nfs", "hostPath", or "directHostPath"
+  # Use "directHostPath" for testing: mounts a node directory directly
+  # without PV/PVC (e.g. /smartmet/data)
   type: hostPath
   # Whether the volume should be mounted as read-only
   readOnly: true
   # Provisioning mode: "static" (use existing PV) or "dynamic" (create new PV)
   provisioning: dynamic
 
-  # hostPath configuration (for local directory on node)
+  # directHostPath configuration (for testing - no PV/PVC created)
+  directHostPath:
+    path: /smartmet/data
+    type: Directory
+
+  # hostPath configuration (for local directory on node, uses PV/PVC)
   hostPath:
     path: /tmp/smartmet-data
     # PV/PVC configuration for hostPath

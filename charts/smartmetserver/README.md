@@ -21,9 +21,30 @@ helm upgrade --install smartmetserver fmi/smartmetserver --namespace smartmetser
 
 ## Volume Configuration Examples
 
-The chart supports three different volume types for smartmet data storage with both static and dynamic provisioning:
+The chart supports four different volume types for smartmet data storage with both static and dynamic provisioning:
 
-### 1. NFS Volume
+### 1. Direct HostPath Volume (Testing)
+
+Mounts a local node directory directly into the container without creating PV/PVC resources. Useful for local testing and development.
+
+**Helm Command:**
+```bash
+helm upgrade --install smartmetserver fmi/smartmetserver \
+  --namespace smartmetserver --create-namespace \
+  --set volume.type=directHostPath \
+  --set volume.directHostPath.path=/smartmet/data
+```
+
+**Values YAML:**
+```yaml
+volume:
+  type: directHostPath
+  directHostPath:
+    path: /smartmet/data
+    type: Directory  # Directory, DirectoryOrCreate, File, etc.
+```
+
+### 2. NFS Volume
 
 **Helm Command:**
 ```bash
@@ -43,7 +64,7 @@ volume:
     path: /smartmet/data
 ```
 
-### 2. CephFS Volume - Static Provisioning (existing PV)
+### 3. CephFS Volume - Static Provisioning (existing PV)
 
 Uses existing CephFS volume. The capacity values are metadata only and should match your actual volume size.
 
@@ -71,7 +92,7 @@ volume:
       capacity: 5Ti  # Must match PV capacity
 ```
 
-### 3. CephFS Volume - Dynamic Provisioning
+### 4. CephFS Volume - Dynamic Provisioning
 
 **Helm Command:**
 ```bash
@@ -93,7 +114,7 @@ volume:
       capacity: 100Gi
 ```
 
-### 4. HostPath Volume - Static Provisioning (existing PV)
+### 5. HostPath Volume - Static Provisioning (existing PV)
 
 **Helm Command:**
 ```bash
@@ -114,7 +135,7 @@ volume:
       storage: 10Gi
 ```
 
-### 5. HostPath Volume - Dynamic Provisioning
+### 6. HostPath Volume - Dynamic Provisioning
 
 **Helm Command:**
 ```bash
@@ -317,9 +338,11 @@ The following table lists the configurable parameters of the Smartmetserver char
 | `ingress.tls.secretName` | Secret name for TLS certificate | `smartmetserver-ingress-tls` |
 | `ingress.tls.issuerRef.kind` | Certificate issuer kind | `ClusterIssuer` |
 | `ingress.tls.issuerRef.name` | Certificate issuer name | `letsencrypt` |
-| `volume.type` | Type of volume for smartmet data: `cephfs`, `nfs`, or `hostPath` | `hostPath` |
+| `volume.type` | Type of volume for smartmet data: `cephfs`, `nfs`, `hostPath`, or `directHostPath` | `hostPath` |
 | `volume.readOnly` | Whether the volume should be mounted as read-only | `true` |
 | `volume.provisioning` | Provisioning mode: `static` (use existing PV) or `dynamic` (create new PV) | `static` |
+| `volume.directHostPath.path` | Node directory path for direct hostPath mount (no PV/PVC) | `/smartmet/data` |
+| `volume.directHostPath.type` | hostPath type: `Directory`, `DirectoryOrCreate`, `File`, etc. | `Directory` |
 | `volume.hostPath.path` | Path for hostPath volume | `/tmp/smartmet-data` |
 | `volume.hostPath.pv.name` | Name of hostPath PersistentVolume | `smartmet-data-pv` |
 | `volume.hostPath.pv.storageClassName` | Storage class for hostPath PV | `hostpath-smartmet` |
