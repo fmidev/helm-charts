@@ -82,7 +82,7 @@ spec:
           claimName: {{ .Values.volume.hostPath.pvc.name }}
         {{- else if eq .Values.volume.type "directHostPath" }}
         hostPath:
-          path: {{ .Values.volume.directHostPath.path }}
+          path: {{ .Values.volume.directHostPath.path | quote }}
           type: {{ .Values.volume.directHostPath.type | default "Directory" }}
         {{- else }}
         {{- fail "volume.type must be one of: cephfs, nfs, hostPath, directHostPath" }}
