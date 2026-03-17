@@ -340,16 +340,16 @@ The following table lists the configurable parameters of the Smartmetserver char
 | `ingress.tls.issuerRef.name` | Certificate issuer name | `letsencrypt` |
 | `volume.type` | Type of volume for smartmet data: `cephfs`, `nfs`, `hostPath`, or `directHostPath` | `hostPath` |
 | `volume.readOnly` | Whether the volume should be mounted as read-only | `true` |
-| `volume.provisioning` | Provisioning mode: `static` (use existing PV) or `dynamic` (create new PV) | `static` |
+| `volume.provisioning` | Provisioning mode: `static` (use existing PV) or `dynamic` (create new PV) | `dynamic` |
 | `volume.directHostPath.path` | Node directory path for direct hostPath mount (no PV/PVC) | `/smartmet/data` |
 | `volume.directHostPath.type` | hostPath type: `Directory`, `DirectoryOrCreate`, `File`, etc. | `Directory` |
 | `volume.hostPath.path` | Path for hostPath volume | `/tmp/smartmet-data` |
 | `volume.hostPath.pv.name` | Name of hostPath PersistentVolume | `smartmet-data-pv` |
-| `volume.hostPath.pv.storageClassName` | Storage class for hostPath PV | `hostpath-smartmet` |
+| `volume.hostPath.pv.storageClassName` | Storage class for hostPath PV | `""` |
 | `volume.hostPath.pvc.name` | Name of hostPath PersistentVolumeClaim | `smartmet-data-pvc` |
 | `volume.hostPath.pvc.accessModes` | Access modes for hostPath PVC | `ReadWriteOnce` |
 | `volume.hostPath.pvc.storage` | Storage size for hostPath PVC | `1Gi` |
-| `volume.hostPath.pvc.storageClassName` | Storage class for dynamic provisioning | `hostpath-smartmet` |
+| `volume.hostPath.pvc.storageClassName` | Storage class for dynamic provisioning | `""` |
 | `volume.nfs.server` | NFS server address | `10.12.12.66` |
 | `volume.nfs.path` | NFS export path | `/smartmet/data` |
 | `volume.cephfs.pv.name` | Name of CephFS PersistentVolume | `smartmet-data-pv` |
