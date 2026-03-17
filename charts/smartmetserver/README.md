@@ -25,7 +25,7 @@ The chart supports four different volume types for smartmet data storage: CephFS
 
 ### 1. Direct HostPath Volume (Testing)
 
-Mounts a local node directory directly into the container without creating PV/PVC resources. Useful for local testing and development.
+Mounts a local node directory directly into the container without creating PV/PVC resources. This ties the pod to node-local state: in clusters with multiple nodes or when running more than one replica, pods may be scheduled onto nodes that do not have the specified directory, causing them to fail to start unless you constrain scheduling (for example with `nodeSelector`/affinity) or ensure the path exists on every node. This mode is intended only for local testing and development and is not recommended for production use.
 
 **Helm Command:**
 ```bash
