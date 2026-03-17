@@ -23,6 +23,7 @@ objects:
           - sh
           - -c
           - |
+            mkdir -p {{ .Values.sftp.localPath }}/$(dirname ${FILENAME})
             sftp -o StrictHostKeyChecking=no \
                  -o BatchMode=yes \
                  -i /secrets/ssh-key \
