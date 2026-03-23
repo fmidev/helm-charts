@@ -1,11 +1,13 @@
 apiVersion: v2
-name: fmi-cronjob
-description: Helm chart for defining a single cronjob
-type: library
-version: 0.0.1
+name: fmi-cronjobs
+description: Helm chart for defining multiple CronJobs
+type: application
+version: 0.1.0
 keywords:
   - fmi
   - cronjob
+  - batch
+  - scheduled
 home: https://github.com/fmidev/helm-charts
 maintainers:
   - name: fmi-build-bot

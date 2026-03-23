@@ -1,0 +1,24 @@
+# Default values applied to every job. Per-job settings always take precedence.
+defaults: {}
+# defaults:
+#   pullSecret: my-pull-secret    # shorthand: expands to imagePullSecrets: [{name: <value>}]
+#   pullPolicy: IfNotPresent
+#   timeZone: "Europe/Helsinki"
+#   backoffLimit: 5
+#   concurrencyPolicy: Forbid
+#   restartPolicy: Never
+#   successfulJobsHistoryLimit: 1
+#   failedJobsHistoryLimit: 3
+#   resourcePreset: minimal
+
+# List of CronJob definitions. See README.md for the full configuration reference.
+#
+# Minimal example:
+#   jobs:
+#     - name: my-job
+#       enabled: true
+#       schedule: "0 * * * *"
+#       image:
+#         repository: quay.io/myorg/my-image
+#         tag: 1.0.0
+jobs: []

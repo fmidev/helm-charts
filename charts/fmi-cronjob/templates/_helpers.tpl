@@ -1,5 +1,5 @@
-{{/* render full env block */}}
-{{- define "fmi-cronjob.renderEnv" -}}
+{{/* render full env: block (no output if list is empty) */}}
+{{- define "fmi-cronjobs.renderEnv" -}}
 {{- with . -}}
 env:
 {{- range . }}
@@ -16,11 +16,13 @@ env:
 {{- end -}}
 {{- end -}}
 
-{{/* resources */}}
-{{- define "fmi-cronjob.renderResources" -}}
+{{/* render resource requests and limits for a container */}}
+{{- define "fmi-cronjobs.renderResources" -}}
 {{- $job := .job -}}
-{{- if $job.resourcePreset }}
-{{- if eq $job.resourcePreset "minimal" }}
+{{- $defaults := (.defaults | default (dict)) -}}
+{{- $preset := $job.resourcePreset | default $defaults.resourcePreset -}}
+{{- if $preset }}
+{{- if eq $preset "minimal" }}
 resources:
   limits:
     cpu: 100m
@@ -28,7 +30,7 @@ resources:
   requests:
     cpu: 50m
     memory: 256Mi
-{{- else if eq $job.resourcePreset "normal" }}
+{{- else if eq $preset "normal" }}
 resources:
   limits:
     cpu: 500m
@@ -36,18 +38,24 @@ resources:
   requests:
     cpu: 250m
     memory: 512Mi
-{{- else if eq $job.resourcePreset "custom" }}
+{{- else if eq $preset "custom" }}
 resources:
   {{- toYaml $job.resources | nindent 2 }}
 {{- end -}}
-{{- else if $job.resources }}
+{{- else }}
+{{- if $job.resources }}
 resources:
   {{- toYaml $job.resources | nindent 2 }}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 
-{{/* volumes */}}
-{{- define "fmi-cronjob.renderVolumes" -}}
+{{/*
+Render all volumes: NFS mounts + optional tmp emptyDir
+Usage from a manifest:
+  {{ include "fmi-cronjobs.renderVolumes" (dict "mounts" ($job.mounts | default (list)) "tmp" ($job.tmp | default (dict))) | nindent 10 }}
+*/}}
+{{- define "fmi-cronjobs.renderVolumes" -}}
 {{- $mounts := (default (list) .mounts) -}}
 {{- $tmp := (default (dict) .tmp) -}}
 {{- $renderTmp := and $tmp (hasKey $tmp "enabled") ($tmp.enabled) -}}
@@ -72,8 +80,10 @@ volumes:
 {{- end }}
 {{- end }}
 
-{{/* volumeMounts */}}
-{{- define "fmi-cronjob.renderVolumeMounts" -}}
+{{/*
+Render all volumeMounts: NFS mounts + optional tmp emptyDir
+*/}}
+{{- define "fmi-cronjobs.renderVolumeMounts" -}}
 {{- $mounts := (default (list) .mounts) -}}
 {{- $tmp := (default (dict) .tmp) -}}
 
