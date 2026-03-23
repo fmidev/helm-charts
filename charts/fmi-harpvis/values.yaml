@@ -1,0 +1,71 @@
+# Default values for harp.
+
+replicaCount: 1
+
+image:
+  repository: quay.io/fmi/harp
+  tag: latest
+  pullPolicy: IfNotPresent
+
+imageStream:
+  scheduled: true
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+podLabels: {}
+
+service:
+  type: ClusterIP
+  port: 8080
+
+route:
+  host: "harp.apps.ocp.fmi.fi"
+  annotations: {}
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+
+sftp:
+  host: calibrix.fmi.fi
+  user: harpverif
+  remoteBasePath: /data/bris_verification
+  localPath: /data
+  pvcName: verification-data
+  sshSecretName: sftp-ssh-key
+
+  image:
+    name: sftp-puller
+    tag: "3.23"  # latest alpine version
+
+  job:
+    name: sftp-pull
+    ttlSecondsAfterFinished: 3600
+    resources:
+      requests:
+        cpu: 100m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
+
+pvc:
+  size: 10Gi
+  accessMode: ReadWriteMany
+  storageClassName: ocs-storagecluster-cephfs

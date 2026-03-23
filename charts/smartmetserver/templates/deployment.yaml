@@ -80,8 +80,12 @@ spec:
         {{- else if eq .Values.volume.type "hostPath" }}
         persistentVolumeClaim:
           claimName: {{ .Values.volume.hostPath.pvc.name }}
+        {{- else if eq .Values.volume.type "directHostPath" }}
+        hostPath:
+          path: {{ .Values.volume.directHostPath.path | quote }}
+          type: {{ .Values.volume.directHostPath.type | default "Directory" }}
         {{- else }}
-        {{- fail "volume.type must be one of: cephfs, nfs, hostPath" }}
+        {{- fail "volume.type must be one of: cephfs, nfs, hostPath, directHostPath" }}
         {{- end }}
       - name: smartmet-configuration
         configMap:
