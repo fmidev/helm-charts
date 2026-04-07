@@ -34,7 +34,7 @@ fmi-cronjobs:
 
 ## Configuration
 
-### `cronjobs.defaults`
+### `defaults`
 
 Optional shared defaults applied to every job. Per-job settings always take precedence.
 
@@ -50,14 +50,14 @@ Optional shared defaults applied to every job. Per-job settings always take prec
 | `failedJobsHistoryLimit` | Failed job records to keep | `3` |
 | `resourcePreset` | Default resource preset (`minimal`, `normal`, `custom`) | — |
 
-### `cronjobs.jobs`
+### `jobs`
 
-List of CronJob definitions. Each entry in `cronjobs.jobs` supports the following fields:
+List of CronJob definitions. Each entry supports the following fields:
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
 | `name` | CronJob name (required) | — |
-| `enabled` | Whether to create this CronJob | — |
+| `enabled` | Whether to create this CronJob. Jobs are **skipped** when `false` or omitted. | — |
 | `schedule` | Cron schedule expression (required) | — |
 | `timeZone` | IANA timezone; overrides `defaults.timeZone` | `Europe/Helsinki` |
 | `backoffLimit` | Retries before marking the job failed; overrides `defaults.backoffLimit` | `5` |
@@ -102,14 +102,15 @@ env:
 
 ### Resources
 
-Set `resourcePreset` to one of the built-in presets, or omit it and provide a custom `resources` block.
+Set `resourcePreset` to one of the built-in presets, or omit it and provide a `resources` block directly.
 
 | Preset | CPU limit/request | Memory limit/request |
 |--------|-------------------|----------------------|
 | `minimal` | 100m / 50m | 512Mi / 256Mi |
 | `normal` | 500m / 250m | 1Gi / 512Mi |
+| `custom` | — (reads from `resources`) | — (reads from `resources`) |
 
-Custom resources example:
+Custom resources example (either use `resourcePreset: custom` or omit `resourcePreset` entirely):
 
 ```yaml
 resources:
@@ -123,7 +124,16 @@ resources:
 
 ### `mounts`
 
-List of NFS volume mounts. Each item must have `name`, `mountPath`, `server`, and `serverPath`. Volumes default to read-only unless `readOnly: false` is set explicitly.
+List of NFS volume mounts. Volumes and volume mounts both default to read-only unless `readOnly: false` is set explicitly.
+
+| Field | Description | Required |
+|-------|-------------|----------|
+| `name` | Volume name | Yes |
+| `mountPath` | Path inside the container | Yes |
+| `server` | NFS server hostname or IP | Yes |
+| `serverPath` | Exported path on the NFS server | Yes |
+| `readOnly` | Mount as read-only | No (default: `true`) |
+| `subPath` | Sub-directory of the NFS export to mount | No |
 
 ```yaml
 mounts:
@@ -156,16 +166,19 @@ tmp:
 
 ## Full example
 
-```yaml
-defaults:
-  pullSecret: my-pull-secret   # applied to all jobs unless overridden
-  pullPolicy: IfNotPresent
-  timeZone: "Europe/Helsinki"
-  backoffLimit: 2
-  resourcePreset: minimal
+When used as a dependency, nest everything under `fmi-cronjobs:`.
 
-jobs:
-  - name: my-batch-job
+```yaml
+fmi-cronjobs:
+  defaults:
+    pullSecret: my-pull-secret   # applied to all jobs unless overridden
+    pullPolicy: IfNotPresent
+    timeZone: "Europe/Helsinki"
+    backoffLimit: 2
+    resourcePreset: minimal
+
+  jobs:
+    - name: my-batch-job
       enabled: true
       schedule: "30 6 * * *"
       timeZone: "UTC"            # overrides defaults.timeZone for this job
@@ -196,7 +209,7 @@ jobs:
       image:
         repository: quay.io/myorg/heavy-image
         tag: 1.0.0
-      resources:                 # custom resources override defaults.resourcePreset
+      resources:                 # custom resources; overrides defaults.resourcePreset
         limits:
           cpu: 4
           memory: 8Gi
