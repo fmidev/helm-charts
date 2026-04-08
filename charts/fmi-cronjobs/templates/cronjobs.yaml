@@ -1,0 +1,63 @@
+{{- $root := . -}}
+{{- $defaults := (.Values.defaults | default (dict)) -}}
+{{- range $idx, $job := .Values.jobs }}
+{{- if $job.enabled }}
+{{- /* Resolve effective values: per-job overrides defaults, defaults override built-ins */ -}}
+{{- $timeZone := $job.timeZone | default $defaults.timeZone | default "Europe/Helsinki" -}}
+{{- $concurrencyPolicy := $job.concurrencyPolicy | default $defaults.concurrencyPolicy | default "Forbid" -}}
+{{- $restartPolicy := $job.restartPolicy | default $defaults.restartPolicy | default "Never" -}}
+{{- $backoffLimit := $job.backoffLimit | default $defaults.backoffLimit | default 5 -}}
+{{- $successfulJobsHistoryLimit := $job.successfulJobsHistoryLimit | default $defaults.successfulJobsHistoryLimit | default 1 -}}
+{{- $failedJobsHistoryLimit := $job.failedJobsHistoryLimit | default $defaults.failedJobsHistoryLimit | default 3 -}}
+{{- $pullPolicy := $job.image.pullPolicy | default $defaults.pullPolicy | default "IfNotPresent" -}}
+{{- $pullSecrets := $job.image.pullSecrets -}}
+{{- if and (not $pullSecrets) $defaults.pullSecret -}}
+{{- $pullSecrets = list (dict "name" $defaults.pullSecret) -}}
+{{- end }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ $job.name }}
+  namespace: {{ $root.Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ $job.name }}
+    app.kubernetes.io/instance: {{ $root.Release.Name }}
+    app.kubernetes.io/managed-by: {{ $root.Chart.Name }}
+    app.kubernetes.io/component: cronjob
+  {{- if $job.annotations }}
+  annotations:
+    {{- toYaml $job.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  schedule: {{ $job.schedule | quote }}
+  timeZone: {{ $timeZone | quote }}
+  successfulJobsHistoryLimit: {{ $successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ $failedJobsHistoryLimit }}
+  concurrencyPolicy: {{ $concurrencyPolicy }}
+  jobTemplate:
+    spec:
+      backoffLimit: {{ $backoffLimit }}
+      template:
+        spec:
+          restartPolicy: {{ $restartPolicy }}
+          {{- if $pullSecrets }}
+          imagePullSecrets:
+            {{- toYaml $pullSecrets | nindent 12 }}
+          {{- end }}
+          containers:
+            - name: {{ $job.name }}-runner
+              image: "{{ $job.image.repository }}:{{ $job.image.tag }}"
+              imagePullPolicy: {{ $pullPolicy }}
+              {{- if $job.command }}
+              command: {{ toJson $job.command }}
+              {{- end }}
+              {{- if $job.args }}
+              args: {{ toJson $job.args }}
+              {{- end }}
+              {{ include "fmi-cronjobs.renderEnv" $job.env | nindent 14 }}
+              {{ include "fmi-cronjobs.renderResources" (dict "job" $job "defaults" $defaults) | nindent 14 }}
+              {{ include "fmi-cronjobs.renderVolumeMounts" (dict "mounts" ($job.mounts | default (list)) "tmp" ($job.tmp | default (dict))) | nindent 14 }}
+          {{ include "fmi-cronjobs.renderVolumes" (dict "mounts" ($job.mounts | default (list)) "tmp" ($job.tmp | default (dict))) | nindent 10 }}
+{{- end -}}
+{{- end -}}
