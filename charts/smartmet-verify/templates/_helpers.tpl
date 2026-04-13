@@ -27,9 +27,9 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{ with .Values.commonLabels }}
+{{- with .Values.commonLabels }}
 {{ toYaml . | trimSuffix "\n" }}
-{{ end }}
+{{- end }}
 {{- end -}}
 
 {{- define "smartmet-verify.selectorLabels" -}}
