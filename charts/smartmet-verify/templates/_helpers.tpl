@@ -70,9 +70,17 @@ app.kubernetes.io/component: {{ $component }}
 {{- $image := index . 1 -}}
 {{- $registry := $root.Values.global.imageRegistry | default "" -}}
 {{- $repo := $image.repository -}}
-{{- $tag := coalesce $image.tag $root.Values.global.imageTag $root.Chart.AppVersion -}}
+{{- $repoWithoutRegistry := $repo -}}
+{{- $repoParts := splitList "/" $repo -}}
+{{- if gt (len $repoParts) 1 -}}
+{{- $firstPart := first $repoParts -}}
+{{- if or (contains "." $firstPart) (contains ":" $firstPart) (eq $firstPart "localhost") -}}
+{{- $repoWithoutRegistry = join "/" (rest $repoParts) -}}
+{{- end -}}
+{{- end -}}
+{{- $tag := default $root.Values.global.imageTag $image.tag -}}
 {{- if $registry -}}
-{{- printf "%s/%s:%s" $registry $repo $tag -}}
+{{- printf "%s/%s:%s" $registry $repoWithoutRegistry $tag -}}
 {{- else -}}
 {{- printf "%s:%s" $repo $tag -}}
 {{- end -}}
