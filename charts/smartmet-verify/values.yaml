@@ -147,7 +147,13 @@ runner:
     tag: ""
     pullPolicy: IfNotPresent
 
-  resources: {}
+  resources:
+    requests:
+      memory: 6Gi
+      cpu: 2
+    limits:
+      memory: 6Gi
+      cpu: 2
 
   nodeSelector: {}
   tolerations: []
