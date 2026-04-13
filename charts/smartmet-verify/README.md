@@ -53,7 +53,7 @@ or:
 1. Download the Kubernetes pull secret for the account (e.g. to `pull-secret.yaml`).
 2. Submit the secret to the cluster:
 ```shell
-kubectl create -f pull-secret.yml --namespace=PUT_NAMESPACE_HERE
+kubectl create -f pull-secret.yaml --namespace=PUT_NAMESPACE_HERE
 ```
 3. Update Kubernetes configuration:
 ```yaml
