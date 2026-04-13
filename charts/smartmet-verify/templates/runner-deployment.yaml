@@ -39,6 +39,10 @@ spec:
           imagePullPolicy: {{ .Values.runner.image.pullPolicy }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.runner.service.port }}
+              protocol: TCP
           {{- $env := concat .Values.runner.env .Values.runner.extraEnv }}
           {{- if $env }}
           env:
@@ -64,7 +68,7 @@ spec:
           livenessProbe:
             httpGet:
               path: {{ .Values.runner.probes.liveness.path }}
-              port: 8080
+              port: http
             initialDelaySeconds: {{ .Values.runner.probes.liveness.initialDelaySeconds }}
             periodSeconds: {{ .Values.runner.probes.liveness.periodSeconds }}
             timeoutSeconds: {{ .Values.runner.probes.liveness.timeoutSeconds }}
@@ -74,7 +78,7 @@ spec:
           readinessProbe:
             httpGet:
               path: {{ .Values.runner.probes.readiness.path }}
-              port: 8080
+              port: http
             initialDelaySeconds: {{ .Values.runner.probes.readiness.initialDelaySeconds }}
             periodSeconds: {{ .Values.runner.probes.readiness.periodSeconds }}
             timeoutSeconds: {{ .Values.runner.probes.readiness.timeoutSeconds }}

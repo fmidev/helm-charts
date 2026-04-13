@@ -147,6 +147,10 @@ runner:
     tag: ""
     pullPolicy: IfNotPresent
 
+  service:
+    type: ClusterIP
+    port: 8080
+
   resources:
     requests:
       memory: 6Gi
