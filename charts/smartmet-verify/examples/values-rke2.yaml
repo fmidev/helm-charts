@@ -1,0 +1,38 @@
+imagePullSecrets:
+  - name: quay-pull-secret
+
+gui:
+  enabled: true
+  image:
+    tag: "1.2.3"
+  config:
+    secretFile:
+      secretName: smartmet-verify-gui-config
+  persistence:
+    logs:
+      enabled: true
+      size: 5Gi
+
+  ingress:
+    enabled: true
+    className: nginx
+    hosts:
+      - host: verification.example.org
+        paths:
+          - path: /
+            pathType: Prefix
+
+runner:
+  enabled: true
+  image:
+    tag: "1.2.3"
+
+  config:
+    mode: secretFile
+    secretFile:
+      secretName: smartmet-verify-runner-config
+
+  persistence:
+    logs:
+      enabled: true
+      storageClassName: local-path

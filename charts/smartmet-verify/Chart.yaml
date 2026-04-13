@@ -1,0 +1,16 @@
+apiVersion: v2
+name: smartmet-verify
+description: Helm chart for deploying SmartMet Verify applications (GUI and runner)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+home: https://github.com/fmidev/helm-charts
+sources:
+  - https://github.com/fmidev/helm-charts
+maintainers:
+  - name: Finnish Meteorological Institute
+keywords:
+  - smartmet
+  - verify
+  - spring-boot
+  - verification

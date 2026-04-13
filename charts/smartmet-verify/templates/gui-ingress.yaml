@@ -1,0 +1,35 @@
+{{- if and .Values.gui.enabled .Values.gui.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "smartmet-verify.componentFullname" (list . "gui") }}
+  labels:
+    {{- include "smartmet-verify.componentLabels" (list . "gui") | nindent 4 }}
+  {{- with .Values.gui.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.gui.ingress.className }}
+  ingressClassName: {{ .Values.gui.ingress.className }}
+  {{- end }}
+  rules:
+    {{- range .Values.gui.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ include "smartmet-verify.componentFullname" (list $ "gui") }}
+                port:
+                  number: {{ $.Values.gui.service.port }}
+          {{- end }}
+    {{- end }}
+  {{- with .Values.gui.ingress.tls }}
+  tls:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

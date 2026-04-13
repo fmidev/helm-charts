@@ -1,0 +1,208 @@
+nameOverride: ""
+fullnameOverride: ""
+
+commonLabels: {}
+commonAnnotations: {}
+
+imagePullSecrets: []
+# Example:
+# imagePullSecrets:
+#   - name: container-registry-pull-secret
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+podSecurityContext:
+  fsGroup: 1000
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+
+global:
+  imageRegistry: ""
+  imageTag: ""
+  extraVolumes: []
+  extraVolumeMounts: []
+
+gui:
+  enabled: false
+
+  replicaCount: 1
+
+  image:
+    repository: quay.io/fmi/fmi-verification-gui
+    tag: ""
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  resources:
+    requests:
+      memory: 3Gi
+      cpu: 2
+    limits:
+      memory: 3Gi
+      cpu: 2
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+  podAnnotations: {}
+  podLabels: {}
+
+  env:
+    - name: TZ
+      value: "UTC"
+    - name: JAVA_TOOL_OPTIONS
+      value: "-DproductionMode=true -Dvaadin.productionMode -XX:ActiveProcessorCount=2"
+    - name: JAVA_OPTS
+      value: "-Duser.timezone=UTC -Dspring.profiles.active=production -Dspring.config.additional-location=/var/app/config/"
+  extraEnv: []
+  extraEnvFrom: []
+  extraVolumes: []
+  extraVolumeMounts: []
+
+  config:
+    # Supported modes:
+    # - secretFile: mount one file from a Secret, e.g. application.yaml
+    # - env: import env vars from Secret/ConfigMap
+    # - none: do nothing
+    mode: secretFile
+
+    secretFile:
+      enabled: true
+      secretName: ""
+      secretKey: application.yaml
+      mountPath: /var/app/config
+      fileName: application.yaml
+
+    envFrom:
+      secretRefs: []
+      configMapRefs: []
+
+  persistence:
+    logs:
+      enabled: false
+      accessModes:
+        - ReadWriteOnce
+      size: 5Gi
+      storageClassName: ""
+      mountPath: /var/log/tomcat
+
+  probes:
+    liveness:
+      enabled: true
+      path: /actuator/health/liveness
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 3
+      failureThreshold: 6
+    readiness:
+      enabled: true
+      path: /actuator/health/readiness
+      initialDelaySeconds: 20
+      periodSeconds: 10
+      timeoutSeconds: 3
+      failureThreshold: 6
+
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    hosts:
+      - host: smartmet-verify-gui.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+
+  route:
+    enabled: false
+    annotations: {}
+    host: ""
+    tls:
+      enabled: true
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+
+runner:
+  enabled: false
+
+  replicaCount: 1
+
+  image:
+    repository: quay.io/fmi/fmi-verification-runner
+    tag: ""
+    pullPolicy: IfNotPresent
+
+  resources: {}
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+  podAnnotations: {}
+  podLabels: {}
+
+  env:
+    - name: TZ
+      value: "UTC"
+    - name: JAVA_TOOL_OPTIONS
+      value: "-DproductionMode=true -Dvaadin.productionMode -XX:ActiveProcessorCount=2"
+    - name: JAVA_OPTS
+      value: "-Duser.timezone=UTC -Dspring.profiles.active=production -Dspring.config.additional-location=/var/app/config/"
+  extraEnv: []
+  extraEnvFrom: []
+  extraVolumes: []
+  extraVolumeMounts: []
+
+  config:
+    mode: secretFile
+
+    secretFile:
+      enabled: true
+      secretName: ""
+      secretKey: application.yaml
+      mountPath: /var/app/config
+      fileName: application.yaml
+
+    envFrom:
+      secretRefs: []
+      configMapRefs: []
+
+  persistence:
+    logs:
+      enabled: false
+      accessModes:
+        - ReadWriteOnce
+      size: 5Gi
+      storageClassName: ""
+      mountPath: /var/log/tomcat
+
+  probes:
+    liveness:
+      enabled: true
+      path: /actuator/health/liveness
+      initialDelaySeconds: 30
+      periodSeconds: 20
+      timeoutSeconds: 3
+      failureThreshold: 6
+    readiness:
+      enabled: true
+      path: /actuator/health/readiness
+      initialDelaySeconds: 20
+      periodSeconds: 20
+      timeoutSeconds: 3
+      failureThreshold: 6

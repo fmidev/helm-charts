@@ -1,0 +1,21 @@
+SmartMet Verify chart installed.
+
+Release: {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+
+Enabled components:
+{{- if .Values.gui.enabled }}
+- GUI: enabled
+{{- else }}
+- GUI: disabled
+{{- end }}
+{{- if .Values.runner.enabled }}
+- Runner: enabled
+{{- else }}
+- Runner: disabled
+{{- end }}
+
+Important:
+- Configure imagePullSecrets to access private Quay images.
+- Prefer existing Kubernetes Secrets for Spring configuration and credentials.
+- GUI exposure can be configured with either Ingress or OpenShift Route.

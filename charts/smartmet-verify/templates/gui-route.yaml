@@ -1,0 +1,27 @@
+{{- if and .Values.gui.enabled .Values.gui.route.enabled }}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ include "smartmet-verify.componentFullname" (list . "gui") }}
+  labels:
+    {{- include "smartmet-verify.componentLabels" (list . "gui") | nindent 4 }}
+  {{- with .Values.gui.route.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.gui.route.host }}
+  host: {{ .Values.gui.route.host }}
+  {{- end }}
+  to:
+    kind: Service
+    name: {{ include "smartmet-verify.componentFullname" (list . "gui") }}
+    weight: 100
+  port:
+    targetPort: http
+  {{- if .Values.gui.route.tls.enabled }}
+  tls:
+    termination: {{ .Values.gui.route.tls.termination }}
+    insecureEdgeTerminationPolicy: {{ .Values.gui.route.tls.insecureEdgeTerminationPolicy }}
+  {{- end }}
+{{- end }}
