@@ -76,10 +76,18 @@ To use a mirror or a private registry for all images:
 ```yaml
 global:
   imageRegistry: my-registry.example.org
-  imageTag: "1.2.3"    # override tag for all components at once
 ```
 
-Per-component tags can be set under `gui.image.tag` and `runner.image.tag`.
+Tags must be set per component, as GUI and runner are versioned independently:
+
+```yaml
+gui:
+  image:
+    tag: "1.2.3"
+runner:
+  image:
+    tag: "4.5.6"
+```
 
 ## Configuration
 

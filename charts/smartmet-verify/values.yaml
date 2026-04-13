@@ -29,7 +29,6 @@ securityContext:
 
 global:
   imageRegistry: ""
-  imageTag: ""
   extraVolumes: []
   extraVolumeMounts: []
 
