@@ -1,3 +1,6 @@
+{{- if and .Values.gui.ingress.enabled .Values.gui.route.enabled }}
+{{- fail "gui.ingress.enabled and gui.route.enabled cannot both be true. Use Ingress (Kubernetes) or Route (OpenShift), not both." }}
+{{- end }}
 {{- if and .Values.gui.enabled .Values.gui.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
