@@ -170,7 +170,7 @@ runner:
     - name: TZ
       value: "UTC"
     - name: JAVA_TOOL_OPTIONS
-      value: "-DproductionMode=true -Dvaadin.productionMode -XX:ActiveProcessorCount=2"
+      value: "-DproductionMode=true -XX:ActiveProcessorCount=2"
     - name: JAVA_OPTS
       value: "-Duser.timezone=UTC -Dspring.profiles.active=production -Dspring.config.additional-location=/var/app/config/"
   extraEnv: []
