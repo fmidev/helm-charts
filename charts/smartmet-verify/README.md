@@ -18,6 +18,14 @@ The chart is designed to:
   - SmartMet Server (HTTP API)
 - Use **Secrets for configuration** (recommended)
 
+> **Both components are disabled by default.** You must explicitly enable at least one:
+> ```yaml
+> gui:
+>   enabled: true
+> runner:
+>   enabled: true
+> ```
+
 ## Prerequisites
 
 Before installing:
@@ -61,11 +69,59 @@ imagePullSecrets:
   - name: put-secret-name-here
 ```
 
+### Image registry and tag overrides
+
+To use a mirror or a private registry for all images:
+
+```yaml
+global:
+  imageRegistry: my-registry.example.org
+  imageTag: "1.2.3"    # override tag for all components at once
+```
+
+Per-component tags can be set under `gui.image.tag` and `runner.image.tag`.
+
 ## Configuration
 
 Each application requires its own configuration file (`application.yaml`).
 
-These are provided via Kubernetes Secrets.
+### Configuration modes
+
+Set `config.mode` for each component independently:
+
+| Mode | Description |
+|------|-------------|
+| `secretFile` | Mount a single file from a Secret (default). Recommended. |
+| `env` | Import environment variables from Secrets and/or ConfigMaps. |
+| `none` | No configuration injection. |
+
+#### `secretFile` mode (default)
+
+Create a Secret containing `application.yaml` and reference it:
+
+```yaml
+gui:
+  config:
+    mode: secretFile
+    secretFile:
+      secretName: smartmet-verify-gui-config   # must be set
+      secretKey: application.yaml              # key inside the Secret
+      mountPath: /var/app/config
+      fileName: application.yaml
+```
+
+#### `env` mode
+
+```yaml
+gui:
+  config:
+    mode: env
+    envFrom:
+      secretRefs:
+        - my-spring-secrets
+      configMapRefs:
+        - my-spring-config
+```
 
 ### Example: GUI configuration secret
 
@@ -152,6 +208,53 @@ stringData:
 ### Full example YAML files
 
 See [`examples/`](./examples/).
+
+## Exposing the GUI
+
+### Standard Kubernetes (Ingress)
+
+```yaml
+gui:
+  ingress:
+    enabled: true
+    className: nginx
+    hosts:
+      - host: verify.example.org
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: verify-tls
+        hosts:
+          - verify.example.org
+```
+
+### OpenShift (Route)
+
+```yaml
+gui:
+  route:
+    enabled: true
+    host: verify.apps.openshift.example.org
+    tls:
+      enabled: true
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+```
+
+Do not enable both `ingress` and `route` at the same time.
+
+## Runner monitoring port
+
+The runner exposes port 8080 (Spring Boot Actuator) via a ClusterIP Service.
+This allows external monitoring tools such as Prometheus to scrape metrics
+without exposing the runner publicly. The port is configurable:
+
+```yaml
+runner:
+  service:
+    port: 8080   # default
+```
 
 ## Installation
 
