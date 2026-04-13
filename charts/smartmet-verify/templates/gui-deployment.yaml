@@ -86,7 +86,7 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.gui.resources | nindent 12 }}
-          {{- $hasConfigMount := and (eq .Values.gui.config.mode "secretFile") .Values.gui.config.secretFile.enabled .Values.gui.config.secretFile.secretName }}
+          {{- $hasConfigMount := and (eq .Values.gui.config.mode "secretFile") .Values.gui.config.secretFile.secretName }}
           {{- if or $hasConfigMount .Values.gui.persistence.logs.enabled .Values.global.extraVolumeMounts .Values.gui.extraVolumeMounts }}
           volumeMounts:
             {{- if $hasConfigMount }}
