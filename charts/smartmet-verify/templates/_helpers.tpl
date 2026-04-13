@@ -78,7 +78,7 @@ app.kubernetes.io/component: {{ $component }}
 {{- $repoWithoutRegistry = join "/" (rest $repoParts) -}}
 {{- end -}}
 {{- end -}}
-{{- $tag := coalesce $image.tag $root.Values.global.imageTag $root.Chart.AppVersion -}}
+{{- $tag := coalesce $image.tag $root.Values.global.imageTag "latest" -}}
 {{- if $registry -}}
 {{- printf "%s/%s:%s" $registry $repoWithoutRegistry $tag -}}
 {{- else -}}
