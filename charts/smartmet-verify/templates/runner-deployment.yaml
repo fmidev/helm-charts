@@ -1,0 +1,140 @@
+{{- if .Values.runner.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "smartmet-verify.componentFullname" (list . "runner") }}
+  labels:
+    {{- include "smartmet-verify.componentLabels" (list . "runner") | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.runner.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "smartmet-verify.componentSelectorLabels" (list . "runner") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "smartmet-verify.componentSelectorLabels" (list . "runner") | nindent 8 }}
+        {{- with .Values.runner.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.runner.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "smartmet-verify.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: runner
+          image: {{ include "smartmet-verify.image" (list . .Values.runner.image) }}
+          imagePullPolicy: {{ .Values.runner.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.runner.service.port }}
+              protocol: TCP
+          {{- $env := concat .Values.runner.env .Values.runner.extraEnv }}
+          {{- if $env }}
+          env:
+            {{- toYaml $env | nindent 12 }}
+          {{- end }}
+          {{- $envFrom := list }}
+          {{- if eq .Values.runner.config.mode "env" }}
+            {{- range .Values.runner.config.envFrom.configMapRefs }}
+              {{- $envFrom = append $envFrom (dict "configMapRef" (dict "name" .)) }}
+            {{- end }}
+            {{- range .Values.runner.config.envFrom.secretRefs }}
+              {{- $envFrom = append $envFrom (dict "secretRef" (dict "name" .)) }}
+            {{- end }}
+          {{- end }}
+          {{- range .Values.runner.extraEnvFrom }}
+            {{- $envFrom = append $envFrom . }}
+          {{- end }}
+          {{- if $envFrom }}
+          envFrom:
+            {{- toYaml $envFrom | nindent 12 }}
+          {{- end }}
+          {{- if .Values.runner.probes.liveness.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.runner.probes.liveness.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.runner.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.runner.probes.liveness.periodSeconds }}
+            timeoutSeconds: {{ .Values.runner.probes.liveness.timeoutSeconds }}
+            failureThreshold: {{ .Values.runner.probes.liveness.failureThreshold }}
+          {{- end }}
+          {{- if .Values.runner.probes.readiness.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.runner.probes.readiness.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.runner.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.runner.probes.readiness.periodSeconds }}
+            timeoutSeconds: {{ .Values.runner.probes.readiness.timeoutSeconds }}
+            failureThreshold: {{ .Values.runner.probes.readiness.failureThreshold }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.runner.resources | nindent 12 }}
+          {{- $hasConfigMount := and (eq .Values.runner.config.mode "secretFile") .Values.runner.config.secretFile.secretName }}
+          {{- if or $hasConfigMount .Values.runner.persistence.logs.enabled .Values.global.extraVolumeMounts .Values.runner.extraVolumeMounts }}
+          volumeMounts:
+            {{- if $hasConfigMount }}
+            - name: runner-config
+              mountPath: {{ printf "%s/%s" .Values.runner.config.secretFile.mountPath .Values.runner.config.secretFile.fileName }}
+              subPath: {{ .Values.runner.config.secretFile.secretKey }}
+              readOnly: true
+            {{- end }}
+            {{- if .Values.runner.persistence.logs.enabled }}
+            - name: runner-logs
+              mountPath: {{ .Values.runner.persistence.logs.mountPath }}
+            {{- end }}
+            {{- with .Values.global.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- with .Values.runner.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+      {{- if or $hasConfigMount .Values.runner.persistence.logs.enabled .Values.global.extraVolumes .Values.runner.extraVolumes }}
+      volumes:
+        {{- if $hasConfigMount }}
+        - name: runner-config
+          secret:
+            secretName: {{ .Values.runner.config.secretFile.secretName }}
+        {{- end }}
+        {{- if .Values.runner.persistence.logs.enabled }}
+        - name: runner-logs
+          persistentVolumeClaim:
+            claimName: {{ include "smartmet-verify.componentFullname" (list . "runner") }}-logs
+        {{- end }}
+        {{- with .Values.global.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.runner.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.runner.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.runner.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.runner.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
