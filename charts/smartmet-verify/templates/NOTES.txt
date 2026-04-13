@@ -19,7 +19,12 @@ Enabled components:
 
 GUI access:
 {{- if .Values.gui.route.enabled }}
-  URL: https://{{ .Values.gui.route.host }}
+{{- if .Values.gui.route.host }}
+  URL: http{{ if .Values.gui.route.tls.enabled }}s{{ end }}://{{ .Values.gui.route.host }}
+{{- else }}
+  Host not set — OpenShift will generate one. Retrieve it with:
+  oc get route -n {{ .Release.Namespace }} {{ include "smartmet-verify.componentFullname" (list . "gui") }}
+{{- end }}
 {{- else if .Values.gui.ingress.enabled }}
 {{- range .Values.gui.ingress.hosts }}
   URL: http{{ if $.Values.gui.ingress.tls }}s{{ end }}://{{ .host }}
