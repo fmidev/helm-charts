@@ -1,0 +1,34 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Values.smartmetDataGfs.name }}-{{ .Values.cronJob.name }}
+  labels:
+    app: {{ .Values.smartmetDataGfs.name }}
+spec:
+  schedule: {{ .Values.cronJob.schedule | quote }}
+  timeZone: {{ .Values.cronJob.timeZone | quote }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          securityContext: {{ .Values.cronJob.securityContext | toYaml | nindent 12 }}
+          containers:
+          - name: {{ .Values.smartmetDataGfs.name }}
+            image: {{ .Values.smartmetDataGfs.image.repository }}:{{ .Values.smartmetDataGfs.image.tag }}
+            imagePullPolicy: {{ .Values.smartmetDataGfs.image.imagePullPolicy }}
+            volumeMounts:
+            - name: smartmet-data-gfs-volume
+              mountPath: "/smartmet/data/"
+            - name: gfs-file-config-volume
+              mountPath: "/smartmet/cnf/data"
+          restartPolicy: {{ .Values.cronJob.restartPolicy }}
+          volumes:
+          - name: smartmet-data-gfs-volume
+            persistentVolumeClaim:
+              claimName: {{ .Values.smartmetDataGfs.name }}-{{ .Values.pvc.name }}
+          - name: gfs-file-config-volume
+            configMap:
+              items:
+              - key: gfs.cnf
+                path: gfs.cnf
+              name: {{ .Values.smartmetDataGfs.name }}-{{ .Values.gfsFileConfigMap.name }}
