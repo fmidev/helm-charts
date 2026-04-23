@@ -1,0 +1,21 @@
+imagePullSecrets:
+  - name: quay-pull-secret
+
+gui:
+  enabled: true
+  image:
+    tag: "1.2.3"
+
+  config:
+    mode: secretFile
+    secretFile:
+      secretName: smartmet-verify-gui-config
+
+  route:
+    enabled: true
+    host: verify-gui.apps.openshift.example.org
+    annotations:
+      haproxy.router.openshift.io/ip_whitelist: "10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+
+runner:
+  enabled: false
