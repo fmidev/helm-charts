@@ -13,6 +13,18 @@ gui:
       enabled: true
       size: 5Gi
 
+  # The GUI listens on HTTP port 8080 when its application.yaml sets
+  # `security.require-ssl: false` (recommended for cluster-internal traffic).
+  # With Spring Security protecting /actuator/**, fall back to tcpSocket probes
+  # unless the "noauth" profile is active or the health endpoints are permitted.
+  probes:
+    liveness:
+      tcpSocket:
+        port: http
+    readiness:
+      tcpSocket:
+        port: http
+
   ingress:
     enabled: true
     className: nginx
@@ -36,3 +48,89 @@ runner:
     logs:
       enabled: true
       storageClassName: local-path
+
+  # The runner has no HTTP server. Exec probes keep Kubernetes happy without
+  # turning on an Actuator endpoint.
+  probes:
+    liveness:
+      exec:
+        command: ["true"]
+    readiness:
+      exec:
+        command: ["true"]
+
+# Optional PostgreSQL/PostGIS database managed by CloudNativePG.
+#
+# Prerequisites:
+#   1. Install the CloudNativePG operator (see chart README).
+#   2. Create a ConfigMap that holds your init SQL scripts, e.g.:
+#        kubectl -n <ns> create configmap verification-db-init-sql \
+#          --from-file=0000-pre-init.sql \
+#          --from-file=0001-production-schema.sql \
+#          --from-file=0002-post-ownership.sql
+#   3. Create basic-auth secrets for each managed role, e.g.:
+#        kubectl -n <ns> create secret generic verification-db-verifwww \
+#          --type=kubernetes.io/basic-auth \
+#          --from-literal=username=verifwww --from-literal=password=<strong>
+database:
+  enabled: true
+  name: verification-db
+  spec:
+    instances: 1
+    imageName: ghcr.io/cloudnative-pg/postgis:16-3.4
+    env:
+      - name: TZ
+        value: UTC
+    postgresql:
+      parameters:
+        timezone: UTC
+        log_timezone: UTC
+    storage:
+      size: 20Gi
+      storageClass: local-path
+    bootstrap:
+      initdb:
+        database: verifapi
+        owner: app
+        postInitSQLRefs:
+          configMapRefs:
+            - name: verification-db-init-sql
+              key: 0000-pre-init.sql
+        postInitApplicationSQLRefs:
+          configMapRefs:
+            - name: verification-db-init-sql
+              key: 0002-post-ownership.sql
+            - name: verification-db-init-sql
+              key: 0001-production-schema.sql
+    managed:
+      roles:
+        - name: verifadmin
+          ensure: present
+          login: true
+          inherit: true
+          passwordSecret:
+            name: verification-db-verifadmin
+        - name: verifwww
+          ensure: present
+          login: true
+          inherit: true
+          inRoles:
+            - verif_ro
+          passwordSecret:
+            name: verification-db-verifwww
+        - name: verifrun
+          ensure: present
+          login: true
+          inherit: true
+          inRoles:
+            - verif_data_rw
+          passwordSecret:
+            name: verification-db-verifrun
+      services:
+        additional:
+          # Exposes the primary as `verification-db` so application configs
+          # that expect that hostname work without change.
+          - selectorType: rw
+            serviceTemplate:
+              metadata:
+                name: verification-db

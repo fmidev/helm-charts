@@ -66,34 +66,26 @@ spec:
           {{- end }}
           {{- if .Values.gui.probes.liveness.enabled }}
           livenessProbe:
-            httpGet:
-              path: {{ .Values.gui.probes.liveness.path }}
-              port: http
-            initialDelaySeconds: {{ .Values.gui.probes.liveness.initialDelaySeconds }}
-            periodSeconds: {{ .Values.gui.probes.liveness.periodSeconds }}
-            timeoutSeconds: {{ .Values.gui.probes.liveness.timeoutSeconds }}
-            failureThreshold: {{ .Values.gui.probes.liveness.failureThreshold }}
+            {{- include "smartmet-verify.probe" .Values.gui.probes.liveness | nindent 12 }}
           {{- end }}
           {{- if .Values.gui.probes.readiness.enabled }}
           readinessProbe:
-            httpGet:
-              path: {{ .Values.gui.probes.readiness.path }}
-              port: http
-            initialDelaySeconds: {{ .Values.gui.probes.readiness.initialDelaySeconds }}
-            periodSeconds: {{ .Values.gui.probes.readiness.periodSeconds }}
-            timeoutSeconds: {{ .Values.gui.probes.readiness.timeoutSeconds }}
-            failureThreshold: {{ .Values.gui.probes.readiness.failureThreshold }}
+            {{- include "smartmet-verify.probe" .Values.gui.probes.readiness | nindent 12 }}
           {{- end }}
           resources:
             {{- toYaml .Values.gui.resources | nindent 12 }}
           {{- $hasConfigMount := and (eq .Values.gui.config.mode "secretFile") .Values.gui.config.secretFile.secretName }}
-          {{- if or $hasConfigMount .Values.gui.persistence.logs.enabled .Values.global.extraVolumeMounts .Values.gui.extraVolumeMounts }}
+          {{- if or $hasConfigMount .Values.gui.tmpDir.enabled .Values.gui.persistence.logs.enabled .Values.global.extraVolumeMounts .Values.gui.extraVolumeMounts }}
           volumeMounts:
             {{- if $hasConfigMount }}
             - name: gui-config
               mountPath: {{ printf "%s/%s" .Values.gui.config.secretFile.mountPath .Values.gui.config.secretFile.fileName }}
               subPath: {{ .Values.gui.config.secretFile.secretKey }}
               readOnly: true
+            {{- end }}
+            {{- if .Values.gui.tmpDir.enabled }}
+            - name: tmp
+              mountPath: /tmp
             {{- end }}
             {{- if .Values.gui.persistence.logs.enabled }}
             - name: gui-logs
@@ -106,12 +98,16 @@ spec:
             {{- toYaml . | nindent 12 }}
             {{- end }}
           {{- end }}
-      {{- if or $hasConfigMount .Values.gui.persistence.logs.enabled .Values.global.extraVolumes .Values.gui.extraVolumes }}
+      {{- if or $hasConfigMount .Values.gui.tmpDir.enabled .Values.gui.persistence.logs.enabled .Values.global.extraVolumes .Values.gui.extraVolumes }}
       volumes:
         {{- if $hasConfigMount }}
         - name: gui-config
           secret:
             secretName: {{ .Values.gui.config.secretFile.secretName }}
+        {{- end }}
+        {{- if .Values.gui.tmpDir.enabled }}
+        - name: tmp
+          emptyDir: {}
         {{- end }}
         {{- if .Values.gui.persistence.logs.enabled }}
         - name: gui-logs

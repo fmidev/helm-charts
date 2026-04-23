@@ -99,6 +99,14 @@ gui:
       storageClassName: ""
       mountPath: /var/log/tomcat
 
+  # Writable /tmp mounted as emptyDir. Required when readOnlyRootFilesystem is
+  # true (the default) because Tomcat and the JVM need to write to /tmp.
+  tmpDir:
+    enabled: true
+
+  # Probe action. By default this is an httpGet against `path` on the named
+  # `http` port. Set one of `httpGet`, `tcpSocket` or `exec` to use a different
+  # action — those override the `path` shortcut when present.
   probes:
     liveness:
       enabled: true
@@ -198,6 +206,11 @@ runner:
       storageClassName: ""
       mountPath: /var/log/tomcat
 
+  tmpDir:
+    enabled: true
+
+  # The runner has no HTTP server by default, so probe overrides are common.
+  # See the `exec` / `tcpSocket` / `httpGet` examples in values-rke2.yaml.
   probes:
     liveness:
       enabled: true
@@ -213,3 +226,77 @@ runner:
       periodSeconds: 20
       timeoutSeconds: 3
       failureThreshold: 6
+
+# Optional PostgreSQL/PostGIS database managed by the CloudNativePG operator.
+#
+# The operator itself is NOT installed by this chart. Before setting
+# `database.enabled: true` you must install CloudNativePG (see README).
+#
+# The fields under `spec` are passed through to the `Cluster` resource verbatim,
+# so anything the CNPG API supports can be configured from here.
+database:
+  enabled: false
+
+  # Cluster name. Also becomes the stem of the CNPG-generated services
+  # (`<name>-rw`, `<name>-ro`, `<name>-r`). Applications that use a different
+  # hostname (e.g. `verification-db`) can add an alias via
+  # `database.spec.managed.services.additional`.
+  name: verification-db
+
+  spec:
+    instances: 1
+    imageName: ghcr.io/cloudnative-pg/postgis:16-3.4
+
+    env:
+      - name: TZ
+        value: UTC
+
+    postgresql:
+      parameters:
+        timezone: UTC
+        log_timezone: UTC
+
+    storage:
+      size: 20Gi
+      # storageClass: ""
+
+    # By keeping `owner: app` the operator creates a throw-away `app` role,
+    # which lets pre-init SQL CREATE ROLE verifadmin without colliding.
+    # A post-init SQL should transfer ownership of the application database
+    # to verifadmin before the production schema runs.
+    bootstrap:
+      initdb:
+        database: verifapi
+        owner: app
+        # References to ConfigMap/Secret keys containing SQL scripts.
+        # Supply these as existing ConfigMaps — the chart does not vendor
+        # the SmartMet Verify schema.
+        postInitSQLRefs:
+          configMapRefs: []
+          # - name: verification-db-init-sql
+          #   key: 0000-pre-init.sql
+        postInitApplicationSQLRefs:
+          configMapRefs: []
+          # - name: verification-db-init-sql
+          #   key: 0002-post-ownership.sql
+          # - name: verification-db-init-sql
+          #   key: 0001-production-schema.sql
+
+    # managed.roles and managed.services below give applications access to the
+    # DB under their expected role names and service hostnames.
+    managed:
+      roles: []
+      # - name: verifwww
+      #   ensure: present
+      #   login: true
+      #   inherit: true
+      #   inRoles:
+      #     - verif_ro
+      #   passwordSecret:
+      #     name: verification-db-verifwww
+      services:
+        additional: []
+        # - selectorType: rw
+        #   serviceTemplate:
+        #     metadata:
+        #       name: verification-db

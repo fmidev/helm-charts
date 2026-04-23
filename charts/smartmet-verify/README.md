@@ -264,6 +264,67 @@ runner:
     port: 8080   # default
 ```
 
+## Writable `/tmp` volume
+
+Both components run with `securityContext.readOnlyRootFilesystem: true`, which
+blocks Tomcat/JVM writes to `/tmp`. To keep the root filesystem read-only while
+still allowing these writes, the chart mounts an `emptyDir` at `/tmp` by
+default. It is controlled independently per component:
+
+```yaml
+gui:
+  tmpDir:
+    enabled: true   # default
+runner:
+  tmpDir:
+    enabled: true   # default
+```
+
+Disable only if you provide an alternative writable location for `/tmp`.
+
+## Probes
+
+The GUI and runner liveness and readiness probes support the full Kubernetes
+probe-action set. Each of `gui.probes.liveness`, `gui.probes.readiness`,
+`runner.probes.liveness` and `runner.probes.readiness` accepts one of the
+optional keys `httpGet`, `tcpSocket` or `exec` (passed through verbatim to the
+pod spec). If none is set, the template falls back to the existing `path:`
+shortcut, which performs an `httpGet` against the named `http` port.
+
+The runner does not expose an HTTP server by default, so `exec` probes are the
+recommended choice there:
+
+```yaml
+runner:
+  probes:
+    liveness:
+      exec:
+        command: ["true"]
+      initialDelaySeconds: 30
+      periodSeconds: 30
+    readiness:
+      exec:
+        command: ["true"]
+      initialDelaySeconds: 10
+      periodSeconds: 15
+```
+
+The GUI's Spring Security configuration protects `/actuator/**` by default, so
+the `path:` shortcut returns HTTP 401 unless the `noauth` Spring profile is
+active or the health endpoints are explicitly permitted. A `tcpSocket` probe
+avoids this:
+
+```yaml
+gui:
+  probes:
+    liveness:
+      tcpSocket:
+        port: http
+    readiness:
+      tcpSocket:
+        port: http
+```
+
 ## Installation
 
 1. Add Helm repo:
@@ -275,6 +336,126 @@ helm repo update
 ```shell
 helm install smartmet-verify fmidev/smartmet-verify -f values.yaml
 ```
+
+## Database (optional)
+
+The chart can optionally provision a PostgreSQL/PostGIS database using
+[CloudNativePG](https://cloudnative-pg.io/) (CNPG). This is a convenience for
+clusters that do not already have an external database; any existing
+PostgreSQL/PostGIS instance continues to work unchanged.
+
+### Install the CloudNativePG operator
+
+**The CloudNativePG operator is NOT installed by this chart.** You must install
+it separately, cluster-wide, before enabling the database:
+
+```shell
+kubectl apply --server-side -f \
+  https://github.com/cloudnative-pg/cloudnative-pg/releases/download/v1.29.0/cnpg-1.29.0.yaml
+```
+
+The above is the version this chart has been tested against. Any reasonably
+current CNPG release should work.
+
+### Enable the database
+
+```yaml
+database:
+  enabled: true
+  name: verification-db   # default
+```
+
+When enabled, the chart creates a `postgresql.cnpg.io/v1` `Cluster` named by
+`database.name` (default `verification-db`). The default image is
+`ghcr.io/cloudnative-pg/postgis:16-3.4`.
+
+`database.spec` is a pass-through to the CNPG `Cluster.spec` — anything CNPG
+supports goes there.
+
+### Init SQL
+
+The chart does not vendor the SmartMet Verify schema. You must provide the init
+SQL yourself as an existing ConfigMap and reference it from `database.spec`.
+
+Create the ConfigMap:
+
+```shell
+kubectl -n <ns> create configmap verification-db-init-sql \
+  --from-file=0000-pre-init.sql \
+  --from-file=0001-production-schema.sql \
+  --from-file=0002-post-ownership.sql
+```
+
+Reference it via CNPG's `postInitSQLRefs` and `postInitApplicationSQLRefs`:
+
+```yaml
+database:
+  spec:
+    bootstrap:
+      initdb:
+        postInitSQLRefs:
+          configMapRefs:
+            - { name: verification-db-init-sql, key: 0000-pre-init.sql }
+        postInitApplicationSQLRefs:
+          configMapRefs:
+            - { name: verification-db-init-sql, key: 0002-post-ownership.sql }
+            - { name: verification-db-init-sql, key: 0001-production-schema.sql }
+```
+
+`0002-post-ownership.sql` is a small user-supplied wrapper that transfers the
+application database's ownership to `verifadmin` before the schema loads. It is
+needed because the CNPG initdb `owner: app` default avoids conflicting with the
+`CREATE ROLE verifadmin` in `0000-pre-init.sql`, so ownership has to be handed
+over explicitly. Example contents:
+
+```sql
+ALTER DATABASE verifapi OWNER TO verifadmin;
+ALTER SCHEMA public OWNER TO verifadmin;
+GRANT USAGE ON SCHEMA public TO verif_ro;
+GRANT CREATE ON SCHEMA public TO verifadmin;
+```
+
+### Role passwords
+
+Role passwords come from `kubernetes.io/basic-auth` secrets that you create,
+one per managed role:
+
+```shell
+kubectl -n <ns> create secret generic verification-db-verifwww \
+  --type=kubernetes.io/basic-auth \
+  --from-literal=username=verifwww \
+  --from-literal=password=<strong>
+```
+
+The same password must also end up in the application config Secret (e.g.
+`smartmet-verify-gui-config`) that the GUI and runner mount. Keep the two in
+sync whenever you rotate a password.
+
+### Managed role memberships
+
+**Pitfall:** CNPG's `managed.roles` reconciliation removes any role memberships
+it did not declare itself. If a role's privileges come from a
+`GRANT <group_role> TO <user>` line in `0000-pre-init.sql`, you must **also**
+repeat that via the `inRoles:` field on the managed role — otherwise CNPG will
+revoke it on the next reconcile.
+
+`examples/values-rke2.yaml` shows `verifwww` with `inRoles: [verif_ro]` and
+`verifrun` with `inRoles: [verif_data_rw]` for exactly this reason.
+
+### Service hostname
+
+CNPG creates `<name>-rw`, `<name>-ro` and `<name>-r` services for the cluster.
+Applications that hard-code `verification-db` as the database hostname (e.g.
+in a pre-existing `application.yaml`) can get that name via
+`database.spec.managed.services.additional` — a `selectorType: rw` service
+template named `verification-db`. See `examples/values-rke2.yaml` for the exact
+shape.
+
+### Full example
+
+See [`examples/values-rke2.yaml`](./examples/values-rke2.yaml) for a complete
+working database configuration, including managed roles, additional services
+and init SQL wiring.
 
 ## Notes for operators
 

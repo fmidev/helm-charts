@@ -65,6 +65,51 @@ app.kubernetes.io/component: {{ $component }}
 app.kubernetes.io/component: {{ $component }}
 {{- end -}}
 
+{{/*
+Render a Kubernetes probe from a probe spec.
+
+Input: a map like `.Values.<component>.probes.liveness`.
+The probe action is picked in this priority order:
+
+  1. exec       — map with a command list
+  2. tcpSocket  — map with a port
+  3. httpGet    — map with path/port/scheme/httpHeaders
+  4. path       — legacy shortcut, expanded to httpGet on the named "http" port
+
+Timing fields are forwarded when set.
+*/}}
+{{- define "smartmet-verify.probe" -}}
+{{- if .exec -}}
+exec:
+  {{- toYaml .exec | nindent 2 }}
+{{- else if .tcpSocket -}}
+tcpSocket:
+  {{- toYaml .tcpSocket | nindent 2 }}
+{{- else if .httpGet -}}
+httpGet:
+  {{- toYaml .httpGet | nindent 2 }}
+{{- else if .path -}}
+httpGet:
+  path: {{ .path }}
+  port: http
+{{- end }}
+{{- with .initialDelaySeconds }}
+initialDelaySeconds: {{ . }}
+{{- end }}
+{{- with .periodSeconds }}
+periodSeconds: {{ . }}
+{{- end }}
+{{- with .timeoutSeconds }}
+timeoutSeconds: {{ . }}
+{{- end }}
+{{- with .failureThreshold }}
+failureThreshold: {{ . }}
+{{- end }}
+{{- with .successThreshold }}
+successThreshold: {{ . }}
+{{- end }}
+{{- end -}}
+
 {{- define "smartmet-verify.image" -}}
 {{- $root := index . 0 -}}
 {{- $image := index . 1 -}}

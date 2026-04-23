@@ -66,34 +66,26 @@ spec:
           {{- end }}
           {{- if .Values.runner.probes.liveness.enabled }}
           livenessProbe:
-            httpGet:
-              path: {{ .Values.runner.probes.liveness.path }}
-              port: http
-            initialDelaySeconds: {{ .Values.runner.probes.liveness.initialDelaySeconds }}
-            periodSeconds: {{ .Values.runner.probes.liveness.periodSeconds }}
-            timeoutSeconds: {{ .Values.runner.probes.liveness.timeoutSeconds }}
-            failureThreshold: {{ .Values.runner.probes.liveness.failureThreshold }}
+            {{- include "smartmet-verify.probe" .Values.runner.probes.liveness | nindent 12 }}
           {{- end }}
           {{- if .Values.runner.probes.readiness.enabled }}
           readinessProbe:
-            httpGet:
-              path: {{ .Values.runner.probes.readiness.path }}
-              port: http
-            initialDelaySeconds: {{ .Values.runner.probes.readiness.initialDelaySeconds }}
-            periodSeconds: {{ .Values.runner.probes.readiness.periodSeconds }}
-            timeoutSeconds: {{ .Values.runner.probes.readiness.timeoutSeconds }}
-            failureThreshold: {{ .Values.runner.probes.readiness.failureThreshold }}
+            {{- include "smartmet-verify.probe" .Values.runner.probes.readiness | nindent 12 }}
           {{- end }}
           resources:
             {{- toYaml .Values.runner.resources | nindent 12 }}
           {{- $hasConfigMount := and (eq .Values.runner.config.mode "secretFile") .Values.runner.config.secretFile.secretName }}
-          {{- if or $hasConfigMount .Values.runner.persistence.logs.enabled .Values.global.extraVolumeMounts .Values.runner.extraVolumeMounts }}
+          {{- if or $hasConfigMount .Values.runner.tmpDir.enabled .Values.runner.persistence.logs.enabled .Values.global.extraVolumeMounts .Values.runner.extraVolumeMounts }}
           volumeMounts:
             {{- if $hasConfigMount }}
             - name: runner-config
               mountPath: {{ printf "%s/%s" .Values.runner.config.secretFile.mountPath .Values.runner.config.secretFile.fileName }}
               subPath: {{ .Values.runner.config.secretFile.secretKey }}
               readOnly: true
+            {{- end }}
+            {{- if .Values.runner.tmpDir.enabled }}
+            - name: tmp
+              mountPath: /tmp
             {{- end }}
             {{- if .Values.runner.persistence.logs.enabled }}
             - name: runner-logs
@@ -106,12 +98,16 @@ spec:
             {{- toYaml . | nindent 12 }}
             {{- end }}
           {{- end }}
-      {{- if or $hasConfigMount .Values.runner.persistence.logs.enabled .Values.global.extraVolumes .Values.runner.extraVolumes }}
+      {{- if or $hasConfigMount .Values.runner.tmpDir.enabled .Values.runner.persistence.logs.enabled .Values.global.extraVolumes .Values.runner.extraVolumes }}
       volumes:
         {{- if $hasConfigMount }}
         - name: runner-config
           secret:
             secretName: {{ .Values.runner.config.secretFile.secretName }}
+        {{- end }}
+        {{- if .Values.runner.tmpDir.enabled }}
+        - name: tmp
+          emptyDir: {}
         {{- end }}
         {{- if .Values.runner.persistence.logs.enabled }}
         - name: runner-logs
