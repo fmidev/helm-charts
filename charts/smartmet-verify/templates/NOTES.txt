@@ -1,0 +1,42 @@
+SmartMet Verify chart installed.
+
+Release: {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+
+Enabled components:
+{{- if .Values.gui.enabled }}
+- GUI: enabled
+{{- else }}
+- GUI: disabled
+{{- end }}
+{{- if .Values.runner.enabled }}
+- Runner: enabled
+{{- else }}
+- Runner: disabled
+{{- end }}
+
+{{- if .Values.gui.enabled }}
+
+GUI access:
+{{- if .Values.gui.route.enabled }}
+{{- if .Values.gui.route.host }}
+  URL: http{{ if .Values.gui.route.tls.enabled }}s{{ end }}://{{ .Values.gui.route.host }}
+{{- else }}
+  Host not set — OpenShift will generate one. Retrieve it with:
+  oc get route -n {{ .Release.Namespace }} {{ include "smartmet-verify.componentFullname" (list . "gui") }}
+{{- end }}
+{{- else if .Values.gui.ingress.enabled }}
+{{- range .Values.gui.ingress.hosts }}
+  URL: http{{ if $.Values.gui.ingress.tls }}s{{ end }}://{{ .host }}
+{{- end }}
+{{- else }}
+  Not exposed externally. Use port-forward to access:
+  kubectl port-forward -n {{ .Release.Namespace }} svc/{{ include "smartmet-verify.componentFullname" (list . "gui") }} 8080:{{ .Values.gui.service.port }}
+  URL: http://localhost:8080
+{{- end }}
+{{- end }}
+
+Important:
+- Configure imagePullSecrets to access private Quay images.
+- Prefer existing Kubernetes Secrets for Spring configuration and credentials.
+- GUI exposure can be configured with either Ingress or OpenShift Route.

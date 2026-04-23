@@ -1,0 +1,17 @@
+{{- if and .Values.runner.enabled .Values.runner.persistence.logs.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "smartmet-verify.componentFullname" (list . "runner") }}-logs
+  labels:
+    {{- include "smartmet-verify.componentLabels" (list . "runner") | nindent 4 }}
+spec:
+  accessModes:
+    {{- toYaml .Values.runner.persistence.logs.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.runner.persistence.logs.size }}
+  {{- if .Values.runner.persistence.logs.storageClassName }}
+  storageClassName: {{ .Values.runner.persistence.logs.storageClassName }}
+  {{- end }}
+{{- end }}
