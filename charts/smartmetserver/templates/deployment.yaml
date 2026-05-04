@@ -46,6 +46,11 @@ spec:
         - mountPath: "/etc/smartmet/engines/querydata.conf"
           subPath: "querydata.conf"
           name: smartmet-querydata-config
+        {{- if .Values.wmsVolume.enabled }}
+        - mountPath: "/smartmet/share/wms"
+          name: smartmet-wms-volume
+          readOnly: {{ .Values.wmsVolume.readOnly }}
+        {{- end }}
         livenessProbe:
           tcpSocket:
             port: {{ .Values.smartmetserver.containerPort }}
@@ -97,3 +102,10 @@ spec:
         emptyDir: {}
       - name: archivecache-volume
         emptyDir: {}
+      {{- if .Values.wmsVolume.enabled }}
+      - name: smartmet-wms-volume
+        nfs:
+          server: {{ .Values.wmsVolume.nfs.server }}
+          path: {{ .Values.wmsVolume.nfs.path }}
+          readOnly: {{ .Values.wmsVolume.readOnly }}
+      {{- end }}

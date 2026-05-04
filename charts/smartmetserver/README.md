@@ -157,6 +157,28 @@ volume:
       storage: 10Gi
 ```
 
+### Optional WMS NFS Mount
+
+Independent of the main `/smartmet/data` volume, an additional NFS share can be mounted at `/smartmet/share/wms`.
+
+**Helm Command:**
+```bash
+helm upgrade --install smartmetserver fmi/smartmetserver \
+  --namespace smartmetserver --create-namespace \
+  --set wmsVolume.enabled=true \
+  --set wmsVolume.nfs.server=10.12.12.66 \
+  --set wmsVolume.nfs.path=/smartmet/share/wms
+```
+
+**Values YAML:**
+```yaml
+wmsVolume:
+  enabled: true
+  nfs:
+    server: 10.12.12.66
+    path: /smartmet/share/wms
+```
+
 ## Ingress Configuration
 
 ### 1. Basic HTTP Ingress
@@ -362,6 +384,10 @@ The following table lists the configurable parameters of the Smartmetserver char
 | `volume.cephfs.pvc.name` | Name of CephFS PersistentVolumeClaim | `smartmet-data-pvc` |
 | `volume.cephfs.pvc.capacity` | Storage capacity for CephFS PVC | `1Ti` |
 | `volume.cephfs.pvc.storageClassName` | Storage class for dynamic provisioning | `csi-cephfs` |
+| `wmsVolume.enabled` | Mount an additional NFS volume at `/smartmet/share/wms` | `false` |
+| `wmsVolume.readOnly` | Mount the wms NFS volume as read-only | `true` |
+| `wmsVolume.nfs.server` | NFS server address for the wms volume | `""` |
+| `wmsVolume.nfs.path` | NFS export path for the wms volume | `/smartmet/share/wms` |
 | `hpa.minReplicas` | Minimum amount of replicas for horizontal pod autoscaler | `2` |
 | `hpa.maxReplicas` | Maximum amount of replicas for horizontal pod autoscaler | `6` |
 | `hpa.targetCPUUtilizationPercentage` | Target CPU percentage for horizontal pod autoscaler | `60` |
