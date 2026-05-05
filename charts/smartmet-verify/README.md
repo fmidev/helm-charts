@@ -53,7 +53,8 @@ kubectl create secret docker-registry container-registry-pull-secret \
   --docker-server=quay.io \
   --docker-username=<USERNAME> \
   --docker-password=<PASSWORD> \
-  --docker-email=<EMAIL>
+  --docker-email=<EMAIL> \
+  --namespace=smartmet-verify
 ```
 
 or:
