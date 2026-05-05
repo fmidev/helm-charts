@@ -49,7 +49,23 @@ The application images are private and hosted in Quay.io
 - `quay.io/fmi/fmi-verification-gui`
 - `quay.io/fmi/fmi-verification-runner`
 
-You must create an image pull secret:
+You must create an image pull secret. The recommended approach is to download the
+pull secret directly from the Quay.io robot account settings:
+
+1. Download the Kubernetes pull secret YAML from the Quay.io robot account settings
+   (e.g. to `pull-secret.yaml`).
+2. Apply it to the cluster:
+```shell
+kubectl create -f pull-secret.yaml --namespace=smartmet-verify
+```
+3. If the secret name in the downloaded file differs from `pull-secret`, update
+   `imagePullSecrets` in your values file accordingly:
+```yaml
+imagePullSecrets:
+  - name: pull-secret
+```
+
+Alternatively (option B), create the secret manually with credentials:
 
 ```shell
 kubectl create secret docker-registry pull-secret \
@@ -58,19 +74,6 @@ kubectl create secret docker-registry pull-secret \
   --docker-password=<PASSWORD> \
   --docker-email=<EMAIL> \
   --namespace=smartmet-verify
-```
-
-or:
-
-1. Download the Kubernetes pull secret for the account (e.g. to `pull-secret.yaml`).
-2. Submit the secret to the cluster:
-```shell
-kubectl create -f pull-secret.yaml --namespace=smartmet-verify
-```
-3. Update Kubernetes configuration to reference the secret by the name used above:
-```yaml
-imagePullSecrets:
-  - name: pull-secret
 ```
 
 ### Image registry and tag overrides
@@ -150,7 +153,7 @@ stringData:
         name: verification
         type: com.zaxxer.hikari.HikariDataSource
         driverClassName: org.postgresql.Driver
-        jdbcUrl: jdbc:postgresql://verification-db.fmi.fi:5432/verifapi
+        jdbcUrl: jdbc:postgresql://verification-db:5432/verifapi
         # readOnly: false is required to enable the result calculation and user UI selection storing from GUI, set this to true if not required
         readOnly: false
         username: verifwww
@@ -166,7 +169,7 @@ stringData:
       supported-language-tags: en-US
       default-language-tag: en-US
     security:
-      require-ssl: true
+      require-ssl: false
       basic:
         enabled: false
       # List of allowed GUI views
@@ -178,7 +181,7 @@ stringData:
       default-redirect: MetadataView
     verification-gui:
       wiki:
-        url: https://wiki.fmi.fi/x/KQCB
+        url: https://wiki.example.com/path/to/documentation
     logging:
       level:
         fi.fmi.verification: INFO
@@ -199,7 +202,7 @@ stringData:
         name: verification
         type: com.zaxxer.hikari.HikariDataSource
         driverClassName: org.postgresql.Driver
-        jdbcUrl: jdbc:postgresql://verification-db.fmi.fi:5432/verifapi
+        jdbcUrl: jdbc:postgresql://verification-db:5432/verifapi
         readOnly: false
         username: verifrun
         password: change-me
