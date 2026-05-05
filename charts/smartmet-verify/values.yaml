@@ -104,20 +104,28 @@ gui:
   tmpDir:
     enabled: true
 
-  # Probe action. By default this is an httpGet against `path` on the named
-  # `http` port. Set one of `httpGet`, `tcpSocket` or `exec` to use a different
-  # action — those override the `path` shortcut when present.
+  # Spring Boot Actuator management port. The app exposes /actuator/health on
+  # this port (separate from the main HTTP port so Spring Security does not
+  # apply). Must match management.server.port in the app's application.yaml.
+  managementPort: 8081
+
+  # Probe action. By default httpGet against the management port.
+  # Set one of `httpGet`, `tcpSocket` or `exec` to override.
   probes:
     liveness:
       enabled: true
-      path: /actuator/health/liveness
+      httpGet:
+        path: /actuator/health/liveness
+        port: management
       initialDelaySeconds: 30
       periodSeconds: 10
       timeoutSeconds: 3
       failureThreshold: 6
     readiness:
       enabled: true
-      path: /actuator/health/readiness
+      httpGet:
+        path: /actuator/health/readiness
+        port: management
       initialDelaySeconds: 20
       periodSeconds: 10
       timeoutSeconds: 3
@@ -209,19 +217,27 @@ runner:
   tmpDir:
     enabled: true
 
-  # The runner has no HTTP server by default, so probe overrides are common.
-  # See the `exec` / `tcpSocket` / `httpGet` examples in values-rke2.yaml.
+  # Spring Boot Actuator management port. Must match management.server.port
+  # in the app's application.yaml.
+  managementPort: 8081
+
+  # Probe action. By default httpGet against the management port.
+  # Set one of `httpGet`, `tcpSocket` or `exec` to override.
   probes:
     liveness:
       enabled: true
-      path: /actuator/health/liveness
+      httpGet:
+        path: /actuator/health/liveness
+        port: management
       initialDelaySeconds: 30
       periodSeconds: 20
       timeoutSeconds: 3
       failureThreshold: 6
     readiness:
       enabled: true
-      path: /actuator/health/readiness
+      httpGet:
+        path: /actuator/health/readiness
+        port: management
       initialDelaySeconds: 20
       periodSeconds: 20
       timeoutSeconds: 3

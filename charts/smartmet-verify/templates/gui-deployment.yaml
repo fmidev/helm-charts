@@ -43,6 +43,9 @@ spec:
             - name: http
               containerPort: {{ .Values.gui.service.port }}
               protocol: TCP
+            - name: management
+              containerPort: {{ .Values.gui.managementPort }}
+              protocol: TCP
           {{- $env := concat .Values.gui.env .Values.gui.extraEnv }}
           {{- if $env }}
           env:

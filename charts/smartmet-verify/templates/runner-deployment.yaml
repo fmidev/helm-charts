@@ -43,6 +43,9 @@ spec:
             - name: http
               containerPort: {{ .Values.runner.service.port }}
               protocol: TCP
+            - name: management
+              containerPort: {{ .Values.runner.managementPort }}
+              protocol: TCP
           {{- $env := concat .Values.runner.env .Values.runner.extraEnv }}
           {{- if $env }}
           env:
