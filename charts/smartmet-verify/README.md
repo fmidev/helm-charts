@@ -329,12 +329,14 @@ gui:
 
 1. Add Helm repo:
 ```shell
-helm repo add fmidev https://fmidev.github.io/helm-charts
+helm repo add fmi https://fmidev.github.io/helm-charts
 helm repo update
 ```
 2. Install chart:
 ```shell
-helm install smartmet-verify fmidev/smartmet-verify -f values.yaml
+helm install smartmet-verify fmi/smartmet-verify \
+  --namespace smartmet-verify \
+  -f values.yaml
 ```
 
 ## Database (optional)
