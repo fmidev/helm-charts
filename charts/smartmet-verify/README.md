@@ -5,7 +5,7 @@ This Helm chart deploys the **SmartMet Verify** system, consisting of:
 - `fmi-verification-gui` (web application)
 - `fmi-verification-runner` (background processing)
 
-Both applications are deployed independently and can be enabled or disabled as needed.
+Both applications can be deployed together or independently. An optional PostgreSQL/PostGIS database can also be provisioned in the same namespace via the CloudNativePG operator.
 
 ## Overview
 
