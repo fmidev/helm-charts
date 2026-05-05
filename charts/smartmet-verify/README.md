@@ -423,15 +423,23 @@ Role passwords come from `kubernetes.io/basic-auth` secrets that you create,
 one per managed role:
 
 ```shell
-kubectl -n <ns> create secret generic verification-db-verifwww \
+kubectl -n smartmet-verify create secret generic verification-db-verifadmin \
   --type=kubernetes.io/basic-auth \
-  --from-literal=username=verifwww \
-  --from-literal=password=<strong>
+  --from-literal=username=verifadmin --from-literal=password=<password>
+kubectl -n smartmet-verify create secret generic verification-db-verifwww \
+  --type=kubernetes.io/basic-auth \
+  --from-literal=username=verifwww --from-literal=password=<password>
+kubectl -n smartmet-verify create secret generic verification-db-verifrun \
+  --type=kubernetes.io/basic-auth \
+  --from-literal=username=verifrun --from-literal=password=<password>
+kubectl -n smartmet-verify create secret generic verification-db-verifimport \
+  --type=kubernetes.io/basic-auth \
+  --from-literal=username=verifimport --from-literal=password=<password>
 ```
 
-The same password must also end up in the application config Secret (e.g.
-`smartmet-verify-gui-config`) that the GUI and runner mount. Keep the two in
-sync whenever you rotate a password.
+The `verifwww` and `verifrun` passwords must also appear in the application
+config Secrets (`smartmet-verify-gui-config` and `smartmet-verify-runner-config`
+respectively). Keep the two in sync whenever you rotate a password.
 
 ### Managed role memberships
 
