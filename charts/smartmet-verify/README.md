@@ -52,7 +52,7 @@ The application images are private and hosted in Quay.io
 You must create an image pull secret:
 
 ```shell
-kubectl create secret docker-registry container-registry-pull-secret \
+kubectl create secret docker-registry pull-secret \
   --docker-server=quay.io \
   --docker-username=<USERNAME> \
   --docker-password=<PASSWORD> \
@@ -67,11 +67,10 @@ or:
 ```shell
 kubectl create -f pull-secret.yaml --namespace=smartmet-verify
 ```
-3. Update Kubernetes configuration to reference the secret by the name used above
-   (adjust if you chose a different name, e.g. `quay-pull-secret`):
+3. Update Kubernetes configuration to reference the secret by the name used above:
 ```yaml
 imagePullSecrets:
-  - name: container-registry-pull-secret
+  - name: pull-secret
 ```
 
 ### Image registry and tag overrides
@@ -240,6 +239,10 @@ gui:
       - secretName: verify-tls
         hosts:
           - verify.example.org
+    # Use customAnnotations for cert-manager or other ingress controller annotations.
+    # These are merged with any chart-default annotations.
+    customAnnotations:
+      cert-manager.io/cluster-issuer: letsencrypt
 ```
 
 ### OpenShift (Route)
@@ -257,16 +260,22 @@ gui:
 
 Do not enable both `ingress` and `route` at the same time.
 
-## Runner monitoring port
+## Management port
 
-The runner exposes port 8080 (Spring Boot Actuator) via a ClusterIP Service.
-This allows external monitoring tools such as Prometheus to scrape metrics
-without exposing the runner publicly. The port is configurable:
+Both GUI and runner expose Spring Boot Actuator on a dedicated management port
+(default **8081**), separate from the main HTTP port 8080. This port starts its
+own HTTP listener that is independent of Spring Security, so health endpoints
+are always reachable by probes regardless of the authentication profile active
+on the main port.
+
+The management port is used for liveness/readiness probes and can also be
+scraped by Prometheus. It is configurable independently per component:
 
 ```yaml
+gui:
+  managementPort: 8081   # default
 runner:
-  service:
-    port: 8080   # default
+  managementPort: 8081   # default
 ```
 
 ## Writable `/tmp` volume
@@ -289,46 +298,45 @@ Disable only if you provide an alternative writable location for `/tmp`.
 
 ## Probes
 
-The GUI and runner liveness and readiness probes support the full Kubernetes
-probe-action set. Each of `gui.probes.liveness`, `gui.probes.readiness`,
-`runner.probes.liveness` and `runner.probes.readiness` accepts one of the
-optional keys `httpGet`, `tcpSocket` or `exec` (passed through verbatim to the
-pod spec). If none is set, the template falls back to the existing `path:`
-shortcut, which performs an `httpGet` against the named `http` port.
+Both components default to `httpGet` probes against the management port (8081).
+Because the management port is a separate HTTP listener that bypasses Spring
+Security, probes work correctly regardless of which authentication profile is
+active — no special probe configuration is needed.
 
-The runner does not expose an HTTP server by default, so `exec` probes are the
-recommended choice there:
+Each probe field (`gui.probes.liveness`, `gui.probes.readiness`,
+`runner.probes.liveness`, `runner.probes.readiness`) accepts any of the
+standard Kubernetes probe actions — `httpGet`, `tcpSocket`, or `exec` — passed
+through verbatim to the pod spec. Override only if you have a specific reason:
 
 ```yaml
+# Example: disable readiness probing entirely for the runner
 runner:
   probes:
-    liveness:
-      exec:
-        command: ["true"]
-      initialDelaySeconds: 30
-      periodSeconds: 30
     readiness:
-      exec:
-        command: ["true"]
-      initialDelaySeconds: 10
-      periodSeconds: 15
+      enabled: false
 ```
 
-The GUI's Spring Security configuration protects `/actuator/**` by default, so
-the `path:` shortcut returns HTTP 401 unless the `noauth` Spring profile is
-active or the health endpoints are explicitly permitted. A `tcpSocket` probe
-avoids this:
+## Subchart usage
+
+When this chart is used as a dependency (subchart) of a wrapper chart, all
+values must be nested under the chart's release name key. For example, if the
+dependency is declared as `name: smartmet-verify`, prefix every parameter from
+this README with `smartmet-verify.`:
 
 ```yaml
-gui:
-  probes:
-    liveness:
-      tcpSocket:
-        port: http
-    readiness:
-      tcpSocket:
-        port: http
+# wrapper chart values.yaml
+smartmet-verify:
+  gui:
+    enabled: true
+    image:
+      tag: "1.2.3"
+  runner:
+    enabled: true
 ```
+
+The [deployment template](https://github.com/fmidev/smartmet-verify-deployment-template)
+follows this pattern — its `values-rke2.yaml` and `values-openshift.yaml` use
+the `smartmet-verify.` prefix throughout.
 
 ## Installation
 
@@ -387,7 +395,7 @@ SQL yourself as an existing ConfigMap and reference it from `database.spec`.
 Create the ConfigMap:
 
 ```shell
-kubectl -n <ns> create configmap verification-db-init-sql \
+kubectl -n smartmet-verify create configmap verification-db-init-sql \
   --from-file=0000-pre-init.sql \
   --from-file=0001-production-schema.sql \
   --from-file=0002-post-ownership.sql

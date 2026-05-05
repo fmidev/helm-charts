@@ -7,7 +7,7 @@ commonAnnotations: {}
 imagePullSecrets: []
 # Example:
 # imagePullSecrets:
-#   - name: container-registry-pull-secret
+#   - name: pull-secret
 
 serviceAccount:
   create: true
