@@ -278,7 +278,7 @@ database:
         log_timezone: UTC
 
     storage:
-      size: 20Gi
+      size: 100Gi
       # storageClass: ""
 
     # By keeping `owner: app` the operator creates a throw-away `app` role,

@@ -498,3 +498,167 @@ Check mounted configuration:
 ```shell
 kubectl exec -it <pod> -- ls /var/app/config
 ```
+
+## Chart Configuration
+
+The following table lists all configurable parameters and their defaults.
+
+### Global
+
+| Parameter | Description | Default |
+|---|---|---|
+| `nameOverride` | Override the chart name used in resource names | `""` |
+| `fullnameOverride` | Override the full name used in resource names | `""` |
+| `commonLabels` | Labels added to every resource | `{}` |
+| `commonAnnotations` | Annotations added to every resource | `{}` |
+| `imagePullSecrets` | Image pull secrets for private registries | `[]` |
+| `global.imageRegistry` | Global image registry prefix (overrides per-image registries) | `""` |
+| `global.extraVolumes` | Extra volumes added to all pods | `[]` |
+| `global.extraVolumeMounts` | Extra volume mounts added to all containers | `[]` |
+| `serviceAccount.create` | Create a dedicated ServiceAccount | `true` |
+| `serviceAccount.name` | ServiceAccount name (generated if empty) | `""` |
+| `serviceAccount.annotations` | Annotations for the ServiceAccount | `{}` |
+| `podSecurityContext.fsGroup` | Filesystem group for mounted volumes | `1000` |
+| `securityContext.runAsNonRoot` | Require non-root execution | `true` |
+| `securityContext.runAsUser` | User ID for the container process | `1000` |
+| `securityContext.runAsGroup` | Group ID for the container process | `1000` |
+| `securityContext.allowPrivilegeEscalation` | Allow privilege escalation | `false` |
+| `securityContext.readOnlyRootFilesystem` | Mount root filesystem read-only | `true` |
+| `securityContext.capabilities.drop` | Linux capabilities to drop | `["ALL"]` |
+
+### GUI
+
+| Parameter | Description | Default |
+|---|---|---|
+| `gui.enabled` | Deploy the GUI | `false` |
+| `gui.replicaCount` | Number of GUI pod replicas | `1` |
+| `gui.image.repository` | GUI image repository | `quay.io/fmi/fmi-verification-gui` |
+| `gui.image.tag` | GUI image tag — **required** | `""` |
+| `gui.image.pullPolicy` | Image pull policy | `IfNotPresent` |
+| `gui.service.type` | Kubernetes Service type | `ClusterIP` |
+| `gui.service.port` | Service port (main HTTP) | `8080` |
+| `gui.resources.requests.memory` | Memory request | `3Gi` |
+| `gui.resources.requests.cpu` | CPU request | `2` |
+| `gui.resources.limits.memory` | Memory limit | `3Gi` |
+| `gui.resources.limits.cpu` | CPU limit | `2` |
+| `gui.nodeSelector` | Node selector constraints | `{}` |
+| `gui.tolerations` | Pod tolerations | `[]` |
+| `gui.affinity` | Pod affinity rules | `{}` |
+| `gui.podAnnotations` | Annotations added to GUI pods | `{}` |
+| `gui.podLabels` | Labels added to GUI pods | `{}` |
+| `gui.springProfile` | Comma-separated Spring profile(s) to activate | `production` |
+| `gui.env` | Environment variables for the GUI container | see `values.yaml` |
+| `gui.extraEnv` | Additional environment variables | `[]` |
+| `gui.extraEnvFrom` | Additional `envFrom` sources | `[]` |
+| `gui.extraVolumes` | Additional volumes | `[]` |
+| `gui.extraVolumeMounts` | Additional volume mounts | `[]` |
+| `gui.config.mode` | Config injection mode: `secretFile`, `env`, or `none` | `secretFile` |
+| `gui.config.secretFile.secretName` | Secret containing `application.yaml` — **required** for `secretFile` mode | `""` |
+| `gui.config.secretFile.secretKey` | Key within the Secret | `application.yaml` |
+| `gui.config.secretFile.mountPath` | Mount path inside the container | `/var/app/config` |
+| `gui.config.secretFile.fileName` | Filename at mount path | `application.yaml` |
+| `gui.config.envFrom.secretRefs` | Secrets to import as env vars (`env` mode) | `[]` |
+| `gui.config.envFrom.configMapRefs` | ConfigMaps to import as env vars (`env` mode) | `[]` |
+| `gui.persistence.logs.enabled` | Persist Tomcat logs to a PVC | `false` |
+| `gui.persistence.logs.size` | Log PVC size | `5Gi` |
+| `gui.persistence.logs.storageClassName` | Storage class for the log PVC | `""` |
+| `gui.persistence.logs.mountPath` | Log directory mount path | `/var/log/tomcat` |
+| `gui.tmpDir.enabled` | Mount a writable `emptyDir` at `/tmp` (required with read-only root filesystem) | `true` |
+| `gui.managementPort` | Spring Boot Actuator management port | `8081` |
+| `gui.probes.liveness.enabled` | Enable liveness probe | `true` |
+| `gui.probes.liveness.httpGet.path` | Liveness probe HTTP path | `/actuator/health/liveness` |
+| `gui.probes.liveness.httpGet.port` | Liveness probe port | `management` |
+| `gui.probes.liveness.initialDelaySeconds` | Seconds before first liveness check | `30` |
+| `gui.probes.liveness.periodSeconds` | Seconds between liveness checks | `10` |
+| `gui.probes.liveness.timeoutSeconds` | Probe timeout | `3` |
+| `gui.probes.liveness.failureThreshold` | Failures before pod restart | `6` |
+| `gui.probes.readiness.enabled` | Enable readiness probe | `true` |
+| `gui.probes.readiness.httpGet.path` | Readiness probe HTTP path | `/actuator/health/readiness` |
+| `gui.probes.readiness.httpGet.port` | Readiness probe port | `management` |
+| `gui.probes.readiness.initialDelaySeconds` | Seconds before first readiness check | `20` |
+| `gui.probes.readiness.periodSeconds` | Seconds between readiness checks | `10` |
+| `gui.probes.readiness.timeoutSeconds` | Probe timeout | `3` |
+| `gui.probes.readiness.failureThreshold` | Failures before pod marked unready | `6` |
+| `gui.ingress.enabled` | Enable Ingress (Kubernetes / RKE2) | `false` |
+| `gui.ingress.className` | Ingress class name (e.g. `traefik`, `nginx`) | `""` |
+| `gui.ingress.annotations` | Ingress annotations | `{}` |
+| `gui.ingress.customAnnotations` | Additional ingress annotations merged with `annotations` (e.g. `cert-manager.io/cluster-issuer`) | `{}` |
+| `gui.ingress.hosts` | Ingress host rules | see `values.yaml` |
+| `gui.ingress.tls` | Ingress TLS configuration | `[]` |
+| `gui.route.enabled` | Enable OpenShift Route (mutually exclusive with `ingress.enabled`) | `false` |
+| `gui.route.annotations` | Route annotations (e.g. HAProxy IP whitelist) | `{}` |
+| `gui.route.host` | Route hostname | `""` |
+| `gui.route.tls.enabled` | Enable TLS on the Route | `true` |
+| `gui.route.tls.termination` | TLS termination type | `edge` |
+| `gui.route.tls.insecureEdgeTerminationPolicy` | HTTP → HTTPS redirect policy | `Redirect` |
+
+### Runner
+
+| Parameter | Description | Default |
+|---|---|---|
+| `runner.enabled` | Deploy the runner | `false` |
+| `runner.replicaCount` | Number of runner pod replicas | `1` |
+| `runner.image.repository` | Runner image repository | `quay.io/fmi/fmi-verification-runner` |
+| `runner.image.tag` | Runner image tag — **required** | `""` |
+| `runner.image.pullPolicy` | Image pull policy | `IfNotPresent` |
+| `runner.service.type` | Kubernetes Service type | `ClusterIP` |
+| `runner.service.port` | Service port | `8080` |
+| `runner.resources.requests.memory` | Memory request | `6Gi` |
+| `runner.resources.requests.cpu` | CPU request | `2` |
+| `runner.resources.limits.memory` | Memory limit | `6Gi` |
+| `runner.resources.limits.cpu` | CPU limit | `2` |
+| `runner.nodeSelector` | Node selector constraints | `{}` |
+| `runner.tolerations` | Pod tolerations | `[]` |
+| `runner.affinity` | Pod affinity rules | `{}` |
+| `runner.podAnnotations` | Annotations added to runner pods | `{}` |
+| `runner.podLabels` | Labels added to runner pods | `{}` |
+| `runner.springProfile` | Comma-separated Spring profile(s) to activate | `production` |
+| `runner.env` | Environment variables for the runner container | see `values.yaml` |
+| `runner.extraEnv` | Additional environment variables | `[]` |
+| `runner.extraEnvFrom` | Additional `envFrom` sources | `[]` |
+| `runner.extraVolumes` | Additional volumes | `[]` |
+| `runner.extraVolumeMounts` | Additional volume mounts | `[]` |
+| `runner.config.mode` | Config injection mode: `secretFile`, `env`, or `none` | `secretFile` |
+| `runner.config.secretFile.secretName` | Secret containing `application.yaml` — **required** for `secretFile` mode | `""` |
+| `runner.config.secretFile.secretKey` | Key within the Secret | `application.yaml` |
+| `runner.config.secretFile.mountPath` | Mount path inside the container | `/var/app/config` |
+| `runner.config.secretFile.fileName` | Filename at mount path | `application.yaml` |
+| `runner.config.envFrom.secretRefs` | Secrets to import as env vars (`env` mode) | `[]` |
+| `runner.config.envFrom.configMapRefs` | ConfigMaps to import as env vars (`env` mode) | `[]` |
+| `runner.persistence.logs.enabled` | Persist Tomcat logs to a PVC | `false` |
+| `runner.persistence.logs.size` | Log PVC size | `5Gi` |
+| `runner.persistence.logs.storageClassName` | Storage class for the log PVC | `""` |
+| `runner.persistence.logs.mountPath` | Log directory mount path | `/var/log/tomcat` |
+| `runner.tmpDir.enabled` | Mount a writable `emptyDir` at `/tmp` | `true` |
+| `runner.managementPort` | Spring Boot Actuator management port | `8081` |
+| `runner.probes.liveness.enabled` | Enable liveness probe | `true` |
+| `runner.probes.liveness.httpGet.path` | Liveness probe HTTP path | `/actuator/health/liveness` |
+| `runner.probes.liveness.httpGet.port` | Liveness probe port | `management` |
+| `runner.probes.liveness.initialDelaySeconds` | Seconds before first liveness check | `30` |
+| `runner.probes.liveness.periodSeconds` | Seconds between liveness checks | `20` |
+| `runner.probes.liveness.timeoutSeconds` | Probe timeout | `3` |
+| `runner.probes.liveness.failureThreshold` | Failures before pod restart | `6` |
+| `runner.probes.readiness.enabled` | Enable readiness probe | `true` |
+| `runner.probes.readiness.httpGet.path` | Readiness probe HTTP path | `/actuator/health/readiness` |
+| `runner.probes.readiness.httpGet.port` | Readiness probe port | `management` |
+| `runner.probes.readiness.initialDelaySeconds` | Seconds before first readiness check | `20` |
+| `runner.probes.readiness.periodSeconds` | Seconds between readiness checks | `20` |
+| `runner.probes.readiness.timeoutSeconds` | Probe timeout | `3` |
+| `runner.probes.readiness.failureThreshold` | Failures before pod marked unready | `6` |
+
+### Database (CloudNativePG)
+
+| Parameter | Description | Default |
+|---|---|---|
+| `database.enabled` | Provision a PostgreSQL/PostGIS database via CloudNativePG | `false` |
+| `database.name` | CNPG `Cluster` name; also the stem of generated services (`<name>-rw`, `-ro`, `-r`) | `verification-db` |
+| `database.spec.instances` | Number of PostgreSQL instances | `1` |
+| `database.spec.imageName` | PostgreSQL + PostGIS container image | `ghcr.io/cloudnative-pg/postgis:16-3.4` |
+| `database.spec.storage.size` | PVC size for database storage | `100Gi` |
+| `database.spec.storage.storageClass` | Storage class for the database PVC | `""` |
+| `database.spec.bootstrap.initdb.database` | Name of the application database to create | `verifapi` |
+| `database.spec.bootstrap.initdb.owner` | Initial database owner role | `app` |
+| `database.spec.bootstrap.initdb.postInitSQLRefs` | ConfigMap/Secret refs for SQL run before app init (e.g. `0000-pre-init.sql`) | `[]` |
+| `database.spec.bootstrap.initdb.postInitApplicationSQLRefs` | ConfigMap/Secret refs for SQL run after app init (e.g. schema + ownership SQL) | `[]` |
+| `database.spec.managed.roles` | CNPG managed roles with passwords from Kubernetes Secrets | `[]` |
+| `database.spec.managed.services.additional` | Extra services (e.g. a `verification-db` alias for the primary) | `[]` |
