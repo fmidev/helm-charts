@@ -46,7 +46,8 @@ spec:
             - name: management
               containerPort: {{ .Values.runner.managementPort }}
               protocol: TCP
-          {{- $env := concat .Values.runner.env .Values.runner.extraEnv }}
+          {{- $springProfileEnv := list (dict "name" "SPRING_PROFILES_ACTIVE" "value" .Values.runner.springProfile) }}
+          {{- $env := concat $springProfileEnv .Values.runner.env .Values.runner.extraEnv }}
           {{- if $env }}
           env:
             {{- toYaml $env | nindent 12 }}

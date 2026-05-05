@@ -61,7 +61,7 @@ or:
 1. Download the Kubernetes pull secret for the account (e.g. to `pull-secret.yaml`).
 2. Submit the secret to the cluster:
 ```shell
-kubectl create -f pull-secret.yaml --namespace=PUT_NAMESPACE_HERE
+kubectl create -f pull-secret.yaml --namespace=smartmet-verify
 ```
 3. Update Kubernetes configuration:
 ```yaml
@@ -462,20 +462,20 @@ and init SQL wiring.
 - Always use Secrets for database credentials
 - Keep GUI and runner configs separate
 - Use different database users for each app
-- Prefer separate namespaces for production deployments
+- Deploy into a dedicated namespace — the conventional default is `smartmet-verify` (may vary, especially on OpenShift where project names are customer-specific)
 
 ## Troubleshooting
 
 Check pods:
 
 ```shell
-kubectl get pods
+kubectl get pods -n smartmet-verify
 ```
 
 View logs:
 
 ```shell
-kubectl logs <pod-name>
+kubectl logs -n smartmet-verify <pod-name>
 ```
 
 Check mounted configuration:
