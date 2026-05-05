@@ -34,6 +34,9 @@ Before installing:
    - A Kubernetes or OpenShift cluster
    - `kubectl` or `oc` configured
    - `helm` installed
+   - An ingress controller (Kubernetes) or Route support (OpenShift) — RKE2 includes Traefik by default
+   - A DNS record for the GUI hostname pointing to the cluster's ingress IP
+   - [cert-manager](https://cert-manager.io/) with a `letsencrypt` ClusterIssuer for automated TLS (Kubernetes); on OpenShift TLS is handled by the Route
 
 2. You must create:
    - A **pull secret** for Quay.io
