@@ -64,10 +64,11 @@ or:
 ```shell
 kubectl create -f pull-secret.yaml --namespace=smartmet-verify
 ```
-3. Update Kubernetes configuration:
+3. Update Kubernetes configuration to reference the secret by the name used above
+   (adjust if you chose a different name, e.g. `quay-pull-secret`):
 ```yaml
 imagePullSecrets:
-  - name: put-secret-name-here
+  - name: container-registry-pull-secret
 ```
 
 ### Image registry and tag overrides
