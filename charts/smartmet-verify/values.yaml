@@ -137,6 +137,7 @@ gui:
     enabled: false
     className: ""
     annotations: {}
+    customAnnotations: {}
     hosts:
       - host: smartmet-verify-gui.local
         paths:
