@@ -1,0 +1,85 @@
+# Minimum-viable values for an AVI-focused smartmetserver deployment.
+#
+# This is the smallest engine/plugin set that boots cleanly and serves
+# the EDR /collections AVI metadata against a populated AVI PostGIS
+# database. Companion docs:
+#   - docs/avi-only-deployment.md   (chart-side configuration)
+#   - docs/avi-database-setup.md    (database-side configuration)
+#
+# Override smartmetConf.avi.engine.postgis.password via --set or an
+# external values file. Override `ingress.hosts` for your own host name.
+
+image:
+  # Older tags hit a memory bug at avi-engine init; use 26.03.19 or newer.
+  tag: "26.03.19"
+
+smartmetserver:
+  replicas: 1
+  startupProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    failureThreshold: 30   # ~5 min budget for first start
+  livenessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 30
+  readinessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    failureThreshold: 30
+  resources:
+    limits:   { cpu: "1",    memory: 2Gi   }
+    requests: { cpu: "200m", memory: 512Mi }
+
+# /smartmet/data is required by the chart even when only avi is in use.
+# directHostPath + DirectoryOrCreate is the simplest way to satisfy
+# that without provisioning a PV.
+volume:
+  type: directHostPath
+  directHostPath:
+    path: /tmp/smartmet-data
+    type: DirectoryOrCreate
+
+hpa:
+  minReplicas: 1
+  maxReplicas: 1
+
+podDisruptionBudget:
+  enabled: false
+
+ingress:
+  enabled: true
+  hosts:
+    - avi.example.com
+  tls:
+    enabled: true
+
+smartmetConf:
+  # Minimum engines required by edr.so. The four non-avi entries are
+  # ELF symbol deps (Geonames, Gis, Grid, Querydata) — drop any of
+  # them and edr.so fails to load with `undefined symbol …`.
+  engines:
+    - avi
+    - geonames
+    - gis
+    - grid
+    - querydata
+
+  # Only the EDR plugin. Removing autocomplete/download/timeseries/wms
+  # has no effect on AVI functionality.
+  # Add "avi" here once the image ships smartmet-plugin-avi
+  # (tracked in fmidev/docker-smartmetserver#18).
+  plugins:
+    - edr
+
+  avi:
+    enabled: true
+    engine:
+      postgis:
+        host: avi-db-rw          # adjust to your CNPG service name
+        port: 5432
+        database: avi
+        username: avidb_ro       # see docs/avi-database-setup.md
+        password: ""             # set via --set or external values
+        encoding: UTF8
+        startconnections: 2
+        maxconnections: 5

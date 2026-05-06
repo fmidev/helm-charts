@@ -51,6 +51,14 @@ spec:
           name: smartmet-wms-volume
           readOnly: {{ .Values.wmsVolume.readOnly }}
         {{- end }}
+        {{- if .Values.smartmetConf.avi.enabled }}
+        - mountPath: "/etc/smartmet/engines/avi.conf"
+          subPath: "avi-engine.conf"
+          name: smartmet-avi-config
+        - mountPath: "/etc/smartmet/plugins/avi.conf"
+          subPath: "avi-plugin.conf"
+          name: smartmet-avi-config
+        {{- end }}
         livenessProbe:
           tcpSocket:
             port: {{ .Values.smartmetserver.containerPort }}
@@ -108,4 +116,9 @@ spec:
           server: {{ .Values.wmsVolume.nfs.server }}
           path: {{ .Values.wmsVolume.nfs.path }}
           readOnly: {{ .Values.wmsVolume.readOnly }}
+      {{- end }}
+      {{- if .Values.smartmetConf.avi.enabled }}
+      - name: smartmet-avi-config
+        secret:
+          secretName: {{ include "smartmetserver.fullname" . }}-avi-config
       {{- end }}
