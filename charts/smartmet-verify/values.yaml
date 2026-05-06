@@ -77,14 +77,22 @@ gui:
 
   config:
     # Supported modes:
-    # - secretFile: mount one file from a Secret, e.g. application.yaml
-    # - env: import env vars from Secret/ConfigMap
-    # - none: do nothing
+    # - secretFile:    mount one file from a Secret (recommended when full config is sensitive)
+    # - configMapFile: mount one file from a ConfigMap (recommended when only the DB password
+    #                  is sensitive; inject the password via extraEnv from a separate Secret)
+    # - env:           import env vars from Secret/ConfigMap
+    # - none:          do nothing
     mode: secretFile
 
     secretFile:
       secretName: ""
       secretKey: application.yaml
+      mountPath: /var/app/config
+      fileName: application.yaml
+
+    configMapFile:
+      configMapName: ""
+      configMapKey: application.yaml
       mountPath: /var/app/config
       fileName: application.yaml
 
@@ -203,6 +211,12 @@ runner:
     secretFile:
       secretName: ""
       secretKey: application.yaml
+      mountPath: /var/app/config
+      fileName: application.yaml
+
+    configMapFile:
+      configMapName: ""
+      configMapKey: application.yaml
       mountPath: /var/app/config
       fileName: application.yaml
 

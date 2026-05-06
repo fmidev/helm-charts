@@ -106,11 +106,32 @@ Set `config.mode` for each component independently:
 
 | Mode | Description |
 |------|-------------|
-| `secretFile` | Mount a single file from a Secret (default). Recommended. |
+| `configMapFile` | Mount a single file from a ConfigMap. **Recommended** — keep non-sensitive config in version control; inject only the DB password from a Secret via `extraEnv`. |
+| `secretFile` | Mount a single file from a Secret. Use when the entire config must be opaque. |
 | `env` | Import environment variables from Secrets and/or ConfigMaps. |
 | `none` | No configuration injection. |
 
-#### `secretFile` mode (default)
+#### `configMapFile` mode (recommended)
+
+Store the non-sensitive `application.yaml` in a ConfigMap. Use `${SPRING_DATASOURCE_PASSWORD}`
+as a Spring placeholder — it is resolved at startup from the `SPRING_DATASOURCE_PASSWORD`
+environment variable, which you inject from a separate password-only Secret:
+
+```yaml
+gui:
+  config:
+    mode: configMapFile
+    configMapFile:
+      configMapName: smartmet-verify-gui-config   # must be set
+  extraEnv:
+    - name: SPRING_DATASOURCE_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: smartmet-verify-gui-db-password   # Secret containing only the password
+          key: password
+```
+
+#### `secretFile` mode
 
 Create a Secret containing `application.yaml` and reference it:
 
@@ -120,9 +141,6 @@ gui:
     mode: secretFile
     secretFile:
       secretName: smartmet-verify-gui-config   # must be set
-      secretKey: application.yaml              # key inside the Secret
-      mountPath: /var/app/config
-      fileName: application.yaml
 ```
 
 #### `env` mode
@@ -138,15 +156,18 @@ gui:
         - my-spring-config
 ```
 
-### Example: GUI configuration secret
+### Example: GUI configuration ConfigMap
+
+The `application.yaml` is stored in a ConfigMap. The DB password is a Spring placeholder
+resolved from the `SPRING_DATASOURCE_PASSWORD` env var (injected by the chart via `extraEnv`).
 
 ```yaml
 apiVersion: v1
-kind: Secret
+kind: ConfigMap
 metadata:
   name: smartmet-verify-gui-config
-type: Opaque
-stringData:
+  namespace: smartmet-verify
+data:
   application.yaml: |
     spring:
       datasource:
@@ -157,7 +178,7 @@ stringData:
         # readOnly: false is required to enable the result calculation and user UI selection storing from GUI, set this to true if not required
         readOnly: false
         username: verifwww
-        password: change-me
+        password: "${SPRING_DATASOURCE_PASSWORD}"
         connectionInitSql: SET SESSION TIME ZONE 'UTC'
         poolName: verification
         maximumPoolSize: 5
@@ -187,15 +208,28 @@ stringData:
         fi.fmi.verification: INFO
 ```
 
-### Example: Runner configuration secret
+Password Secret (contains only the DB password):
 
 ```yaml
 apiVersion: v1
 kind: Secret
 metadata:
-  name: smartmet-verify-runner-config
+  name: smartmet-verify-gui-db-password
+  namespace: smartmet-verify
 type: Opaque
 stringData:
+  password: change-me
+```
+
+### Example: Runner configuration ConfigMap
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smartmet-verify-runner-config
+  namespace: smartmet-verify
+data:
   application.yaml: |
     spring:
       datasource:
@@ -205,7 +239,7 @@ stringData:
         jdbcUrl: jdbc:postgresql://verification-db:5432/verifapi
         readOnly: false
         username: verifrun
-        password: change-me
+        password: "${SPRING_DATASOURCE_PASSWORD}"
         connectionInitSql: SET SESSION TIME ZONE 'UTC'
         poolName: verification
         maximumPoolSize: 5
@@ -218,6 +252,19 @@ stringData:
     logging:
       level:
         fi.fmi.verification: INFO
+```
+
+Password Secret:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: smartmet-verify-runner-db-password
+  namespace: smartmet-verify
+type: Opaque
+stringData:
+  password: change-me
 ```
 
 ### Full example YAML files
@@ -563,7 +610,11 @@ The following table lists all configurable parameters and their defaults.
 | `gui.extraEnvFrom` | Additional `envFrom` sources | `[]` |
 | `gui.extraVolumes` | Additional volumes | `[]` |
 | `gui.extraVolumeMounts` | Additional volume mounts | `[]` |
-| `gui.config.mode` | Config injection mode: `secretFile`, `env`, or `none` | `secretFile` |
+| `gui.config.mode` | Config injection mode: `configMapFile`, `secretFile`, `env`, or `none` | `secretFile` |
+| `gui.config.configMapFile.configMapName` | ConfigMap containing `application.yaml` — **required** for `configMapFile` mode | `""` |
+| `gui.config.configMapFile.configMapKey` | Key within the ConfigMap | `application.yaml` |
+| `gui.config.configMapFile.mountPath` | Mount path inside the container | `/var/app/config` |
+| `gui.config.configMapFile.fileName` | Filename at mount path | `application.yaml` |
 | `gui.config.secretFile.secretName` | Secret containing `application.yaml` — **required** for `secretFile` mode | `""` |
 | `gui.config.secretFile.secretKey` | Key within the Secret | `application.yaml` |
 | `gui.config.secretFile.mountPath` | Mount path inside the container | `/var/app/config` |
@@ -629,7 +680,11 @@ The following table lists all configurable parameters and their defaults.
 | `runner.extraEnvFrom` | Additional `envFrom` sources | `[]` |
 | `runner.extraVolumes` | Additional volumes | `[]` |
 | `runner.extraVolumeMounts` | Additional volume mounts | `[]` |
-| `runner.config.mode` | Config injection mode: `secretFile`, `env`, or `none` | `secretFile` |
+| `runner.config.mode` | Config injection mode: `configMapFile`, `secretFile`, `env`, or `none` | `secretFile` |
+| `runner.config.configMapFile.configMapName` | ConfigMap containing `application.yaml` — **required** for `configMapFile` mode | `""` |
+| `runner.config.configMapFile.configMapKey` | Key within the ConfigMap | `application.yaml` |
+| `runner.config.configMapFile.mountPath` | Mount path inside the container | `/var/app/config` |
+| `runner.config.configMapFile.fileName` | Filename at mount path | `application.yaml` |
 | `runner.config.secretFile.secretName` | Secret containing `application.yaml` — **required** for `secretFile` mode | `""` |
 | `runner.config.secretFile.secretKey` | Key within the Secret | `application.yaml` |
 | `runner.config.secretFile.mountPath` | Mount path inside the container | `/var/app/config` |

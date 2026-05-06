@@ -79,12 +79,19 @@ spec:
           resources:
             {{- toYaml .Values.gui.resources | nindent 12 }}
           {{- $hasConfigMount := and (eq .Values.gui.config.mode "secretFile") .Values.gui.config.secretFile.secretName }}
-          {{- if or $hasConfigMount .Values.gui.tmpDir.enabled .Values.gui.persistence.logs.enabled .Values.global.extraVolumeMounts .Values.gui.extraVolumeMounts }}
+          {{- $hasConfigMapMount := and (eq .Values.gui.config.mode "configMapFile") .Values.gui.config.configMapFile.configMapName }}
+          {{- if or $hasConfigMount $hasConfigMapMount .Values.gui.tmpDir.enabled .Values.gui.persistence.logs.enabled .Values.global.extraVolumeMounts .Values.gui.extraVolumeMounts }}
           volumeMounts:
             {{- if $hasConfigMount }}
             - name: gui-config
               mountPath: {{ printf "%s/%s" .Values.gui.config.secretFile.mountPath .Values.gui.config.secretFile.fileName }}
               subPath: {{ .Values.gui.config.secretFile.secretKey }}
+              readOnly: true
+            {{- end }}
+            {{- if $hasConfigMapMount }}
+            - name: gui-config
+              mountPath: {{ printf "%s/%s" .Values.gui.config.configMapFile.mountPath .Values.gui.config.configMapFile.fileName }}
+              subPath: {{ .Values.gui.config.configMapFile.configMapKey }}
               readOnly: true
             {{- end }}
             {{- if .Values.gui.tmpDir.enabled }}
@@ -102,12 +109,20 @@ spec:
             {{- toYaml . | nindent 12 }}
             {{- end }}
           {{- end }}
-      {{- if or $hasConfigMount .Values.gui.tmpDir.enabled .Values.gui.persistence.logs.enabled .Values.global.extraVolumes .Values.gui.extraVolumes }}
+      {{- if or $hasConfigMount $hasConfigMapMount .Values.gui.tmpDir.enabled .Values.gui.persistence.logs.enabled .Values.global.extraVolumes .Values.gui.extraVolumes }}
       volumes:
         {{- if $hasConfigMount }}
         - name: gui-config
           secret:
             secretName: {{ .Values.gui.config.secretFile.secretName }}
+        {{- end }}
+        {{- if $hasConfigMapMount }}
+        - name: gui-config
+          configMap:
+            name: {{ .Values.gui.config.configMapFile.configMapName }}
+            items:
+              - key: {{ .Values.gui.config.configMapFile.configMapKey }}
+                path: {{ .Values.gui.config.configMapFile.fileName }}
         {{- end }}
         {{- if .Values.gui.tmpDir.enabled }}
         - name: tmp
