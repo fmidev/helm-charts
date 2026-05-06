@@ -278,6 +278,17 @@ database:
   # `database.spec.managed.services.additional`.
   name: verification-db
 
+  # Expose the database primary outside the cluster so that bare-metal servers
+  # or other environments outside the namespace can connect directly.
+  # Disabled by default — enable only when external PostgreSQL access is needed.
+  externalAccess:
+    enabled: false
+    # NodePort — works on any cluster; connects via <any-node-IP>:<nodePort>.
+    # LoadBalancer — requires a cloud provider or MetalLB; gets a dedicated external IP.
+    type: NodePort
+    # nodePort: 30432  # Specific port in range 30000–32767 (NodePort only). Omit to auto-assign.
+    annotations: {}  # e.g. metallb.universe.tf/address-pool: "default"
+
   spec:
     instances: 1
     imageName: ghcr.io/cloudnative-pg/postgis:16-3.4

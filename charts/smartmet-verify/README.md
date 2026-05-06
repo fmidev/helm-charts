@@ -530,6 +530,33 @@ See [`examples/values-rke2.yaml`](./examples/values-rke2.yaml) for a complete
 working database configuration, including managed roles, additional services
 and init SQL wiring.
 
+### External access
+
+By default the database is only reachable within the cluster. To allow
+connections from bare-metal servers or other environments outside the namespace,
+enable the external access Service:
+
+```yaml
+database:
+  externalAccess:
+    enabled: true
+    type: NodePort      # or LoadBalancer
+    # nodePort: 30432   # optional fixed port (NodePort only, 30000–32767)
+```
+
+When `type: NodePort`, clients connect to `<any-node-IP>:<nodePort>` on port 5432.
+When `type: LoadBalancer`, a dedicated external IP is provisioned (requires a
+cloud provider or [MetalLB](https://metallb.universe.tf/) on bare-metal clusters).
+
+The Service name is `<database.name>-external` (e.g. `verification-db-external`)
+and it always routes to the **primary** (read-write) pod.
+
+> **Security note:** direct PostgreSQL exposure over the network should be paired
+> with TLS (CNPG supports server-side TLS via `database.spec.certificates`) and
+> tight `pg_hba.conf` rules (`database.spec.postgresql.pg_hba`) so that only
+> known client IPs and authenticated users are accepted. Consider firewall or
+> network-policy rules in addition.
+
 ## Notes for operators
 
 - Always use Secrets for database credentials
@@ -718,6 +745,10 @@ The following table lists all configurable parameters and their defaults.
 |---|---|---|
 | `database.enabled` | Provision a PostgreSQL/PostGIS database via CloudNativePG | `false` |
 | `database.name` | CNPG `Cluster` name; also the stem of generated services (`<name>-rw`, `-ro`, `-r`) | `verification-db` |
+| `database.externalAccess.enabled` | Expose the database primary outside the cluster via a NodePort or LoadBalancer Service | `false` |
+| `database.externalAccess.type` | Service type: `NodePort` or `LoadBalancer` | `NodePort` |
+| `database.externalAccess.nodePort` | Fixed NodePort number (30000–32767, NodePort only). Omit to auto-assign. | `""` |
+| `database.externalAccess.annotations` | Annotations on the external Service (e.g. MetalLB address pool) | `{}` |
 | `database.spec.instances` | Number of PostgreSQL instances | `1` |
 | `database.spec.imageName` | PostgreSQL + PostGIS container image | `ghcr.io/cloudnative-pg/postgis:16-3.4` |
 | `database.spec.storage.size` | PVC size for database storage | `100Gi` |
