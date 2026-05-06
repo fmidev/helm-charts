@@ -156,6 +156,14 @@ volume:
       # For dynamic provisioning, specify storageClassName
       storageClassName: csi-cephfs
 
+# Optional NFS mount for /smartmet/share/wms
+wmsVolume:
+  enabled: false
+  readOnly: true
+  nfs:
+    server: ""
+    path: /smartmet/share/wms
+
 hpa:
   minReplicas: 2
   maxReplicas: 6
