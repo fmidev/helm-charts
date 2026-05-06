@@ -43,7 +43,11 @@ spec:
             - name: http
               containerPort: {{ .Values.runner.service.port }}
               protocol: TCP
-          {{- $env := concat .Values.runner.env .Values.runner.extraEnv }}
+            - name: management
+              containerPort: {{ .Values.runner.managementPort }}
+              protocol: TCP
+          {{- $springProfileEnv := list (dict "name" "SPRING_PROFILES_ACTIVE" "value" .Values.runner.springProfile) }}
+          {{- $env := concat $springProfileEnv .Values.runner.env .Values.runner.extraEnv }}
           {{- if $env }}
           env:
             {{- toYaml $env | nindent 12 }}
@@ -75,12 +79,19 @@ spec:
           resources:
             {{- toYaml .Values.runner.resources | nindent 12 }}
           {{- $hasConfigMount := and (eq .Values.runner.config.mode "secretFile") .Values.runner.config.secretFile.secretName }}
-          {{- if or $hasConfigMount .Values.runner.tmpDir.enabled .Values.runner.persistence.logs.enabled .Values.global.extraVolumeMounts .Values.runner.extraVolumeMounts }}
+          {{- $hasConfigMapMount := and (eq .Values.runner.config.mode "configMapFile") .Values.runner.config.configMapFile.configMapName }}
+          {{- if or $hasConfigMount $hasConfigMapMount .Values.runner.tmpDir.enabled .Values.runner.persistence.logs.enabled .Values.global.extraVolumeMounts .Values.runner.extraVolumeMounts }}
           volumeMounts:
             {{- if $hasConfigMount }}
             - name: runner-config
               mountPath: {{ printf "%s/%s" .Values.runner.config.secretFile.mountPath .Values.runner.config.secretFile.fileName }}
               subPath: {{ .Values.runner.config.secretFile.secretKey }}
+              readOnly: true
+            {{- end }}
+            {{- if $hasConfigMapMount }}
+            - name: runner-config
+              mountPath: {{ printf "%s/%s" .Values.runner.config.configMapFile.mountPath .Values.runner.config.configMapFile.fileName }}
+              subPath: {{ .Values.runner.config.configMapFile.configMapKey }}
               readOnly: true
             {{- end }}
             {{- if .Values.runner.tmpDir.enabled }}
@@ -98,12 +109,20 @@ spec:
             {{- toYaml . | nindent 12 }}
             {{- end }}
           {{- end }}
-      {{- if or $hasConfigMount .Values.runner.tmpDir.enabled .Values.runner.persistence.logs.enabled .Values.global.extraVolumes .Values.runner.extraVolumes }}
+      {{- if or $hasConfigMount $hasConfigMapMount .Values.runner.tmpDir.enabled .Values.runner.persistence.logs.enabled .Values.global.extraVolumes .Values.runner.extraVolumes }}
       volumes:
         {{- if $hasConfigMount }}
         - name: runner-config
           secret:
             secretName: {{ .Values.runner.config.secretFile.secretName }}
+        {{- end }}
+        {{- if $hasConfigMapMount }}
+        - name: runner-config
+          configMap:
+            name: {{ .Values.runner.config.configMapFile.configMapName }}
+            items:
+              - key: {{ .Values.runner.config.configMapFile.configMapKey }}
+                path: {{ .Values.runner.config.configMapFile.fileName }}
         {{- end }}
         {{- if .Values.runner.tmpDir.enabled }}
         - name: tmp

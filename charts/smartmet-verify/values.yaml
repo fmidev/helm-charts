@@ -7,7 +7,7 @@ commonAnnotations: {}
 imagePullSecrets: []
 # Example:
 # imagePullSecrets:
-#   - name: container-registry-pull-secret
+#   - name: pull-secret
 
 serviceAccount:
   create: true
@@ -61,13 +61,15 @@ gui:
   podAnnotations: {}
   podLabels: {}
 
+  springProfile: production
+
   env:
     - name: TZ
       value: "UTC"
     - name: JAVA_TOOL_OPTIONS
       value: "-DproductionMode=true -Dvaadin.productionMode -XX:ActiveProcessorCount=2"
     - name: JAVA_OPTS
-      value: "-Duser.timezone=UTC -Dspring.profiles.active=production -Dspring.config.additional-location=/var/app/config/"
+      value: "-Duser.timezone=UTC -Dspring.config.additional-location=/var/app/config/"
   extraEnv: []
   extraEnvFrom: []
   extraVolumes: []
@@ -75,14 +77,22 @@ gui:
 
   config:
     # Supported modes:
-    # - secretFile: mount one file from a Secret, e.g. application.yaml
-    # - env: import env vars from Secret/ConfigMap
-    # - none: do nothing
+    # - secretFile:    mount one file from a Secret (recommended when full config is sensitive)
+    # - configMapFile: mount one file from a ConfigMap (recommended when only the DB password
+    #                  is sensitive; inject the password via extraEnv from a separate Secret)
+    # - env:           import env vars from Secret/ConfigMap
+    # - none:          do nothing
     mode: secretFile
 
     secretFile:
       secretName: ""
       secretKey: application.yaml
+      mountPath: /var/app/config
+      fileName: application.yaml
+
+    configMapFile:
+      configMapName: ""
+      configMapKey: application.yaml
       mountPath: /var/app/config
       fileName: application.yaml
 
@@ -104,20 +114,28 @@ gui:
   tmpDir:
     enabled: true
 
-  # Probe action. By default this is an httpGet against `path` on the named
-  # `http` port. Set one of `httpGet`, `tcpSocket` or `exec` to use a different
-  # action — those override the `path` shortcut when present.
+  # Spring Boot Actuator management port. The app exposes /actuator/health on
+  # this port (separate from the main HTTP port so Spring Security does not
+  # apply). Must match management.server.port in the app's application.yaml.
+  managementPort: 8081
+
+  # Probe action. By default httpGet against the management port.
+  # Set one of `httpGet`, `tcpSocket` or `exec` to override.
   probes:
     liveness:
       enabled: true
-      path: /actuator/health/liveness
+      httpGet:
+        path: /actuator/health/liveness
+        port: management
       initialDelaySeconds: 30
       periodSeconds: 10
       timeoutSeconds: 3
       failureThreshold: 6
     readiness:
       enabled: true
-      path: /actuator/health/readiness
+      httpGet:
+        path: /actuator/health/readiness
+        port: management
       initialDelaySeconds: 20
       periodSeconds: 10
       timeoutSeconds: 3
@@ -127,6 +145,7 @@ gui:
     enabled: false
     className: ""
     annotations: {}
+    customAnnotations: {}
     hosts:
       - host: smartmet-verify-gui.local
         paths:
@@ -172,13 +191,15 @@ runner:
   podAnnotations: {}
   podLabels: {}
 
+  springProfile: production
+
   env:
     - name: TZ
       value: "UTC"
     - name: JAVA_TOOL_OPTIONS
       value: "-DproductionMode=true -XX:ActiveProcessorCount=2"
     - name: JAVA_OPTS
-      value: "-Duser.timezone=UTC -Dspring.profiles.active=production -Dspring.config.additional-location=/var/app/config/"
+      value: "-Duser.timezone=UTC -Dspring.config.additional-location=/var/app/config/"
   extraEnv: []
   extraEnvFrom: []
   extraVolumes: []
@@ -190,6 +211,12 @@ runner:
     secretFile:
       secretName: ""
       secretKey: application.yaml
+      mountPath: /var/app/config
+      fileName: application.yaml
+
+    configMapFile:
+      configMapName: ""
+      configMapKey: application.yaml
       mountPath: /var/app/config
       fileName: application.yaml
 
@@ -209,19 +236,27 @@ runner:
   tmpDir:
     enabled: true
 
-  # The runner has no HTTP server by default, so probe overrides are common.
-  # See the `exec` / `tcpSocket` / `httpGet` examples in values-rke2.yaml.
+  # Spring Boot Actuator management port. Must match management.server.port
+  # in the app's application.yaml.
+  managementPort: 8081
+
+  # Probe action. By default httpGet against the management port.
+  # Set one of `httpGet`, `tcpSocket` or `exec` to override.
   probes:
     liveness:
       enabled: true
-      path: /actuator/health/liveness
+      httpGet:
+        path: /actuator/health/liveness
+        port: management
       initialDelaySeconds: 30
       periodSeconds: 20
       timeoutSeconds: 3
       failureThreshold: 6
     readiness:
       enabled: true
-      path: /actuator/health/readiness
+      httpGet:
+        path: /actuator/health/readiness
+        port: management
       initialDelaySeconds: 20
       periodSeconds: 20
       timeoutSeconds: 3
@@ -243,6 +278,17 @@ database:
   # `database.spec.managed.services.additional`.
   name: verification-db
 
+  # Expose the database primary outside the cluster so that bare-metal servers
+  # or other environments outside the namespace can connect directly.
+  # Disabled by default — enable only when external PostgreSQL access is needed.
+  externalAccess:
+    enabled: false
+    # NodePort — works on any cluster; connects via <any-node-IP>:<nodePort>.
+    # LoadBalancer — requires a cloud provider or MetalLB; gets a dedicated external IP.
+    type: NodePort
+    # nodePort: 30432  # Specific port in range 30000–32767 (NodePort only). Omit to auto-assign.
+    annotations: {}  # e.g. metallb.universe.tf/address-pool: "default"
+
   spec:
     instances: 1
     imageName: ghcr.io/cloudnative-pg/postgis:16-3.4
@@ -257,7 +303,7 @@ database:
         log_timezone: UTC
 
     storage:
-      size: 20Gi
+      size: 100Gi
       # storageClass: ""
 
     # By keeping `owner: app` the operator creates a throw-away `app` role,

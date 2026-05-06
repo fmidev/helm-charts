@@ -8,7 +8,8 @@ metadata:
   name: {{ include "smartmet-verify.componentFullname" (list . "gui") }}
   labels:
     {{- include "smartmet-verify.componentLabels" (list . "gui") | nindent 4 }}
-  {{- with .Values.gui.ingress.annotations }}
+  {{- $annotations := merge (.Values.gui.ingress.customAnnotations | default dict) (.Values.gui.ingress.annotations | default dict) }}
+  {{- with $annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}

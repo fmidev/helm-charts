@@ -1,0 +1,25 @@
+{{- if and .Values.database.enabled .Values.database.externalAccess.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.database.name }}-external
+  labels:
+    {{- include "smartmet-verify.componentLabels" (list . "database") | nindent 4 }}
+  {{- with .Values.database.externalAccess.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.database.externalAccess.type }}
+  selector:
+    cnpg.io/cluster: {{ .Values.database.name }}
+    cnpg.io/instanceRole: primary
+  ports:
+    - name: postgresql
+      port: 5432
+      targetPort: 5432
+      protocol: TCP
+      {{- if and (eq .Values.database.externalAccess.type "NodePort") .Values.database.externalAccess.nodePort }}
+      nodePort: {{ .Values.database.externalAccess.nodePort }}
+      {{- end }}
+{{- end }}
