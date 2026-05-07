@@ -83,3 +83,18 @@ smartmetConf:
         encoding: UTF8
         startconnections: 2
         maxconnections: 5
+
+  # Provide a full edr.conf body to expose AVI-backed collections via
+  # the EDR plugin. Without this, the image's default edr.conf is used
+  # (no AVI collections). See docs/avi-only-deployment.md §3 for the
+  # recipe; typically you `kubectl exec ... cat .../edr.conf`, edit it,
+  # and pass it back via `--set-file smartmetConf.edrConf=edr.conf`.
+  # edrConf: |
+  #   verbose = true;
+  #   aviengine_disabled = false;
+  #   avi:
+  #   {
+  #     period_length = 30;
+  #     collections: ( … );
+  #   };
+  #   collection_info: { … };

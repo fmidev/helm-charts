@@ -241,6 +241,17 @@ smartmetConf:
     - timeseries
     - wms
 
+  # EDR plugin configuration override.
+  #
+  # Empty (default) -> the image's bundled /etc/smartmet/plugins/edr.conf
+  # is used, unchanged.
+  #
+  # Non-empty -> a Secret is rendered with this content and mounted over
+  # /etc/smartmet/plugins/edr.conf. Use it to enable AVI-backed EDR
+  # collections (metar/taf/sigmet) or any other site-specific EDR config.
+  # See docs/avi-only-deployment.md for an AVI-focused example.
+  edrConf: ""
+
   # AVI engine and plugin configuration (optional, off by default).
   # When disabled, the chart leaves the avi engine to use whatever stub
   # avi.conf ships in the image (no functional database connection).

@@ -59,6 +59,11 @@ spec:
           subPath: "avi-plugin.conf"
           name: smartmet-avi-config
         {{- end }}
+        {{- if .Values.smartmetConf.edrConf }}
+        - mountPath: "/etc/smartmet/plugins/edr.conf"
+          subPath: "edr.conf"
+          name: smartmet-edr-config
+        {{- end }}
         livenessProbe:
           tcpSocket:
             port: {{ .Values.smartmetserver.containerPort }}
@@ -121,4 +126,9 @@ spec:
       - name: smartmet-avi-config
         secret:
           secretName: {{ include "smartmetserver.fullname" . }}-avi-config
+      {{- end }}
+      {{- if .Values.smartmetConf.edrConf }}
+      - name: smartmet-edr-config
+        secret:
+          secretName: {{ include "smartmetserver.fullname" . }}-edr-config
       {{- end }}

@@ -112,6 +112,63 @@ VALUES (
 );
 ```
 
+### Polygon orientation (RFC 7946)
+
+EDR returns FIR polygons as GeoJSON. RFC 7946 requires exterior rings to
+be **counter-clockwise** (CCW); some renderers fill the wrong side or
+draw inverted shapes when the orientation is wrong. Most published eAIP
+coordinates are CW. Force CCW after loading:
+
+```sql
+UPDATE icao_fir_yhdiste     SET areageom = ST_Multi(ST_ForcePolygonCCW(areageom));
+UPDATE icao_fir_yhdistelma  SET geom     = ST_Multi(ST_ForcePolygonCCW(geom));
+```
+
+This is idempotent — re-running it on already-CCW polygons is a no-op.
+
+### Synthetic FIR-station for SIGMET-as-single-location
+
+A SIGMET applies to a whole FIR, not a single aerodrome. Without help,
+the engine returns one entry per aerodrome inside the FIR — which is
+not what most clients want. The convention used here is to insert a
+synthetic station whose ICAO code matches the FIR ICAO and whose
+`geom` is the FIR centroid:
+
+```sql
+INSERT INTO avidb_stations (icao_code, name, geom, elevation, country_code)
+SELECT 'EETT', 'TALLINN FIR (centroid)',
+       ST_Centroid(geom), 0, 'EE'
+FROM icao_fir_yhdistelma WHERE icaocode = 'EETT';
+```
+
+Then in `edr.conf` filter SIGMET to this single ICAO and exclude it
+from METAR/TAF (it isn't a real airport). See
+[`avi-only-deployment.md`](avi-only-deployment.md) for the full EDR
+recipe.
+
+## 4a. Sample messages (smoke test)
+
+To verify the engine + plugin path end-to-end you need at least one row
+in `avidb_messages` for each message type you have configured. A
+minimal smoke-test seed:
+
+```sql
+WITH s AS (SELECT station_id FROM avidb_stations WHERE icao_code = 'EETN')
+INSERT INTO avidb_messages
+  (station_id, message_type_id, message_time, valid_from, valid_to,
+   message, status_id)
+SELECT s.station_id, mt.type_id,
+       now(), now(), now() + interval '6 hour',
+       'METAR EETN 010100Z 12005KT CAVOK 05/03 Q1015',
+       1
+FROM s, avidb_message_types mt WHERE mt.type = 'METAR';
+```
+
+Repeat with `'TAF'` and `'SIGMET'` (and the ICAO `EETT` for SIGMET) to
+cover the three collections this chart exposes by default. These rows
+exist purely so that `/edr/collections/<id>` returns non-empty results;
+delete them before going to production.
+
 ## 5. Caveats
 
 - The avi engine's `queryStationsWithBBoxes` builds invalid SQL when the
