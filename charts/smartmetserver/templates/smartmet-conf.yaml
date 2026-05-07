@@ -26,6 +26,9 @@ data:
     lazylinking = {{ .Values.smartmetConf.server.lazylinking }};
     compress = {{ .Values.smartmetConf.server.compress }};
     compresslimit = {{ .Values.smartmetConf.server.compresslimit }};
+
+    // Crash diagnostics
+    stacktrace = {{ default false .Values.smartmetConf.server.stacktrace }};
     
     // Thread pool configuration
     slowpool:

@@ -206,6 +206,9 @@ smartmetConf:
     lazylinking: true
     compress: true
     compresslimit: 1000
+    # Print a stack trace when smartmetd crashes (SIGSEGV, abort, …).
+    # Off by default; turn on for debugging.
+    stacktrace: false
 
   # Thread pool configuration
   pools:
