@@ -206,6 +206,9 @@ smartmetConf:
     lazylinking: true
     compress: true
     compresslimit: 1000
+    # Print a stack trace when smartmetd crashes (SIGSEGV, abort, …).
+    # Off by default; turn on for debugging.
+    stacktrace: false
 
   # Thread pool configuration
   pools:
@@ -227,13 +230,62 @@ smartmetConf:
     - grid
     - observation
 
-  # List of plugins to enable
+  # List of plugins to enable.
+  # To use the avi plugin, add "avi" to this list and set
+  # smartmetConf.avi.enabled=true so its config Secret is rendered
+  # and mounted (the image must also ship plugins/avi.so).
   plugins:
     - autocomplete
     - download
     - edr
     - timeseries
     - wms
+
+  # EDR plugin configuration override.
+  #
+  # Empty (default) -> the image's bundled /etc/smartmet/plugins/edr.conf
+  # is used, unchanged.
+  #
+  # Non-empty -> a Secret is rendered with this content and mounted over
+  # /etc/smartmet/plugins/edr.conf. Use it to enable AVI-backed EDR
+  # collections (metar/taf/sigmet) or any other site-specific EDR config.
+  # See docs/avi-only-deployment.md for an AVI-focused example.
+  edrConf: ""
+
+  # AVI engine and plugin configuration (optional, off by default).
+  # When disabled, the chart leaves the avi engine to use whatever stub
+  # avi.conf ships in the image (no functional database connection).
+  # When enabled, the chart creates a Secret with templated avi.conf
+  # for both engine and plugin and mounts them at
+  # /etc/smartmet/engines/avi.conf and /etc/smartmet/plugins/avi.conf,
+  # overriding the image defaults. The avi engine and plugin are loaded
+  # by smartmetd only when listed in `engines` / `plugins` above.
+  avi:
+    enabled: false
+    engine:
+      # PostgreSQL / PostGIS connection settings
+      postgis:
+        host: localhost
+        port: 5432
+        database: avi
+        username: avi_user
+        # Override via --set or a separate values file in production
+        password: avi_pw
+        encoding: UTF8
+        startconnections: 5
+        maxconnections: 10
+      # Operational defaults (most users should leave these as-is)
+      message:
+        maxstations: 0
+        maxrows: 0
+        recordsetstarttimeoffsethours: 30
+        recordsetendtimeoffsethours: 12
+    plugin:
+      message:
+        maxstations: 0
+        maxrows: 0
+        maxrangedays: 31
+      multiplelocationoptions: true
 
   # QueryData engine configuration
   #
