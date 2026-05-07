@@ -10,8 +10,8 @@
 # external values file. Override `ingress.hosts` for your own host name.
 
 image:
-  # Older tags hit a memory bug at avi-engine init; use 26.03.19 or newer.
-  tag: "26.03.19"
+  # Tags before 26.02.09 hit a multi-engine init heap-corruption bug.
+  tag: "26.05.07"
 
 smartmetserver:
   replicas: 1
@@ -30,14 +30,11 @@ smartmetserver:
     limits:   { cpu: "1",    memory: 2Gi   }
     requests: { cpu: "200m", memory: 512Mi }
 
-# /smartmet/data is required by the chart even when only avi is in use.
-# directHostPath + DirectoryOrCreate is the simplest way to satisfy
-# that without provisioning a PV.
+# AVI-only deployments don't need /smartmet/data — the image already
+# ships an empty model-subdir tree there, which is what querydata sees
+# when no real data is supplied. "none" leaves the image's tree alone.
 volume:
-  type: directHostPath
-  directHostPath:
-    path: /tmp/smartmet-data
-    type: DirectoryOrCreate
+  type: none
 
 hpa:
   minReplicas: 1

@@ -103,9 +103,19 @@ ingress:
 
 # Volume configuration for smartmet data
 volume:
-  # Volume type: "cephfs", "nfs", "hostPath", or "directHostPath"
-  # Use "directHostPath" for testing: mounts a node directory directly
-  # without PV/PVC (e.g. /smartmet/data)
+  # Volume type. Controls what is mounted at /smartmet/data inside the
+  # container.
+  #   "none"           - do not mount anything; the image's bundled
+  #                      /smartmet/data tree (with model subdirs:
+  #                      gfs, meps, ecmwf, ...) is left intact. Use this
+  #                      for AVI-only deployments and any setup where
+  #                      you don't supply real querydata files.
+  #   "emptyDir"       - empty pod-local scratch directory, hides the
+  #                      image's tree but is writable.
+  #   "cephfs"         - PVC-backed CephFS mount (see cephfs:* below).
+  #   "nfs"            - direct NFS mount (see nfs:* below).
+  #   "hostPath"       - PV/PVC-backed hostPath (see hostPath:* below).
+  #   "directHostPath" - direct hostPath, no PV/PVC (testing).
   type: hostPath
   # Whether the volume should be mounted as read-only
   readOnly: true
