@@ -27,7 +27,13 @@ The default `fmidev/smartmetserver` image:
   pointer` / `double free or corruption (out)` immediately after the
   geonames admin handler registers, regardless of avidb data state.
   The bug was implicitly fixed by `26.02.09`. Use **`26.02.09` or
-  newer** (the example values pin `26.03.19`).
+  newer** (the example values pin `26.05.07`).
+
+The image already ships `/smartmet/data/` with empty subdirectories for
+each forecast model (`gfs`, `meps`, `ecmwf`, …) — fine as-is for
+AVI-only setups. Set `volume.type: none` (chart 1.9.11+) so the chart
+does not mount anything over `/smartmet/data` and the image's tree is
+left intact.
 
 ## 2. Helm values
 
