@@ -49,15 +49,6 @@ runner:
       enabled: true
       storageClassName: local-path
 
-  # The runner has no HTTP server. Exec probes keep Kubernetes happy without
-  # turning on an Actuator endpoint.
-  probes:
-    liveness:
-      exec:
-        command: ["true"]
-    readiness:
-      exec:
-        command: ["true"]
 
 # Optional PostgreSQL/PostGIS database managed by CloudNativePG.
 #
