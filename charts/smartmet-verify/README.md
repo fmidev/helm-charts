@@ -463,12 +463,12 @@ database:
             - { name: verification-db-init-sql, key: 0000-pre-init.sql }
         postInitApplicationSQLRefs:
           configMapRefs:
-            - { name: verification-db-init-sql, key: 0002-post-ownership.sql }
             - { name: verification-db-init-sql, key: 0001-production-schema.sql }
+            - { name: verification-db-init-sql, key: 0002-post-ownership.sql }
 ```
 
 `0002-post-ownership.sql` is a small user-supplied wrapper that transfers the
-application database's ownership to `verifadmin` before the schema loads. It is
+application database's ownership to `verifadmin` after the schema loads. It is
 needed because the CNPG initdb `owner: app` default avoids conflicting with the
 `CREATE ROLE verifadmin` in `0000-pre-init.sql`, so ownership has to be handed
 over explicitly. Example contents:

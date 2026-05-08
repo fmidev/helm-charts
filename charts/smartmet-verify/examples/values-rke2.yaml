@@ -90,9 +90,9 @@ database:
         postInitApplicationSQLRefs:
           configMapRefs:
             - name: verification-db-init-sql
-              key: 0002-post-ownership.sql
-            - name: verification-db-init-sql
               key: 0001-production-schema.sql
+            - name: verification-db-init-sql
+              key: 0002-post-ownership.sql
     managed:
       roles:
         - name: verifadmin

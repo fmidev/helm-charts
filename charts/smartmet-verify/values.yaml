@@ -324,9 +324,9 @@ database:
         postInitApplicationSQLRefs:
           configMapRefs: []
           # - name: verification-db-init-sql
-          #   key: 0002-post-ownership.sql
-          # - name: verification-db-init-sql
           #   key: 0001-production-schema.sql
+          # - name: verification-db-init-sql
+          #   key: 0002-post-ownership.sql
 
     # managed.roles and managed.services below give applications access to the
     # DB under their expected role names and service hostnames.
