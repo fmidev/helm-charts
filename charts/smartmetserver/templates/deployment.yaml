@@ -33,9 +33,11 @@ spec:
         ports:
         - containerPort: {{ .Values.smartmetserver.containerPort }}
         volumeMounts:
+        {{- if ne (.Values.volume.type | default "none") "none" }}
         - mountPath: "/smartmet/data"
           name: smartmetserver-volume
           readOnly: {{ .Values.volume.readOnly }}
+        {{- end }}
         - mountPath: "/etc/smartmet/smartmet.conf"
           subPath: "smartmet.conf"
           name: smartmet-configuration
@@ -50,6 +52,19 @@ spec:
         - mountPath: "/smartmet/share/wms"
           name: smartmet-wms-volume
           readOnly: {{ .Values.wmsVolume.readOnly }}
+        {{- end }}
+        {{- if .Values.smartmetConf.avi.enabled }}
+        - mountPath: "/etc/smartmet/engines/avi.conf"
+          subPath: "avi-engine.conf"
+          name: smartmet-avi-config
+        - mountPath: "/etc/smartmet/plugins/avi.conf"
+          subPath: "avi-plugin.conf"
+          name: smartmet-avi-config
+        {{- end }}
+        {{- if .Values.smartmetConf.edrConf }}
+        - mountPath: "/etc/smartmet/plugins/edr.conf"
+          subPath: "edr.conf"
+          name: smartmet-edr-config
         {{- end }}
         livenessProbe:
           tcpSocket:
@@ -73,25 +88,30 @@ spec:
           {{- toYaml .Values.smartmetserver.resources | nindent 10 }}
         {{- end }}
       volumes:
+      {{- $volType := .Values.volume.type | default "none" }}
+      {{- if ne $volType "none" }}
       - name: smartmetserver-volume
-        {{- if eq .Values.volume.type "cephfs" }}
+        {{- if eq $volType "cephfs" }}
         persistentVolumeClaim:
           claimName: {{ .Values.volume.cephfs.pvc.name }}
-        {{- else if eq .Values.volume.type "nfs" }}
+        {{- else if eq $volType "nfs" }}
         nfs:
           server: {{ .Values.volume.nfs.server }}
           path: {{ .Values.volume.nfs.path }}
           readOnly: {{ .Values.volume.readOnly }}
-        {{- else if eq .Values.volume.type "hostPath" }}
+        {{- else if eq $volType "hostPath" }}
         persistentVolumeClaim:
           claimName: {{ .Values.volume.hostPath.pvc.name }}
-        {{- else if eq .Values.volume.type "directHostPath" }}
+        {{- else if eq $volType "directHostPath" }}
         hostPath:
           path: {{ .Values.volume.directHostPath.path | quote }}
           type: {{ .Values.volume.directHostPath.type | default "Directory" }}
+        {{- else if eq $volType "emptyDir" }}
+        emptyDir: {}
         {{- else }}
-        {{- fail "volume.type must be one of: cephfs, nfs, hostPath, directHostPath" }}
+        {{- fail "volume.type must be one of: none, emptyDir, cephfs, nfs, hostPath, directHostPath" }}
         {{- end }}
+      {{- end }}
       - name: smartmet-configuration
         configMap:
           name: {{ include "smartmetserver.fullname" . }}-config
@@ -108,4 +128,14 @@ spec:
           server: {{ .Values.wmsVolume.nfs.server }}
           path: {{ .Values.wmsVolume.nfs.path }}
           readOnly: {{ .Values.wmsVolume.readOnly }}
+      {{- end }}
+      {{- if .Values.smartmetConf.avi.enabled }}
+      - name: smartmet-avi-config
+        secret:
+          secretName: {{ include "smartmetserver.fullname" . }}-avi-config
+      {{- end }}
+      {{- if .Values.smartmetConf.edrConf }}
+      - name: smartmet-edr-config
+        secret:
+          secretName: {{ include "smartmetserver.fullname" . }}-edr-config
       {{- end }}
