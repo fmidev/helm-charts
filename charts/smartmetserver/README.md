@@ -410,8 +410,8 @@ The following table lists the configurable parameters of the Smartmetserver char
 | `smartmetConf.pools.slowpool.maxrequeuesize` | Maximum requeue size for slow pool | `100` |
 | `smartmetConf.pools.fastpool.maxthreads` | Maximum threads for fast pool | `24` |
 | `smartmetConf.pools.fastpool.maxrequeuesize` | Maximum requeue size for fast pool | `100` |
-| `smartmetConf.engines` | List of engines to enable | `[sputnik, contour, geonames, gis, querydata, grid]` |
-| `smartmetConf.plugins` | List of plugins to enable | `[autocomplete, download, edr, timeseries, wms]` |
+| `smartmetConf.engines` | List of engines to enable (avi engine is listed by default and uses the image's stub config unless `smartmetConf.avi.enabled` is true) | `[avi, sputnik, contour, geonames, gis, querydata, grid, observation]` |
+| `smartmetConf.plugins` | List of plugins to enable (add `avi` here too to enable the avi plugin alongside `smartmetConf.avi.enabled`) | `[autocomplete, download, edr, timeseries, wms]` |
 | `smartmetConf.querydata` | QueryData engine configuration (supports structured, raw, or legacy string format) | See below |
 | `smartmetConf.querydata.basePath` | Base directory path for querydata files | `"/smartmet/data"` |
 | `smartmetConf.querydata.defaultArea` | Default geographical area for producers | `"world"` |
@@ -423,6 +423,23 @@ The following table lists the configurable parameters of the Smartmetserver char
 | `smartmetConf.querydata.defaults.alias` | Default alias (empty string = no alias line) | `""` |
 | `smartmetConf.querydata.producers` | List of producer configurations | `[{name: demo, levels: {surface: {number_to_keep: 1}}}]` |
 | `smartmetConf.querydata.raw` | Raw querydata configuration string (alternative to structured config) | `null` |
+| `smartmetConf.avi.enabled` | Render the templated AVI engine + plugin config (Secret) and mount it over the image defaults. Add `avi` to `smartmetConf.engines` / `smartmetConf.plugins` to actually load them. | `false` |
+| `smartmetConf.avi.engine.postgis.host` | AVI PostgreSQL/PostGIS host | `localhost` |
+| `smartmetConf.avi.engine.postgis.port` | AVI database port | `5432` |
+| `smartmetConf.avi.engine.postgis.database` | AVI database name | `avi` |
+| `smartmetConf.avi.engine.postgis.username` | AVI database username | `avi_user` |
+| `smartmetConf.avi.engine.postgis.password` | AVI database password (override via `--set` or external values file) | `avi_pw` |
+| `smartmetConf.avi.engine.postgis.encoding` | Database encoding | `UTF8` |
+| `smartmetConf.avi.engine.postgis.startconnections` | Connection pool start size | `5` |
+| `smartmetConf.avi.engine.postgis.maxconnections` | Connection pool max size | `10` |
+| `smartmetConf.avi.engine.message.maxstations` | Engine: max stations per query (0 = unlimited) | `0` |
+| `smartmetConf.avi.engine.message.maxrows` | Engine: max rows per query (0 = unlimited) | `0` |
+| `smartmetConf.avi.engine.message.recordsetstarttimeoffsethours` | Engine: backwards expansion of message_time range | `30` |
+| `smartmetConf.avi.engine.message.recordsetendtimeoffsethours` | Engine: forwards expansion of message_time range | `12` |
+| `smartmetConf.avi.plugin.message.maxstations` | Plugin: max stations override (< 0 = use engine) | `0` |
+| `smartmetConf.avi.plugin.message.maxrows` | Plugin: max rows override (< 0 = use engine) | `0` |
+| `smartmetConf.avi.plugin.message.maxrangedays` | Plugin: max query time range (days, 0 = unlimited) | `31` |
+| `smartmetConf.avi.plugin.multiplelocationoptions` | Allow multiple location options per query | `true` |
 | `smartmetserver.resources` | Resource limits and requests for the container | See below |
 | `smartmetserver.resources.limits.memory` | Memory limit for the container | `4Gi` |
 | `smartmetserver.resources.limits.cpu` | CPU limit for the container | `2` |
@@ -605,6 +622,34 @@ smartmetConf:
     - timeseries
     - download
 ```
+
+### AVI Engine and Plugin
+
+The AVI engine is included in the image and is listed in the default `engines:` config, so it loads using the stub `avi.conf` shipped in the image. To actually point it at a database, set `smartmetConf.avi.enabled: true` and provide the connection details. When enabled, the chart renders a Secret with a templated engine and plugin configuration and mounts it at `/etc/smartmet/engines/avi.conf` and `/etc/smartmet/plugins/avi.conf` — overriding the image defaults.
+
+The avi plugin is **not** loaded automatically. To use it, add `avi` to `smartmetConf.plugins` (the same way you would any other plugin). The image must also ship `plugins/avi.so`.
+
+```yaml
+smartmetConf:
+  plugins:
+    - autocomplete
+    - avi          # add this to enable the avi plugin
+    - download
+    - edr
+    - timeseries
+    - wms
+  avi:
+    enabled: true
+    engine:
+      postgis:
+        host: avi-db.example.com
+        port: 5432
+        database: avi
+        username: avi_user
+        password: change-me   # override via --set or external values
+```
+
+Most other AVI settings (message types, validity windows, etc.) are kept as sample defaults inside the chart template; override individual fields under `smartmetConf.avi.engine.message` or `smartmetConf.avi.plugin` if needed.
 
 ### Complete Configuration Example
 
