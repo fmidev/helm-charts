@@ -69,7 +69,7 @@ gui:
     - name: JAVA_TOOL_OPTIONS
       value: "-DproductionMode=true -Dvaadin.productionMode -XX:ActiveProcessorCount=2"
     - name: JAVA_OPTS
-      value: "-Duser.timezone=UTC -Dspring.config.additional-location=/var/app/config/"
+      value: "-Duser.timezone=UTC -Dspring.config.additional-location=/var/app/config/ -Dspring.profiles.active=$(SPRING_PROFILES_ACTIVE)"
   extraEnv: []
   extraEnvFrom: []
   extraVolumes: []
@@ -197,9 +197,9 @@ runner:
     - name: TZ
       value: "UTC"
     - name: JAVA_TOOL_OPTIONS
-      value: "-DproductionMode=true -XX:ActiveProcessorCount=2"
+      value: "-XX:ActiveProcessorCount=2"
     - name: JAVA_OPTS
-      value: "-Duser.timezone=UTC -Dspring.config.additional-location=/var/app/config/"
+      value: "-Duser.timezone=UTC -Dspring.config.additional-location=/var/app/config/ -Dspring.profiles.active=$(SPRING_PROFILES_ACTIVE)"
   extraEnv: []
   extraEnvFrom: []
   extraVolumes: []
