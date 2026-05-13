@@ -187,6 +187,7 @@ The following table lists the configurable parameters of the Taf backend chart a
 
 | Chart version | taf version |
 |---------------|-------------|
+| 1.2.8         | 3.1.8       |
 | 1.2.7         | 3.1.6       |
 | 1.2.6         | 3.1.6       |
 | 1.2.5         | 3.1.4       |
