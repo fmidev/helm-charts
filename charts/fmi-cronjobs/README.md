@@ -10,7 +10,7 @@ Install standalone or add as a dependency to another chart:
 # Chart.yaml
 dependencies:
   - name: fmi-cronjobs
-    version: "0.1.1"
+    version: "0.2.0"
     repository: "https://fmidev.github.io/helm-charts"
 ```
 
@@ -177,7 +177,7 @@ mounts:
 
 ### `pvcMounts`
 
-List of PersistentVolumeClaim volume mounts. Reference a PVC by its `claimName` — either one created by the `pvcs` list in this chart or a pre-existing claim in the namespace. Volumes default to read-write unless `readOnly: true` is set explicitly.
+List of PersistentVolumeClaim volume mounts. Reference a PVC by its `claimName`. Volumes default to read-write unless `readOnly: true` is set explicitly.
 
 | Field | Description | Required |
 |-------|-------------|----------|

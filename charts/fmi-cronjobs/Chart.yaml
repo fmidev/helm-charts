@@ -2,7 +2,7 @@ apiVersion: v2
 name: fmi-cronjobs
 description: Helm chart for defining multiple CronJobs
 type: application
-version: 0.1.0
+version: 0.2.0
 keywords:
   - fmi
   - cronjob
