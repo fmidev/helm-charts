@@ -1,0 +1,26 @@
+{{- range $pvc := .Values.pvcs }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ required "pvcs[].name is required" $pvc.name }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ $.Chart.Name }}
+    app.kubernetes.io/component: pvc
+  {{- if $pvc.annotations }}
+  annotations:
+    {{- toYaml $pvc.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- toYaml (required "pvcs[].accessModes is required" $pvc.accessModes) | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ required "pvcs[].size is required" $pvc.size }}
+  storageClassName: {{ default "ocs-storagecluster-cephfs" $pvc.storageClassName }}
+  {{- if $pvc.volumeName }}
+  volumeName: {{ $pvc.volumeName }}
+  {{- end }}
+{{- end }}

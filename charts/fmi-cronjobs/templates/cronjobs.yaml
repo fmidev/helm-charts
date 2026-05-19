@@ -57,7 +57,7 @@ spec:
               {{- end }}
               {{ include "fmi-cronjobs.renderEnv" $job.env | nindent 14 }}
               {{ include "fmi-cronjobs.renderResources" (dict "job" $job "defaults" $defaults) | nindent 14 }}
-              {{ include "fmi-cronjobs.renderVolumeMounts" (dict "mounts" ($job.mounts | default (list)) "tmp" ($job.tmp | default (dict))) | nindent 14 }}
-          {{ include "fmi-cronjobs.renderVolumes" (dict "mounts" ($job.mounts | default (list)) "tmp" ($job.tmp | default (dict))) | nindent 10 }}
+              {{ include "fmi-cronjobs.renderVolumeMounts" (dict "mounts" ($job.mounts | default (list)) "pvcMounts" ($job.pvcMounts | default (list)) "tmp" ($job.tmp | default (dict))) | nindent 14 }}
+          {{ include "fmi-cronjobs.renderVolumes" (dict "mounts" ($job.mounts | default (list)) "pvcMounts" ($job.pvcMounts | default (list)) "tmp" ($job.tmp | default (dict))) | nindent 10 }}
 {{- end -}}
 {{- end -}}
