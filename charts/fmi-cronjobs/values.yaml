@@ -11,6 +11,19 @@ defaults: {}
 #   failedJobsHistoryLimit: 3
 #   resourcePreset: minimal
 
+
+# List of PersistentVolumeClaims to be created by the chart. These can be used by all of the defined jobs.
+# Fields not defined as optional are required
+pvcs: []
+# pvcs:
+#   - name: my-cronjob-pvc # name your pvc with the jobname intend to use the claim for clarity
+#     accessModes: [ReadWriteMany] # Access mode must be compatible with the storage class and the intended usage (e.g., ReadWriteMany for shared access)
+#     size: 1Gi
+#     storageClassName: ocs-storagecluster-cephfs   # optional, defaults to ocs-storagecluster-cephfs
+#     annotations: {}                # optional
+#     volumeName: ""                 # optional
+
+
 # List of CronJob definitions. See README.md for the full configuration reference.
 #
 # Minimal example:
@@ -21,4 +34,15 @@ defaults: {}
 #       image:
 #         repository: quay.io/myorg/my-image
 #         tag: 1.0.0
+
+# Mount an existing or chart-managed PVC to job:
+#   jobs:
+#     - name: my-job
+#       ...
+#       pvcMounts:
+#         - name: my-cronjob-data
+#           claimName: my-cronjob-pvc
+#           mountPath: /data
+#           readOnly: false
+#           subPath: ""        # optional
 jobs: []

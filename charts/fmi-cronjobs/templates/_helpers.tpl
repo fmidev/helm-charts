@@ -51,16 +51,17 @@ resources:
 {{- end -}}
 
 {{/*
-Render all volumes: NFS mounts + optional tmp emptyDir
+Render all volumes: NFS mounts + PVC mounts + optional tmp emptyDir
 Usage from a manifest:
-  {{ include "fmi-cronjobs.renderVolumes" (dict "mounts" ($job.mounts | default (list)) "tmp" ($job.tmp | default (dict))) | nindent 10 }}
+  {{ include "fmi-cronjobs.renderVolumes" (dict "mounts" ($job.mounts | default (list)) "pvcMounts" ($job.pvcMounts | default (list)) "tmp" ($job.tmp | default (dict))) | nindent 10 }}
 */}}
 {{- define "fmi-cronjobs.renderVolumes" -}}
 {{- $mounts := (default (list) .mounts) -}}
+{{- $pvcMounts := (default (list) .pvcMounts) -}}
 {{- $tmp := (default (dict) .tmp) -}}
 {{- $renderTmp := and $tmp (hasKey $tmp "enabled") ($tmp.enabled) -}}
 
-{{- if or (gt (len $mounts) 0) $renderTmp }}
+{{- if or (gt (len $mounts) 0) (gt (len $pvcMounts) 0) $renderTmp }}
 volumes:
 {{- if $renderTmp }}
   - name: tmp
@@ -77,17 +78,23 @@ volumes:
       readOnly: true
       {{- end }}
 {{- end }}
+{{- range $mount := $pvcMounts }}
+  - name: {{ required "pvcMount.name is required" $mount.name }}
+    persistentVolumeClaim:
+      claimName: {{ required "pvcMount.claimName is required" $mount.claimName }}
+{{- end }}
 {{- end }}
 {{- end }}
 
 {{/*
-Render all volumeMounts: NFS mounts + optional tmp emptyDir
+Render all volumeMounts: NFS mounts + PVC mounts + optional tmp emptyDir
 */}}
 {{- define "fmi-cronjobs.renderVolumeMounts" -}}
 {{- $mounts := (default (list) .mounts) -}}
+{{- $pvcMounts := (default (list) .pvcMounts) -}}
 {{- $tmp := (default (dict) .tmp) -}}
 
-{{- if or (gt (len $mounts) 0) (and $tmp $tmp.enabled) }}
+{{- if or (gt (len $mounts) 0) (gt (len $pvcMounts) 0) (and $tmp $tmp.enabled) }}
 volumeMounts:
 {{- range $mount := $mounts }}
   - name: {{ required "mount.name is required" $mount.name }}
@@ -101,7 +108,18 @@ volumeMounts:
     readOnly: true
     {{- end }}
 {{- end }}
-
+{{- range $mount := $pvcMounts }}
+  - name: {{ required "pvcMount.name is required" $mount.name }}
+    mountPath: {{ required "pvcMount.mountPath is required" $mount.mountPath }}
+    {{- if $mount.subPath }}
+    subPath: {{ $mount.subPath }}
+    {{- end }}
+    {{- if hasKey $mount "readOnly" }}
+    readOnly: {{ $mount.readOnly }}
+    {{- else }}
+    readOnly: false
+    {{- end }}
+{{- end }}
 {{- if and $tmp $tmp.enabled }}
   - name: tmp
     mountPath: {{ required "tmp.mountPath is required when tmp.enabled=true" $tmp.mountPath }}
