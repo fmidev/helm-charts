@@ -8,10 +8,10 @@ spec:
   lookupPolicy:
     local: false
   tags:
-    - name: {{ .Values.image.tag | default "latest" | quote }}
+    - name: {{ .Values.images.harpvis.tag | default "latest" | quote }}
       from:
         kind: DockerImage
-        name: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "latest" }}"
+        name: "{{ .Values.images.harpvis.repository }}:{{ .Values.images.harpvis.tag | default "latest" }}"
       importPolicy:
         scheduled: {{ .Values.imageStream.scheduled }}
       referencePolicy:
@@ -27,3 +27,22 @@ metadata:
 spec:
   lookupPolicy:
     local: true
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: harpverif
+  labels:
+    {{- include "harp.labels" . | nindent 4 }}
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+    - name: {{ .Values.images.harpverif.tag | default "latest" | quote }}
+      from:
+        kind: DockerImage
+        name: "{{ .Values.images.harpverif.repository }}:{{ .Values.images.harpverif.tag | default "latest" }}"
+      importPolicy:
+        scheduled: {{ .Values.imageStream.scheduled }}
+      referencePolicy:
+        type: Local

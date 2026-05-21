@@ -6,7 +6,7 @@ metadata:
     {{- include "harp.labels" . | nindent 4 }}
   annotations:
     image.openshift.io/triggers: |
-      [{"from":{"kind":"ImageStreamTag","name":"{{ include "harp.fullname" . }}:{{ .Values.image.tag | default "latest" }}","namespace":"{{ .Release.Namespace }}"},"fieldPath":"spec.template.spec.containers[?(@.name==\"{{ .Chart.Name }}\")].image"}]
+      [{"from":{"kind":"ImageStreamTag","name":"{{ include "harp.fullname" . }}:{{ .Values.images.harpvis.tag | default "latest" }}","namespace":"{{ .Release.Namespace }}"},"fieldPath":"spec.template.spec.containers[?(@.name==\"{{ .Chart.Name }}\")].image"}]
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -30,8 +30,8 @@ spec:
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "image-registry.openshift-image-registry.svc:5000/{{ .Release.Namespace }}/{{ include "harp.fullname" . }}:{{ .Values.image.tag | default "latest" }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "image-registry.openshift-image-registry.svc:5000/{{ .Release.Namespace }}/{{ include "harp.fullname" . }}:{{ .Values.images.harpvis.tag | default "latest" }}"
+          imagePullPolicy: {{ .Values.images.harpvis.pullPolicy }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
