@@ -220,10 +220,13 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.awsAccessKeyId` | AWS_ACCESS_KEY_ID for authenticating to S3 | |
 | `frontend.awsAccessKeySecret` | AWS_SECRET_ACCESS_KEY for authenticating to S3 | |
 | `frontend.awsDefaultRegion` | Region where your S3 bucket is located | |
+| `frontend.nginx.headers` | Optional nginx headers override. When omitted, the `/etc/nginx/headers.conf` file from the image is used | |
+| `frontend.nginx.headers.mountPath` | File path where the nginx headers configuration is mounted when `frontend.nginx.headers` is set | `/etc/nginx/headers.conf` |
+| `frontend.nginx.headers.config` | Contents of the nginx headers configuration file. Use this for global response headers such as security headers and CSP | |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |
 | `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | `nginx` |
 | `ingress.tls` | TLS configuration section for the ingress | |
-| `ingress.rules` | Extra nginx configuration rules, like cache headers | See reference in `values.yaml` |
+| `ingress.rules` | Extra nginx ingress-controller configuration rules, like path-based cache headers | See reference in `values.yaml` |
 | `ingress.customAnnotations` | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations and `frontend.auth_secret`, `frontend.auth_secretName` and `ingress.rules` can't be used if set | |
 
 # Chart versions

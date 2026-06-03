@@ -1,3 +1,4 @@
+{{- $nginx := default dict .Values.frontend.nginx -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -70,6 +71,12 @@ spec:
               key: GW_AUTH_CLIENT_ID
       {{- end }}
         volumeMounts:
+      {{- with $nginx.headers }}
+        - name: nginx-headers
+          mountPath: {{ default "/etc/nginx/headers.conf" .mountPath | quote }}
+          subPath: headers.conf
+          readOnly: true
+      {{- end }}
       {{- if .Values.secretProvider }}
         - name: secrets-store-inline
           mountPath: "/mnt/secrets-store"
@@ -84,7 +91,12 @@ spec:
           mountPath: {{ .Values.frontend.customConfigurationMountPath }}
       {{- end }}
       volumes:
-    {{- if .Values.frontend.useCustomConfigurationFiles }}
+      {{- with $nginx.headers }}
+      - name: nginx-headers
+        configMap:
+          name: {{ $.Values.frontend.name }}-nginx-headers
+      {{- end }}
+      {{- if .Values.frontend.useCustomConfigurationFiles }}
       - name: {{ .Values.frontend.name }}-volume
       {{- if eq .Values.frontend.customConfigurationLocation "s3"}}
         emptyDir: {}
@@ -92,8 +104,8 @@ spec:
         persistentVolumeClaim:
           claimName: {{ .Values.frontend.name }}-claim
       {{- end }}
-    {{- end }}
-    {{- if .Values.frontend.customConfiguration.enabled }}
+      {{- end }}
+      {{- if .Values.frontend.customConfiguration.enabled }}
       - name: generated-configs
         configMap:
           name: {{ .Values.frontend.name }}
@@ -102,7 +114,7 @@ spec:
           - key: {{ $filename }}
             path: {{ $filename }}
           {{- end }}
-    {{- end }}    
+      {{- end }}
       - name: secrets-store-inline
       {{- if .Values.secretProvider }}
         csi:
