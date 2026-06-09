@@ -1,26 +1,67 @@
-{{- if .Values.presets.db.useZalandoOperatorDb }}
+{{- $dbMode := default "sidecar" .Values.presets.db.mode }}
+{{- if not (has $dbMode (list "sidecar" "external" "zalando" "cloudnativepg")) }}
+{{- fail "presets.db.mode must be one of: sidecar, external, zalando, cloudnativepg" }}
+{{- end }}
+{{- if or (hasKey .Values.presets "db_secret") (hasKey .Values.presets "db_secretName") (hasKey .Values.presets "db_secretType") (hasKey .Values.presets "db_secretPath") (hasKey .Values.presets "db_secretKey") }}
+{{- fail "presets.db_secret* values were removed in chart 3.0.0. Use presets.db.external.* instead." }}
+{{- end }}
+{{- if or (hasKey .Values.presets.db "POSTGRES_DB") (hasKey .Values.presets.db "POSTGRES_USER") (hasKey .Values.presets.db "POSTGRES_PASSWORD") (hasKey .Values.presets.db "POSTGRES_VERSION") }}
+{{- fail "presets.db.POSTGRES_* values were removed in chart 3.0.0. Use presets.db.databaseName, presets.db.username, and the mode-specific provider blocks instead." }}
+{{- end }}
+{{- if eq $dbMode "zalando" }}
 apiVersion: "acid.zalan.do/v1"
 kind: postgresql
 metadata:
   name: {{ .Values.presets.db.name }}
 spec:
-  teamId: {{ .Values.presets.db.zalandoTeamId }}
+  teamId: {{ .Values.presets.db.zalando.teamId }}
   volume:
-    size: {{ .Values.presets.db.instanceSize }}
-  numberOfInstances: {{ .Values.presets.db.numberOfInstances }}
+    size: {{ .Values.presets.db.zalando.volumeSize }}
+  numberOfInstances: {{ .Values.presets.db.zalando.instances }}
   users:
-    {{ .Values.presets.db.POSTGRES_USER }}:
+    {{ .Values.presets.db.username }}:
     - superuser
     - createdb
   databases:
-    {{ .Values.presets.db.POSTGRES_DB }}: {{ .Values.presets.db.POSTGRES_USER }}
+    {{ .Values.presets.db.databaseName }}: {{ .Values.presets.db.username }}
   postgresql:
-    version: {{ .Values.presets.db.POSTGRES_VERSION | quote }}
-  enableLogicalBackup: {{ .Values.presets.db.enableLogicalBackup }}
-  {{- if not .Values.presets.db.cleanInstall }}
+    version: {{ .Values.presets.db.zalando.postgresVersion | quote }}
+  enableLogicalBackup: {{ .Values.presets.db.zalando.enableLogicalBackup }}
+  {{- if .Values.presets.db.zalando.clone.enabled }}
   clone:
     cluster: {{ .Values.presets.db.name | quote }}
-    timestamp: {{ .Values.presets.db.backupTimestamp | quote }}
-    s3_wal_path: {{ .Values.presets.db.backupBucket | quote }}
+    timestamp: {{ .Values.presets.db.zalando.clone.timestamp | quote }}
+    s3_wal_path: {{ .Values.presets.db.zalando.clone.backupBucket | quote }}
   {{- end }}
 {{- end }}
+{{- if eq $dbMode "cloudnativepg" }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.presets.db.cloudNativePG.bootstrap.userSecretName }}
+type: Opaque
+stringData:
+  username: {{ .Values.presets.db.username | quote }}
+  password: {{ .Values.presets.db.cloudNativePG.bootstrap.password | quote }}
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ .Values.presets.db.name }}
+spec:
+  instances: {{ .Values.presets.db.cloudNativePG.instances }}
+  {{- if .Values.presets.db.cloudNativePG.resources }}
+  resources: {{ toYaml .Values.presets.db.cloudNativePG.resources | nindent 4 }}
+  {{- end }}
+  bootstrap:
+    initdb:
+      database: {{ .Values.presets.db.databaseName }}
+      owner: {{ .Values.presets.db.username }}
+      secret:
+        name: {{ .Values.presets.db.cloudNativePG.bootstrap.userSecretName }}
+  storage:
+    size: {{ .Values.presets.db.cloudNativePG.storage.size }}
+    {{- if .Values.presets.db.cloudNativePG.storage.className }}
+    storageClass: {{ .Values.presets.db.cloudNativePG.storage.className | quote }}
+    {{- end }}
+  {{- end }}

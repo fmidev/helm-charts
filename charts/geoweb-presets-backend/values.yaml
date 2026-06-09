@@ -11,10 +11,6 @@ presets:
   PRESETS_PORT_HTTP: 8080
   DEPLOY_ENVIRONMENT: open
   postStartCommand: bin/admin.sh
-  db_secret: cG9zdGdyZXNxbDovL2dlb3dlYjpwb3N0Z3Jlc0Bsb2NhbGhvc3Q6NTQzMi9wcmVzZXRz
-  db_secretName: presets-db
-  db_secretType: secretsmanager
-  spcName: presets-spc
   secretServiceAccount: presets-service-account
   resources:
     requests:
@@ -82,21 +78,56 @@ presets:
       timeoutSeconds: 3
       failureThreshold: 1
   db:
-    enableDefaultDb: true
-    useZalandoOperatorDb: false
+    # Database mode. Supported values:
+    # - sidecar: run the default postgres container in the presets pod
+    # - external: read PRESETS_BACKEND_DB from an externally managed connection string Secret
+    # - zalando: create/use a Zalando Postgres operator database
+    # - cloudnativepg: create/use a CloudNativePG Cluster
+    mode: sidecar
     name: presets-db
-    image: postgres
-    port: 5432
-    POSTGRES_DB: presets
-    POSTGRES_USER: geoweb
-    POSTGRES_PASSWORD: postgres
-    POSTGRES_VERSION: 15
-    numberOfInstances: 1
-    instanceSize: 100Mi
-    zalandoTeamId: geoweb
-    enableLogicalBackup: true
-    cleanInstall: true
-    backupTimestamp: "2030-01-01T00:00:00+00:00"
+    databaseName: presets
+    username: geoweb
+    sidecar:
+      image: postgres
+      port: 5432
+      password: postgres
+    external:
+      secretName: presets-db
+      secretKey: PRESETS_BACKEND_DB
+      encodedConnectionString: cG9zdGdyZXNxbDovL2dlb3dlYjpwb3N0Z3Jlc0Bsb2NhbGhvc3Q6NTQzMi9wcmVzZXRz
+      secretProvider:
+        provider: ""
+        className: presets-spc
+        objectName: ""
+        objectType: secretsmanager
+        path: ""
+        key: ""
+        iamRoleARN: ""
+        parameters: {}
+    zalando:
+      teamId: geoweb
+      postgresVersion: 15
+      instances: 1
+      volumeSize: 100Mi
+      enableLogicalBackup: true
+      clone:
+        enabled: false
+        timestamp: "2030-01-01T00:00:00+00:00"
+        backupBucket: ""
+    cloudNativePG:
+      instances: 1
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          memory: 512Mi
+      bootstrap:
+        userSecretName: presets-db-user
+        password: postgres
+      storage:
+        size: 1Gi
+        className: ""
   useCustomConfigurationFiles: false
   customConfigurationLocation: local
   useCustomWorkspacePresets: false
