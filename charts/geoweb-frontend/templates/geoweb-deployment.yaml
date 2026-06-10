@@ -19,6 +19,9 @@ spec:
       {{- if .Values.frontend.commitHash }}
         commitHash: {{ .Values.frontend.commitHash }}
       {{- end }}
+      {{- with $nginx.headers }}
+        checksum/nginx-headers: {{ default "" .config | sha256sum | quote }}
+      {{- end }}
     spec:
     {{- if eq .Values.secretProvider "aws" }}
       serviceAccountName: {{ .Values.frontend.secretServiceAccount }}
