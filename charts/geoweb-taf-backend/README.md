@@ -10,7 +10,7 @@ helm repo update
 Create your own values file for required variables:
 * Using aws as the secret provider
 ```yaml
-taf: 
+taf:
   url: geoweb.example.com
   db_secret: secretName # Secret should contain postgresql database connection string
   iamRoleARN: arn:aws:iam::123456789012:role/example-iam-role-with-permissions-to-secret
@@ -98,7 +98,7 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.path` | Path suffix added to url | `/taf-backend/(.*)` |
 | `taf.svcPort` | Port used for service | `80` |
 | `taf.replicas` | Amount of replicas deployed | `1` |
-| `taf.minPodsAvailable` | Minimum available pods in pod disruption budget. Value `0` omits the pdb. | `0` | 
+| `taf.minPodsAvailable` | Minimum available pods in pod disruption budget. Value `0` omits the pdb. | `0` |
 | `taf.db_secret` | Secret containing base64 encoded Postgresql database connection string | |
 | `taf.db_secretName` | Name of db secret | `taf-db` |
 | `taf.db_secretType` | Type to db secret | `secretsmanager` |
@@ -187,6 +187,7 @@ The following table lists the configurable parameters of the Taf backend chart a
 
 | Chart version | taf version |
 |---------------|-------------|
+| 1.2.9         | 3.1.10      |
 | 1.2.8         | 3.1.8       |
 | 1.2.7         | 3.1.6       |
 | 1.2.6         | 3.1.6       |
