@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ include "fmi-redis.fullname" . }}
   labels:
-    app: {{ .Release.Name }}
+    app: {{ include "fmi-redis.fullname" . }}
 spec:
   replicas: 1
   strategy:
     type: {{ .Values.persistence.enabled | ternary "Recreate" "RollingUpdate" }}
   selector:
     matchLabels:
-      app: {{ .Release.Name }}
+      app: {{ include "fmi-redis.fullname" . }}
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}
+        app: {{ include "fmi-redis.fullname" . }}
     spec:
       securityContext:
         runAsNonRoot: true
@@ -33,7 +33,7 @@ spec:
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.auth.existingSecret | default (printf "%s-secret" .Release.Name) }}
+                  name: {{ .Values.auth.existingSecret | default (include "fmi-redis.fullname" .) }}
                   key: redis-password
           {{- end }}
           ports:
@@ -72,7 +72,7 @@ spec:
         - name: data
           {{- if .Values.persistence.enabled }}
           persistentVolumeClaim:
-            claimName: {{ .Release.Name }}-pvc
+            claimName: {{ include "fmi-redis.fullname" . }}
           {{- else }}
           emptyDir: {}
           {{- end }}
