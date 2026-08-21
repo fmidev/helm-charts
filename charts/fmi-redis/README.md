@@ -38,6 +38,9 @@ When used as a dependency, nest values under `fmi-redis:`.
 | `auth.existingSecret` | Name of an existing Secret with a `redis-password` key; takes precedence over `auth.password` | `""` |
 | `auth.password` | Plaintext password, only used when `auth.existingSecret` is unset | `""` |
 | `service.port` | Service port | `6379` |
+| `config.enabled` | Mount a custom `redis.conf` at `/usr/local/etc/redis/redis.conf` and start `redis-server` with it | `false` |
+| `config.existingConfigMap` | Name of an existing ConfigMap with a `redis.conf` key; takes precedence over `config.content` | `""` |
+| `config.content` | Raw `redis.conf` content, only used when `config.existingConfigMap` is unset | `""` |
 
 ## Connecting
 
@@ -86,4 +89,28 @@ fmi-redis:
     size: 8Gi
   auth:
     enabled: false
+```
+
+### With a custom redis.conf
+
+`auth.enabled`/`auth.password` still work on top of a custom config — they're applied as an
+extra `--requirepass` argument after the config file, so don't set `requirepass` yourself in
+`config.content`.
+
+```yaml
+fmi-redis:
+  config:
+    enabled: true
+    content: |
+      maxmemory 100mb
+      maxmemory-policy allkeys-lru
+```
+
+Or reference a ConfigMap you manage yourself:
+
+```yaml
+fmi-redis:
+  config:
+    enabled: true
+    existingConfigMap: my-redis-conf
 ```

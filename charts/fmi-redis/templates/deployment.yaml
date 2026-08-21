@@ -24,6 +24,9 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - redis-server
+            {{- if .Values.config.enabled }}
+            - /usr/local/etc/redis/redis.conf
+            {{- end }}
             {{- if .Values.auth.enabled }}
             - --requirepass
             - $(REDIS_PASSWORD)
@@ -42,6 +45,12 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data
+            {{- if .Values.config.enabled }}
+            - name: config
+              mountPath: /usr/local/etc/redis/redis.conf
+              subPath: redis.conf
+              readOnly: true
+            {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           readinessProbe:
@@ -76,3 +85,8 @@ spec:
           {{- else }}
           emptyDir: {}
           {{- end }}
+        {{- if .Values.config.enabled }}
+        - name: config
+          configMap:
+            name: {{ .Values.config.existingConfigMap | default (include "fmi-redis.fullname" .) }}
+        {{- end }}

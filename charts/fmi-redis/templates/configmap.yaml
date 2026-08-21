@@ -1,0 +1,13 @@
+# Automatically generated ConfigMap if config is enabled and inline content is provided.
+# Skipped entirely when config.existingConfigMap is set instead
+{{- if and .Values.config.enabled (not .Values.config.existingConfigMap) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "fmi-redis.fullname" . }}
+  labels:
+    app: {{ include "fmi-redis.fullname" . }}
+data:
+  redis.conf: |
+{{ .Values.config.content | indent 4 }}
+{{- end }}

@@ -29,3 +29,13 @@ auth:
 
 service:
   port: 6379
+
+config:
+  enabled: false
+  # Name of an existing ConfigMap containing a `redis.conf` key. Takes
+  # precedence over `content` below.
+  existingConfigMap: ""
+  # Write raw redis.conf content, only used when `existingConfigMap` and `config.enabled`
+  # Don't set `requirepass` in there — auth.enabled applies it separately as a
+  # --requirepass argument on top of this file.
+  content: ""
