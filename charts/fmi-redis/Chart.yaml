@@ -1,6 +1,5 @@
 apiVersion: v2
 name: fmi-redis
-icon: https://raw.githubusercontent.com/fmidev/helm-charts/main/charts/fmi-redis/redis.png
 description: Minimal, single-instance Redis deployment on the official Redis image
 type: application
 version: 0.1.0
