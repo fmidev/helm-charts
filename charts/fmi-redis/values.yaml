@@ -3,14 +3,14 @@ image:
   tag: "8-alpine"
   pullPolicy: IfNotPresent
 
-# Use runAsNonRoot, with no fixed runAsUser/fsGroup: on OpenShift, 
-# SCC assigns a non-root uid/fsGroup from the namespace's own 
+# Use runAsNonRoot, with no fixed runAsUser/fsGroup: on OpenShift,
+# SCC assigns a non-root uid/fsGroup from the namespace's own
 # allocated range automatically when these are left unset
 #
-# On a plain Kubernetes cluster with no such admission controller, there's no automatic assignment. 
+# On a plain Kubernetes cluster with no such admission controller, there's no automatic assignment.
 # The official redis image also has no static non-root USER of its own.
 # It drops privileges inside its entrypoint so runAsNonRoot without an explicit runAsUser fails.
-# For that case, override this to match the image's actual uid/gid, 
+# For that case, override this to match the image's actual uid/gid,
 # used for exactly this in this chart's own CI:
 #   redis:8-alpine -> runAsUser: 999, runAsGroup: 1000, fsGroup: 1000
 #   redis:8         -> runAsUser: 999, runAsGroup: 999,  fsGroup: 999
