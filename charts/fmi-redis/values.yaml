@@ -12,8 +12,8 @@ resources:
     cpu: 500m
 
 # Single Redis instance — no replication/Sentinel. This chart intentionally
-# does not support HA: if your app needs failover for redis, look elsewhere (e.g. a
-# Sentinel/Operator-based chart).
+# does not support HA: if your app needs failover for redis, look elsewhere
+# (e.g. a Sentinel/Operator-based chart).
 persistence:
   enabled: true
   size: 8Gi

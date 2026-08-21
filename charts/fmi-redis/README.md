@@ -43,11 +43,12 @@ When used as a dependency, nest values under `fmi-redis:`.
 
 Other workloads in the same namespace can reach it at `<release-name>-redis:<service.port>` (or
 `<release-name>-redis.<namespace>:<service.port>` from other namespaces). When used as a
-dependency, `<release-name>` is the *parent* chart's release name.
+dependency, `<release-name>` is the _parent_ chart's release name.
 
 ## Example
 
 ### With password and pre-existing secret
+
 ```yaml
 fmi-redis:
   image:
@@ -61,6 +62,7 @@ fmi-redis:
 ```
 
 ### With password and plain text password
+
 ```yaml
 fmi-redis:
   image:
@@ -74,6 +76,7 @@ fmi-redis:
 ```
 
 ### Without authentication
+
 ```yaml
 fmi-redis:
   image:
