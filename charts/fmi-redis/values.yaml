@@ -3,6 +3,21 @@ image:
   tag: "8-alpine"
   pullPolicy: IfNotPresent
 
+# The official redis image starts as root and only drops to a non-root user
+# inside docker-entrypoint.sh (via gosu), so it has no static non-root USER
+# for kubelet to discover — runAsNonRoot without an explicit runAsUser fails
+# admission with "container has runAsNonRoot and image will run as root".
+# These values must be set explicitly instead, and must match the actual
+# uid/gid the chosen image.tag runs as:
+#   redis:8-alpine -> uid=999(redis) gid=1000(redis)
+#   redis:8         -> uid=999(redis) gid=999(redis)
+# Override both if you change image.tag to a variant with different ids.
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 999
+  runAsGroup: 1000
+  fsGroup: 1000
+
 resources:
   requests:
     memory: 256Mi

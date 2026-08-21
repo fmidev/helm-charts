@@ -30,6 +30,7 @@ When used as a dependency, nest values under `fmi-redis:`.
 | `image.repository` | Container image repository | `docker.io/library/redis` |
 | `image.tag` | Container image tag | `8-alpine` |
 | `image.pullPolicy` | Image pull policy | `IfNotPresent` |
+| `podSecurityContext` | Pod-level `securityContext`. The official redis image drops privileges inside its entrypoint rather than declaring a static non-root `USER`, so `runAsUser`/`runAsGroup`/`fsGroup` must be set explicitly here — **update these if you change `image.tag`** to a variant with different uid/gid (`redis:8-alpine` is `999:1000`, `redis:8` is `999:999`) | `runAsNonRoot: true, runAsUser: 999, runAsGroup: 1000, fsGroup: 1000` |
 | `resources` | Standard Kubernetes resources block | `256Mi/100m` requests, `512Mi/500m` limits |
 | `persistence.enabled` | Back `/data` with a PVC instead of `emptyDir` | `true` |
 | `persistence.size` | PVC storage request | `8Gi` |
