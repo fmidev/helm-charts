@@ -1,0 +1,31 @@
+image:
+  repository: docker.io/library/redis
+  tag: "8-alpine"
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    memory: 256Mi
+    cpu: 100m
+  limits:
+    memory: 512Mi
+    cpu: 500m
+
+# Single Redis instance — no replication/Sentinel. This chart intentionally
+# does not support HA: if your app needs failover for redis, look elsewhere (e.g. a
+# Sentinel/Operator-based chart).
+persistence:
+  enabled: true
+  size: 8Gi
+  storageClassName: ""
+
+auth:
+  enabled: false
+  # Name of an existing Secret containing the password. Takes precedence over
+  # `password` below. Must contain a `redis-password` key.
+  existingSecret: ""
+  # Only used when `existingSecret` is empty and auth is enabled.
+  password: ""
+
+service:
+  port: 6379
