@@ -30,7 +30,7 @@ When used as a dependency, nest values under `fmi-redis:`.
 | `image.repository` | Container image repository | `docker.io/library/redis` |
 | `image.tag` | Container image tag | `8-alpine` |
 | `image.pullPolicy` | Image pull policy | `IfNotPresent` |
-| `imagePullSecrets` | List of Secret names for pulling the image from a private registry | `[]` |
+| `imagePullSecrets` | List of imagePullSecrets objects (each item like `- name: my-registry-secret`) for pulling the image from a private registry | `[]` |
 | `podSecurityContext` | Pod-level `securityContext`. Left at just `runAsNonRoot: true` by default so OpenShift's SCC can auto-assign a non-root uid/fsGroup from the namespace's own range — **do not hardcode `runAsUser`/`fsGroup` here for OpenShift**, the SCC will reject a fixed uid that doesn't fall in its allocated range. On a plain Kubernetes cluster with no such admission controller, override this to match the image's actual uid/gid instead (`redis:8-alpine` is `999:1000`, `redis:8` is `999:999`) — see `ci/kind-values.yaml` for that, used by this chart's own CI | `runAsNonRoot: true` |
 | `resources` | Standard Kubernetes resources block | `256Mi/100m` requests, `512Mi/500m` limits |
 | `persistence.enabled` | Back `/data` with a PVC instead of `emptyDir` | `true` |
