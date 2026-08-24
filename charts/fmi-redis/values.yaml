@@ -3,6 +3,10 @@ image:
   tag: "8-alpine"
   pullPolicy: IfNotPresent
 
+# imagePullSecrets:
+#   - name: my-registry-secret
+imagePullSecrets: []
+
 # Use runAsNonRoot, with no fixed runAsUser/fsGroup: on OpenShift,
 # SCC assigns a non-root uid/fsGroup from the namespace's own
 # allocated range automatically when these are left unset
