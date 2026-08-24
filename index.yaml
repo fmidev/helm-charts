@@ -74,6 +74,25 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/fmi-nodeport-0.0.2/fmi-nodeport-0.0.2.tgz
     version: 0.0.2
+  fmi-redis:
+  - apiVersion: v2
+    created: "2026-08-24T08:17:00.875580862Z"
+    description: Minimal, single-instance Redis deployment on the official Redis image
+    digest: 177dc6a898449d8347a1c9470b98eeb979b5640ab047da75a810a65252050ba0
+    home: https://github.com/fmidev/helm-charts
+    keywords:
+    - fmi
+    - redis
+    - cache
+    maintainers:
+    - email: admin@weatherproof.fi
+      name: fmi-build-bot
+      url: https://github.com/fmi-build-bot
+    name: fmi-redis
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/fmi-redis-0.1.0/fmi-redis-0.1.0.tgz
+    version: 0.1.0
   fmi-routes:
   - apiVersion: v2
     created: "2025-05-20T09:27:52.919127433Z"
@@ -5594,4 +5613,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2026-08-06T13:39:42.024293694Z"
+generated: "2026-08-24T08:17:00.876581864Z"
