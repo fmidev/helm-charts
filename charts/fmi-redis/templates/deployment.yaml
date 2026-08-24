@@ -63,7 +63,7 @@ spec:
                 - sh
                 - -c
                 {{- if .Values.auth.enabled }}
-                - redis-cli -a "$REDIS_PASSWORD" --no-auth-warning ping
+                - REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli --no-auth-warning ping
                 {{- else }}
                 - redis-cli ping
                 {{- end }}
