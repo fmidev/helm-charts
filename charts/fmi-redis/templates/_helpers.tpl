@@ -5,5 +5,5 @@ release AND as a subchart dependency of another chart that might otherwise
 claim the bare release name for its own resources.
 */}}
 {{- define "fmi-redis.fullname" -}}
-{{- printf "%s-redis" .Release.Name -}}
+{{- printf "%s-redis" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
