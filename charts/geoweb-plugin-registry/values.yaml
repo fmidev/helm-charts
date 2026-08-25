@@ -1,0 +1,56 @@
+# Application version overrides used by environment deployment configuration.
+versions:
+  pluginRegistry: ""
+
+# Number of registry replicas. The local PVC setup is intended for one replica.
+replicaCount: 1
+
+image:
+  # Container image repository.
+  repository: registry.gitlab.com/opengeoweb/backend-services/plugin-registry-backend/plugin-registry-backend
+  # Image tag. `versions.pluginRegistry` takes precedence when set.
+  tag: v0.4.2
+  # Kubernetes image pull policy.
+  pullPolicy: IfNotPresent
+
+# Registry credentials for private container images.
+imagePullSecrets: []
+
+service:
+  # Kubernetes Service type.
+  type: ClusterIP
+  # Service and container port.
+  port: 4873
+
+route:
+  # Enable the OpenShift Route.
+  enabled: true
+  # Optional explicit hostname; empty lets OpenShift assign one.
+  host: ""
+  tls:
+    enabled: false
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+
+persistence:
+  # Use a PVC for local Verdaccio package storage.
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 10Gi
+  storageClassName: ""
+
+resources: {}
+
+# Pod-level security settings.
+podSecurityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  # Container-level security settings.
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL

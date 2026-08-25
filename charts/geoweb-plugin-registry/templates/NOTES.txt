@@ -1,0 +1,15 @@
+GeoWeb plugin registry is installed.
+
+Get the OpenShift Route with:
+
+  oc get route {{ include "geoweb-plugin-registry.fullname" . }}
+
+Check Verdaccio:
+
+  curl http://<route-host>/-/ping
+
+The local registry uses a PVC and Verdaccio htpasswd authentication. Create a
+local user before publishing packages:
+
+  npm adduser --registry http://<route-host>
+

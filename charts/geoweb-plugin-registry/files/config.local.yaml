@@ -1,0 +1,44 @@
+# Local OpenShift development configuration.
+storage: /verdaccio/storage
+plugins: /verdaccio/plugins
+
+web:
+  title: GeoWeb Local Plugin Registry
+  enable: true
+
+auth:
+  htpasswd:
+    file: /verdaccio/storage/htpasswd
+    max_users: 1000
+
+packages:
+  "@opengeoweb-sandbox/*":
+    access: $all
+    publish: $all
+    unpublish: $all
+  "@*/*":
+    access: $all
+    publish: $all
+    unpublish: $all
+  "**":
+    access: $all
+    publish: $all
+    unpublish: $all
+
+server:
+  keepAliveTimeout: 60
+
+middlewares:
+  verdaccio-registry-api:
+    enabled: true
+
+logs:
+  - { type: stdout, format: pretty, level: debug }
+
+security:
+  api:
+    legacy: true
+
+listen:
+  - 0.0.0.0:4873
+
