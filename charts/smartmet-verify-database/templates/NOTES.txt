@@ -1,0 +1,75 @@
+{{- $cluster := include "smartmet-verify-database.clusterName" . -}}
+{{- $alias := default $cluster .Values.serviceAlias.name -}}
+SmartMet Verify database "{{ $cluster }}" has been submitted to CloudNativePG.
+
+Watch it bootstrap:
+
+  kubectl -n {{ .Release.Namespace }} get cluster {{ $cluster }} -w
+
+It is ready when STATUS reads "Cluster in healthy state". Loading the schema
+takes a while on first bootstrap -- it is a ~686 KB dump with 186 tables.
+
+Connect from inside the cluster:
+
+  host     {{ $alias }}{{ if not .Values.serviceAlias.enabled }}-rw{{ end }}
+  port     5432
+  database {{ .Values.cluster.database }}
+
+{{ if .Values.schema.enabled -}}
+Schema loaded from fmi-verification-common-sql @ {{ include "smartmet-verify-database.sqlRef" . | trunc 12 }}
+(applied by initdb ONLY -- a later `helm upgrade` will NOT migrate this database).
+{{- else -}}
+Vendored schema is DISABLED (schema.enabled=false); the database bootstraps from
+whatever `schema.existingConfigMaps` referenced.
+{{- end }}
+
+{{- $generated := list }}
+{{- $supplied := list }}
+{{- range $role := .Values.roles }}
+{{- if $role.enabled }}
+{{- if $role.existingSecret }}
+{{- $supplied = append $supplied $role }}
+{{- else if not $role.password }}
+{{- $generated = append $generated $role }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{- if $generated }}
+
+PASSWORDS
+---------
+{{ len $generated }} role password(s) are managed by this release. Read them with:
+{{ range $role := $generated }}
+  kubectl -n {{ $.Release.Namespace }} get secret {{ include "smartmet-verify-database.roleSecretName" (list $ $role) }} \
+    -o jsonpath='{.data.password}' | base64 -d; echo   # {{ $role.name }}
+{{- end }}
+
+Record them in your secret manager now. `helm uninstall` deletes both these
+Secrets and (via CNPG) the database volumes.
+
+NOTE: password reuse across upgrades relies on Helm's `lookup`, which does not
+work under `helm template`, client-side `--dry-run`, or Argo CD. Preview an
+upgrade with `--dry-run=server`. For GitOps, set auth.generatePasswords=false
+and supply roles[].existingSecret instead.
+{{- end }}
+
+{{- if $supplied }}
+
+Verify each supplied Secret carries a `username` key matching its role exactly,
+or CNPG will refuse to reconcile that role:
+{{ range $role := $supplied }}
+  kubectl -n {{ $.Release.Namespace }} get secret {{ $role.existingSecret }} \
+    -o jsonpath='{.data.username}' | base64 -d; echo   # must be: {{ $role.name }}
+{{- end }}
+{{- end }}
+
+{{- if .Values.externalAccess.enabled }}
+
+!! WARNING: externalAccess is ENABLED !!
+The vendored SQL creates every login role with the password 'password'. CNPG
+replaces those on its first reconcile, but until it does, the primary is
+reachable from outside the cluster with known credentials. Confirm the roles
+have reconciled before relying on this, and restrict access with
+cluster.postgresql.pg_hba and/or loadBalancerSourceRanges.
+{{- end }}

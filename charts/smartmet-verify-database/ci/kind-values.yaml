@@ -1,0 +1,19 @@
+---
+# Used by `ct install` against the CI Kind cluster.
+#
+# The Kind cluster has the CloudNativePG CRDs installed but NOT the operator, so
+# the Cluster resource is created and structurally validated but never
+# reconciled. Nothing here should depend on the database actually starting.
+#
+# Storage is trimmed so the manifest is honest about the CI environment; it has
+# no practical effect without an operator to provision the volume.
+cluster:
+  storage:
+    size: 1Gi
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m

@@ -1,0 +1,26 @@
+{{/*
+The SmartMet Verify production schema (pg_dump output, ~686 KB). Executed as
+superuser on the application database. Kept in its own ConfigMap so it has the
+full 1 MiB object budget to itself as the schema grows.
+
+Rendered only when schema.enabled is true. The ConfigMap name is STABLE and
+carries no content hash on purpose: CNPG treats Cluster.spec.bootstrap as
+immutable once the cluster is initialised, so a changing ref name would make
+subsequent `helm upgrade` runs fail rather than no-op.
+*/}}
+{{- if .Values.schema.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "smartmet-verify-database.clusterName" . }}-sql-production
+  labels:
+    {{- include "smartmet-verify-database.componentLabels" (list . "database") | nindent 4 }}
+  annotations:
+    fmi.fi/schema-source-ref: {{ include "smartmet-verify-database.sqlRef" . | quote }}
+    checksum/sql: {{ .Files.Get "files/sql/0001-production-schema.sql" | sha256sum }}
+    {{- with .Values.commonAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+data:
+  {{- (.Files.Glob "files/sql/0001-production-schema.sql").AsConfig | nindent 2 }}
+{{- end }}

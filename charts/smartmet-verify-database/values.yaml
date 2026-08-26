@@ -1,0 +1,254 @@
+---
+# Default values for smartmet-verify-database.
+#
+# This chart deploys the SmartMet Verify PostgreSQL/PostGIS database as a
+# CloudNativePG (CNPG) Cluster, loads the verification schema at bootstrap, and
+# manages the role passwords.
+#
+# The CNPG operator itself is NOT installed by this chart -- see the README.
+
+nameOverride: ""
+fullnameOverride: ""
+
+# Labels/annotations added to every object this chart creates.
+commonLabels: {}
+commonAnnotations: {}
+
+# Name of the CNPG Cluster.
+#
+# Also the stem of the operator-generated services (<name>-rw, <name>-ro,
+# <name>-r) and of the per-role password Secrets (<name>-<role>).
+#
+# Deliberately NOT derived from the release name: SmartMet Verify application
+# configs hard-code `verification-db` as the JDBC host, and CNPG appends its own
+# suffixes, so a short stable name matters. Keep it well under 53 characters.
+clusterName: verification-db
+
+auth:
+  # Generate a random 32-character password for every enabled role that has
+  # neither `existingSecret` nor `password` set, and reuse the password already
+  # in the cluster on upgrade (so `helm upgrade` never rotates credentials).
+  #
+  # WARNING: reuse relies on Helm's `lookup`, which returns nothing under
+  # `helm template`, `helm lint`, client-side `--dry-run` and Argo CD. Under
+  # Argo CD every reconcile would render a NEW password and CNPG would apply it,
+  # breaking live connections. In GitOps setups set this to false and supply
+  # `existingSecret` for every role. See "GitOps" in the README.
+  generatePasswords: true
+
+cluster:
+  instances: 1
+
+  # PostgreSQL 16 + PostGIS 3.4.
+  #
+  # MANDATORY, not cosmetic: the vendored schema does
+  # `CREATE EXTENSION postgis`, `postgis_raster` and `pgstattuple`. A plain
+  # CloudNativePG postgresql image will fail to bootstrap.
+  imageName: ghcr.io/cloudnative-pg/postgis:16-3.4
+  imagePullPolicy: ""
+  imagePullSecrets: []
+  # - name: my-pull-secret
+
+  # Application database created by initdb.
+  #
+  # Must stay `verifapi` unless you also patch the vendored SQL:
+  # 0002-post-ownership.sql does `ALTER DATABASE verifapi OWNER TO verifadmin`.
+  database: verifapi
+
+  # initdb owner role.
+  #
+  # Deliberately `app`, a throw-away role created by CNPG itself. This leaves
+  # 0000-pre-init.sql free to CREATE ROLE verifadmin without colliding;
+  # 0002-post-ownership.sql then transfers ownership to verifadmin.
+  owner: app
+
+  storage:
+    size: 100Gi
+    # Empty means "omit the field" and use the cluster default StorageClass.
+    storageClass: ""
+
+  # Separate volume for the write-ahead log. Recommended in production.
+  walStorage:
+    enabled: false
+    size: 20Gi
+    storageClass: ""
+
+  resources:
+    requests:
+      memory: 2Gi
+      cpu: 500m
+    limits:
+      memory: 4Gi
+      cpu: "2"
+
+  env:
+    - name: TZ
+      value: UTC
+
+  postgresql:
+    parameters:
+      timezone: UTC
+      log_timezone: UTC
+    # Extra pg_hba.conf lines, prepended to CNPG's defaults. Only needed when
+    # exposing the database outside the cluster; prefer scram-sha-256 over TLS.
+    pg_hba: []
+    # - hostssl verifapi verifwww 10.0.0.0/8 scram-sha-256
+
+  # Rolling-update strategy for the instances.
+  primaryUpdateStrategy: unsupervised
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  priorityClassName: ""
+
+  # Deep-merged into the rendered Cluster.spec LAST. Escape hatch for anything
+  # the structured fields above do not cover: backup.barmanObjectStore,
+  # monitoring, certificates, nodeMaintenanceWindow, replica clusters, ...
+  #
+  # Do NOT put `bootstrap` here -- CNPG treats bootstrap as immutable once the
+  # cluster is initialised, and a conflicting override would break upgrades.
+  extraSpec: {}
+
+schema:
+  # Render the SQL vendored under files/sql/ into ConfigMaps and wire them into
+  # bootstrap.initdb. Set to false to bootstrap an empty database, or when
+  # supplying your own SQL via `existingConfigMaps` below.
+  #
+  # IMPORTANT: this SQL is applied by initdb ONLY, on first bootstrap. Editing
+  # files/sql/ and running `helm upgrade` does NOT migrate an existing database.
+  enabled: true
+
+  # Use pre-existing ConfigMaps instead of the vendored SQL. Only consulted when
+  # `schema.enabled` is false.
+  existingConfigMaps:
+    # Executed as superuser on the `postgres` database, before the app DB exists.
+    postInit: []
+    # - name: verification-db-init-sql
+    #   key: 0000-pre-init.sql
+    # Executed as superuser on the application database, after initdb.
+    postInitApplication: []
+
+  # Extra SQL executed as superuser on the application database, after the
+  # vendored 0002-post-ownership.sql. Intended for the upstream
+  # `local-schema-upgrade/` scripts at initial bootstrap.
+  #
+  # Plain SQL only -- psql meta-commands (\i, \copy, \echo) are NOT supported.
+  #
+  # This renders into a fixed-name ConfigMap that is always referenced when
+  # `schema.enabled` is true, even when empty, so adding an entry later changes
+  # only the ConfigMap contents and never the bootstrap refs list (which CNPG
+  # would reject on an initialised cluster).
+  extraSql: {}
+  # 0010-my-migration.sql: |
+  #   ALTER TABLE public.forecasts ADD COLUMN foo integer;
+
+  # Additional refs appended after everything above.
+  extraPostInitApplicationRefs:
+    configMapRefs: []
+    secretRefs: []
+
+# CNPG managed roles.
+#
+# Only the nine LOGIN roles from 0000-pre-init.sql are listed. The three group
+# roles (verif_data_rw, verif_meta_rw, verif_ro) are deliberately NOT managed:
+# CNPG's reconciler REVOKES any membership it did not declare itself, and the
+# group-to-group grants (GRANT verif_ro TO verif_data_rw, and to verif_meta_rw)
+# exist only in the SQL. Leaving the groups unmanaged keeps them intact.
+#
+# !! SECURITY !!
+# 0000-pre-init.sql creates EVERY login role with the literal password
+# 'password'. CNPG overwrites it on the first reconcile -- but only for roles
+# listed here. Removing a role from this list leaves a live account with a
+# publicly known password. Set `enabled: false` only if you also patch the
+# vendored SQL to not create that role.
+#
+# Per role:
+#   name           PostgreSQL role name (may contain underscores)
+#   enabled        create and manage this role
+#   inRoles        memberships, copied verbatim from 0000-pre-init.sql
+#   existingSecret name of a pre-made kubernetes.io/basic-auth Secret whose
+#                  `username` key equals `name`; disables password generation
+#   password       literal password; disables password generation
+roles:
+  - name: verifadmin
+    enabled: true
+    inRoles: []
+    existingSecret: ""
+    password: ""
+  - name: verifapi_restore
+    enabled: true
+    inRoles: []
+    existingSecret: ""
+    password: ""
+  - name: verifely
+    enabled: true
+    inRoles:
+      - verif_ro
+    existingSecret: ""
+    password: ""
+  - name: verifimport
+    enabled: true
+    inRoles:
+      - verif_data_rw
+    existingSecret: ""
+    password: ""
+  - name: verifrun
+    enabled: true
+    inRoles:
+      - verif_data_rw
+    existingSecret: ""
+    password: ""
+  - name: verifmeta
+    enabled: true
+    inRoles:
+      - verif_meta_rw
+    existingSecret: ""
+    password: ""
+  - name: verifwww
+    enabled: true
+    inRoles:
+      - verif_ro
+    existingSecret: ""
+    password: ""
+  - name: verifwww_len
+    enabled: true
+    inRoles:
+      - verif_ro
+    existingSecret: ""
+    password: ""
+  # Legacy role from the Docker Compose deployment. CNPG uses its own
+  # `streaming_replica` user and does not need this one, but the vendored SQL
+  # creates it with password 'password', so it is managed here to rotate that.
+  - name: replicator
+    enabled: true
+    replication: true
+    inRoles: []
+    existingSecret: ""
+    password: ""
+
+# Expose the cluster primary outside Kubernetes, for bare-metal clients that
+# cannot reach the in-cluster service.
+#
+# Off by default: the window between initdb and the first managed-roles
+# reconcile is the only time the 'password' credentials from the vendored SQL
+# are live, and it should not be reachable from the network.
+externalAccess:
+  enabled: false
+  # NodePort     -- works on any cluster; connect via <node-IP>:<nodePort>.
+  # LoadBalancer -- requires a cloud provider or MetalLB.
+  type: NodePort
+  # Specific port in 30000-32767 (NodePort only). Empty auto-assigns.
+  nodePort: ""
+  annotations: {}
+  # metallb.universe.tf/address-pool: default
+  loadBalancerIP: ""
+  loadBalancerSourceRanges: []
+
+# An additional Service that publishes the primary under a stable hostname, so
+# application configs can use `verification-db` rather than
+# `verification-db-rw`. Rendered through CNPG's managed.services.
+serviceAlias:
+  enabled: true
+  # Defaults to clusterName when empty.
+  name: ""
