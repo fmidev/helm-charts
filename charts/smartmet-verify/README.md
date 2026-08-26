@@ -312,8 +312,11 @@ Do not enable both `ingress` and `route` at the same time.
 
 ## Management port
 
-Both GUI and runner expose Spring Boot Actuator on a dedicated management port
-(default **8081**), separate from the main HTTP port 8080. This port starts its
+Both GUI and runner expose Spring Boot Actuator on a dedicated management port,
+separate from the main HTTP port 8080 — **8081** for the GUI and **8082** for the
+runner, so the two do not collide on a host where both share a network
+namespace. Each value must match `management.server.port` in that application's
+own `application.yaml`. This port starts its
 own HTTP listener that is independent of Spring Security, so health endpoints
 are always reachable by probes regardless of the authentication profile active
 on the main port.
@@ -325,7 +328,7 @@ scraped by Prometheus. It is configurable independently per component:
 gui:
   managementPort: 8081   # default
 runner:
-  managementPort: 8081   # default
+  managementPort: 8082   # default
 ```
 
 ## Writable `/tmp` volume
@@ -348,7 +351,8 @@ Disable only if you provide an alternative writable location for `/tmp`.
 
 ## Probes
 
-Both components default to `httpGet` probes against the management port (8081).
+Both components default to `httpGet` probes against their own management port
+(8081 for the GUI, 8082 for the runner).
 Because the management port is a separate HTTP listener that bypasses Spring
 Security, probes work correctly regardless of which authentication profile is
 active — no special probe configuration is needed.
@@ -723,7 +727,7 @@ The following table lists all configurable parameters and their defaults.
 | `runner.persistence.logs.storageClassName` | Storage class for the log PVC | `""` |
 | `runner.persistence.logs.mountPath` | Log directory mount path | `/var/log/tomcat` |
 | `runner.tmpDir.enabled` | Mount a writable `emptyDir` at `/tmp` | `true` |
-| `runner.managementPort` | Spring Boot Actuator management port | `8081` |
+| `runner.managementPort` | Spring Boot Actuator management port | `8082` |
 | `runner.probes.liveness.enabled` | Enable liveness probe | `true` |
 | `runner.probes.liveness.httpGet.path` | Liveness probe HTTP path | `/actuator/health/liveness` |
 | `runner.probes.liveness.httpGet.port` | Liveness probe port | `management` |
