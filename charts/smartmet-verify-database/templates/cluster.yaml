@@ -90,13 +90,16 @@ spec:
           - name: {{ $cm }}-pre-init
             key: 0000-pre-init.sql
       # Then, as superuser on {{ .Values.cluster.database }}: schema, then
-      # ownership transfer, then any operator-supplied SQL. Order is load-bearing.
+      # ownership transfer, then the reference rows the applications require,
+      # then any operator-supplied SQL. Order is load-bearing.
       postInitApplicationSQLRefs:
         configMapRefs:
           - name: {{ $cm }}-production
             key: 0001-production-schema.sql
           - name: {{ $cm }}-post-ownership
             key: 0002-post-ownership.sql
+          - name: {{ $cm }}-reference-data
+            key: 0004-reference-data.sql
           - name: {{ $cm }}-extra
             key: extra.sql
           {{- with .Values.schema.extraPostInitApplicationRefs.configMapRefs }}

@@ -1,0 +1,33 @@
+{{/*
+Reference rows the applications require in every deployment, currently
+target_types. Must run AFTER the ownership transfer, and before any
+operator-supplied SQL so that an operator can still override it.
+
+These are not customer metadata: the GUI compiles the names in, so a database
+without them is broken rather than empty. TargetTypeRadioGroup preselects
+GROUP, then AREA, then LOCATION, and leaves the radio group unset when it finds
+none of them; every query form then switches on the selected name, so an empty
+table makes the first view a user opens throw
+`Cannot invoke "String.hashCode()" because ... is null`.
+
+Rendered only when schema.enabled is true. The ConfigMap name is STABLE and
+carries no content hash on purpose: CNPG treats Cluster.spec.bootstrap as
+immutable once the cluster is initialised, so a changing ref name would make
+subsequent `helm upgrade` runs fail rather than no-op.
+*/}}
+{{- if .Values.schema.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "smartmet-verify-database.clusterName" . }}-sql-reference-data
+  labels:
+    {{- include "smartmet-verify-database.componentLabels" (list . "database") | nindent 4 }}
+  annotations:
+    fmi.fi/schema-source-ref: {{ include "smartmet-verify-database.sqlRef" . | quote }}
+    checksum/sql: {{ .Files.Get "files/sql/0004-reference-data.sql" | sha256sum }}
+    {{- with .Values.commonAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+data:
+  {{- (.Files.Glob "files/sql/0004-reference-data.sql").AsConfig | nindent 2 }}
+{{- end }}
