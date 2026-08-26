@@ -1,10 +1,10 @@
 # GeoWeb Presets Backend Helm Chart
 
-Deploys the GeoWeb presets backend, auth proxy sidecar, and optional PostgreSQL database resources.
+Deploys the GeoWeb presets backend, auth proxy sidecar, and optional development or Zalando PostgreSQL resources. CloudNativePG databases are managed separately with the `geoweb-cnpg` chart.
 
 # Upgrade notes for chart 3.0.0
 
-Chart `3.0.0` introduces a breaking database values cleanup. The old `presets.db.enableDefaultDb` and `presets.db.useZalandoOperatorDb` booleans are replaced by the new `presets.db.mode` value, and database settings now live under common fields and mode-specific blocks. CloudNativePG support is new in this chart version.
+Chart `3.0.0` introduces a breaking database values cleanup. The old `presets.db.enableDefaultDb` and `presets.db.useZalandoOperatorDb` booleans are replaced by the new `presets.db.mode` value, and database settings now live under common fields and mode-specific blocks. Removed 2.x database values cause template rendering to fail until they are migrated.
 
 Migration map:
 
@@ -13,7 +13,7 @@ Migration map:
 | `presets.db.enableDefaultDb: true`                                                | `presets.db.mode: sidecar`                                                                                                                        |
 | `presets.db.enableDefaultDb: false` with `presets.db.useZalandoOperatorDb: false` | `presets.db.mode: external`                                                                                                                       |
 | `presets.db.useZalandoOperatorDb: true`                                           | `presets.db.mode: zalando`                                                                                                                        |
-| `presets.db_secret`                                                               | `presets.db.external.encodedConnectionString` for inline base64, or `presets.db.external.secretProvider.objectName` for external secret providers |
+| `presets.db_secret`                                                               | `presets.db.external.encodedConnectionString` for `source: inline`, or `presets.db.external.secretProvider.objectName` for `source: secretProvider` |
 | `presets.db_secretName`                                                           | `presets.db.external.secretName`                                                                                                                  |
 | `presets.db_secretType`                                                           | `presets.db.external.secretProvider.objectType`                                                                                                   |
 | `presets.db_secretPath`                                                           | `presets.db.external.secretProvider.path`                                                                                                         |
@@ -23,7 +23,7 @@ Migration map:
 | `secretProviderParameters`                                                        | `presets.db.external.secretProvider.parameters`                                                                                                   |
 | `presets.db.POSTGRES_DB`                                                          | `presets.db.databaseName`                                                                                                                         |
 | `presets.db.POSTGRES_USER`                                                        | `presets.db.username`                                                                                                                             |
-| `presets.db.POSTGRES_PASSWORD`                                                    | `presets.db.sidecar.password` or `presets.db.cloudNativePG.bootstrap.password`                                                                    |
+| `presets.db.POSTGRES_PASSWORD`                                                    | `presets.db.sidecar.password`                                                                                                                       |
 | `presets.db.POSTGRES_VERSION`                                                     | `presets.db.zalando.postgresVersion`                                                                                                              |
 | `presets.db.numberOfInstances`                                                    | `presets.db.zalando.instances`                                                                                                                    |
 | `presets.db.instanceSize`                                                         | `presets.db.zalando.volumeSize`                                                                                                                   |
@@ -36,6 +36,22 @@ Migration map:
 For existing Zalando deployments, render old and migrated values before upgrading and compare the generated `postgresql` resource. The resource name, users, database name, team ID, instance count, and volume size should stay unchanged.
 
 For existing external database deployments, verify that the rendered Deployment still reads `PRESETS_BACKEND_DB` from the intended Kubernetes Secret name and key.
+
+An upgrade from 2.x does not require changing database technology. First migrate the values to `mode: sidecar`, `mode: zalando`, or the corresponding external source and verify the rendered resources. Moving the data to CloudNativePG is a separate operation and should not be combined with the chart values migration.
+
+## Migrating an existing database to CloudNativePG
+
+The `geoweb-cnpg` chart creates a new, empty database. It does not adopt or copy a 2.x sidecar, Zalando, or external database.
+
+1. Migrate and validate the 2.x values while retaining the existing database mode.
+2. Back up the source database and verify that the dump can be read.
+3. Install `geoweb-cnpg` as a separate release with a different resource name from the source database.
+4. Stop writes to presets, take a final consistent dump, and restore it into the CNPG database.
+5. Verify schema, row counts, and required presets before changing the application release.
+6. Upgrade presets with `mode: external`, `source: existingSecret`, and the CNPG-generated `<cluster-name>-app` Secret key `uri`.
+7. Keep the source database and backup until application validation and the rollback window are complete.
+
+Do not uninstall the source database release as part of the application upgrade. The exact dump and restore commands depend on the source mode and environment; rehearse the procedure on a copy before production migration.
 
 # Install the chart repository
 
@@ -56,6 +72,7 @@ presets:
   db:
     mode: external
     external:
+      source: secretProvider
       secretName: presets-db
       secretKey: PRESETS_BACKEND_DB
       secretProvider:
@@ -76,6 +93,7 @@ presets:
   db:
     mode: external
     external:
+      source: inline
       secretName: presets-db
       secretKey: PRESETS_BACKEND_DB
       encodedConnectionString: base64_encoded_postgresql_connection_string
@@ -145,30 +163,20 @@ presets:
         backupBucket: s3://<S3-bucket-name>/
 ```
 
-- Using CloudNativePG database
+- Using a separately managed CloudNativePG database
 
 ```yaml
 presets:
   url: geoweb.example.com
   db:
-    mode: cloudnativepg
-    name: presets-db
-    databaseName: presets
-    username: geoweb
-    cloudNativePG:
-      instances: 1
-      resources:
-        requests:
-          cpu: 100m
-          memory: 256Mi
-        limits:
-          memory: 512Mi
-      bootstrap:
-        userSecretName: presets-db-user
-        password: postgres
-      storage:
-        size: 1Gi
+    mode: external
+    external:
+      source: existingSecret
+      secretName: presets-db-app
+      secretKey: uri
 ```
+
+Install the database separately using `charts/geoweb-cnpg` and wait for the CNPG `Cluster` to become ready before deploying presets. Both releases must use the same namespace for this configuration. Set `secretName` to `<geoweb-cnpg name>-app`; CNPG's backup method does not change this application Secret contract.
 
 # Testing the Chart
 
@@ -246,7 +254,7 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.nginx.resources`                             | Configure resource limits & requests                                                                                                                      | see defaults from `values.yaml`                                             |
 | `presets.nginx.startupProbe`                          | Configure nginx container startupProbe                                                                                                                    | see defaults from `values.yaml`                                             |
 | `presets.nginx.ENV_VAR_STRICT_MODE`                   | Enable check if all necessary variables for authentication and authorization are set                                                                      | `false`                                                                     |
-| `presets.db.mode`                                     | Database mode _(sidecar\|external\|zalando\|cloudnativepg)_                                                                                               | `sidecar`                                                                   |
+| `presets.db.mode`                                     | Database mode _(sidecar\|external\|zalando)_                                                                                                             | `sidecar`                                                                   |
 | `presets.db.name`                                     | Database resource/container name                                                                                                                          | `presets-db`                                                                |
 | `presets.db.databaseName`                             | PostgreSQL database name                                                                                                                                  | `presets`                                                                   |
 | `presets.db.username`                                 | PostgreSQL application user                                                                                                                               | `geoweb`                                                                    |
@@ -255,7 +263,8 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.db.sidecar.password`                         | Sidecar PostgreSQL password                                                                                                                               | `postgres`                                                                  |
 | `presets.db.external.secretName`                      | Kubernetes Secret name containing the external PostgreSQL connection string                                                                               | `presets-db`                                                                |
 | `presets.db.external.secretKey`                       | Kubernetes Secret key containing the external PostgreSQL connection string                                                                                | `PRESETS_BACKEND_DB`                                                        |
-| `presets.db.external.encodedConnectionString`         | Base64 encoded external PostgreSQL connection string used when no secret provider is configured                                                           | see default from `values.yaml`                                              |
+| `presets.db.external.source`                          | External Secret source _(inline\|secretProvider\|existingSecret)_                                                                                        | `inline`                                                                    |
+| `presets.db.external.encodedConnectionString`         | Base64 encoded external PostgreSQL connection string used with `source: inline`                                                                            | see default from `values.yaml`                                              |
 | `presets.db.external.secretProvider.provider`         | External secret provider for database connection string _(aws\|azure\|gcp\|vault)_                                                                        |                                                                             |
 | `presets.db.external.secretProvider.className`        | SecretProviderClass name for the database connection string                                                                                               | `presets-spc`                                                               |
 | `presets.db.external.secretProvider.objectName`       | Provider object name containing the database connection string                                                                                            |                                                                             |
@@ -272,12 +281,6 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.db.zalando.clone.enabled`                    | Restore Zalando cluster from backup instead of clean install                                                                                              | `false`                                                                     |
 | `presets.db.zalando.clone.timestamp`                  | Zalando clone timestamp                                                                                                                                   | `2030-01-01T00:00:00+00:00`                                                 |
 | `presets.db.zalando.clone.backupBucket`               | Zalando clone backup bucket                                                                                                                               |                                                                             |
-| `presets.db.cloudNativePG.bootstrap.userSecretName`   | CloudNativePG bootstrap user Secret name                                                                                                                  | `presets-db-user`                                                           |
-| `presets.db.cloudNativePG.bootstrap.password`         | CloudNativePG bootstrap user password                                                                                                                     | `postgres`                                                                  |
-| `presets.db.cloudNativePG.instances`                  | CloudNativePG instance count                                                                                                                              | `1`                                                                         |
-| `presets.db.cloudNativePG.resources`                  | CloudNativePG container resources. Defaults set CPU and memory requests plus a memory limit, but no CPU limit.                                            | see defaults from `values.yaml`                                             |
-| `presets.db.cloudNativePG.storage.size`               | CloudNativePG data volume size                                                                                                                            | `1Gi`                                                                       |
-| `presets.db.cloudNativePG.storage.className`          | Optional CloudNativePG storage class                                                                                                                      |                                                                             |
 | `presets.useCustomConfigurationFiles`                 | Use custom configurations                                                                                                                                 | `false`                                                                     |
 | `presets.customConfigurationLocation`                 | Where custom configurations are located _(local\|s3)_                                                                                                     | `local`                                                                     |
 | `presets.customConfigurationFolderPath`               | Path to the folder which contains custom configurations                                                                                                   |                                                                             |

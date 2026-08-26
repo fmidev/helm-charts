@@ -82,7 +82,6 @@ presets:
     # - sidecar: run the default postgres container in the presets pod
     # - external: read PRESETS_BACKEND_DB from an externally managed connection string Secret
     # - zalando: create/use a Zalando Postgres operator database
-    # - cloudnativepg: create/use a CloudNativePG Cluster
     mode: sidecar
     name: presets-db
     databaseName: presets
@@ -92,6 +91,8 @@ presets:
       port: 5432
       password: postgres
     external:
+      # Supported values: inline, secretProvider, existingSecret
+      source: inline
       secretName: presets-db
       secretKey: PRESETS_BACKEND_DB
       encodedConnectionString: cG9zdGdyZXNxbDovL2dlb3dlYjpwb3N0Z3Jlc0Bsb2NhbGhvc3Q6NTQzMi9wcmVzZXRz
@@ -114,20 +115,6 @@ presets:
         enabled: false
         timestamp: "2030-01-01T00:00:00+00:00"
         backupBucket: ""
-    cloudNativePG:
-      instances: 1
-      resources:
-        requests:
-          cpu: 100m
-          memory: 256Mi
-        limits:
-          memory: 512Mi
-      bootstrap:
-        userSecretName: presets-db-user
-        password: postgres
-      storage:
-        size: 1Gi
-        className: ""
   useCustomConfigurationFiles: false
   customConfigurationLocation: local
   useCustomWorkspacePresets: false

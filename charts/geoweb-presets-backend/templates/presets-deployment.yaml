@@ -1,5 +1,5 @@
 {{- $dbMode := default "sidecar" .Values.presets.db.mode }}
-{{- $usesExternalSecretProvider := and (eq $dbMode "external") .Values.presets.db.external.secretProvider.provider }}
+{{- $usesExternalSecretProvider := and (eq $dbMode "external") (eq (default "inline" .Values.presets.db.external.source) "secretProvider") }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -21,7 +21,7 @@ spec:
         commitHash: {{ .Values.presets.commitHash }}
       {{- end }}
     spec:
-    {{- if eq .Values.presets.db.external.secretProvider.provider "aws" }}
+    {{- if and $usesExternalSecretProvider (eq .Values.presets.db.external.secretProvider.provider "aws") }}
       serviceAccountName: {{ .Values.presets.secretServiceAccount }}
     {{- end }}
       initContainers:
@@ -59,11 +59,6 @@ spec:
       - name: wait-for-db
         image: busybox
         command: ['sh', '-c', "until nc -z -v -w30 {{ .Values.presets.db.name }} 5432; do echo 'Waiting for database...'; sleep 5; done"]
-      {{- end }}
-      {{- if eq $dbMode "cloudnativepg" }}
-      - name: wait-for-db
-        image: busybox
-        command: ['sh', '-c', "until nc -z -v -w30 {{ .Values.presets.db.name }}-rw 5432; do echo 'Waiting for database...'; sleep 5; done"]
       {{- end }}
       containers:
       - name: {{ .Values.presets.name }}
@@ -107,23 +102,9 @@ spec:
               name: {{ .Values.presets.db.username }}.{{ .Values.presets.db.name }}.credentials.postgresql.acid.zalan.do
               key: username
       {{- end }}
-      {{- if eq $dbMode "cloudnativepg" }}
-        - name: PG_PASS
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.presets.db.cloudNativePG.bootstrap.userSecretName }}
-              key: password
-        - name: PG_USER
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.presets.db.cloudNativePG.bootstrap.userSecretName }}
-              key: username
-      {{- end }}
         - name: PRESETS_BACKEND_DB
         {{- if eq $dbMode "zalando" }}
           value: "postgresql://$(PG_USER):$(PG_PASS)@{{ .Values.presets.db.name }}:5432/{{ .Values.presets.db.databaseName }}"
-        {{- else if eq $dbMode "cloudnativepg" }}
-          value: "postgresql://$(PG_USER):$(PG_PASS)@{{ .Values.presets.db.name }}-rw:5432/{{ .Values.presets.db.databaseName }}"
         {{- else if eq $dbMode "sidecar" }}
           value: "postgresql://{{ .Values.presets.db.username }}:{{ .Values.presets.db.sidecar.password }}@localhost:{{ .Values.presets.db.sidecar.port }}/{{ .Values.presets.db.databaseName }}"
         {{- else }}
@@ -166,8 +147,10 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Values.presets.nginx.name }}
-      {{- if and .Values.presets.useCustomConfigurationFiles }}
         volumeMounts:
+        - name: nginx-run
+          mountPath: "/run"
+      {{- if and .Values.presets.useCustomConfigurationFiles }}
         - mountPath: "/nginx.conf"
           subPath: "nginx.conf"
           name: {{ .Values.presets.name }}-volume
@@ -185,8 +168,9 @@ spec:
           - name: POSTGRES_PASSWORD
             value: {{ .Values.presets.db.sidecar.password }}
       {{- end }}
-    {{- if or .Values.presets.useCustomConfigurationFiles .Values.presets.useCustomWorkspacePresets $usesExternalSecretProvider }}
       volumes:
+      - name: nginx-run
+        emptyDir: {}
     {{- if .Values.presets.useCustomConfigurationFiles }}
       - name: {{ .Values.presets.name }}-volume
       {{- if eq .Values.presets.customConfigurationLocation "s3"}}
@@ -212,7 +196,6 @@ spec:
           readOnly: true
           volumeAttributes:
             secretProviderClass: {{ .Values.presets.db.external.secretProvider.className | quote }}
-    {{- end }}
     {{- end }}
       affinity:
         podAntiAffinity:

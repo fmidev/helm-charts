@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "GeoWeb CloudNativePG chart values",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "helm", "cluster", "backup"],
+  "properties": {
+    "name": {
+      "description": "CloudNativePG Cluster name as a DNS-1035 label.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50,
+      "pattern": "^[a-z]([-a-z0-9]*[a-z0-9])?$"
+    },
+    "helm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resourcePolicy"],
+      "properties": {
+        "resourcePolicy": {
+          "description": "Helm resource policy annotation value; empty omits the annotation.",
+          "type": "string",
+          "enum": ["", "keep"]
+        }
+      }
+    },
+    "cluster": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["instances", "affinity", "imageName", "primaryUpdateStrategy", "bootstrap", "storage", "resources"],
+      "properties": {
+        "instances": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "affinity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["podAntiAffinityType", "topologyKey"],
+          "properties": {
+            "podAntiAffinityType": {
+              "type": "string",
+              "enum": ["preferred", "required"]
+            },
+            "topologyKey": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "imageName": {
+          "type": "string"
+        },
+        "primaryUpdateStrategy": {
+          "type": "string",
+          "enum": ["unsupervised", "supervised"]
+        },
+        "bootstrap": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "initdb", "recovery"],
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": ["initdb", "recovery"]
+            },
+            "initdb": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["database", "owner"],
+              "properties": {
+                "database": {
+                  "type": "string"
+                },
+                "owner": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "recovery": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["source", "backupName", "database", "owner", "secretName", "recoveryTarget", "barmanCloud"],
+              "properties": {
+                "source": {
+                  "type": "string"
+                },
+                "backupName": {
+                  "type": "string"
+                },
+                "database": {
+                  "type": "string"
+                },
+                "owner": {
+                  "type": "string"
+                },
+                "secretName": {
+                  "type": "string"
+                },
+                "recoveryTarget": {
+                  "type": "object"
+                },
+                "barmanCloud": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["objectStoreName", "serverName"],
+                  "properties": {
+                    "objectStoreName": {
+                      "type": "string"
+                    },
+                    "serverName": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "storage": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["size", "storageClass"],
+          "properties": {
+            "size": {
+              "type": "string",
+              "minLength": 1
+            },
+            "storageClass": {
+              "type": "string"
+            }
+          }
+        },
+        "resources": {
+          "type": "object"
+        }
+      }
+    },
+    "backup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "target", "schedule", "immediate", "suspend", "backupOwnerReference", "volumeSnapshot", "barmanCloud"],
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["none", "volumeSnapshot", "barmanCloud"]
+        },
+        "target": {
+          "type": "string",
+          "enum": ["primary", "prefer-standby"]
+        },
+        "schedule": {
+          "type": "string",
+          "minLength": 1
+        },
+        "immediate": {
+          "type": "boolean"
+        },
+        "suspend": {
+          "type": "boolean"
+        },
+        "backupOwnerReference": {
+          "type": "string",
+          "enum": ["none", "self", "cluster"]
+        },
+        "volumeSnapshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["className", "online", "snapshotOwnerReference"],
+          "properties": {
+            "className": {
+              "type": "string"
+            },
+            "online": {
+              "type": "boolean"
+            },
+            "snapshotOwnerReference": {
+              "type": "string",
+              "enum": ["none", "backup", "cluster"]
+            }
+          }
+        },
+        "barmanCloud": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["objectStoreName"],
+          "properties": {
+            "objectStoreName": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "global": {
+      "type": "object"
+    }
+  }
+}

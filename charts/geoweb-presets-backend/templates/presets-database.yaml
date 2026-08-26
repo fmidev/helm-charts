@@ -1,12 +1,15 @@
 {{- $dbMode := default "sidecar" .Values.presets.db.mode }}
-{{- if not (has $dbMode (list "sidecar" "external" "zalando" "cloudnativepg")) }}
-{{- fail "presets.db.mode must be one of: sidecar, external, zalando, cloudnativepg" }}
+{{- if not (has $dbMode (list "sidecar" "external" "zalando")) }}
+{{- fail "presets.db.mode must be one of: sidecar, external, zalando" }}
 {{- end }}
 {{- if or (hasKey .Values.presets "db_secret") (hasKey .Values.presets "db_secretName") (hasKey .Values.presets "db_secretType") (hasKey .Values.presets "db_secretPath") (hasKey .Values.presets "db_secretKey") }}
 {{- fail "presets.db_secret* values were removed in chart 3.0.0. Use presets.db.external.* instead." }}
 {{- end }}
-{{- if or (hasKey .Values.presets.db "POSTGRES_DB") (hasKey .Values.presets.db "POSTGRES_USER") (hasKey .Values.presets.db "POSTGRES_PASSWORD") (hasKey .Values.presets.db "POSTGRES_VERSION") }}
-{{- fail "presets.db.POSTGRES_* values were removed in chart 3.0.0. Use presets.db.databaseName, presets.db.username, and the mode-specific provider blocks instead." }}
+{{- if or (hasKey .Values "secretProvider") (hasKey .Values "secretProviderParameters") (hasKey .Values.presets "iamRoleARN") }}
+{{- fail "Legacy secret provider values were removed in chart 3.0.0. Use presets.db.external.secretProvider.* instead." }}
+{{- end }}
+{{- if or (hasKey .Values.presets.db "enableDefaultDb") (hasKey .Values.presets.db "useZalandoOperatorDb") (hasKey .Values.presets.db "POSTGRES_DB") (hasKey .Values.presets.db "POSTGRES_USER") (hasKey .Values.presets.db "POSTGRES_PASSWORD") (hasKey .Values.presets.db "POSTGRES_VERSION") (hasKey .Values.presets.db "numberOfInstances") (hasKey .Values.presets.db "instanceSize") (hasKey .Values.presets.db "zalandoTeamId") (hasKey .Values.presets.db "enableLogicalBackup") (hasKey .Values.presets.db "cleanInstall") (hasKey .Values.presets.db "backupTimestamp") (hasKey .Values.presets.db "backupBucket") }}
+{{- fail "Legacy presets.db values were removed in chart 3.0.0. Set presets.db.mode and migrate database settings using the README migration map." }}
 {{- end }}
 {{- if eq $dbMode "zalando" }}
 apiVersion: "acid.zalan.do/v1"
@@ -34,34 +37,3 @@ spec:
     s3_wal_path: {{ .Values.presets.db.zalando.clone.backupBucket | quote }}
   {{- end }}
 {{- end }}
-{{- if eq $dbMode "cloudnativepg" }}
-apiVersion: v1
-kind: Secret
-metadata:
-  name: {{ .Values.presets.db.cloudNativePG.bootstrap.userSecretName }}
-type: Opaque
-stringData:
-  username: {{ .Values.presets.db.username | quote }}
-  password: {{ .Values.presets.db.cloudNativePG.bootstrap.password | quote }}
----
-apiVersion: postgresql.cnpg.io/v1
-kind: Cluster
-metadata:
-  name: {{ .Values.presets.db.name }}
-spec:
-  instances: {{ .Values.presets.db.cloudNativePG.instances }}
-  {{- if .Values.presets.db.cloudNativePG.resources }}
-  resources: {{ toYaml .Values.presets.db.cloudNativePG.resources | nindent 4 }}
-  {{- end }}
-  bootstrap:
-    initdb:
-      database: {{ .Values.presets.db.databaseName }}
-      owner: {{ .Values.presets.db.username }}
-      secret:
-        name: {{ .Values.presets.db.cloudNativePG.bootstrap.userSecretName }}
-  storage:
-    size: {{ .Values.presets.db.cloudNativePG.storage.size }}
-    {{- if .Values.presets.db.cloudNativePG.storage.className }}
-    storageClass: {{ .Values.presets.db.cloudNativePG.storage.className | quote }}
-    {{- end }}
-  {{- end }}

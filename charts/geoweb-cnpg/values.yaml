@@ -1,0 +1,68 @@
+name: ""
+
+helm:
+  resourcePolicy: keep
+
+cluster:
+  instances: 1
+  affinity:
+    # Spread instances across nodes when possible. Use required only when every
+    # environment has enough schedulable topology domains for all instances.
+    podAntiAffinityType: preferred
+    topologyKey: kubernetes.io/hostname
+  # Full CNPG-compatible PostgreSQL image reference. Empty uses the operator's
+  # default image. Pin a tag or digest in production to select the version.
+  imageName: ""
+  # Use supervised to require an operator-triggered primary switchover during
+  # rolling updates after all replicas have been updated.
+  primaryUpdateStrategy: unsupervised
+  bootstrap:
+    # Supported values: initdb, recovery
+    mode: initdb
+    initdb:
+      # Initial application database and its login/owner role.
+      # Empty uses the Cluster name.
+      database: ""
+      owner: geoweb
+    recovery:
+      # Set exactly one of source or backupName.
+      source: ""
+      backupName: ""
+      # Required chart inputs defining the application database and owner after
+      # recovery. CNPG creates or reconciles them if necessary.
+      database: ""
+      owner: geoweb
+      # Leave empty to let CNPG generate new application credentials.
+      secretName: ""
+      recoveryTarget: {}
+      barmanCloud:
+        # ObjectStore containing the source cluster's backups and WAL archive.
+        objectStoreName: ""
+        # Source cluster name in the archive. Empty uses source.
+        serverName: ""
+  storage:
+    size: 1Gi
+    storageClass: ""
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+
+backup:
+  # Supported values: none, volumeSnapshot, barmanCloud
+  method: none
+  target: prefer-standby
+  schedule: "0 0 0 * * *"
+  immediate: true
+  suspend: false
+  # Keep backup resources independent from both the schedule and Cluster.
+  backupOwnerReference: none
+  volumeSnapshot:
+    className: ""
+    online: true
+    snapshotOwnerReference: none
+  barmanCloud:
+    # ObjectStore used for base backups and continuous WAL archiving.
+    objectStoreName: ""

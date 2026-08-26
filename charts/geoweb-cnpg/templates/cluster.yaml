@@ -1,0 +1,103 @@
+{{- $bootstrapMode := .Values.cluster.bootstrap.mode }}
+{{- $initdb := .Values.cluster.bootstrap.initdb }}
+{{- $initdbDatabase := default (include "geoweb-cnpg.name" .) $initdb.database }}
+{{- $recovery := .Values.cluster.bootstrap.recovery }}
+{{- if and (eq $bootstrapMode "recovery") (eq (empty $recovery.source) (empty $recovery.backupName)) }}
+{{- fail "exactly one of cluster.bootstrap.recovery.source or backupName is required in recovery mode" }}
+{{- end }}
+{{- if and (eq $bootstrapMode "recovery") (not $recovery.database) }}
+{{- fail "cluster.bootstrap.recovery.database is required in recovery mode" }}
+{{- end }}
+{{- if and (eq $bootstrapMode "recovery") (not $recovery.owner) }}
+{{- fail "cluster.bootstrap.recovery.owner is required in recovery mode" }}
+{{- end }}
+{{- if and (eq $bootstrapMode "recovery") $recovery.source (not $recovery.barmanCloud.objectStoreName) }}
+{{- fail "cluster.bootstrap.recovery.barmanCloud.objectStoreName is required for source recovery" }}
+{{- end }}
+{{- if and (eq .Values.backup.method "barmanCloud") (not .Values.backup.barmanCloud.objectStoreName) }}
+{{- fail "backup.barmanCloud.objectStoreName is required when backup.method is barmanCloud" }}
+{{- end }}
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ include "geoweb-cnpg.name" . }}
+  {{- with .Values.helm.resourcePolicy }}
+  annotations:
+    helm.sh/resource-policy: {{ . | quote }}
+  {{- end }}
+  labels:
+    {{- include "geoweb-cnpg.labels" . | nindent 4 }}
+spec:
+  instances: {{ .Values.cluster.instances }}
+  primaryUpdateStrategy: {{ .Values.cluster.primaryUpdateStrategy }}
+  enableSuperuserAccess: false
+  affinity:
+    podAntiAffinityType: {{ .Values.cluster.affinity.podAntiAffinityType }}
+    topologyKey: {{ .Values.cluster.affinity.topologyKey | quote }}
+  {{- if .Values.cluster.imageName }}
+  imageName: {{ .Values.cluster.imageName | quote }}
+  {{- end }}
+  bootstrap:
+    {{- if eq $bootstrapMode "initdb" }}
+    initdb:
+      database: {{ $initdbDatabase | quote }}
+      owner: {{ $initdb.owner | quote }}
+    {{- else }}
+    recovery:
+      database: {{ $recovery.database | quote }}
+      owner: {{ $recovery.owner | quote }}
+      {{- if $recovery.secretName }}
+      secret:
+        name: {{ $recovery.secretName }}
+      {{- end }}
+      {{- if $recovery.backupName }}
+      backup:
+        name: {{ $recovery.backupName }}
+      {{- else }}
+      source: {{ $recovery.source }}
+      {{- end }}
+      {{- with $recovery.recoveryTarget }}
+      recoveryTarget:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- end }}
+  storage:
+    size: {{ .Values.cluster.storage.size }}
+    {{- if .Values.cluster.storage.storageClass }}
+    storageClass: {{ .Values.cluster.storage.storageClass | quote }}
+    {{- end }}
+  {{- with .Values.cluster.resources }}
+  resources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if ne .Values.backup.method "none" }}
+  backup:
+    target: {{ .Values.backup.target }}
+    {{- if eq .Values.backup.method "volumeSnapshot" }}
+    volumeSnapshot:
+      online: {{ .Values.backup.volumeSnapshot.online }}
+      snapshotOwnerReference: {{ .Values.backup.volumeSnapshot.snapshotOwnerReference }}
+      {{- if .Values.backup.volumeSnapshot.className }}
+      className: {{ .Values.backup.volumeSnapshot.className | quote }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+  {{- if eq .Values.backup.method "barmanCloud" }}
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      enabled: true
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: {{ .Values.backup.barmanCloud.objectStoreName | quote }}
+  {{- end }}
+  {{- if and (eq $bootstrapMode "recovery") $recovery.source }}
+  externalClusters:
+    - name: {{ $recovery.source }}
+      plugin:
+        name: barman-cloud.cloudnative-pg.io
+        parameters:
+          barmanObjectName: {{ $recovery.barmanCloud.objectStoreName | quote }}
+          {{- with $recovery.barmanCloud.serverName }}
+          serverName: {{ . | quote }}
+        {{- end }}
+  {{- end }}
