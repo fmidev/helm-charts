@@ -15,4 +15,3 @@ spec:
   storageClassName: {{ . | quote }}
   {{- end }}
 {{- end }}
-

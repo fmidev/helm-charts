@@ -1,0 +1,74 @@
+# Production Verdaccio configuration. Runtime settings are supplied by the pod environment.
+store:
+  aws-s3-storage:
+    bucket: ${AWS_S3_BUCKET}
+    keyPrefix: ${AWS_S3_PLUGIN_PREFIX}
+    region: ${AWS_DEFAULT_REGION}
+    endpoint: ${AWS_S3_ENDPOINT}
+    s3ForcePathStyle: ${AWS_S3_PATH_STYLE}
+    accessKeyId: ${AWS_ACCESS_KEY_ID}
+    secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
+    sessionToken: ${AWS_SESSION_TOKEN}
+
+pluginStorage:
+  type: s3
+  bucket: ${AWS_S3_BUCKET}
+  region: ${AWS_DEFAULT_REGION}
+  endpoint: ${AWS_S3_ENDPOINT}
+  forcePathStyle: ${AWS_S3_PATH_STYLE}
+  accessKeyId: ${AWS_ACCESS_KEY_ID}
+  secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
+  sessionToken: ${AWS_SESSION_TOKEN}
+  prefix: ${AWS_S3_PLUGIN_PREFIX}
+
+plugins: /verdaccio/plugins
+
+web:
+  title: GeoWeb Plugin Registry
+  enable: true
+
+packages:
+  "**":
+    access: $all
+    publish: plugin-development
+    unpublish: plugin-development
+
+auth:
+  openid:
+    provider-host: ${VERDACCIO_OPENID_PROVIDER_HOST}
+    client-id: ${VERDACCIO_OPENID_CLIENT_ID}
+    client-secret: ${VERDACCIO_OPENID_CLIENT_SECRET}
+    scope: ${VERDACCIO_OPENID_SCOPE}
+    username-claim: ${VERDACCIO_OPENID_USERNAME_CLAIM}
+    provider-type: ${VERDACCIO_OPENID_PROVIDER_TYPE}
+    issuer: ${VERDACCIO_OPENID_ISSUER}
+    authorization-endpoint: ${VERDACCIO_OPENID_AUTHORIZATION_ENDPOINT}
+    token-endpoint: ${VERDACCIO_OPENID_TOKEN_ENDPOINT}
+    userinfo-endpoint: ${VERDACCIO_OPENID_USERINFO_ENDPOINT}
+    jwks-uri: ${VERDACCIO_OPENID_JWKS_URI}
+    store-type: file
+    store-config: /verdaccio/storage/openid-store
+
+middlewares:
+  registry-api:
+    enabled: true
+  openid:
+    enabled: true
+
+server:
+  keepAliveTimeout: 60
+
+log:
+  - {type: stdout, format: pretty, level: http}
+
+security:
+  api:
+    jwt:
+      sign:
+        expiresIn: 30d
+  web:
+    sign:
+      expiresIn: 8h
+
+listen:
+  - 0.0.0.0:4873

@@ -33,7 +33,7 @@ middlewares:
     enabled: true
 
 logs:
-  - { type: stdout, format: pretty, level: debug }
+  - {type: stdout, format: pretty, level: debug}
 
 security:
   api:
@@ -41,4 +41,3 @@ security:
 
 listen:
   - 0.0.0.0:4873
-

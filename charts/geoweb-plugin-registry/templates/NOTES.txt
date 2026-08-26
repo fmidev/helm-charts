@@ -1,15 +1,40 @@
+{{- $scheme := "http" -}}
+{{- if or (and .Values.route.enabled .Values.route.tls.enabled) (and .Values.ingress.enabled .Values.ingress.tls) -}}
+{{- $scheme = "https" -}}
+{{- end -}}
 GeoWeb plugin registry is installed.
 
+{{- if .Values.route.enabled }}
 Get the OpenShift Route with:
 
   oc get route {{ include "geoweb-plugin-registry.fullname" . }}
 
-Check Verdaccio:
+{{- else if .Values.ingress.enabled }}
+Get the Ingress with:
 
-  curl http://<route-host>/-/ping
+  kubectl get ingress {{ include "geoweb-plugin-registry.fullname" . }}
 
-The local registry uses a PVC and Verdaccio htpasswd authentication. Create a
-local user before publishing packages:
+{{- else }}
+Forward the registry service locally with:
 
-  npm adduser --registry http://<route-host>
+  kubectl port-forward service/{{ include "geoweb-plugin-registry.fullname" . }} 4873:{{ .Values.service.port }}
 
+{{- end }}
+{{- if or .Values.route.enabled .Values.ingress.enabled }}
+Check Verdaccio through the configured public hostname:
+
+  curl {{ $scheme }}://<registry-host>/-/ping
+{{- else }}
+Check Verdaccio through the forwarded service:
+
+  curl http://localhost:4873/-/ping
+{{- end }}
+
+The registry uses a PVC for authentication state. In local mode, create a user
+before publishing packages when htpasswd authentication is enabled:
+
+{{- if or .Values.route.enabled .Values.ingress.enabled }}
+  npm adduser --registry {{ $scheme }}://<registry-host>
+{{- else }}
+  npm adduser --registry http://localhost:4873
+{{- end }}
