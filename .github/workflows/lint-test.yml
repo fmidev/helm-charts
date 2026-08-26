@@ -64,6 +64,22 @@ jobs:
           kubectl apply --filename=openshift-crds/route.yaml
           # TODO: Add more stubs here if your charts need them
 
+      # Real upstream CRDs, not stubs, so the CNPG Cluster spec rendered by
+      # charts/smartmet-verify-database is structurally validated (field names,
+      # enums, required fields). Only the CRDs are applied -- installing the
+      # operator itself would make every PR wait on Postgres pods and PVCs.
+      #
+      # --server-side is mandatory: the clusters.postgresql.cnpg.io CRD exceeds
+      # 1 MB, and a client-side apply would blow the 262 kB
+      # last-applied-configuration annotation limit.
+      - name: Install CloudNativePG CRDs into Kind
+        if: steps.list-changed.outputs.changed == 'true'
+        run: |
+          curl --silent --show-error --location \
+            https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/v1.29.0/releases/cnpg-1.29.0.yaml \
+            | yq 'select(.kind == "CustomResourceDefinition")' \
+            | kubectl apply --server-side --filename=-
+
       - name: Run chart-testing (install)
         if: steps.list-changed.outputs.changed == 'true'
         run: ct install --target-branch ${{ github.event.repository.default_branch }}
