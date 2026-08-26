@@ -39,40 +39,31 @@ Before installing:
    - [cert-manager](https://cert-manager.io/) with a `letsencrypt` ClusterIssuer for automated TLS (Kubernetes); on OpenShift TLS is handled by the Route
 
 2. You must create:
-   - A **pull secret** for Quay.io
    - **configuration Secrets** for GUI and/or runner
 
-## Private container images
+## Container images
 
-The application images are private and hosted in Quay.io
+The application images are public on GitHub Container Registry:
 
-- `quay.io/fmi/fmi-verification-gui`
-- `quay.io/fmi/fmi-verification-runner`
+- `ghcr.io/fmidev/fmi-verification-gui`
+- `ghcr.io/fmidev/fmi-verification-runner`
 
-You must create an image pull secret. The recommended approach is to download the
-pull secret directly from the Quay.io robot account settings:
+**No image pull secret is needed** to deploy this chart as shipped.
 
-1. Download the Kubernetes pull secret YAML from the Quay.io robot account settings
-   (e.g. to `pull-secret.yaml`).
-2. Apply it to the cluster:
-```shell
-kubectl create -f pull-secret.yaml --namespace=smartmet-verify
-```
-3. If the secret name in the downloaded file differs from `pull-secret`, update
-   `imagePullSecrets` in your values file accordingly:
+`imagePullSecrets` remains available for deployments that point the image
+repositories somewhere that does require credentials — a private mirror, or an
+air-gapped copy:
+
 ```yaml
 imagePullSecrets:
   - name: pull-secret
 ```
 
-Alternatively (option B), create the secret manually with credentials:
-
 ```shell
 kubectl create secret docker-registry pull-secret \
-  --docker-server=quay.io \
+  --docker-server=<REGISTRY> \
   --docker-username=<USERNAME> \
   --docker-password=<PASSWORD> \
-  --docker-email=<EMAIL> \
   --namespace=smartmet-verify
 ```
 
@@ -621,7 +612,7 @@ The following table lists all configurable parameters and their defaults.
 |---|---|---|
 | `gui.enabled` | Deploy the GUI | `false` |
 | `gui.replicaCount` | Number of GUI pod replicas | `1` |
-| `gui.image.repository` | GUI image repository | `quay.io/fmi/fmi-verification-gui` |
+| `gui.image.repository` | GUI image repository | `ghcr.io/fmidev/fmi-verification-gui` |
 | `gui.image.tag` | GUI image tag — **required** | `""` |
 | `gui.image.pullPolicy` | Image pull policy | `IfNotPresent` |
 | `gui.service.type` | Kubernetes Service type | `ClusterIP` |
@@ -691,7 +682,7 @@ The following table lists all configurable parameters and their defaults.
 |---|---|---|
 | `runner.enabled` | Deploy the runner | `false` |
 | `runner.replicaCount` | Number of runner pod replicas | `1` |
-| `runner.image.repository` | Runner image repository | `quay.io/fmi/fmi-verification-runner` |
+| `runner.image.repository` | Runner image repository | `ghcr.io/fmidev/fmi-verification-runner` |
 | `runner.image.tag` | Runner image tag — **required** | `""` |
 | `runner.image.pullPolicy` | Image pull policy | `IfNotPresent` |
 | `runner.service.type` | Kubernetes Service type | `ClusterIP` |

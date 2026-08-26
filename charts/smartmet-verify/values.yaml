@@ -4,6 +4,10 @@ fullnameOverride: ""
 commonLabels: {}
 commonAnnotations: {}
 
+# The default images are published publicly to GitHub Container Registry, so no
+# pull secret is needed to deploy this chart as shipped. Set this only when
+# pointing the image repositories at a registry that does require credentials --
+# a private mirror, or an air-gapped copy.
 imagePullSecrets: []
 # Example:
 # imagePullSecrets:
@@ -38,7 +42,7 @@ gui:
   replicaCount: 1
 
   image:
-    repository: quay.io/fmi/fmi-verification-gui
+    repository: ghcr.io/fmidev/fmi-verification-gui
     tag: ""
     pullPolicy: IfNotPresent
 
@@ -168,7 +172,7 @@ runner:
   replicaCount: 1
 
   image:
-    repository: quay.io/fmi/fmi-verification-runner
+    repository: ghcr.io/fmidev/fmi-verification-runner
     tag: ""
     pullPolicy: IfNotPresent
 
