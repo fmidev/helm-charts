@@ -4,6 +4,10 @@ fullnameOverride: ""
 commonLabels: {}
 commonAnnotations: {}
 
+# The default images are published publicly to GitHub Container Registry, so no
+# pull secret is needed to deploy this chart as shipped. Set this only when
+# pointing the image repositories at a registry that does require credentials --
+# a private mirror, or an air-gapped copy.
 imagePullSecrets: []
 # Example:
 # imagePullSecrets:
@@ -38,7 +42,7 @@ gui:
   replicaCount: 1
 
   image:
-    repository: quay.io/fmi/fmi-verification-gui
+    repository: ghcr.io/fmidev/fmi-verification-gui
     tag: ""
     pullPolicy: IfNotPresent
 
@@ -168,7 +172,7 @@ runner:
   replicaCount: 1
 
   image:
-    repository: quay.io/fmi/fmi-verification-runner
+    repository: ghcr.io/fmidev/fmi-verification-runner
     tag: ""
     pullPolicy: IfNotPresent
 
@@ -238,7 +242,11 @@ runner:
 
   # Spring Boot Actuator management port. Must match management.server.port
   # in the app's application.yaml.
-  managementPort: 8081
+  #
+  # 8082, not the GUI's 8081: the runner sets management.server.port: 8082 so
+  # the two do not collide on a host where both share a network namespace.
+  # Aligning this with the GUI's value points the probes at a closed port.
+  managementPort: 8082
 
   # Probe action. By default httpGet against the management port.
   # Set one of `httpGet`, `tcpSocket` or `exec` to override.

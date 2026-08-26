@@ -37,6 +37,7 @@ GUI access:
 {{- end }}
 
 Important:
-- Configure imagePullSecrets to access private Quay images.
+- The default images are public on ghcr.io; imagePullSecrets is needed only
+  for a private mirror.
 - Prefer existing Kubernetes Secrets for Spring configuration and credentials.
 - GUI exposure can be configured with either Ingress or OpenShift Route.

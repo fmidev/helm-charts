@@ -39,40 +39,31 @@ Before installing:
    - [cert-manager](https://cert-manager.io/) with a `letsencrypt` ClusterIssuer for automated TLS (Kubernetes); on OpenShift TLS is handled by the Route
 
 2. You must create:
-   - A **pull secret** for Quay.io
    - **configuration Secrets** for GUI and/or runner
 
-## Private container images
+## Container images
 
-The application images are private and hosted in Quay.io
+The application images are public on GitHub Container Registry:
 
-- `quay.io/fmi/fmi-verification-gui`
-- `quay.io/fmi/fmi-verification-runner`
+- `ghcr.io/fmidev/fmi-verification-gui`
+- `ghcr.io/fmidev/fmi-verification-runner`
 
-You must create an image pull secret. The recommended approach is to download the
-pull secret directly from the Quay.io robot account settings:
+**No image pull secret is needed** to deploy this chart as shipped.
 
-1. Download the Kubernetes pull secret YAML from the Quay.io robot account settings
-   (e.g. to `pull-secret.yaml`).
-2. Apply it to the cluster:
-```shell
-kubectl create -f pull-secret.yaml --namespace=smartmet-verify
-```
-3. If the secret name in the downloaded file differs from `pull-secret`, update
-   `imagePullSecrets` in your values file accordingly:
+`imagePullSecrets` remains available for deployments that point the image
+repositories somewhere that does require credentials — a private mirror, or an
+air-gapped copy:
+
 ```yaml
 imagePullSecrets:
   - name: pull-secret
 ```
 
-Alternatively (option B), create the secret manually with credentials:
-
 ```shell
 kubectl create secret docker-registry pull-secret \
-  --docker-server=quay.io \
+  --docker-server=<REGISTRY> \
   --docker-username=<USERNAME> \
   --docker-password=<PASSWORD> \
-  --docker-email=<EMAIL> \
   --namespace=smartmet-verify
 ```
 
@@ -312,8 +303,11 @@ Do not enable both `ingress` and `route` at the same time.
 
 ## Management port
 
-Both GUI and runner expose Spring Boot Actuator on a dedicated management port
-(default **8081**), separate from the main HTTP port 8080. This port starts its
+Both GUI and runner expose Spring Boot Actuator on a dedicated management port,
+separate from the main HTTP port 8080 — **8081** for the GUI and **8082** for the
+runner, so the two do not collide on a host where both share a network
+namespace. Each value must match `management.server.port` in that application's
+own `application.yaml`. This port starts its
 own HTTP listener that is independent of Spring Security, so health endpoints
 are always reachable by probes regardless of the authentication profile active
 on the main port.
@@ -325,7 +319,7 @@ scraped by Prometheus. It is configurable independently per component:
 gui:
   managementPort: 8081   # default
 runner:
-  managementPort: 8081   # default
+  managementPort: 8082   # default
 ```
 
 ## Writable `/tmp` volume
@@ -348,7 +342,8 @@ Disable only if you provide an alternative writable location for `/tmp`.
 
 ## Probes
 
-Both components default to `httpGet` probes against the management port (8081).
+Both components default to `httpGet` probes against their own management port
+(8081 for the GUI, 8082 for the runner).
 Because the management port is a separate HTTP listener that bypasses Spring
 Security, probes work correctly regardless of which authentication profile is
 active — no special probe configuration is needed.
@@ -617,7 +612,7 @@ The following table lists all configurable parameters and their defaults.
 |---|---|---|
 | `gui.enabled` | Deploy the GUI | `false` |
 | `gui.replicaCount` | Number of GUI pod replicas | `1` |
-| `gui.image.repository` | GUI image repository | `quay.io/fmi/fmi-verification-gui` |
+| `gui.image.repository` | GUI image repository | `ghcr.io/fmidev/fmi-verification-gui` |
 | `gui.image.tag` | GUI image tag — **required** | `""` |
 | `gui.image.pullPolicy` | Image pull policy | `IfNotPresent` |
 | `gui.service.type` | Kubernetes Service type | `ClusterIP` |
@@ -687,7 +682,7 @@ The following table lists all configurable parameters and their defaults.
 |---|---|---|
 | `runner.enabled` | Deploy the runner | `false` |
 | `runner.replicaCount` | Number of runner pod replicas | `1` |
-| `runner.image.repository` | Runner image repository | `quay.io/fmi/fmi-verification-runner` |
+| `runner.image.repository` | Runner image repository | `ghcr.io/fmidev/fmi-verification-runner` |
 | `runner.image.tag` | Runner image tag — **required** | `""` |
 | `runner.image.pullPolicy` | Image pull policy | `IfNotPresent` |
 | `runner.service.type` | Kubernetes Service type | `ClusterIP` |
@@ -723,7 +718,7 @@ The following table lists all configurable parameters and their defaults.
 | `runner.persistence.logs.storageClassName` | Storage class for the log PVC | `""` |
 | `runner.persistence.logs.mountPath` | Log directory mount path | `/var/log/tomcat` |
 | `runner.tmpDir.enabled` | Mount a writable `emptyDir` at `/tmp` | `true` |
-| `runner.managementPort` | Spring Boot Actuator management port | `8081` |
+| `runner.managementPort` | Spring Boot Actuator management port | `8082` |
 | `runner.probes.liveness.enabled` | Enable liveness probe | `true` |
 | `runner.probes.liveness.httpGet.path` | Liveness probe HTTP path | `/actuator/health/liveness` |
 | `runner.probes.liveness.httpGet.port` | Liveness probe port | `management` |
