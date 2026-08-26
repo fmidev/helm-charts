@@ -51,6 +51,7 @@ kubectl -n smartmet-verify get cluster verification-db -w
 | `ConfigMap` | `verification-db-sql-pre-init` | `0000-pre-init.sql` — roles |
 | `ConfigMap` | `verification-db-sql-production` | `0001-production-schema.sql` — the schema |
 | `ConfigMap` | `verification-db-sql-post-ownership` | `0002-post-ownership.sql` — ownership transfer |
+| `ConfigMap` | `verification-db-sql-reference-data` | `0004-reference-data.sql` — rows the applications require |
 | `ConfigMap` | `verification-db-sql-extra` | operator-supplied `schema.extraSql` |
 | `Secret` × 9 | `verification-db-<role>` | `kubernetes.io/basic-auth` role passwords |
 | `Service` | `verification-db` | alias for the primary (via CNPG `managed.services`) |
@@ -72,10 +73,19 @@ Vendored files, applied in this order:
    pgstattuple`.
 3. `0002-post-ownership.sql` — transfers ownership of the database and schema
    `public` to `verifadmin`.
-4. `verification-db-sql-extra` — anything from `schema.extraSql`.
+4. `0004-reference-data.sql` — reference rows the applications require in every
+   deployment, currently `target_types`. These are **not** customer metadata:
+   the GUI compiles the names in, so a database without them is broken rather
+   than empty — every query form switches on the selected target type, and an
+   empty table makes the first view a user opens throw
+   `Cannot invoke "String.hashCode()" because ... is null`. Idempotent, so it is
+   safe against a database that already has the rows.
+5. `verification-db-sql-extra` — anything from `schema.extraSql`. Last, so an
+   operator can override the reference data above.
 
 `0003-legacy-test-data.sql` is deliberately **not** vendored: it consists of
 `\COPY` meta-commands against ~176 MB of CSV fixtures, which CNPG cannot execute.
+That is why the vendored numbering skips from `0002` to `0004`.
 
 > **The schema is applied by `initdb` ONLY, on first bootstrap.**
 > Editing `files/sql/` and running `helm upgrade` does **not** migrate an

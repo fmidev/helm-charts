@@ -29,6 +29,7 @@ FILES=(
   0000-pre-init.sql
   0001-production-schema.sql
   0002-post-ownership.sql
+  0004-reference-data.sql
 )
 
 command -v gh >/dev/null || { echo "ERROR: gh is required" >&2; exit 1; }
