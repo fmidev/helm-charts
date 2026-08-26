@@ -8,7 +8,7 @@ home: https://github.com/fmidev/helm-charts
 sources:
   - https://gitlab.com/opengeoweb/backend-services/plugin-registry-backend
 maintainers:
-  - name: OpenGeoWeb
+  - name: karricgi
 keywords:
   - geoweb
   - plugin-registry
