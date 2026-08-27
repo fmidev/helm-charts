@@ -38,6 +38,7 @@ kubectl create secret generic plugin-registry-oidc \
 Configure the chart with values similar to:
 
 ```yaml
+publicUrl: https://plugins.example.com
 storage:
   backend: s3
   s3:
@@ -70,6 +71,7 @@ plugin stores its state at `/verdaccio/storage/openid-store`.
 | Parameter | Description | Default |
 |---|---|---|
 | `versions.pluginRegistry` | Optional application version override | `""` |
+| `publicUrl` | Canonical external registry URL used for UI assets and package metadata | `""` |
 | `image.repository` | Container image repository | `registry.gitlab.com/opengeoweb/backend-services/plugin-registry-backend/plugin-registry-backend` |
 | `image.tag` | Container image tag | `v0.4.2` |
 | `image.pullPolicy` | Kubernetes image pull policy | `IfNotPresent` |

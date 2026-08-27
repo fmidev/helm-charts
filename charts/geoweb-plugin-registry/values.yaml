@@ -2,6 +2,10 @@
 versions:
   pluginRegistry: ""
 
+# Canonical externally accessible registry URL. Leave empty to let Verdaccio
+# derive it from the request headers.
+publicUrl: ""
+
 image:
   # Container image repository.
   repository: registry.gitlab.com/opengeoweb/backend-services/plugin-registry-backend/plugin-registry-backend

@@ -35,8 +35,13 @@ spec:
         - name: geoweb-plugin-registry
           image: "{{ .Values.image.repository }}:{{ default .Values.image.tag .Values.versions.pluginRegistry }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if eq .Values.storage.backend "s3" }}
+          {{- if or .Values.publicUrl (eq .Values.storage.backend "s3") }}
           env:
+            {{- with .Values.publicUrl }}
+            - name: VERDACCIO_PUBLIC_URL
+              value: {{ . | quote }}
+            {{- end }}
+            {{- if eq .Values.storage.backend "s3" }}
             {{- if or .Values.storage.s3.existingSecret (and .Values.storage.s3.accessKeyId .Values.storage.s3.secretAccessKey) }}
             - name: AWS_ACCESS_KEY_ID
               {{- if .Values.storage.s3.existingSecret }}
@@ -108,6 +113,7 @@ spec:
               value: {{ $.Values.auth.scope | quote }}
             - name: VERDACCIO_OPENID_USERNAME_CLAIM
               value: {{ $.Values.auth.usernameClaim | quote }}
+            {{- end }}
             {{- end }}
           {{- end }}
           securityContext:
