@@ -2,6 +2,11 @@
 
 This chart deploys the Verdaccio plugin registry.
 
+The chart intentionally deploys one registry replica. The production OpenID
+configuration uses a file-backed store on the mounted PVC, which cannot safely
+be shared by replicas across nodes. Supporting multiple replicas would require
+a shared OpenID store such as Redis or DynamoDB.
+
 ## Render and install
 
 ```bash
@@ -67,7 +72,6 @@ plugin stores its state at `/verdaccio/storage/openid-store`.
 | `image.tag` | Container image tag | `v0.4.2` |
 | `image.pullPolicy` | Kubernetes image pull policy | `IfNotPresent` |
 | `imagePullSecrets` | Optional image pull secrets for private images | `[]` |
-| `replicaCount` | Number of registry replicas | `1` |
 | `service.port` | Service and container port | `4873` |
 | `route.enabled` | Enable the OpenShift Route | `true` |
 | `ingress.enabled` | Enable the Kubernetes Ingress | `false` |

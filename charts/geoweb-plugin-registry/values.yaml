@@ -2,9 +2,6 @@
 versions:
   pluginRegistry: ""
 
-# Number of registry replicas. The local PVC setup is intended for one replica.
-replicaCount: 1
-
 image:
   # Container image repository.
   repository: registry.gitlab.com/opengeoweb/backend-services/plugin-registry-backend/plugin-registry-backend
