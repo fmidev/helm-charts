@@ -23,6 +23,8 @@ The AWS environment repository should provide the bucket, region, GitLab OAuth
 Secret name, service account IAM role, and public hostname as Helm values. Leave
 `storage.s3.endpoint` empty and set `pathStyle` to `false` for native AWS S3.
 The S3 bucket and IAM role should be created outside this chart.
+Set `ingress.className` to the IngressClass installed in the target cluster, or
+leave it empty to use the cluster default.
 
 Create a Kubernetes Secret containing the GitLab OAuth client credentials:
 
@@ -53,7 +55,7 @@ auth:
   existingSecret: plugin-registry-oidc
 ingress:
   enabled: true
-  className: nginx
+  className: ""
   host: plugins.example.com
 route:
   enabled: false
