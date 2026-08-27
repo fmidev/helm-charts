@@ -4940,6 +4940,28 @@ entries:
   smartmet-verify:
   - apiVersion: v2
     appVersion: 0.1.0
+    created: "2026-08-27T15:17:09.195351495Z"
+    description: Helm chart for deploying SmartMet Verify applications (GUI and runner)
+    digest: 43a0115913a4f7bbe1fc755dace46f7aa19b51b11f8cae069c630a8108f9b13d
+    home: https://github.com/fmidev/helm-charts
+    keywords:
+    - smartmet
+    - verify
+    - spring-boot
+    - verification
+    maintainers:
+    - email: admin@weatherproof.fi
+      name: fmi-build-bot
+      url: https://github.com/fmi-build-bot
+    name: smartmet-verify
+    sources:
+    - https://github.com/fmidev/helm-charts
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/smartmet-verify-0.7.0/smartmet-verify-0.7.0.tgz
+    version: 0.7.0
+  - apiVersion: v2
+    appVersion: 0.1.0
     created: "2026-08-27T12:45:56.837016974Z"
     description: Helm chart for deploying SmartMet Verify applications (GUI and runner)
     digest: bdeb43d653f54c560b6cd4f2b25c0470e18233dd064b85c7179a5a5255fdfc36
@@ -5784,4 +5806,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2026-08-27T13:49:44.500945104Z"
+generated: "2026-08-27T15:17:09.195932147Z"
