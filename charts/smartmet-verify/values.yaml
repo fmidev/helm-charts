@@ -301,13 +301,21 @@ loader:
   tmpDir:
     enabled: true
 
+  # The spool holds forecasts fetched while the verification database was unavailable, replayed
+  # when it returns. Persistent by default: an emptyDir spool is discarded on a pod reschedule,
+  # which loses precisely the runs it exists to protect -- and the loader only spools at all for an
+  # outage longer than EDR's instance retention, so those runs cannot simply be re-fetched.
+  #
+  # mountPath must match loader.spool.path in the application config, and size should match
+  # loader.spool.max-size, which is the cap the application evicts against.
   spool:
     mountPath: /var/spool/verification-loader
     persistence:
-      enabled: false
+      enabled: true
       accessModes:
         - ReadWriteOnce
       size: 5Gi
+      # Empty -> the cluster's default StorageClass.
       storageClassName: ""
 
   resources:
