@@ -297,6 +297,10 @@ loader:
   # Ephemeral spool by default (emptyDir). Enable persistence to keep spooled runs across a pod
   # reschedule -- worth it where a maintenance window can outlast the EDR's short instance
   # retention. mountPath must match loader.spool.path in the application config.
+  # Writable /tmp for the embedded servlet container under the read-only root filesystem.
+  tmpDir:
+    enabled: true
+
   spool:
     mountPath: /var/spool/verification-loader
     persistence:
