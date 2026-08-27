@@ -80,6 +80,10 @@ spec:
           volumeMounts:
             - name: spool
               mountPath: {{ .Values.loader.spool.mountPath }}
+            {{- if .Values.loader.tmpDir.enabled }}
+            - name: tmp
+              mountPath: /tmp
+            {{- end }}
             {{- with .Values.global.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -87,6 +91,12 @@ spec:
             {{- toYaml . | nindent 12 }}
             {{- end }}
       volumes:
+        {{- if .Values.loader.tmpDir.enabled }}
+        # Writable /tmp: the image runs with a read-only root filesystem, and the embedded
+        # servlet container needs to create its work directory under /tmp. Mirrors gui/runner.
+        - name: tmp
+          emptyDir: {}
+        {{- end }}
         - name: spool
           {{- if .Values.loader.spool.persistence.enabled }}
           persistentVolumeClaim:
