@@ -12,7 +12,7 @@ Both applications can be deployed together or independently. An optional Postgre
 The chart is designed to:
 
 - Work on standard Kubernetes (RKE2) and OpenShift
-- Support separate deployments of GUI and runner
+- Support separate deployments of GUI, runner and the optional EDR model-data loader
 - Use **external services**:
   - PostgreSQL/PostGIS database
   - SmartMet Server (HTTP API)
@@ -47,6 +47,7 @@ The application images are public on GitHub Container Registry:
 
 - `ghcr.io/fmidev/fmi-verification-gui`
 - `ghcr.io/fmidev/fmi-verification-runner`
+- `ghcr.io/fmidev/fmi-verification-loader` (only when `loader.enabled: true`)
 
 **No image pull secret is needed** to deploy this chart as shipped.
 
