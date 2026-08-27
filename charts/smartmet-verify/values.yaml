@@ -270,6 +270,83 @@ runner:
       timeoutSeconds: 3
       failureThreshold: 6
 
+# Optional model data loader: reads model forecasts from a SmartMet Server EDR API and writes them
+# into model_data. Off by default -- FMI fills that table another way, so only deployments that
+# rely on the EDR loader (e.g. international ones) enable it.
+loader:
+  enabled: false
+
+  image:
+    repository: ghcr.io/fmidev/fmi-verification-loader
+    tag: ""
+    pullPolicy: IfNotPresent
+
+  # The verification database. jdbcUrl, not url: the app binds a Hikari DataSource by its own
+  # property names. In-cluster this is the CNPG service; the password comes from a secret.
+  db:
+    jdbcUrl: jdbc:postgresql://verification-db:5432/verifapi
+    username: verifrun
+    passwordSecret:
+      name: smartmet-verify-loader-db-password
+      key: password
+
+  edr:
+    # SmartMet Server EDR endpoint, in-cluster DNS (<service>.<namespace>), not the public name.
+    baseUrl: ""
+
+  # Ephemeral spool by default (emptyDir). Enable persistence to keep spooled runs across a pod
+  # reschedule -- worth it where a maintenance window can outlast the EDR's short instance
+  # retention. mountPath must match loader.spool.path in the application config.
+  spool:
+    mountPath: /var/spool/verification-loader
+    persistence:
+      enabled: false
+      accessModes:
+        - ReadWriteOnce
+      size: 5Gi
+      storageClassName: ""
+
+  resources:
+    requests:
+      memory: 1Gi
+      cpu: "1"
+    limits:
+      memory: 1Gi
+      cpu: "1"
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  podAnnotations: {}
+  podLabels: {}
+  extraEnv: []
+  extraVolumes: []
+  extraVolumeMounts: []
+
+  # Spring Boot Actuator management port. Must match management.server.port in the loader's
+  # application.yaml. 8083: the GUI holds 8081 and the runner 8082, so all three can share a
+  # network namespace without colliding.
+  managementPort: 8083
+
+  # Liveness only. The loader answers no application traffic and has no Service, so readiness
+  # gates nothing; a loader that cannot momentarily reach EDR or the database is still healthy and
+  # retrying, and must not be marked unready for it. Liveness catches a wedged process.
+  probes:
+    liveness:
+      enabled: true
+      httpGet:
+        path: /actuator/health/liveness
+        port: management
+      initialDelaySeconds: 30
+      periodSeconds: 20
+      timeoutSeconds: 3
+      failureThreshold: 6
+    readiness:
+      enabled: false
+      httpGet:
+        path: /actuator/health/readiness
+        port: management
+
 # Optional PostgreSQL/PostGIS database managed by the CloudNativePG operator.
 #
 # The operator itself is NOT installed by this chart. Before setting
