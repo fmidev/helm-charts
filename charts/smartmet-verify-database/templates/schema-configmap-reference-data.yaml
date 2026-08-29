@@ -1,14 +1,17 @@
 {{/*
-Reference rows the applications require in every deployment, currently
-target_types. Must run AFTER the ownership transfer, and before any
-operator-supplied SQL so that an operator can still override it.
+Reference rows the applications require in every deployment: target_types and
+the estimators with their localized descriptions. Must run AFTER the ownership
+transfer, and before any operator-supplied SQL so that an operator can still
+override it.
 
-These are not customer metadata: the GUI compiles the names in, so a database
-without them is broken rather than empty. TargetTypeRadioGroup preselects
-GROUP, then AREA, then LOCATION, and leaves the radio group unset when it finds
-none of them; every query form then switches on the selected name, so an empty
-table makes the first view a user opens throw
-`Cannot invoke "String.hashCode()" because ... is null`.
+These are not customer metadata: the GUI compiles the names, and some ids, in,
+so a database without them is broken rather than empty. TargetTypeRadioGroup
+preselects GROUP, then AREA, then LOCATION, and leaves the radio group unset
+when it finds none of them; every query form then switches on the selected
+name, so an empty table makes the first view a user opens throw
+`Cannot invoke "String.hashCode()" because ... is null`. The estimator ids match
+FMI's for the same reason: ColumnDiagramChartBuilder hardcodes id 93 for
+BIAS_ON_MAP while EstimatorComboBox resolves that row by name.
 
 Rendered only when schema.enabled is true. The ConfigMap name is STABLE and
 carries no content hash on purpose: CNPG treats Cluster.spec.bootstrap as
