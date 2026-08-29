@@ -1840,8 +1840,149 @@ VALUES
        (1226, 124, 'estimators', '27,28,20')
 ON CONFLICT DO NOTHING;
 
+-- ---------------------------------------------------------------------------
+-- period_types
+-- ---------------------------------------------------------------------------
+-- The ten FMI verifies over. Seeded whole, ids intact, for the usual reason:
+-- WarningsViews asks for period types 1, 2, 3, 5 and 10 by id, and
+-- PeriodTypeRadioGroup indexes the list of requested ids, so the set has to
+-- match FMI's. Before fmi-verification-gui 3.25.4 an out-of-range index there
+-- made /warningsviews an Internal Server Error rather than an empty menu.
+--
+-- WINTER_ROAD_MAINTENANCE (id 12) is a Finnish road-season concept and travels
+-- badly, but it is seeded anyway: dropping it here would fork the id space from
+-- FMI's. A deployment that does not want it deletes it in its own
+-- db-migrations/, which is the documented lever for FMI-specific reference rows.
+--
+-- Localization entries take the 300000 block, keeping them clear of the
+-- estimators (0) and parameters (100000).
+
+INSERT INTO public.localization_entries (id, tablename, columnname, entity_id)
+VALUES
+       (300001, 'period_types', 'description_id', 1),
+       (300002, 'period_types', 'description_id', 2),
+       (300003, 'period_types', 'description_id', 3),
+       (300005, 'period_types', 'description_id', 5),
+       (300010, 'period_types', 'description_id', 10),
+       (300011, 'period_types', 'description_id', 11),
+       (300012, 'period_types', 'description_id', 12),
+       (300013, 'period_types', 'description_id', 13),
+       (300014, 'period_types', 'description_id', 14),
+       (300015, 'period_types', 'description_id', 15)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO public.period_types (id, name, description_id)
+VALUES
+       (1, 'MONTHLY', 300001),
+       (2, 'SEASONAL', 300002),
+       (3, 'ANNUAL', 300003),
+       (5, 'MOVING_ANNUAL', 300005),
+       (10, 'CURRENT_YEAR', 300010),
+       (11, 'MOVING_TRIENNIAL', 300011),
+       (12, 'WINTER_ROAD_MAINTENANCE', 300012),
+       (13, 'ARBITRARY', 300013),
+       (14, 'WEEKLY', 300014),
+       (15, 'DAILY', 300015)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO public.localization_translations (entry_id, language_id, translation)
+VALUES
+       (300001, 1, 'month'),
+       (300002, 1, 'season'),
+       (300003, 1, 'year'),
+       (300005, 1, 'moving year'),
+       (300010, 1, 'current year'),
+       (300011, 1, 'moving three-year'),
+       (300012, 1, 'winter road maintenance'),
+       (300013, 1, 'arbitrary'),
+       (300014, 1, 'week'),
+       (300015, 1, 'day'),
+       (300001, 2, 'kuukausi'),
+       (300002, 2, 'vuodenaika'),
+       (300003, 2, 'vuosi'),
+       (300005, 2, 'liukuva vuosi'),
+       (300010, 2, 'kuluva vuosi'),
+       (300011, 2, 'liukuva kolme vuotta'),
+       (300012, 2, 'teiden talvikunnossapito'),
+       (300013, 2, 'mielivaltainen'),
+       (300014, 2, 'viikko'),
+       (300015, 2, 'vuorokausi')
+ON CONFLICT DO NOTHING;
+
+-- ---------------------------------------------------------------------------
+-- location_kinds
+-- ---------------------------------------------------------------------------
+-- FMI's six, ids intact, with one deliberate change: id 1 is named WEATHER
+-- rather than FMI, and described as "weather stations" rather than "FMI
+-- stations". Every location a deployment seeds points at a location kind, and
+-- id 1 is the one it will point at, so shipping FMI's own name for it abroad
+-- would be wrong in the one row every installation actually uses.
+--
+-- The other five name Finnish observation networks -- the road administration,
+-- the mareograph network, wave buoys -- and a deployment that does not want
+-- them deletes them in its own db-migrations/, keeping the id space aligned
+-- with FMI's.
+--
+-- One coupling worth knowing: the runner maps location kinds to observation
+-- producers by NAME, through smartmet_verify_producers_by_location_kind in the
+-- ansible role. That mapping is empty by default, but a deployment that sets it
+-- must key it on WEATHER, not FMI.
+--
+-- Localization entries take the 400000 block.
+
+INSERT INTO public.localization_entries (id, tablename, columnname, entity_id)
+VALUES
+       (400001, 'location_kinds', 'description_id', 1),
+       (400002, 'location_kinds', 'description_id', 2),
+       (400003, 'location_kinds', 'description_id', 3),
+       (400004, 'location_kinds', 'description_id', 4),
+       (400005, 'location_kinds', 'description_id', 5),
+       (400006, 'location_kinds', 'description_id', 6)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO public.location_kinds (id, name, description_id)
+VALUES
+       (1, 'WEATHER', 400001),
+       (2, 'FOREIGNST', 400002),
+       (3, 'TIEHALLINTO', 400003),
+       (4, 'BUOY', 400004),
+       (5, 'MAREO', 400005),
+       (6, 'RUNWAY', 400006)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO public.localization_translations (entry_id, language_id, translation)
+VALUES
+       (400001, 1, 'weather stations'),
+       (400002, 1, 'foreign stations'),
+       (400003, 1, 'road weather stations'),
+       (400004, 1, 'wave buoys'),
+       (400005, 1, 'mareographs'),
+       (400006, 1, 'runway stations'),
+       (400001, 2, 'sääasemat'),
+       (400002, 2, 'ulkomaiset asemat'),
+       (400003, 2, 'tiesääasemat'),
+       (400004, 2, 'aaltopoijut'),
+       (400005, 2, 'meriveden korkeusasemat'),
+       (400006, 2, 'kiitotieasemat')
+ON CONFLICT DO NOTHING;
+
+-- ---------------------------------------------------------------------------
+-- forecasters
+-- ---------------------------------------------------------------------------
+-- Only the sentinel row. FMI has 97 forecasters, but they are named people at
+-- one institute -- nothing an international deployment should inherit. Id -1 is
+-- the "no particular forecaster" marker the rest of the schema expects, so it is
+-- the one row every deployment needs and the only one seeded here. Real
+-- forecasters are customer metadata, added per deployment.
+
+INSERT INTO public.forecasters (id, username, realname)
+VALUES (-1, 'DEFAULT', 'ALL FORECASTERS')
+ON CONFLICT DO NOTHING;
+
 SELECT setval('public.localization_languages_id_seq', (SELECT max(id) FROM public.localization_languages));
 SELECT setval('public.localization_entries_id_seq', (SELECT max(id) FROM public.localization_entries));
 SELECT setval('public.estimators_id_seq', (SELECT max(id) FROM public.estimators));
 SELECT setval('public.parameter_map_id_seq', (SELECT max(id) FROM public.parameter_map));
+SELECT setval('public.period_types_id_seq', (SELECT max(id) FROM public.period_types));
+SELECT setval('public.location_kinds_id_seq', (SELECT max(id) FROM public.location_kinds));
 SELECT setval('public.parameters_id_seq', (SELECT max(id) FROM public.parameters));
