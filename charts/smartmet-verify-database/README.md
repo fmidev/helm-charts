@@ -74,12 +74,17 @@ Vendored files, applied in this order:
 3. `0002-post-ownership.sql` — transfers ownership of the database and schema
    `public` to `verifadmin`.
 4. `0004-reference-data.sql` — reference rows the applications require in every
-   deployment, currently `target_types`. These are **not** customer metadata:
-   the GUI compiles the names in, so a database without them is broken rather
-   than empty — every query form switches on the selected target type, and an
-   empty table makes the first view a user opens throw
-   `Cannot invoke "String.hashCode()" because ... is null`. Idempotent, so it is
-   safe against a database that already has the rows.
+   deployment: `target_types`, and the 97 `estimators` with their localized
+   descriptions. These are **not** customer metadata: the GUI compiles both the
+   names and, in places, the ids in, so a database without them is broken rather
+   than empty. Every query form switches on the selected target type, and an
+   empty `target_types` makes the first view a user opens throw
+   `Cannot invoke "String.hashCode()" because ... is null`; an absent
+   `BIAS_ON_MAP` estimator likewise made the bias-on-map view an Internal Server
+   Error page before fmi-verification-gui 3.25.1. Estimator ids therefore match
+   FMI's exactly — `ColumnDiagramChartBuilder` hardcodes id 93 for
+   `BIAS_ON_MAP` while `EstimatorComboBox` resolves the same row by name.
+   Idempotent, so it is safe against a database that already has the rows.
 5. `verification-db-sql-extra` — anything from `schema.extraSql`. Last, so an
    operator can override the reference data above.
 
