@@ -2265,6 +2265,19 @@ VALUES
        (824, 4, 824, 2.5, 3.5)
 ON CONFLICT DO NOTHING;
 
+-- ---------------------------------------------------------------------------
+-- Deliberately not seeded
+-- ---------------------------------------------------------------------------
+-- derivative_estimators: 13,864 rows, ~724 KB. Read by the metadata view and
+-- branched on by result calculation, but only 3 of its 73 parameter/estimator
+-- combinations are offerable through the menus a deployment actually gets, and
+-- an empty table degrades silently -- the loader falls through to plain
+-- estimator orders. Carrying it would need a ConfigMap of its own, which is not
+-- worth it for the reachable 262 rows.
+--
+-- derivative_rvm: cannot travel at all. Its comparison_producer_id references
+-- FMI producers, and producers are per-deployment.
+
 SELECT setval('public.localization_languages_id_seq', (SELECT max(id) FROM public.localization_languages));
 SELECT setval('public.localization_entries_id_seq', (SELECT max(id) FROM public.localization_entries));
 SELECT setval('public.estimators_id_seq', (SELECT max(id) FROM public.estimators));
