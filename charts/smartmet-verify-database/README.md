@@ -74,16 +74,30 @@ Vendored files, applied in this order:
 3. `0002-post-ownership.sql` — transfers ownership of the database and schema
    `public` to `verifadmin`.
 4. `0004-reference-data.sql` — reference rows the applications require in every
-   deployment: `target_types`, and the 97 `estimators` with their localized
-   descriptions. These are **not** customer metadata: the GUI compiles both the
-   names and, in places, the ids in, so a database without them is broken rather
-   than empty. Every query form switches on the selected target type, and an
-   empty `target_types` makes the first view a user opens throw
+   deployment: `target_types`, the 97 `estimators` and the 291 `parameters`, the
+   latter two with their localized descriptions in English and Finnish. These are
+   **not** customer metadata: the GUI compiles both the names and, in places, the
+   ids in, so a database without them is broken rather than empty. Every query
+   form switches on the selected target type, and an empty `target_types` makes
+   the first view a user opens throw
    `Cannot invoke "String.hashCode()" because ... is null`; an absent
    `BIAS_ON_MAP` estimator likewise made the bias-on-map view an Internal Server
    Error page before fmi-verification-gui 3.25.1. Estimator ids therefore match
    FMI's exactly — `ColumnDiagramChartBuilder` hardcodes id 93 for
    `BIAS_ON_MAP` while `EstimatorComboBox` resolves the same row by name.
+
+   Parameter *names* carry the same weight: `ModelData.getValue()` rescales
+   `TotalCloudCover` from percent to eighths and clamps `Ceiling` and
+   `Visibility` by name, `ObservationManager` shifts the observation window for
+   `Precipitation24h`, and the chart builders branch on `Direction`,
+   `CloudBase` and `TotalCloudCover`. A deployment that spells them differently
+   gets silently wrong values, not missing ones. Parameter ids are FMI's too, so
+   the views that hardcode them stay usable.
+
+   `localization_entries` is shared, so the seeded tables each own a
+   100000-wide block of entry ids: estimators at offset 0 (1..110), parameters
+   at offset 100000 (100001..100865). A further table takes offset 200000.
+
    Idempotent, so it is safe against a database that already has the rows.
 5. `verification-db-sql-extra` — anything from `schema.extraSql`. Last, so an
    operator can override the reference data above.

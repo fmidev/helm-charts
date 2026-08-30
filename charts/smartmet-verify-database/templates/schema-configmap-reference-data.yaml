@@ -1,8 +1,8 @@
 {{/*
-Reference rows the applications require in every deployment: target_types and
-the estimators with their localized descriptions. Must run AFTER the ownership
-transfer, and before any operator-supplied SQL so that an operator can still
-override it.
+Reference rows the applications require in every deployment: target_types, the
+estimators and the parameters, the latter two with their localized descriptions.
+Must run AFTER the ownership transfer, and before any operator-supplied SQL so
+that an operator can still override it.
 
 These are not customer metadata: the GUI compiles the names, and some ids, in,
 so a database without them is broken rather than empty. TargetTypeRadioGroup
@@ -11,7 +11,10 @@ when it finds none of them; every query form then switches on the selected
 name, so an empty table makes the first view a user opens throw
 `Cannot invoke "String.hashCode()" because ... is null`. The estimator ids match
 FMI's for the same reason: ColumnDiagramChartBuilder hardcodes id 93 for
-BIAS_ON_MAP while EstimatorComboBox resolves that row by name.
+BIAS_ON_MAP while EstimatorComboBox resolves that row by name. Parameter names
+are read the same way -- ModelData.getValue() rescales TotalCloudCover and
+clamps Ceiling and Visibility by name -- so a renamed parameter yields wrong
+values rather than absent ones.
 
 Rendered only when schema.enabled is true. The ConfigMap name is STABLE and
 carries no content hash on purpose: CNPG treats Cluster.spec.bootstrap as
