@@ -2545,6 +2545,25 @@ entries:
     version: 0.1.0
   geoweb-plugin-registry:
   - apiVersion: v2
+    appVersion: v0.4.3
+    created: "2026-08-31T10:17:30.201978498Z"
+    description: Helm chart for the GeoWeb Verdaccio plugin registry
+    digest: 7f8b9d1721678108eea4cb57ecdb84230e4c9675e0402e81db3fca6e76aab879
+    home: https://github.com/fmidev/helm-charts
+    keywords:
+    - geoweb
+    - plugin-registry
+    - verdaccio
+    maintainers:
+    - name: karricgi
+    name: geoweb-plugin-registry
+    sources:
+    - https://gitlab.com/opengeoweb/backend-services/plugin-registry-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-plugin-registry-0.2.0/geoweb-plugin-registry-0.2.0.tgz
+    version: 0.2.0
+  - apiVersion: v2
     appVersion: v0.4.2
     created: "2026-08-27T13:49:44.499957155Z"
     description: Helm chart for the GeoWeb Verdaccio plugin registry
@@ -5868,4 +5887,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2026-08-30T07:21:54.960558532Z"
+generated: "2026-08-31T10:17:30.202621828Z"
