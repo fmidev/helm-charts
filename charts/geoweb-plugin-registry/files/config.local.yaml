@@ -1,6 +1,6 @@
 # Local OpenShift development configuration.
 storage: /verdaccio/storage
-plugins: /verdaccio/plugins
+plugins: /verdaccio/plugins/node_modules
 
 web:
   title: GeoWeb Local Plugin Registry
