@@ -34,10 +34,21 @@ SELECT setval('public.target_types_id_seq', (SELECT max(id) FROM public.target_t
 -- estimators, and the localized descriptions they hang off
 -- ---------------------------------------------------------------------------
 --
--- The 97 estimators FMI verifies with. Like target_types these are not
+-- The 94 estimators FMI verifies with. Like target_types these are not
 -- customer metadata: the GUI compiles both estimator names and estimator ids
 -- into its source, so the ids below are fixed and a deployment that renumbers
 -- them gets views that quietly show nothing.
+--
+-- Three of FMI's rows are deliberately absent: RPS (42), EPOCH (45) and
+-- INDEXEPOCH (70). RPS has no implementation in the runner at all, so ordering
+-- it throws and the order is still marked delivered -- a result that silently
+-- never appears. EPOCH lost its only data source when the *_PERSONAL period
+-- types were removed in runner 3.14.3 and has never produced a single result in
+-- FMI production; INDEXEPOCH indexes exactly those never-written EPOCH rows.
+-- All three are retired system-wide (fmi-verification-runner#46 and #43), and
+-- no parameter_map row below offers any of them, so nothing a view can reach is
+-- lost. Their ids are not reused: the gaps at 42, 45 and 70 stay gaps, so every
+-- other id still means what it means at FMI.
 --
 -- BIAS_ON_MAP is the sharpest case. ColumnDiagramChartBuilder hardcodes id 93
 -- while EstimatorComboBox looks the same row up by name, so the two agree only
@@ -50,8 +61,9 @@ SELECT setval('public.target_types_id_seq', (SELECT max(id) FROM public.target_t
 -- Estimator.getScale() dereferences it unconditionally. ColorUtils derives map
 -- legend limits from scale - 1, so 0 rounds those limits to tens.
 --
--- character is read by the runner, not the GUI. Only SSC, SSP, SEEPS, EPOCH and
--- CATEGORY change behaviour; everything else takes the default branch.
+-- character is read by the runner, not the GUI. Only SSC, SSP, SEEPS and
+-- CATEGORY change behaviour; everything else takes the default branch. (The
+-- EPOCH character went with estimator 45; no row carries it any more.)
 --
 -- Insert order is load-bearing, and follows the foreign keys:
 -- localization_languages and localization_entries first, then estimators
@@ -115,10 +127,8 @@ VALUES
        (39, 'estimators', 'description_id', 39),
        (40, 'estimators', 'description_id', 40),
        (41, 'estimators', 'description_id', 41),
-       (42, 'estimators', 'description_id', 42),
        (43, 'estimators', 'description_id', 43),
        (44, 'estimators', 'description_id', 44),
-       (45, 'estimators', 'description_id', 45),
        (46, 'estimators', 'description_id', 46),
        (47, 'estimators', 'description_id', 47),
        (48, 'estimators', 'description_id', 48),
@@ -143,7 +153,6 @@ VALUES
        (67, 'estimators', 'description_id', 67),
        (68, 'estimators', 'description_id', 68),
        (69, 'estimators', 'description_id', 69),
-       (70, 'estimators', 'description_id', 70),
        (71, 'estimators', 'description_id', 71),
        (72, 'estimators', 'description_id', 72),
        (73, 'estimators', 'description_id', 73),
@@ -217,10 +226,8 @@ VALUES
        (39, 'SEEPS_21', 39, 0.0, NULL, 3, 'SEEPS'),
        (40, 'SEEPS_31', 40, 0.0, NULL, 3, 'SEEPS'),
        (41, 'COUNT', 41, 0, NULL, 0, 'CATEGORY'),
-       (42, 'RPS', 42, 0.0, 1.0, 3, 'PROBABILITY'),
        (43, 'INDEXHR3_M', 43, 0.0, 1.0, 3, 'INDEX'),
        (44, 'INDEXHR3', 44, 0.0, 1.0, 3, 'INDEX'),
-       (45, 'EPOCH', 45, 0, NULL, 0, 'EPOCH'),
        (46, 'INDEXME', 46, NULL, NULL, 2, 'INDEX'),
        (47, 'INDEXMAE', 47, 0, NULL, 2, 'INDEX'),
        (48, 'RVM_M', 48, -1.0, 1.0, 3, 'RVM'),
@@ -245,7 +252,6 @@ VALUES
        (67, 'RF', 67, 0.0, 1.0, 3, 'CONTINUOUS'),
        (68, 'INDEXHR3_C', 68, 0.0, 1.0, 3, 'INDEX'),
        (69, 'RVM_C', 69, -1.0, 1.0, 3, 'RVM'),
-       (70, 'INDEXEPOCH', 70, NULL, NULL, 0, 'INDEX'),
        (71, 'ZLTME_DOWN', 71, NULL, NULL, 3, 'ZL'),
        (72, 'ZLTME_UP', 72, NULL, NULL, 3, 'ZL'),
        (73, 'ZLTME', 73, NULL, NULL, 3, 'ZL'),
@@ -322,10 +328,8 @@ VALUES
        (39, 1, 'SEEPS_F201'),
        (40, 1, 'SEEPS_F301'),
        (41, 1, 'count'),
-       (42, 1, 'Ranked probability score'),
        (43, 1, 'hr3 index (min/max)'),
        (44, 1, 'hr3 index'),
-       (45, 1, 'epoch time'),
        (46, 1, 'index me'),
        (47, 1, 'index mae'),
        (48, 1, 'reference value of the meteorologist (min/max)'),
@@ -350,7 +354,6 @@ VALUES
        (67, 1, 'relative frequency'),
        (68, 1, 'hr3 index (inst/min/max)'),
        (69, 1, 'reference value of the meteorologist (inst/min/max)'),
-       (70, 1, 'epoch index'),
        (71, 1, 'zero limit pass downward time ME'),
        (72, 1, 'zero limit pass upward time ME'),
        (73, 1, 'zero limit pass time ME'),
@@ -419,10 +422,8 @@ VALUES
        (39, 2, 'SEEPS_E2H1'),
        (40, 2, 'SEEPS_E3H1'),
        (41, 2, 'lukumäärä'),
-       (42, 2, 'Ranked probability score'),
        (43, 2, 'hr3 indeksi (min/max)'),
        (44, 2, 'hr3 indeksi'),
-       (45, 2, 'epookki aika'),
        (46, 2, 'me indeksi'),
        (47, 2, 'mae indeksi'),
        (48, 2, 'meteorologin vertailuarvo (min/max)'),
@@ -447,7 +448,6 @@ VALUES
        (67, 2, 'osuvuusfrekvenssi'),
        (68, 2, 'hr3 indeksi (inst/min/max)'),
        (69, 2, 'meteorologin vertailuarvo (inst/min/max)'),
-       (70, 2, 'epookki indeksi'),
        (71, 2, '0-rajan alitusaika ME'),
        (72, 2, '0-rajan ylitysaika ME'),
        (73, 2, '0-rajan läpäisyaika ME'),

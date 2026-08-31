@@ -74,7 +74,7 @@ Vendored files, applied in this order:
 3. `0002-post-ownership.sql` — transfers ownership of the database and schema
    `public` to `verifadmin`.
 4. `0004-reference-data.sql` — reference rows the applications require in every
-   deployment: `target_types`, the 97 `estimators` and the 291 `parameters`, the
+   deployment: `target_types`, the 94 `estimators` and the 291 `parameters`, the
    latter two with their localized descriptions in English and Finnish. These are
    **not** customer metadata: the GUI compiles both the names and, in places, the
    ids in, so a database without them is broken rather than empty. Every query
@@ -85,6 +85,13 @@ Vendored files, applied in this order:
    Error page before fmi-verification-gui 3.25.1. Estimator ids therefore match
    FMI's exactly — `ColumnDiagramChartBuilder` hardcodes id 93 for
    `BIAS_ON_MAP` while `EstimatorComboBox` resolves the same row by name.
+
+   Three of FMI's own estimator rows are deliberately **not** seeded: `RPS`
+   (42), `EPOCH` (45) and `INDEXEPOCH` (70), retired system-wide as dead
+   metadata (fmi-verification-runner#46 and #43). `RPS` has no implementation in
+   the runner, `EPOCH` has never produced a result, and `INDEXEPOCH` indexes
+   `EPOCH`. Their ids stay gaps rather than being reused, and no `parameter_map`
+   row offers them, so no view loses anything.
 
    Parameter *names* carry the same weight: `ModelData.getValue()` rescales
    `TotalCloudCover` from percent to eighths and clamps `Ceiling` and
