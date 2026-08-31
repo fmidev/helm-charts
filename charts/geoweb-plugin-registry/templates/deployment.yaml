@@ -42,6 +42,10 @@ spec:
               value: {{ . | quote }}
             {{- end }}
             {{- if eq .Values.storage.backend "s3" }}
+            # Never fall back to the EKS node role when workload credentials are
+            # unavailable. IRSA and explicit credentials remain supported.
+            - name: AWS_EC2_METADATA_DISABLED
+              value: "true"
             {{- if or .Values.storage.s3.existingSecret (and .Values.storage.s3.accessKeyId .Values.storage.s3.secretAccessKey) }}
             - name: AWS_ACCESS_KEY_ID
               {{- if .Values.storage.s3.existingSecret }}
@@ -74,7 +78,7 @@ spec:
               value: {{ .Values.storage.s3.sessionToken | quote }}
               {{- end }}
             {{- end }}
-            - name: AWS_DEFAULT_REGION
+            - name: AWS_REGION
               value: {{ required "storage.s3.region is required when storage.backend=s3" .Values.storage.s3.region | quote }}
             - name: AWS_S3_ENDPOINT
               value: {{ .Values.storage.s3.endpoint | quote }}
@@ -84,7 +88,7 @@ spec:
               value: {{ required "storage.s3.bucket is required when storage.backend=s3" .Values.storage.s3.bucket | quote }}
             - name: AWS_S3_PLUGIN_PREFIX
               value: {{ .Values.storage.s3.prefix | quote }}
-            {{- with .Values.auth.existingSecret }}
+            {{- with .Values.auth.secretName }}
             - name: VERDACCIO_OPENID_PROVIDER_TYPE
               value: gitlab
             - name: VERDACCIO_OPENID_PROVIDER_HOST
@@ -145,6 +149,11 @@ spec:
             - name: storage
               mountPath: /verdaccio/storage
             {{- end }}
+            {{- if .Values.auth.secretProviderClass.enabled }}
+            - name: secrets-store-inline
+              mountPath: /mnt/secrets-store
+              readOnly: true
+            {{- end }}
       volumes:
         - name: config
           configMap:
@@ -153,4 +162,12 @@ spec:
         - name: storage
           persistentVolumeClaim:
             claimName: {{ include "geoweb-plugin-registry.fullname" . }}-storage
+        {{- end }}
+        {{- if .Values.auth.secretProviderClass.enabled }}
+        - name: secrets-store-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: {{ default (printf "%s-oidc" (include "geoweb-plugin-registry.fullname" .)) .Values.auth.secretProviderClass.name | quote }}
         {{- end }}

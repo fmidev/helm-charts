@@ -10,7 +10,7 @@ image:
   # Container image repository.
   repository: registry.gitlab.com/opengeoweb/backend-services/plugin-registry-backend/plugin-registry-backend
   # Image tag. `versions.pluginRegistry` takes precedence when set.
-  tag: v0.4.2
+  tag: v0.4.3
   # Kubernetes image pull policy.
   pullPolicy: IfNotPresent
 
@@ -63,11 +63,19 @@ storage:
 
 auth:
   # Kubernetes Secret containing the GitLab OAuth client credentials.
-  existingSecret: ""
+  secretName: ""
   clientIdKey: VERDACCIO_OPENID_CLIENT_ID
   clientSecretKey: VERDACCIO_OPENID_CLIENT_SECRET
-  scope: openid profile email read_api
+  scope: openid email read_api
   usernameClaim: email
+  # Optionally synchronize secretName from one JSON object in AWS Secrets
+  # Manager. The pod mounts the CSI volume required to trigger synchronization.
+  secretProviderClass:
+    enabled: false
+    # Empty uses the release fullname with an "-oidc" suffix.
+    name: ""
+    region: ""
+    objectName: ""
 
 ingress:
   enabled: false
