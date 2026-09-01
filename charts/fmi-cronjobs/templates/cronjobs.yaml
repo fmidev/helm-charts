@@ -7,6 +7,8 @@
 {{- $concurrencyPolicy := $job.concurrencyPolicy | default $defaults.concurrencyPolicy | default "Forbid" -}}
 {{- $restartPolicy := $job.restartPolicy | default $defaults.restartPolicy | default "Never" -}}
 {{- $backoffLimit := $job.backoffLimit | default $defaults.backoffLimit | default 5 -}}
+{{- /* No built-in fallback: unset means no deadline. */ -}}
+{{- $activeDeadlineSeconds := $job.activeDeadlineSeconds | default $defaults.activeDeadlineSeconds -}}
 {{- $successfulJobsHistoryLimit := $job.successfulJobsHistoryLimit | default $defaults.successfulJobsHistoryLimit | default 1 -}}
 {{- $failedJobsHistoryLimit := $job.failedJobsHistoryLimit | default $defaults.failedJobsHistoryLimit | default 3 -}}
 {{- $pullPolicy := $job.image.pullPolicy | default $defaults.pullPolicy | default "IfNotPresent" -}}
@@ -38,6 +40,9 @@ spec:
   jobTemplate:
     spec:
       backoffLimit: {{ $backoffLimit }}
+      {{- if $activeDeadlineSeconds }}
+      activeDeadlineSeconds: {{ $activeDeadlineSeconds }}
+      {{- end }}
       template:
         spec:
           restartPolicy: {{ $restartPolicy }}
