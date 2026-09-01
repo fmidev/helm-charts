@@ -1,3 +1,5 @@
+{{- /* Aborts the render if the release still sets removed values (see templates/_deprecations.tpl). */ -}}
+{{- include "smartmet-verify.checkDeprecations" . -}}
 SmartMet Verify chart installed.
 
 Release: {{ .Release.Name }}

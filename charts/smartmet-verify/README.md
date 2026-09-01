@@ -5,7 +5,7 @@ This Helm chart deploys the **SmartMet Verify** system, consisting of:
 - `fmi-verification-gui` (web application)
 - `fmi-verification-runner` (background processing)
 
-Both applications can be deployed together or independently. An optional PostgreSQL/PostGIS database can also be provisioned in the same namespace via the CloudNativePG operator.
+Both applications can be deployed together or independently. This chart deploys applications only; the PostgreSQL/PostGIS database is a separate concern, see [Database](#database).
 
 ## Overview
 
@@ -37,6 +37,7 @@ Before installing:
    - An ingress controller (Kubernetes) or Route support (OpenShift) — RKE2 includes Traefik by default
    - A DNS record for the GUI hostname pointing to the cluster's ingress IP
    - [cert-manager](https://cert-manager.io/) with a `letsencrypt` ClusterIssuer for automated TLS (Kubernetes); on OpenShift TLS is handled by the Route
+   - A PostgreSQL/PostGIS database — see [Database](#database)
 
 2. You must create:
    - **configuration Secrets** for GUI and/or runner
@@ -398,160 +399,66 @@ helm install smartmet-verify fmi/smartmet-verify \
   -f values.yaml
 ```
 
-## Database (optional)
+## Database
 
-The chart can optionally provision a PostgreSQL/PostGIS database using
-[CloudNativePG](https://cloudnative-pg.io/) (CNPG). This is a convenience for
-clusters that do not already have an external database; any existing
-PostgreSQL/PostGIS instance continues to work unchanged.
+**This chart does not deploy a database.** It expects the verification
+PostgreSQL/PostGIS database to already exist, and is pointed at it through the
+GUI, runner and loader configuration (`spring.datasource.jdbcUrl` and
+`loader.db.jdbcUrl`).
 
-### Install the CloudNativePG operator
-
-**The CloudNativePG operator is NOT installed by this chart.** You must install
-it separately, cluster-wide, before enabling the database:
-
-```shell
-kubectl apply --server-side -f \
-  https://github.com/cloudnative-pg/cloudnative-pg/releases/download/v1.29.0/cnpg-1.29.0.yaml
-```
-
-The above is the version this chart has been tested against. Any reasonably
-current CNPG release should work.
-
-### Enable the database
-
-```yaml
-database:
-  enabled: true
-  name: verification-db   # default
-```
-
-When enabled, the chart creates a `postgresql.cnpg.io/v1` `Cluster` named by
-`database.name` (default `verification-db`). The default image is
-`ghcr.io/cloudnative-pg/postgis:16-3.4`.
-
-`database.spec` is a pass-through to the CNPG `Cluster.spec` — anything CNPG
-supports goes there.
-
-### Init SQL
-
-The chart does not vendor the SmartMet Verify schema. You must provide the init
-SQL yourself as an existing ConfigMap and reference it from `database.spec`.
-
-Create the ConfigMap:
+To run the database inside the same cluster, use the separate
+[`smartmet-verify-database`](../smartmet-verify-database/) chart, installed as
+its own Helm release:
 
 ```shell
-kubectl -n smartmet-verify create configmap verification-db-init-sql \
-  --from-file=0000-pre-init.sql \
-  --from-file=0001-production-schema.sql \
-  --from-file=0002-post-ownership.sql
+helm install verification-db fmi/smartmet-verify-database \
+  --namespace smartmet-verify
 ```
 
-Reference it via CNPG's `postInitSQLRefs` and `postInitApplicationSQLRefs`:
+That chart renders the CloudNativePG `Cluster`, vendors the SmartMet Verify
+schema and FMI's reference metadata, and manages the login roles. Splitting it
+out means no `helm upgrade` of the applications can ever delete the database.
+Exactly one Helm release may own `Cluster/verification-db`.
 
-```yaml
-database:
-  spec:
-    bootstrap:
-      initdb:
-        postInitSQLRefs:
-          configMapRefs:
-            - { name: verification-db-init-sql, key: 0000-pre-init.sql }
-        postInitApplicationSQLRefs:
-          configMapRefs:
-            - { name: verification-db-init-sql, key: 0001-production-schema.sql }
-            - { name: verification-db-init-sql, key: 0002-post-ownership.sql }
-```
+Any existing external PostgreSQL/PostGIS instance also works unchanged — point
+the application configs at it and install neither database chart.
 
-`0002-post-ownership.sql` is a small user-supplied wrapper that transfers the
-application database's ownership to `verifadmin` after the schema loads. It is
-needed because the CNPG initdb `owner: app` default avoids conflicting with the
-`CREATE ROLE verifadmin` in `0000-pre-init.sql`, so ownership has to be handed
-over explicitly. Example contents:
+### Migrating from `database.*` (chart 0.7.0 and earlier)
 
-```sql
-ALTER DATABASE verifapi OWNER TO verifadmin;
-ALTER SCHEMA public OWNER TO verifadmin;
-GRANT USAGE ON SCHEMA public TO verif_ro;
-GRANT CREATE ON SCHEMA public TO verifadmin;
-```
+Chart versions up to 0.7.0 could optionally render a CNPG `Cluster` from a
+`database:` values block. **That support was removed in 0.8.0** and the chart
+now **fails the render** if `database` is still set, rather than silently
+ignoring it.
 
-### Role passwords
+> **Data-loss warning.** If a release installed from 0.7.0 or earlier owns
+> `Cluster/verification-db`, simply deleting the `database:` block and running
+> `helm upgrade` removes the `Cluster` from the release manifest, and Helm
+> prunes it. CloudNativePG owner-references the PVC to the `Cluster`, so the
+> volume and every row in the database are deleted with it. There is no undo.
 
-Role passwords come from `kubernetes.io/basic-auth` secrets that you create,
-one per managed role:
+Upgrade one of these two ways:
 
-```shell
-kubectl -n smartmet-verify create secret generic verification-db-verifadmin \
-  --type=kubernetes.io/basic-auth \
-  --from-literal=username=verifadmin --from-literal=password=<password>
-kubectl -n smartmet-verify create secret generic verification-db-verifwww \
-  --type=kubernetes.io/basic-auth \
-  --from-literal=username=verifwww --from-literal=password=<password>
-kubectl -n smartmet-verify create secret generic verification-db-verifrun \
-  --type=kubernetes.io/basic-auth \
-  --from-literal=username=verifrun --from-literal=password=<password>
-kubectl -n smartmet-verify create secret generic verification-db-verifimport \
-  --type=kubernetes.io/basic-auth \
-  --from-literal=username=verifimport --from-literal=password=<password>
-```
+1. **Hand the cluster over.** Back it up, detach the live object from this
+   release so Helm will not prune it, upgrade without `database:`, then adopt
+   the object into a `smartmet-verify-database` release:
 
-The `verifwww` and `verifrun` passwords must also appear in the application
-config Secrets (`smartmet-verify-gui-config` and `smartmet-verify-runner-config`
-respectively). Keep the two in sync whenever you rotate a password.
+   ```shell
+   kubectl -n smartmet-verify annotate cluster/verification-db \
+     helm.sh/resource-policy=keep
+   ```
 
-### Managed role memberships
+   Adoption also needs the `app.kubernetes.io/managed-by`,
+   `meta.helm.sh/release-name` and `meta.helm.sh/release-namespace` metadata to
+   match the new release. Check the result with a rendered diff before applying.
 
-**Pitfall:** CNPG's `managed.roles` reconciliation removes any role memberships
-it did not declare itself. If a role's privileges come from a
-`GRANT <group_role> TO <user>` line in `0000-pre-init.sql`, you must **also**
-repeat that via the `inRoles:` field on the managed role — otherwise CNPG will
-revoke it on the next reconcile.
+2. **Rebuild.** Capture a dump you have verified you can restore, uninstall the
+   release, install `smartmet-verify-database`, and restore into it. Note that
+   CNPG applies the init SQL only at `initdb`, so a cluster must be created with
+   the schema wiring it is meant to have.
 
-`examples/values-rke2.yaml` shows `verifwww` with `inRoles: [verif_ro]` and
-`verifrun` with `inRoles: [verif_data_rw]` for exactly this reason.
-
-### Service hostname
-
-CNPG creates `<name>-rw`, `<name>-ro` and `<name>-r` services for the cluster.
-Applications that hard-code `verification-db` as the database hostname (e.g.
-in a pre-existing `application.yaml`) can get that name via
-`database.spec.managed.services.additional` — a `selectorType: rw` service
-template named `verification-db`. See `examples/values-rke2.yaml` for the exact
-shape.
-
-### Full example
-
-See [`examples/values-rke2.yaml`](./examples/values-rke2.yaml) for a complete
-working database configuration, including managed roles, additional services
-and init SQL wiring.
-
-### External access
-
-By default the database is only reachable within the cluster. To allow
-connections from bare-metal servers or other environments outside the namespace,
-enable the external access Service:
-
-```yaml
-database:
-  externalAccess:
-    enabled: true
-    type: NodePort      # or LoadBalancer
-    # nodePort: 30432   # optional fixed port (NodePort only, 30000–32767)
-```
-
-When `type: NodePort`, clients connect to `<any-node-IP>:<nodePort>` on port 5432.
-When `type: LoadBalancer`, a dedicated external IP is provisioned (requires a
-cloud provider or [MetalLB](https://metallb.universe.tf/) on bare-metal clusters).
-
-The Service name is `<database.name>-external` (e.g. `verification-db-external`)
-and it always routes to the **primary** (read-write) pod.
-
-> **Security note:** direct PostgreSQL exposure over the network should be paired
-> with TLS (CNPG supports server-side TLS via `database.spec.certificates`) and
-> tight `pg_hba.conf` rules (`database.spec.postgresql.pg_hba`) so that only
-> known client IPs and authenticated users are accepted. Consider firewall or
-> network-policy rules in addition.
+Pinning `smartmet-verify` 0.7.0 keeps the old behaviour if you are not ready to
+move. Background and the migration this followed at FMI:
+[fmidev/smartmet-rke2#100](https://github.com/fmidev/smartmet-rke2/issues/100).
 
 ## Notes for operators
 
@@ -734,24 +641,3 @@ The following table lists all configurable parameters and their defaults.
 | `runner.probes.readiness.periodSeconds` | Seconds between readiness checks | `20` |
 | `runner.probes.readiness.timeoutSeconds` | Probe timeout | `3` |
 | `runner.probes.readiness.failureThreshold` | Failures before pod marked unready | `6` |
-
-### Database (CloudNativePG)
-
-| Parameter | Description | Default |
-|---|---|---|
-| `database.enabled` | Provision a PostgreSQL/PostGIS database via CloudNativePG | `false` |
-| `database.name` | CNPG `Cluster` name; also the stem of generated services (`<name>-rw`, `-ro`, `-r`) | `verification-db` |
-| `database.externalAccess.enabled` | Expose the database primary outside the cluster via a NodePort or LoadBalancer Service | `false` |
-| `database.externalAccess.type` | Service type: `NodePort` or `LoadBalancer` | `NodePort` |
-| `database.externalAccess.nodePort` | Fixed NodePort number (30000–32767, NodePort only). Omit to auto-assign. | `""` |
-| `database.externalAccess.annotations` | Annotations on the external Service (e.g. MetalLB address pool) | `{}` |
-| `database.spec.instances` | Number of PostgreSQL instances | `1` |
-| `database.spec.imageName` | PostgreSQL + PostGIS container image | `ghcr.io/cloudnative-pg/postgis:16-3.4` |
-| `database.spec.storage.size` | PVC size for database storage | `100Gi` |
-| `database.spec.storage.storageClass` | Storage class for the database PVC | `""` |
-| `database.spec.bootstrap.initdb.database` | Name of the application database to create | `verifapi` |
-| `database.spec.bootstrap.initdb.owner` | Initial database owner role | `app` |
-| `database.spec.bootstrap.initdb.postInitSQLRefs` | ConfigMap/Secret refs for SQL run before app init (e.g. `0000-pre-init.sql`) | `[]` |
-| `database.spec.bootstrap.initdb.postInitApplicationSQLRefs` | ConfigMap/Secret refs for SQL run after app init (e.g. schema + ownership SQL) | `[]` |
-| `database.spec.managed.roles` | CNPG managed roles with passwords from Kubernetes Secrets | `[]` |
-| `database.spec.managed.services.additional` | Extra services (e.g. a `verification-db` alias for the primary) | `[]` |
