@@ -2,6 +2,25 @@ apiVersion: v1
 entries:
   fmi-cronjobs:
   - apiVersion: v2
+    created: "2026-09-01T06:31:16.665160378Z"
+    description: Helm chart for defining multiple CronJobs
+    digest: 03b46b4faf0aa8614e53e9ecaf565c56e35b61efe848e8368512df8c6a3d1a4e
+    home: https://github.com/fmidev/helm-charts
+    keywords:
+    - fmi
+    - cronjob
+    - batch
+    - scheduled
+    maintainers:
+    - email: admin@weatherproof.fi
+      name: fmi-build-bot
+      url: https://github.com/fmi-build-bot
+    name: fmi-cronjobs
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/fmi-cronjobs-0.3.0/fmi-cronjobs-0.3.0.tgz
+    version: 0.3.0
+  - apiVersion: v2
     created: "2026-05-19T06:04:07.095151546Z"
     description: Helm chart for defining multiple CronJobs
     digest: b55250963f344b3e4bd3eb18366fad6a59e129b08849cab385f19425189016be
@@ -5887,4 +5906,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2026-08-31T10:17:30.202621828Z"
+generated: "2026-09-01T06:31:16.665718211Z"
