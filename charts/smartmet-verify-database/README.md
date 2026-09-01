@@ -74,8 +74,10 @@ Vendored files, applied in this order:
 3. `0002-post-ownership.sql` — transfers ownership of the database and schema
    `public` to `verifadmin`.
 4. `0004-reference-data.sql` — reference rows the applications require in every
-   deployment: `target_types`, the 94 `estimators` and the 291 `parameters`, the
-   latter two with their localized descriptions in English and Finnish. These are
+   deployment: `target_types`, the 94 `estimators`, the 291 `parameters`, the
+   `period_types`, `location_kinds`, `parameter_class_limits`, the `forecasters`
+   sentinel and `parameter_map`, with localized descriptions in English and
+   Finnish for the estimators and parameters. These are
    **not** customer metadata: the GUI compiles both the names and, in places, the
    ids in, so a database without them is broken rather than empty. Every query
    form switches on the selected target type, and an empty `target_types` makes
@@ -94,9 +96,32 @@ Vendored files, applied in this order:
    gets silently wrong values, not missing ones. Parameter ids are FMI's too, so
    the views that hardcode them stay usable.
 
+   `parameter_map` says how a parameter is addressed outside this database.
+   Four of the fifteen categories FMI keeps are universal enough to seed:
+   `estimators` (which metrics may be computed, 100 rows), and `newbase`,
+   `modelData` and `obsBaseParameter` (43 rows each — the id SmartMet Server
+   knows the parameter by, where its forecast value is stored, and the
+   observation it is scored against). NewBase ids are SmartMet Server's global
+   parameter numbering, so none of this is Finnish. Row ids are the parameter id
+   offset per category — 100000 `newbase`, 200000 `modelData`, 300000
+   `obsBaseParameter`, 400000 `estimators` — which is what the `smartmet-rke2`
+   role writes too, so a database seeded by the role and one seeded by this
+   chart carry the same `parameter_map` ids. Nothing has a foreign key to
+   `parameter_map.id`, so the ids are free to be chosen that way.
+
    `localization_entries` is shared, so the seeded tables each own a
    100000-wide block of entry ids: estimators at offset 0 (1..110), parameters
-   at offset 100000 (100001..100865). A further table takes offset 200000.
+   at offset 100000 (100001..100865), period types at 300000 and location kinds
+   at 400000.
+
+   No `producers` rows — those are the models a particular SmartMet Server
+   serves, so they are discovered per deployment. What the file does set is what
+   a `producers` row must look like: `analysis_hours` gets a default of all 24
+   hours and `NOT NULL`, and `arrival_leadtime` a default of `0`. The runner's
+   `ProducerUtils.getAnalysisHours()` reads `analysis_hours` without a null
+   check, so one null row kills the weekly `used_model_*` refresh and leaves the
+   GUI menus it builds silently empty. The table is empty at `initdb`, so the
+   constraint is declared unconditionally rather than backfilled.
 
    Idempotent, so it is safe against a database that already has the rows.
 5. `verification-db-sql-extra` — anything from `schema.extraSql`. Last, so an
