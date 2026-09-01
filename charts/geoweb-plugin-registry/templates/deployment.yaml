@@ -17,6 +17,9 @@ spec:
     metadata:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- with .Values.commitHash }}
+        commitHash: {{ . | quote }}
+        {{- end }}
       labels:
         {{- include "geoweb-plugin-registry.labels" . | nindent 8 }}
     spec:
