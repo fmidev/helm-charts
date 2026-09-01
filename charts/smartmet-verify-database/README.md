@@ -74,7 +74,7 @@ Vendored files, applied in this order:
 3. `0002-post-ownership.sql` — transfers ownership of the database and schema
    `public` to `verifadmin`.
 4. `0004-reference-data.sql` — reference rows the applications require in every
-   deployment: `target_types`, the 97 `estimators` and the 291 `parameters`, the
+   deployment: `target_types`, the 94 `estimators` and the 291 `parameters`, the
    latter two with their localized descriptions in English and Finnish. These are
    **not** customer metadata: the GUI compiles both the names and, in places, the
    ids in, so a database without them is broken rather than empty. Every query
