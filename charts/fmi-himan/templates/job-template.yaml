@@ -10,18 +10,19 @@ objects:
 - apiVersion: batch/v1
   kind: Job
   metadata:
-    name: {{ .Release.Name }}-himan
+    name: ${RUN_IDENTIFIER}
   spec:
     parallelism: 1
     completions: 1
     backoffLimit: 0
+    ttlSecondsAfterFinished: 1500
     template:
       metadata:
         name: {{ .Release.Name }}-himan
         labels:
           app.kubernetes.io/name: {{ .Release.Name }}-himan
       spec:
-        activeDeadlineSeconds: ${{ "{{" }}TIMEOUT{{ "}}" }}
+        activeDeadlineSeconds: {{ printf "${{TIMEOUT}}" }}
         restartPolicy: Never
         containers:
         - command:
@@ -77,10 +78,14 @@ objects:
                  -H 'content-type: application/json' \
                  -H 'authorization: Bearer testitoken' \
                  -d "$payload" \
-                 http://$SNWC_ECFLOW_HTTP_SERVICE_HOST:$SNWC_ECFLOW_HTTP_SERVICE_PORT/v1/suites/$ECF_NAME/attributes
+                 {{- if .Values.ecflow.api.host }}
+                 {{ .Values.ecflow.api.host }}/v1/suites/${ECF_NAME}/attributes
+                 {{- else -}}
+                 http://$SNWC_ECFLOW_HTTP_SERVICE_HOST:$SNWC_ECFLOW_HTTP_SERVICE_PORT/v1/suites/${ECF_NAME}/attributes
+                 {{- end }}
             fi
           env:
-          {{ if .Values.s3.credentials.name }}
+          {{- if .Values.s3.credentials.name }}
           - name: S3_ACCESS_KEY_ID
             valueFrom:
               secretKeyRef:
@@ -129,15 +134,30 @@ objects:
             requests:
               cpu: ${CPU_REQUEST}
               memory: ${MEMORY_REQUEST}
-          {{- with .Values.volumeMounts }}
           volumeMounts:
+          {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 10 }}
+          {{- end }}
+          {{ if eq .Values.cloud "aws" -}}
+          - name: secrets-store-inline
+            mountPath: {{ .Values.s3.credentials.storePath }}
+            readOnly: true
           {{- end }}
         volumes:
         {{- with .Values.volumes }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
+        {{ if eq .Values.cloud "aws" -}}
+        - name: secrets-store-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: {{ .Release.Name }}-secrets
+        {{- end }}
 parameters:
+- description: Unique id for this run
+  name: RUN_IDENTIFIER
 - description: Configuration file name
   name: CONFIGURATION
 - description: Forecast analysis time, YYYY-MM-DD HH24:MI:SS (optional)
