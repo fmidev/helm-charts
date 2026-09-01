@@ -156,6 +156,11 @@ upstream revision is baked in:
 ./scripts/sync-schema.sh main     # move the pin to upstream HEAD
 ```
 
+`0004-reference-data.sql` is **not** among the files it fetches. Upstream has a file of that
+name, so syncing it looks reasonable and would overwrite: upstream's is the original ~1.4 kB
+`target_types` seed, while this chart's has grown past 120 kB with everything a deployment
+actually needs. They are different files that share a name. Maintain this one here.
+
 It requires an authenticated `gh` with access to the (private) upstream repo,
 and rejects any file containing CR bytes, trailing whitespace, invalid UTF-8, or
 psql meta-commands — each of which would either break Helm's YAML block-scalar
