@@ -25,11 +25,20 @@ ANNOTATION="fmi.fi/verification-sql-ref"
 # 0003-legacy-test-data.sql is intentionally NOT vendored: it is nothing but
 # \COPY meta-commands against ~176 MB of CSV fixtures. CNPG cannot execute psql
 # meta-commands, and the fixtures have no place in a chart.
+#
+# 0004-reference-data.sql is intentionally NOT synced either, and that is easy to
+# get wrong: upstream has a file of the same name, so the sync looks like it
+# would work. It would overwrite. Upstream's copy is the original ~1.4 kB
+# target_types seed; this chart's has grown past 120 kB with the estimators,
+# parameters, class limits, parameter_map categories, period types, location
+# kinds and localization a deployment needs. The two are not versions of one
+# file -- they are different files that share a name. Fetching upstream's over
+# this one silently discards all of it, and the only thing standing in the way
+# is remembering to read the diff.
 FILES=(
   0000-pre-init.sql
   0001-production-schema.sql
   0002-post-ownership.sql
-  0004-reference-data.sql
 )
 
 command -v gh >/dev/null || { echo "ERROR: gh is required" >&2; exit 1; }

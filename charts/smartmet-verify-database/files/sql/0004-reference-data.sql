@@ -1710,122 +1710,316 @@ ON CONFLICT DO NOTHING;
 -- blocks of localization_entries are covered: the setval reads the table, not
 -- the block, so it lands past the parameter entries at 100865 as well as past
 -- the estimator entries at 110.
--- parameter_map, the estimators category only
+
 -- ---------------------------------------------------------------------------
--- Which estimators are offered for which parameter. EstimatorMultiSelect reads
--- this to populate the result calculation view, which is one of the views the
--- international profile whitelists, so without these rows that view offers no
--- estimator and no calculation can be ordered.
+-- parameter_map
+-- ---------------------------------------------------------------------------
+-- How each parameter is addressed outside this database. The table is a set of
+-- categories, and four of the fifteen FMI keeps are universal enough to seed:
 --
--- Only this category is seeded. The other fourteen map parameters onto systems
--- that exist only at FMI -- CLDB names, NewBase ids, METAR ids, an FMI producer
--- id -- and every reader guards the lookup, so their absence degrades quietly.
--- This category is different in kind: alternative_id holds a comma-separated
--- list of estimator ids, and every id it references is one this file seeds, so
--- the block is self-contained. alternative_name is unused throughout.
+--   estimators       which metrics may be computed for the parameter
+--   newbase          the id SmartMet Server knows the parameter by
+--   modelData        where a forecast value for it is stored
+--   obsBaseParameter the observed counterpart it is scored against
+--
+-- The remaining eleven map parameters onto systems that exist only at FMI --
+-- CLDB names, METAR ids, an FMI producer id -- and every reader guards the
+-- lookup, so their absence degrades quietly.
+--
+-- Ids are the parameter's own id offset per category, not a position in a list,
+-- so adding or removing a parameter never renumbers the rows around it:
+--
+--   newbase          offset  100000
+--   modelData        offset  200000
+--   obsBaseParameter offset  300000
+--   estimators       offset  400000
+--
+-- That is a different id space from the localization_entries blocks above; the
+-- two tables share no keys. The offsets match the ones the smartmet-rke2 role
+-- writes, so a deployment seeded by the role and one seeded by this chart end
+-- up with the same parameter_map ids. Nothing has a foreign key to
+-- parameter_map.id -- the table carries only its primary key, the
+-- (parameter_id, category) unique index and an outbound key to parameters --
+-- so the ids are free to be chosen this way. The setval at the end of this file
+-- consequently leaves parameter_map_id_seq at 400357, past every block, so a
+-- row inserted later without an explicit id cannot collide with one of these.
+--
+-- ON CONFLICT with no target covers both the primary key and the unique index,
+-- which is what lets a deployment that already carries some of these rows apply
+-- the file without an error.
+
+-- estimators is the category the GUI cannot do without: EstimatorMultiSelect
+-- reads it to populate the result calculation view, which is one of the views
+-- the international profile whitelists, so without these rows that view offers
+-- no estimator and no calculation can be ordered. alternative_id holds a
+-- comma-separated list of estimator ids, every one of which this file seeds
+-- above, so the block is self-contained. It is not gated on newbase: it says
+-- which metrics may be computed, not where the data comes from, and 70 of the
+-- 100 parameters carrying the row have no newbase id at all.
 
 INSERT INTO public.parameter_map (id, parameter_id, category, alternative_id)
 VALUES
-       (420, 1, 'estimators', '1,2,3,4,5,6,7,8,9,10,11,14,15,16,43,44,48,49'),
-       (421, 2, 'estimators', '1,2,3,4,5,6,7,8,9,16,27,28,29'),
-       (422, 3, 'estimators', '1,2,3,4,5,6,7,8,9,16'),
-       (423, 4, 'estimators', '1,2,3,4,5,6,7,8,9,10,11,14,15,16'),
-       (424, 5, 'estimators', '1,2,3,4,5,6,8,9,13,16'),
-       (426, 7, 'estimators', '1,2,3,4,5,6,7,8,9,10,11,14,15,16'),
-       (427, 8, 'estimators', '1,2,3,4,5,6,7,8,9,10,11,14,15,16'),
-       (428, 9, 'estimators', '1,2,3,4,5,6,7,8,9,10,11,14,15,16'),
-       (429, 11, 'estimators', '17,18,94'),
-       (430, 12, 'estimators', '1,2,3,4,5,6,7,8,9,27,28,29'),
-       (431, 13, 'estimators', '1,2,3,4,5,6,8,9,16'),
-       (434, 16, 'estimators', '1,2,3,5,6,8,9,14,15,16,13,16,27,28,29,34,35,36,37,38,39,40,49,63'),
-       (439, 30, 'estimators', '1,2,3,4,5,6,7,8,9,16'),
-       (440, 51, 'estimators', '1,2,3,4,5,6,8,9,16'),
-       (441, 57, 'estimators', '1,2,3,4,5,6,7,8,9,16'),
-       (444, 63, 'estimators', '1,2,3,4,5,6,8,9,14,15,16'),
-       (445, 64, 'estimators', '1,2,3,4,5,6,8,9,16'),
-       (446, 65, 'estimators', '1,2,3,4,5,6,8,9,16'),
-       (447, 67, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (448, 68, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (449, 69, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (463, 94, 'estimators', '17,18,94'),
-       (464, 105, 'estimators', '17,18,94'),
-       (465, 106, 'estimators', '17,18,94'),
-       (466, 113, 'estimators', '1,2,3,4,5,6,8,9,14,15,16'),
-       (467, 114, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,49,96,97,98'),
-       (468, 115, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,49,96,97,98'),
-       (469, 116, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,49,96,97,98'),
-       (470, 117, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,49,96,97,98'),
-       (472, 120, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (473, 121, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (474, 122, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (476, 126, 'estimators', '1,2,3,4,5,6,7,8,9,16'),
-       (477, 130, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (478, 131, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (479, 132, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (484, 155, 'estimators', '17,18,94'),
-       (485, 160, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (486, 161, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (487, 162, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (488, 164, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (489, 165, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (491, 169, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (494, 175, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (495, 177, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (496, 179, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (497, 183, 'estimators', '17,18,94'),
-       (499, 190, 'estimators', '1,2,3,4,5,6,8,9,16'),
-       (509, 204, 'estimators', '1,2,3,4,5,6,8,9,14,15,16'),
-       (510, 205, 'estimators', '1,2,3,4,5,6,8,9,14,15,16'),
-       (511, 206, 'estimators', '1,2,3,4,5,6,8,9,14,15,16'),
-       (512, 207, 'estimators', '1,2,3,4,5,6,8,9,14,15,16'),
-       (513, 210, 'estimators', '1,2,3,4,5,6,7,8,9,10,11,14,15,16'),
-       (514, 211, 'estimators', '1,2,3,4,5,6,7,8,9,10,11,14,15,16'),
-       (519, 260, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (520, 261, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (521, 262, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (522, 263, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (523, 280, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (524, 281, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (525, 282, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (526, 283, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (527, 290, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (528, 291, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (529, 292, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (530, 293, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (539, 331, 'estimators', '1,2,3,4,5,6,8,9,16'),
-       (550, 228, 'estimators', '1,2,3,4,5,6,7,8,9,16'),
-       (582, 75, 'estimators', '17,18,94'),
-       (583, 76, 'estimators', '1,2,3'),
-       (584, 77, 'estimators', '1,2,3'),
-       (642, 269, 'estimators', '1,2,3,4,5,6,7,8,9,16'),
-       (643, 270, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (644, 271, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (645, 272, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (646, 273, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (657, 72, 'estimators', '1,2,3,4,5,6,7,8,9,14,15,16,27,28,29'),
-       (670, 45, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (676, 62, 'estimators', '1,2,3,4,5,6,7,8,9,16'),
-       (794, 208, 'estimators', '1,2,3,4,5,6,8,9,14,15,16'),
-       (795, 209, 'estimators', '1,2,3,4,5,6,8,9,14,15,16'),
-       (806, 212, 'estimators', '1,2,3,4,5,6,8,9,14,15,16'),
-       (807, 213, 'estimators', '1,2,3,4,5,6,8,9,14,15,16'),
-       (850, 214, 'estimators', '1,2,3,4,5,6,7,8,9,10,11,14,15,16'),
-       (851, 215, 'estimators', '1,2,3,4,5,6,7,8,9,10,11,14,15,16'),
-       (858, 111, 'estimators', '1,2,3,4,5,6,8,9,14,15,16'),
-       (863, 118, 'estimators', '27,28,29'),
-       (883, 107, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,49,96,97,98'),
-       (884, 108, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,49,96,97,98'),
-       (885, 109, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,49,96,97,98'),
-       (886, 110, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,49,96,97,98'),
-       (887, 112, 'estimators', '27,28,29'),
-       (890, 78, 'estimators', '1,2,3'),
-       (894, 357, 'estimators', '1,2,3,4,5,6,7,8,9,16'),
-       (985, 96, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (986, 97, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (987, 98, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
-       (998, 31, 'estimators', '1,2,3,4,5,6,7,8,9,16'),
-       (1225, 123, 'estimators', '27,28,20'),
-       (1226, 124, 'estimators', '27,28,20')
+       (400001, 1, 'estimators', '1,2,3,4,5,6,7,8,9,10,11,14,15,16,43,44,48,49'),
+       (400002, 2, 'estimators', '1,2,3,4,5,6,7,8,9,16,27,28,29'),
+       (400003, 3, 'estimators', '1,2,3,4,5,6,7,8,9,16'),
+       (400004, 4, 'estimators', '1,2,3,4,5,6,7,8,9,10,11,14,15,16'),
+       (400005, 5, 'estimators', '1,2,3,4,5,6,8,9,13,16'),
+       (400007, 7, 'estimators', '1,2,3,4,5,6,7,8,9,10,11,14,15,16'),
+       (400008, 8, 'estimators', '1,2,3,4,5,6,7,8,9,10,11,14,15,16'),
+       (400009, 9, 'estimators', '1,2,3,4,5,6,7,8,9,10,11,14,15,16'),
+       (400011, 11, 'estimators', '17,18,94'),
+       (400012, 12, 'estimators', '1,2,3,4,5,6,7,8,9,27,28,29'),
+       (400013, 13, 'estimators', '1,2,3,4,5,6,8,9,16'),
+       (400016, 16, 'estimators', '1,2,3,5,6,8,9,14,15,16,13,16,27,28,29,34,35,36,37,38,39,40,49,63'),
+       (400030, 30, 'estimators', '1,2,3,4,5,6,7,8,9,16'),
+       (400031, 31, 'estimators', '1,2,3,4,5,6,7,8,9,16'),
+       (400045, 45, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400051, 51, 'estimators', '1,2,3,4,5,6,8,9,16'),
+       (400057, 57, 'estimators', '1,2,3,4,5,6,7,8,9,16'),
+       (400062, 62, 'estimators', '1,2,3,4,5,6,7,8,9,16'),
+       (400063, 63, 'estimators', '1,2,3,4,5,6,8,9,14,15,16'),
+       (400064, 64, 'estimators', '1,2,3,4,5,6,8,9,16'),
+       (400065, 65, 'estimators', '1,2,3,4,5,6,8,9,16'),
+       (400067, 67, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400068, 68, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400069, 69, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400072, 72, 'estimators', '1,2,3,4,5,6,7,8,9,14,15,16,27,28,29'),
+       (400075, 75, 'estimators', '17,18,94'),
+       (400076, 76, 'estimators', '1,2,3'),
+       (400077, 77, 'estimators', '1,2,3'),
+       (400078, 78, 'estimators', '1,2,3'),
+       (400094, 94, 'estimators', '17,18,94'),
+       (400096, 96, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400097, 97, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400098, 98, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400105, 105, 'estimators', '17,18,94'),
+       (400106, 106, 'estimators', '17,18,94'),
+       (400107, 107, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,49,96,97,98'),
+       (400108, 108, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,49,96,97,98'),
+       (400109, 109, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,49,96,97,98'),
+       (400110, 110, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,49,96,97,98'),
+       (400111, 111, 'estimators', '1,2,3,4,5,6,8,9,14,15,16'),
+       (400112, 112, 'estimators', '27,28,29'),
+       (400113, 113, 'estimators', '1,2,3,4,5,6,8,9,14,15,16'),
+       (400114, 114, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,49,96,97,98'),
+       (400115, 115, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,49,96,97,98'),
+       (400116, 116, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,49,96,97,98'),
+       (400117, 117, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,49,96,97,98'),
+       (400118, 118, 'estimators', '27,28,29'),
+       (400120, 120, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400121, 121, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400122, 122, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400123, 123, 'estimators', '27,28,20'),
+       (400124, 124, 'estimators', '27,28,20'),
+       (400126, 126, 'estimators', '1,2,3,4,5,6,7,8,9,16'),
+       (400130, 130, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400131, 131, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400132, 132, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400155, 155, 'estimators', '17,18,94'),
+       (400160, 160, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400161, 161, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400162, 162, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400164, 164, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400165, 165, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400169, 169, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400175, 175, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400177, 177, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400179, 179, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400183, 183, 'estimators', '17,18,94'),
+       (400190, 190, 'estimators', '1,2,3,4,5,6,8,9,16'),
+       (400204, 204, 'estimators', '1,2,3,4,5,6,8,9,14,15,16'),
+       (400205, 205, 'estimators', '1,2,3,4,5,6,8,9,14,15,16'),
+       (400206, 206, 'estimators', '1,2,3,4,5,6,8,9,14,15,16'),
+       (400207, 207, 'estimators', '1,2,3,4,5,6,8,9,14,15,16'),
+       (400208, 208, 'estimators', '1,2,3,4,5,6,8,9,14,15,16'),
+       (400209, 209, 'estimators', '1,2,3,4,5,6,8,9,14,15,16'),
+       (400210, 210, 'estimators', '1,2,3,4,5,6,7,8,9,10,11,14,15,16'),
+       (400211, 211, 'estimators', '1,2,3,4,5,6,7,8,9,10,11,14,15,16'),
+       (400212, 212, 'estimators', '1,2,3,4,5,6,8,9,14,15,16'),
+       (400213, 213, 'estimators', '1,2,3,4,5,6,8,9,14,15,16'),
+       (400214, 214, 'estimators', '1,2,3,4,5,6,7,8,9,10,11,14,15,16'),
+       (400215, 215, 'estimators', '1,2,3,4,5,6,7,8,9,10,11,14,15,16'),
+       (400228, 228, 'estimators', '1,2,3,4,5,6,7,8,9,16'),
+       (400260, 260, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400261, 261, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400262, 262, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400263, 263, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400269, 269, 'estimators', '1,2,3,4,5,6,7,8,9,16'),
+       (400270, 270, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400271, 271, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400272, 272, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400273, 273, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400280, 280, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400281, 281, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400282, 282, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400283, 283, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400290, 290, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400291, 291, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400292, 292, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400293, 293, 'estimators', '19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,41,50,56,57,58,59,96,97,98'),
+       (400331, 331, 'estimators', '1,2,3,4,5,6,8,9,16'),
+       (400357, 357, 'estimators', '1,2,3,4,5,6,7,8,9,16')
+ON CONFLICT DO NOTHING;
+
+-- newbase is SmartMet Server's own global parameter numbering, so these ids are
+-- the same wherever SmartMet Server runs -- nothing here is Finnish. The loader
+-- reads alternative_id to ask the timeseries endpoint for the parameter, and
+-- alternative_name is the name it requests it by, which is the parameter's own
+-- name except where FMI addresses it differently (RelativeHumidity is fetched
+-- as Humidity).
+--
+-- Only the 43 parameters that carry a newbase id are wired. The rest of the
+-- catalogue has no SmartMet Server counterpart to fetch, so a modelData or
+-- obsBaseParameter row for one would offer the GUI a parameter nothing fills.
+
+INSERT INTO public.parameter_map (id, parameter_id, category, alternative_id, alternative_name)
+VALUES
+       (100001, 1, 'newbase', '4', 'Temperature'),
+       (100002, 2, 'newbase', '79', 'TotalCloudCover'),
+       (100003, 3, 'newbase', '21', 'WindSpeedMS'),
+       (100004, 4, 'newbase', '10', 'DewPoint'),
+       (100005, 5, 'newbase', '353', 'Precipitation1h'),
+       (100007, 7, 'newbase', '648', 'RoadTemperature'),
+       (100008, 8, 'newbase', '428', 'MinimumTemperature06'),
+       (100009, 9, 'newbase', '432', 'MaximumTemperature18'),
+       (100011, 11, 'newbase', '259', 'PoP'),
+       (100012, 12, 'newbase', '1395', 'TotalCloudCover2'),
+       (100013, 13, 'newbase', '20', 'WindDirection'),
+       (100016, 16, 'newbase', '357', 'Precipitation24h'),
+       (100019, 19, 'newbase', '57', 'PrecipitationForm'),
+       (100051, 51, 'newbase', '1', 'Pressure'),
+       (100057, 57, 'newbase', '466', 'HourlyMaximumWindSpeed'),
+       (100063, 63, 'newbase', '165', 'SigWaveHeight'),
+       (100064, 64, 'newbase', '167', 'WaveDirection'),
+       (100065, 65, 'newbase', '166', 'SigWavePeriod'),
+       (100072, 72, 'newbase', '664', 'Friction'),
+       (100087, 87, 'newbase', '50', 'PrecipitationAmount'),
+       (100088, 88, 'newbase', '23', 'WindUMS'),
+       (100089, 89, 'newbase', '24', 'WindVMS'),
+       (100105, 105, 'newbase', '372', 'FrostProbability'),
+       (100106, 106, 'newbase', '373', 'SevereFrostProbability'),
+       (100111, 111, 'newbase', '159', 'SeaLevelN2000'),
+       (100113, 113, 'newbase', '60', 'SeaLevel'),
+       (100126, 126, 'newbase', '467', 'HourlyMaximumGust'),
+       (100155, 155, 'newbase', '260', 'ProbabilityThunderstorm'),
+       (100190, 190, 'newbase', '13', 'Humidity'),
+       (100204, 204, 'newbase', '407', 'Visibility'),
+       (100205, 205, 'newbase', '1232', 'Visibility2'),
+       (100206, 206, 'newbase', '500', 'CloudBase'),
+       (100207, 207, 'newbase', '1229', 'CloudBase2'),
+       (100211, 211, 'newbase', '874', 'TemperatureF50'),
+       (100600, 600, 'newbase', '273', 'LowCloudCover'),
+       (100601, 601, 'newbase', '274', 'MediumCloudCover'),
+       (100602, 602, 'newbase', '275', 'HighCloudCover'),
+       (100610, 610, 'newbase', '684', 'MeanLowCld'),
+       (100611, 611, 'newbase', '686', 'MeanMiddleCld'),
+       (100612, 612, 'newbase', '689', 'MeanHighCld'),
+       (100615, 615, 'newbase', '685', 'StdDevLowCld'),
+       (100616, 616, 'newbase', '687', 'StdDevMiddleCld'),
+       (100617, 617, 'newbase', '683', 'StdDevHighCld')
+ON CONFLICT DO NOTHING;
+
+-- modelData and obsBaseParameter are identity mappings: the forecast value goes
+-- to model_data under the parameter's own id, and the observation it is scored
+-- against is the same parameter. Both are written for every parameter that has
+-- a newbase id, which is a superset of FMI's own map -- twelve of them are
+-- fetched at FMI but their values land somewhere other than model_data, so FMI
+-- keeps no modelData row for those. Writing the identity row anyway is what
+-- lets a deployment whose only forecast source is SmartMet Server store and
+-- score them.
+
+INSERT INTO public.parameter_map (id, parameter_id, category, alternative_id)
+VALUES
+       (200001, 1, 'modelData', '1'),
+       (200002, 2, 'modelData', '2'),
+       (200003, 3, 'modelData', '3'),
+       (200004, 4, 'modelData', '4'),
+       (200005, 5, 'modelData', '5'),
+       (200007, 7, 'modelData', '7'),
+       (200008, 8, 'modelData', '8'),
+       (200009, 9, 'modelData', '9'),
+       (200011, 11, 'modelData', '11'),
+       (200012, 12, 'modelData', '12'),
+       (200013, 13, 'modelData', '13'),
+       (200016, 16, 'modelData', '16'),
+       (200019, 19, 'modelData', '19'),
+       (200051, 51, 'modelData', '51'),
+       (200057, 57, 'modelData', '57'),
+       (200063, 63, 'modelData', '63'),
+       (200064, 64, 'modelData', '64'),
+       (200065, 65, 'modelData', '65'),
+       (200072, 72, 'modelData', '72'),
+       (200087, 87, 'modelData', '87'),
+       (200088, 88, 'modelData', '88'),
+       (200089, 89, 'modelData', '89'),
+       (200105, 105, 'modelData', '105'),
+       (200106, 106, 'modelData', '106'),
+       (200111, 111, 'modelData', '111'),
+       (200113, 113, 'modelData', '113'),
+       (200126, 126, 'modelData', '126'),
+       (200155, 155, 'modelData', '155'),
+       (200190, 190, 'modelData', '190'),
+       (200204, 204, 'modelData', '204'),
+       (200205, 205, 'modelData', '205'),
+       (200206, 206, 'modelData', '206'),
+       (200207, 207, 'modelData', '207'),
+       (200211, 211, 'modelData', '211'),
+       (200600, 600, 'modelData', '600'),
+       (200601, 601, 'modelData', '601'),
+       (200602, 602, 'modelData', '602'),
+       (200610, 610, 'modelData', '610'),
+       (200611, 611, 'modelData', '611'),
+       (200612, 612, 'modelData', '612'),
+       (200615, 615, 'modelData', '615'),
+       (200616, 616, 'modelData', '616'),
+       (200617, 617, 'modelData', '617')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO public.parameter_map (id, parameter_id, category, alternative_id)
+VALUES
+       (300001, 1, 'obsBaseParameter', '1'),
+       (300002, 2, 'obsBaseParameter', '2'),
+       (300003, 3, 'obsBaseParameter', '3'),
+       (300004, 4, 'obsBaseParameter', '4'),
+       (300005, 5, 'obsBaseParameter', '5'),
+       (300007, 7, 'obsBaseParameter', '7'),
+       (300008, 8, 'obsBaseParameter', '8'),
+       (300009, 9, 'obsBaseParameter', '9'),
+       (300011, 11, 'obsBaseParameter', '11'),
+       (300012, 12, 'obsBaseParameter', '12'),
+       (300013, 13, 'obsBaseParameter', '13'),
+       (300016, 16, 'obsBaseParameter', '16'),
+       (300019, 19, 'obsBaseParameter', '19'),
+       (300051, 51, 'obsBaseParameter', '51'),
+       (300057, 57, 'obsBaseParameter', '57'),
+       (300063, 63, 'obsBaseParameter', '63'),
+       (300064, 64, 'obsBaseParameter', '64'),
+       (300065, 65, 'obsBaseParameter', '65'),
+       (300072, 72, 'obsBaseParameter', '72'),
+       (300087, 87, 'obsBaseParameter', '87'),
+       (300088, 88, 'obsBaseParameter', '88'),
+       (300089, 89, 'obsBaseParameter', '89'),
+       (300105, 105, 'obsBaseParameter', '105'),
+       (300106, 106, 'obsBaseParameter', '106'),
+       (300111, 111, 'obsBaseParameter', '111'),
+       (300113, 113, 'obsBaseParameter', '113'),
+       (300126, 126, 'obsBaseParameter', '126'),
+       (300155, 155, 'obsBaseParameter', '155'),
+       (300190, 190, 'obsBaseParameter', '190'),
+       (300204, 204, 'obsBaseParameter', '204'),
+       (300205, 205, 'obsBaseParameter', '205'),
+       (300206, 206, 'obsBaseParameter', '206'),
+       (300207, 207, 'obsBaseParameter', '207'),
+       (300211, 211, 'obsBaseParameter', '211'),
+       (300600, 600, 'obsBaseParameter', '600'),
+       (300601, 601, 'obsBaseParameter', '601'),
+       (300602, 602, 'obsBaseParameter', '602'),
+       (300610, 610, 'obsBaseParameter', '610'),
+       (300611, 611, 'obsBaseParameter', '611'),
+       (300612, 612, 'obsBaseParameter', '612'),
+       (300615, 615, 'obsBaseParameter', '615'),
+       (300616, 616, 'obsBaseParameter', '616'),
+       (300617, 617, 'obsBaseParameter', '617')
 ON CONFLICT DO NOTHING;
 
 -- ---------------------------------------------------------------------------
@@ -2252,6 +2446,36 @@ VALUES
        (824, 3, 824, 1.5, 2.5),
        (824, 4, 824, 2.5, 3.5)
 ON CONFLICT DO NOTHING;
+
+-- ---------------------------------------------------------------------------
+-- producers: column defaults
+-- ---------------------------------------------------------------------------
+-- No producer rows. Producers are the models a particular SmartMet Server
+-- serves, so they are discovered per deployment, not shipped. What is universal
+-- is what a producers row has to look like, and that is set here.
+--
+-- analysis_hours drives the runner's weekly used_model_* refresh, and
+-- ProducerUtils.getAnalysisHours() reads it without a null check: one null row
+-- throws, the refresh dies, and the GUI menus it builds stay empty with nothing
+-- in the interface to say why. The shipped schema leaves the column nullable
+-- with no default, which makes that outcome reachable by any writer that forgets
+-- it. Declaring the constraint at bootstrap makes null impossible instead of
+-- relying on every writer to remember, and it is unconditional here because the
+-- table is empty at initdb -- there is nothing to backfill and SET NOT NULL
+-- cannot fail. The default is all 24 hours, which is what ProducerUtils itself
+-- falls back to for an empty value, and it fills the column to its full 61
+-- characters exactly.
+--
+-- arrival_leadtime gets a default but stays nullable: Producer exposes it as an
+-- Optional, so null is handled rather than fatal, and 0 means the run is treated
+-- as available at its analysis time.
+
+ALTER TABLE public.producers
+    ALTER COLUMN analysis_hours SET DEFAULT '0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23';
+ALTER TABLE public.producers
+    ALTER COLUMN analysis_hours SET NOT NULL;
+ALTER TABLE public.producers
+    ALTER COLUMN arrival_leadtime SET DEFAULT 0;
 
 -- ---------------------------------------------------------------------------
 -- Deliberately not seeded
