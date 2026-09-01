@@ -39,17 +39,6 @@ SELECT setval('public.target_types_id_seq', (SELECT max(id) FROM public.target_t
 -- into its source, so the ids below are fixed and a deployment that renumbers
 -- them gets views that quietly show nothing.
 --
--- Three of FMI's rows are deliberately absent: RPS (42), EPOCH (45) and
--- INDEXEPOCH (70). RPS has no implementation in the runner at all, so ordering
--- it throws and the order is still marked delivered -- a result that silently
--- never appears. EPOCH lost its only data source when the *_PERSONAL period
--- types were removed in runner 3.14.3 and has never produced a single result in
--- FMI production; INDEXEPOCH indexes exactly those never-written EPOCH rows.
--- All three are retired system-wide (fmi-verification-runner#46 and #43), and
--- no parameter_map row below offers any of them, so nothing a view can reach is
--- lost. Their ids are not reused: the gaps at 42, 45 and 70 stay gaps, so every
--- other id still means what it means at FMI.
---
 -- BIAS_ON_MAP is the sharpest case. ColumnDiagramChartBuilder hardcodes id 93
 -- while EstimatorComboBox looks the same row up by name, so the two agree only
 -- when id 93 is the row named BIAS_ON_MAP. With the row missing altogether that
@@ -62,8 +51,7 @@ SELECT setval('public.target_types_id_seq', (SELECT max(id) FROM public.target_t
 -- legend limits from scale - 1, so 0 rounds those limits to tens.
 --
 -- character is read by the runner, not the GUI. Only SSC, SSP, SEEPS and
--- CATEGORY change behaviour; everything else takes the default branch. (The
--- EPOCH character went with estimator 45; no row carries it any more.)
+-- CATEGORY change behaviour; everything else takes the default branch.
 --
 -- Insert order is load-bearing, and follows the foreign keys:
 -- localization_languages and localization_entries first, then estimators
