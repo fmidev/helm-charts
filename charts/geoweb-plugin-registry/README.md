@@ -32,6 +32,7 @@ sanitized values file is available at
 | Parameter | Description | Default |
 |---|---|---|
 | `versions.pluginRegistry` | Optional application version override | `""` |
+| `commitHash` | Optional deployment marker used to force a rollout for mutable image tags | `""` |
 | `publicUrl` | Canonical external registry URL used for UI assets and package metadata | `""` |
 | `image.repository` | Container image repository | `registry.gitlab.com/opengeoweb/backend-services/plugin-registry-backend/plugin-registry-backend` |
 | `image.tag` | Container image tag | `v0.4.3` |
@@ -71,5 +72,6 @@ sanitized values file is available at
 
 | Chart version | plugin-registry-backend version |
 |---------------|---------------------------------|
+| 0.2.1         | v0.4.3                          |
 | 0.2.0         | v0.4.3                          |
 | 0.1.0         | v0.4.2                          |

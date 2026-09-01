@@ -2,7 +2,7 @@ apiVersion: v2
 name: geoweb-plugin-registry
 description: Helm chart for the GeoWeb Verdaccio plugin registry
 type: application
-version: 0.2.0
+version: 0.2.1
 appVersion: "v0.4.3"
 home: https://github.com/fmidev/helm-charts
 sources:

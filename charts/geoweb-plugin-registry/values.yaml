@@ -2,6 +2,9 @@
 versions:
   pluginRegistry: ""
 
+# Optional deployment marker used to force a rollout for mutable image tags.
+commitHash: ""
+
 # Canonical externally accessible registry URL. Leave empty to let Verdaccio
 # derive it from the request headers.
 publicUrl: ""
