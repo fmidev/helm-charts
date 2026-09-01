@@ -106,6 +106,13 @@ Vendored files, applied in this order:
 `\COPY` meta-commands against ~176 MB of CSV fixtures, which CNPG cannot execute.
 That is why the vendored numbering skips from `0002` to `0004`.
 
+`0004-reference-data.sql` is **not vendored either, and is owned by this chart.**
+Upstream's file seeds `target_types` alone (~1.4 KB); the copy here has been
+extended to ~117 KB with the estimators, parameters, `parameter_map`,
+`period_types`, `location_kinds` and `parameter_class_limits` rows a deployment
+needs. `scripts/sync-schema.sh` therefore does not fetch it — doing so would
+overwrite all of that with the smaller upstream file. Edit it here.
+
 > **The schema is applied by `initdb` ONLY, on first bootstrap.**
 > Editing `files/sql/` and running `helm upgrade` does **not** migrate an
 > existing database. CNPG also treats `spec.bootstrap` as immutable once the
@@ -132,9 +139,26 @@ upstream revision is baked in:
 ```
 
 It requires an authenticated `gh` with access to the (private) upstream repo,
-and rejects any file containing CR bytes, trailing whitespace, invalid UTF-8, or
-psql meta-commands — each of which would either break Helm's YAML block-scalar
-rendering or fail to execute under CNPG. Bump the chart `version` afterwards.
+and rejects any file containing CR bytes, invalid UTF-8, or psql meta-commands —
+each of which would either break Helm's YAML block-scalar rendering or fail to
+execute under CNPG. Bump the chart `version` afterwards.
+
+`0001-production-schema.sql` is additionally **normalised on the way in**: its
+`-- Name: <object>; Type: <kind>` banners and any trailing whitespace are
+removed. That is worth about 38% of the file (652 KB to 401 KB), taking the
+rendered ConfigMap from roughly 67% of the 1 MiB object limit down to 41%.
+
+Two things follow from doing it here rather than upstream. The upstream file
+stays a byte-faithful `pg_dump`, so `tools/split-dump.awk` — which keys on
+exactly those banners — keeps working there. And the trailing-whitespace
+rejection above no longer applies to this one file: a faithful production dump
+contains 17 such lines, 13 of them between tokens inside function bodies where
+PostgreSQL stored the whitespace in `prosrc`, so the file could not be vendored
+at all without trimming them.
+
+Comments are only removed at column 1 and outside dollar-quoted bodies, so
+function bodies are never rewritten, and the script aborts if normalisation
+changes the number of non-comment lines.
 
 ## Roles and passwords
 
