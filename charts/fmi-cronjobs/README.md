@@ -10,7 +10,7 @@ Install standalone or add as a dependency to another chart:
 # Chart.yaml
 dependencies:
   - name: fmi-cronjobs
-    version: "0.2.0"
+    version: "0.3.0"
     repository: "https://fmidev.github.io/helm-charts"
 ```
 
@@ -44,6 +44,7 @@ Optional shared defaults applied to every job. Per-job settings always take prec
 | `pullPolicy` | Image pull policy | `IfNotPresent` |
 | `timeZone` | IANA timezone for schedules | `Europe/Helsinki` |
 | `backoffLimit` | Retries before marking the job failed | `5` |
+| `activeDeadlineSeconds` | Wall-clock seconds before the Job is terminated with `DeadlineExceeded`; unset means no limit. The kill is terminal: it is not retried regardless of `backoffLimit`. | — |
 | `concurrencyPolicy` | `Allow`, `Forbid`, or `Replace` | `Forbid` |
 | `restartPolicy` | Pod restart policy | `Never` |
 | `successfulJobsHistoryLimit` | Successful job records to keep | `1` |
@@ -82,6 +83,7 @@ List of CronJob definitions. Each entry supports the following fields:
 | `schedule` | Cron schedule expression (required) | — |
 | `timeZone` | IANA timezone; overrides `defaults.timeZone` | `Europe/Helsinki` |
 | `backoffLimit` | Retries before marking the job failed; overrides `defaults.backoffLimit` | `5` |
+| `activeDeadlineSeconds` | Wall-clock seconds before the Job is terminated with `DeadlineExceeded`; unset means no limit. The kill is terminal: it is not retried regardless of `backoffLimit`. Overrides `defaults.activeDeadlineSeconds`. | — |
 | `concurrencyPolicy` | `Allow`, `Forbid`, or `Replace`; overrides `defaults.concurrencyPolicy` | `Forbid` |
 | `restartPolicy` | Pod restart policy; overrides `defaults.restartPolicy` | `Never` |
 | `successfulJobsHistoryLimit` | Successful job records to keep; overrides `defaults.successfulJobsHistoryLimit` | `1` |

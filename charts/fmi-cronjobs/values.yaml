@@ -5,6 +5,7 @@ defaults: {}
 #   pullPolicy: IfNotPresent
 #   timeZone: "Europe/Helsinki"
 #   backoffLimit: 5
+#   activeDeadlineSeconds: 3600   # whole-Job timeout; omit = no limit
 #   concurrencyPolicy: Forbid
 #   restartPolicy: Never
 #   successfulJobsHistoryLimit: 1
