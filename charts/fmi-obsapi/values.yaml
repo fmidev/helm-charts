@@ -3,6 +3,8 @@ image:
   pullPolicy: IfNotPresent
   repository: quay.io/fmi/obsapi
   tag: latest
+labels:
+  fmi_elk: ""
 resources:
   requests:
     memory: 200Mi
@@ -17,6 +19,12 @@ configMaps:
   - name: logging-configmap
     filepath: "/app/app/config"
     filename: "logging.conf"
+securityContext:
+  include: false
+  runAsNonRoot: true
+  runAsGroup: 0
+app:
+  reload: false
 environment_secrets:
 tnsnames:
   entries: {}

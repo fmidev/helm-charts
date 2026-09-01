@@ -11,4 +11,4 @@ maintainers:
   url: https://github.com/fmi-build-bot
 name: obsapi
 type: application
-version: 0.0.1
+version: 0.0.4
