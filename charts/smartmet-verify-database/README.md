@@ -36,7 +36,7 @@ helm install verification-db fmi/smartmet-verify-database \
   --set cluster.storage.storageClass=local-path
 ```
 
-Then watch it come up — first bootstrap takes a while, as it loads a ~432 KB
+Then watch it come up — first bootstrap takes a while, as it loads a ~397 KB
 dump with 186 tables:
 
 ```shell
@@ -156,6 +156,13 @@ upstream revision is baked in:
 ./scripts/sync-schema.sh main     # move the pin to upstream HEAD
 ```
 
+The pin tracks upstream, and upstream's `0001` is regenerated from the FMI
+production database, so moving it is how the chart stays on par with production.
+At `91dd2c2` the schema matches production except for the deliberate
+`0004-reference-data.sql` additions (the `producers.analysis_hours` NOT NULL and
+its default, `arrival_leadtime`'s default) and the extensions a deployment
+outside FMI does not get (`pg_partman`).
+
 `0004-reference-data.sql` is **not** among the files it fetches. Upstream has a
 file of that name, so syncing it looks reasonable and would overwrite:
 upstream's is the original ~1.4 kB `target_types` seed, while this chart's has
@@ -192,9 +199,20 @@ narrower than it first appears:
 - **`-- Intentionally commented out:` annotations are kept**, along with the line
   they annotate: they record why `pg_partman` is absent and carry the statement
   someone would re-enable.
-- **trailing whitespace is trimmed outside a body and rejected inside one.**
-  Inside, it is part of `prosrc`, and silently rewriting a function's source is
-  the one thing this must not do.
+- **trailing whitespace is trimmed, and every line trimmed inside a function
+  body is printed by name.** Inside a body that whitespace is part of `prosrc`,
+  so the rewrite is real and has to be visible. Refusing outright turned out to
+  be wrong: upstream's dump carries 13 such lines, all at end of line and all
+  outside any string literal, kept only because whoever wrote the function left
+  them there. What must not happen is trimming them without saying so.
+
+  ```text
+  EXECUTE 'INSERT INTO period_types (id, name) VALUES (' ⏎
+      END IF; ⏎
+  END ; ⏎
+  ```
+
+  (`⏎` marks where the line ends, so the trailing space is visible here.)
 
 Two guards fail the sync rather than ship a damaged file: the count of lines that
 are neither a banner nor blank must not change, and dollar quoting must balance
@@ -206,11 +224,19 @@ carries 17 lines with trailing whitespace, all of them inside
 check ever sees them.
 
 **Equivalence is verified by building the database, not by reading the diff.**
-Applying the original and the normalised file to two throwaway
-`ghcr.io/cloudnative-pg/postgis:16-3.4` containers and dumping each schema back
-out gives byte-identical output — 322 060 B each — with all of tables, columns,
-constraints, indexes, functions, triggers, views, extensions, partitioned
-tables, comments and sequences matching exactly.
+The original and the normalised file are applied to two throwaway
+`ghcr.io/cloudnative-pg/postgis:16-3.4` containers and each schema dumped back
+out. Where no in-body whitespace is trimmed the dumps are byte-identical; where
+some is, the check that matters is that **no token changed**, which is
+`md5(regexp_replace(prosrc, '\s+', '', 'g'))` compared across every function.
+
+Order those by name alone and PostGIS's overloads make the comparison
+non-deterministic — it will report differences that are not there. Order by name
+*and* identity arguments. On the current pin the whitespace-insensitive hashes
+are identical across all 1 308 functions, while exactly 6 differ byte-exactly:
+`add_area_f`, `add_location_f`, `add_location_kind_f`, `add_period_type_f`,
+`fn_triggerall` and `validate_endwind_corr_coeff_f` — the six that contain the
+trimmed lines, and nothing else.
 
 ## Roles and passwords
 
