@@ -77,7 +77,7 @@
       "type": "object",
       "properties": {
         "enabled": {"type": "boolean"},
-        "replicaCount": {"type": "integer"},
+        "replicaCount": false,
         "managementPort": {"type": "integer"},
         "image": {"$ref": "#/definitions/image"},
         "tmpDir": {"$ref": "#/definitions/toggle"},
@@ -130,7 +130,7 @@
       "type": "object",
       "properties": {
         "enabled": {"type": "boolean"},
-        "replicaCount": {"type": "integer"},
+        "replicaCount": false,
         "springProfile": {"type": "string"},
         "managementPort": {"type": "integer"},
         "image": {"$ref": "#/definitions/image"},

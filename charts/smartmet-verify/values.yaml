@@ -169,7 +169,9 @@ gui:
 runner:
   enabled: false
 
-  replicaCount: 1
+  # No replicaCount: the runner is single-instance by design, see
+  # runner-deployment.yaml. Setting one is rejected by values.schema.json
+  # rather than being silently ignored.
 
   image:
     repository: ghcr.io/fmidev/fmi-verification-runner
