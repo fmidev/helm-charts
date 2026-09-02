@@ -22,10 +22,10 @@ The `database.*` values were REMOVED from the smartmet-verify chart in 0.8.0,
 but this release still sets `database`.
 
 This chart no longer renders a CloudNativePG `Cluster`. The database is now
-owned by a separate chart, `fmidev/smartmet-verify-database`, installed as its
+owned by a separate chart, `fmi/smartmet-verify-database`, installed as its
 own Helm release:
 
-    helm install verification-db fmidev/smartmet-verify-database
+    helm install verification-db fmi/smartmet-verify-database
 
 DANGER -- DATA LOSS IF YOU UPGRADE AN EXISTING RELEASE THAT OWNS THE CLUSTER.
 Dropping the `database` values alone is not enough. If this release currently
@@ -39,7 +39,8 @@ Before upgrading to 0.8.0, either:
   a) Hand the cluster over -- back it up, then detach it from this release so
      Helm will not prune it:
 
-       kubectl annotate cluster/{{ (.Values.database).name | default "verification-db" }} helm.sh/resource-policy=keep
+       kubectl annotate -n {{ .Release.Namespace }} \
+         cluster/<cluster-name> helm.sh/resource-policy=keep
 
      then upgrade this release without `database`, and adopt the object into a
      `smartmet-verify-database` release (label/annotate it with the new
