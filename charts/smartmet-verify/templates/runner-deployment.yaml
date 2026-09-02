@@ -10,9 +10,10 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  # Exactly one: the runner polls a shared queue of result orders and marks them done, so a
-  # second replica would compute the same orders twice. Recreate, not RollingUpdate, so a new
-  # pod never shares the ReadWriteOnce logs PVC with the old one during a rollout.
+  # Exactly one: the runner polls a shared queue of result orders and marks
+  # them done, so a second replica would compute the same orders twice.
+  # Recreate, not RollingUpdate, so a new pod never shares the ReadWriteOnce
+  # logs PVC with the old one during a rollout.
   replicas: 1
   strategy:
     type: Recreate
