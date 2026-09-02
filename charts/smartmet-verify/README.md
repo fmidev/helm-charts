@@ -449,6 +449,37 @@ Check mounted configuration:
 kubectl exec -it <pod> -- ls /var/app/config
 ```
 
+## Values schema
+
+The chart ships a `values.schema.json`, which Helm enforces on `install`,
+`upgrade`, `template` and `lint`.
+
+It rejects **unknown top-level keys**. Values that this chart no longer reads --
+`database.*`, removed in 0.8.0 -- and simple typos now fail with a clear message
+instead of being silently ignored:
+
+```text
+Error: values don't meet the specifications of the schema(s) in the following chart(s):
+smartmet-verify:
+- (root): Additional property database is not allowed
+```
+
+This matters most on `helm upgrade`: a values key that Helm ignores renders a
+manifest without the resources it was meant to configure, and Helm prunes
+whatever is missing. Failing the render is the safe outcome.
+
+Nested configuration stays deliberately open. `extraEnv`, `podAnnotations`,
+`resources`, `nodeSelector`, `tolerations`, `affinity`, probe bodies and the
+whole of `global` accept any content, so pass-through Kubernetes fragments are
+never blocked. Only well-defined leaves are typed -- `enabled` as a boolean,
+`replicaCount` and the ports as integers, image fields as strings. Quote
+numeric-looking image tags (`tag: "1.2"`), or the schema rejects them; unquoted
+they used to render as a broken image reference.
+
+**If a legitimate key is rejected, the schema is out of date, not the values.**
+Do not work around it by removing the file: add the property to
+`values.schema.json` alongside the template change that reads it, and open a PR.
+
 ## Chart Configuration
 
 The following table lists all configurable parameters and their defaults.
