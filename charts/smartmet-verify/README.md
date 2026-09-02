@@ -416,49 +416,11 @@ helm install verification-db fmi/smartmet-verify-database \
 ```
 
 That chart renders the CloudNativePG `Cluster`, vendors the SmartMet Verify
-schema and FMI's reference metadata, and manages the login roles. Splitting it
-out means no `helm upgrade` of the applications can ever delete the database.
-Exactly one Helm release may own `Cluster/verification-db`.
+schema and FMI's reference metadata, and manages the login roles. Exactly one
+Helm release may own `Cluster/verification-db`.
 
 Any existing external PostgreSQL/PostGIS instance also works unchanged — point
 the application configs at it and install neither database chart.
-
-### Migrating from `database.*` (chart 0.7.0 and earlier)
-
-Chart versions up to 0.7.0 could optionally render a CNPG `Cluster` from a
-`database:` values block. **That support was removed in 0.8.0** and the chart
-now **fails the render** if `database` is still set, rather than silently
-ignoring it.
-
-> **Data-loss warning.** If a release installed from 0.7.0 or earlier owns
-> `Cluster/verification-db`, simply deleting the `database:` block and running
-> `helm upgrade` removes the `Cluster` from the release manifest, and Helm
-> prunes it. CloudNativePG owner-references the PVC to the `Cluster`, so the
-> volume and every row in the database are deleted with it. There is no undo.
-
-Upgrade one of these two ways:
-
-1. **Hand the cluster over.** Back it up, detach the live object from this
-   release so Helm will not prune it, upgrade without `database:`, then adopt
-   the object into a `smartmet-verify-database` release:
-
-   ```shell
-   kubectl -n smartmet-verify annotate cluster/verification-db \
-     helm.sh/resource-policy=keep
-   ```
-
-   Adoption also needs the `app.kubernetes.io/managed-by`,
-   `meta.helm.sh/release-name` and `meta.helm.sh/release-namespace` metadata to
-   match the new release. Check the result with a rendered diff before applying.
-
-2. **Rebuild.** Capture a dump you have verified you can restore, uninstall the
-   release, install `smartmet-verify-database`, and restore into it. Note that
-   CNPG applies the init SQL only at `initdb`, so a cluster must be created with
-   the schema wiring it is meant to have.
-
-Pinning `smartmet-verify` 0.7.0 keeps the old behaviour if you are not ready to
-move. Background and the migration this followed at FMI:
-[fmidev/smartmet-rke2#100](https://github.com/fmidev/smartmet-rke2/issues/100).
 
 ## Notes for operators
 
