@@ -2,7 +2,7 @@ apiVersion: v2
 name: smartmet-verify-database
 description: PostgreSQL/PostGIS database for SmartMet Verify, managed by the CloudNativePG operator
 type: application
-version: 0.5.1
+version: 0.6.0
 home: https://github.com/fmidev/helm-charts
 sources:
   - https://github.com/fmidev/helm-charts
@@ -26,4 +26,4 @@ annotations:
   # truth for the schema version: read and rewritten by scripts/sync-schema.sh,
   # and surfaced on the rendered ConfigMaps as fmi.fi/schema-source-ref.
   fmi.fi/verification-sql-repo: https://github.com/fmidev/fmi-verification-common-sql
-  fmi.fi/verification-sql-ref: "bda8c1bb94276b41f62748b545e08af3e41b1998"
+  fmi.fi/verification-sql-ref: "91dd2c2e696678de695b2c781143126b131e4e07"
