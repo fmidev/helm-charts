@@ -4,8 +4,13 @@ This Helm chart deploys the **SmartMet Verify** system, consisting of:
 
 - `fmi-verification-gui` (web application)
 - `fmi-verification-runner` (background processing)
+- `fmi-verification-loader` (optional EDR model-data loader)
 
-Both applications can be deployed together or independently. This chart deploys applications only; the PostgreSQL/PostGIS database is a separate concern, see [Database](#database).
+Each component can be deployed on its own or alongside the others. This chart
+deploys applications only; the PostgreSQL/PostGIS database is a separate
+concern, handled by the sibling
+[`smartmet-verify-database`](../smartmet-verify-database/) chart — see
+[Database](#database).
 
 ## Overview
 
@@ -18,13 +23,35 @@ The chart is designed to:
   - SmartMet Server (HTTP API)
 - Use **Secrets for configuration** (recommended)
 
-> **Both components are disabled by default.** You must explicitly enable at least one:
+> **All components are disabled by default.** You must explicitly enable at
+> least one:
 > ```yaml
 > gui:
 >   enabled: true
 > runner:
 >   enabled: true
+> loader:
+>   enabled: true
 > ```
+
+### Replicas
+
+The GUI is the only component that scales. `gui.replicaCount` is yours to set;
+the runner and loader are pinned to a single pod each and have no
+`replicaCount` at all.
+
+Both reconcile shared state — the runner polls one queue of result orders and
+marks them done, the loader owns the forecasts ledger and a spool volume — so a
+second replica would repeat the work rather than share it, and would contend on
+a `ReadWriteOnce` PVC. Their Deployments therefore hardcode `replicas: 1` and
+use the `Recreate` strategy, so not even a rollout overlaps two pods. Setting
+`runner.replicaCount` or `loader.replicaCount` is rejected by the schema
+instead of being silently ignored:
+
+```text
+- at '/runner/replicaCount': false schema         # Helm 4
+- runner.replicaCount: False always fails validation   # Helm 3
+```
 
 ## Prerequisites
 
@@ -78,7 +105,8 @@ global:
   imageRegistry: my-registry.example.org
 ```
 
-Tags must be set per component, as GUI and runner are versioned independently:
+Tags must be set per component, as the three applications are versioned
+independently:
 
 ```yaml
 gui:
@@ -87,6 +115,9 @@ gui:
 runner:
   image:
     tag: "4.5.6"
+loader:
+  image:
+    tag: "0.3.7"
 ```
 
 ## Configuration
@@ -305,11 +336,11 @@ Do not enable both `ingress` and `route` at the same time.
 
 ## Management port
 
-Both GUI and runner expose Spring Boot Actuator on a dedicated management port,
-separate from the main HTTP port 8080 — **8081** for the GUI and **8082** for the
-runner, so the two do not collide on a host where both share a network
-namespace. Each value must match `management.server.port` in that application's
-own `application.yaml`. This port starts its
+All three applications expose Spring Boot Actuator on a dedicated management
+port, separate from the main HTTP port 8080 — **8081** for the GUI, **8082** for
+the runner and **8083** for the loader, so they do not collide on a host where
+they share a network namespace. Each value must match `management.server.port`
+in that application's own `application.yaml`. This port starts its
 own HTTP listener that is independent of Spring Security, so health endpoints
 are always reachable by probes regardless of the authentication profile active
 on the main port.
@@ -416,54 +447,26 @@ helm install verification-db fmi/smartmet-verify-database \
 ```
 
 That chart renders the CloudNativePG `Cluster`, vendors the SmartMet Verify
-schema and FMI's reference metadata, and manages the login roles. Splitting it
-out means no `helm upgrade` of the applications can ever delete the database.
-Exactly one Helm release may own `Cluster/verification-db`.
+schema and FMI's reference metadata, and manages the login roles. Exactly one
+Helm release may own `Cluster/verification-db`.
 
 Any existing external PostgreSQL/PostGIS instance also works unchanged — point
 the application configs at it and install neither database chart.
 
-### Migrating from `database.*` (chart 0.7.0 and earlier)
-
-Chart versions up to 0.7.0 could optionally render a CNPG `Cluster` from a
-`database:` values block. **That support was removed in 0.8.0** and the chart
-now **fails the render** if `database` is still set, rather than silently
-ignoring it.
-
-> **Data-loss warning.** If a release installed from 0.7.0 or earlier owns
-> `Cluster/verification-db`, simply deleting the `database:` block and running
-> `helm upgrade` removes the `Cluster` from the release manifest, and Helm
-> prunes it. CloudNativePG owner-references the PVC to the `Cluster`, so the
-> volume and every row in the database are deleted with it. There is no undo.
-
-Upgrade one of these two ways:
-
-1. **Hand the cluster over.** Back it up, detach the live object from this
-   release so Helm will not prune it, upgrade without `database:`, then adopt
-   the object into a `smartmet-verify-database` release:
-
-   ```shell
-   kubectl -n smartmet-verify annotate cluster/verification-db \
-     helm.sh/resource-policy=keep
-   ```
-
-   Adoption also needs the `app.kubernetes.io/managed-by`,
-   `meta.helm.sh/release-name` and `meta.helm.sh/release-namespace` metadata to
-   match the new release. Check the result with a rendered diff before applying.
-
-2. **Rebuild.** Capture a dump you have verified you can restore, uninstall the
-   release, install `smartmet-verify-database`, and restore into it. Note that
-   CNPG applies the init SQL only at `initdb`, so a cluster must be created with
-   the schema wiring it is meant to have.
-
-Pinning `smartmet-verify` 0.7.0 keeps the old behaviour if you are not ready to
-move. Background and the migration this followed at FMI:
-[fmidev/smartmet-rke2#100](https://github.com/fmidev/smartmet-rke2/issues/100).
-
 ## Notes for operators
 
+> **Upgrading a release that used to render the database.** Earlier versions of
+> this chart could render the CloudNativePG `Cluster` themselves. If a release
+> was installed that way, its `Cluster` and PVCs belong to *this* release, and
+> upgrading to a version that no longer renders them makes Helm prune them —
+> deleting the database with them. Move the database to the
+> [`smartmet-verify-database`](../smartmet-verify-database/) chart, or to an
+> external instance, **before** upgrading, and verify with
+> `helm get manifest <release>` that no `Cluster` remains in this release's
+> manifest.
+
 - Always use Secrets for database credentials
-- Keep GUI and runner configs separate
+- Keep the GUI, runner and loader configs separate
 - Use different database users for each app
 - Deploy into a dedicated namespace — the conventional default is `smartmet-verify` (may vary, especially on OpenShift where project names are customer-specific)
 
@@ -486,6 +489,47 @@ Check mounted configuration:
 ```shell
 kubectl exec -it <pod> -- ls /var/app/config
 ```
+
+## Values schema
+
+The chart ships a `values.schema.json`, which Helm enforces on `install`,
+`upgrade`, `template` and `lint`.
+
+It rejects **unknown top-level keys**. Values that this chart no longer reads --
+`database.*`, removed in 0.8.0 -- and simple typos now fail with a clear message
+instead of being silently ignored:
+
+```text
+Error: values don't meet the specifications of the schema(s) in the following chart(s):
+smartmet-verify:
+- at '': additional properties 'database' not allowed
+```
+
+Helm 3 reports the same rejection as
+`- (root): Additional property database is not allowed`; the wording comes from
+the validator and differs between Helm versions, so read the path and the
+offending key, not the sentence.
+
+This matters most on `helm upgrade`: a values key that Helm ignores renders a
+manifest without the resources it was meant to configure, and Helm prunes
+whatever is missing. Failing the render is the safe outcome.
+
+Nested configuration stays deliberately open. `extraEnv`, `podAnnotations`,
+`resources`, `nodeSelector`, `tolerations`, `affinity`, probe bodies and the
+whole of `global` accept any content, so pass-through Kubernetes fragments are
+never blocked. Only well-defined leaves are typed -- `enabled` as a boolean,
+`gui.replicaCount` and the ports as integers, image fields as strings. Quote
+numeric-looking image tags (`tag: "1.2"`), or the schema rejects them; unquoted
+they used to render as a broken image reference.
+
+Two keys are rejected outright rather than typed: `runner.replicaCount` and
+`loader.replicaCount`, because those Deployments hardcode `replicas: 1` (see
+[Replicas](#replicas)). A key the templates never read is worse than no key --
+it reads like a supported control and changes nothing.
+
+**If a legitimate key is rejected, the schema is out of date, not the values.**
+Do not work around it by removing the file: add the property to
+`values.schema.json` alongside the template change that reads it, and open a PR.
 
 ## Chart Configuration
 
@@ -519,7 +563,7 @@ The following table lists all configurable parameters and their defaults.
 | Parameter | Description | Default |
 |---|---|---|
 | `gui.enabled` | Deploy the GUI | `false` |
-| `gui.replicaCount` | Number of GUI pod replicas | `1` |
+| `gui.replicaCount` | GUI pod replicas (runner/loader are pinned to 1) | `1` |
 | `gui.image.repository` | GUI image repository | `ghcr.io/fmidev/fmi-verification-gui` |
 | `gui.image.tag` | GUI image tag — **required** | `""` |
 | `gui.image.pullPolicy` | Image pull policy | `IfNotPresent` |
@@ -589,7 +633,6 @@ The following table lists all configurable parameters and their defaults.
 | Parameter | Description | Default |
 |---|---|---|
 | `runner.enabled` | Deploy the runner | `false` |
-| `runner.replicaCount` | Number of runner pod replicas | `1` |
 | `runner.image.repository` | Runner image repository | `ghcr.io/fmidev/fmi-verification-runner` |
 | `runner.image.tag` | Runner image tag — **required** | `""` |
 | `runner.image.pullPolicy` | Image pull policy | `IfNotPresent` |

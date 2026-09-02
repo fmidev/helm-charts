@@ -1,0 +1,236 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "smartmet-verify values",
+  "description": "Values accepted by the smartmet-verify chart. Unknown top-level keys are rejected so that removed or misspelled configuration fails loudly instead of being ignored. Nested objects stay open on purpose: extraEnv, podAnnotations, resources, nodeSelector, tolerations, affinity and similar are pass-through Kubernetes fragments.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "enabled": {
+      "description": "Not read by this chart. Allowed because a parent chart that declares this chart with `condition: smartmet-verify.enabled` makes Helm inject the key into these values, and rejecting it would break a standard subchart pattern.",
+      "type": "boolean"
+    },
+    "commonAnnotations": {
+      "description": "Annotations added to every resource this chart renders.",
+      "type": "object"
+    },
+    "commonLabels": {
+      "description": "Labels added to every resource this chart renders.",
+      "type": "object"
+    },
+    "fullnameOverride": {
+      "description": "Override the full name used in resource names.",
+      "type": "string"
+    },
+    "global": {
+      "description": "Values shared with, and injected by, a parent chart. Intentionally open: Helm merges the parent's whole global block in here.",
+      "type": "object",
+      "properties": {
+        "imageRegistry": {
+          "description": "Registry prefix applied to every image in this chart.",
+          "type": "string"
+        },
+        "extraVolumes": {
+          "description": "Extra volumes added to every pod.",
+          "type": "array"
+        },
+        "extraVolumeMounts": {
+          "description": "Extra volume mounts added to every container.",
+          "type": "array"
+        }
+      }
+    },
+    "gui": {
+      "description": "The SmartMet Verify web GUI (Vaadin + Spring Boot).",
+      "type": "object",
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "replicaCount": {"type": "integer"},
+        "springProfile": {"type": "string"},
+        "managementPort": {"type": "integer"},
+        "image": {"$ref": "#/definitions/image"},
+        "service": {"$ref": "#/definitions/service"},
+        "tmpDir": {"$ref": "#/definitions/toggle"},
+        "ingress": {"$ref": "#/definitions/toggle"},
+        "route": {"$ref": "#/definitions/toggle"},
+        "config": {"$ref": "#/definitions/config"},
+        "persistence": {"$ref": "#/definitions/persistence"},
+        "probes": {"$ref": "#/definitions/probes"},
+        "extraEnv": {"type": "array"},
+        "extraEnvFrom": {"type": "array"},
+        "extraVolumes": {"type": "array"},
+        "extraVolumeMounts": {"type": "array"},
+        "env": {"type": "array"},
+        "tolerations": {"type": "array"},
+        "resources": {"type": "object"},
+        "nodeSelector": {"type": "object"},
+        "affinity": {"type": "object"},
+        "podAnnotations": {"type": "object"},
+        "podLabels": {"type": "object"}
+      }
+    },
+    "imagePullSecrets": {
+      "description": "Image pull secrets, used only when the image repositories point at a registry that needs credentials.",
+      "type": "array"
+    },
+    "loader": {
+      "description": "The optional EDR model-data loader. Off by default.",
+      "type": "object",
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "replicaCount": false,
+        "managementPort": {"type": "integer"},
+        "image": {"$ref": "#/definitions/image"},
+        "tmpDir": {"$ref": "#/definitions/toggle"},
+        "probes": {"$ref": "#/definitions/probes"},
+        "db": {
+          "type": "object",
+          "properties": {
+            "jdbcUrl": {
+              "description": "JDBC URL of the verification database. jdbcUrl, not url: the app binds a Hikari DataSource by its own property names.",
+              "type": "string"
+            },
+            "username": {"type": "string"},
+            "passwordSecret": {"type": "object"}
+          }
+        },
+        "edr": {
+          "type": "object",
+          "properties": {
+            "baseUrl": {"type": "string"}
+          }
+        },
+        "spool": {
+          "type": "object",
+          "properties": {
+            "mountPath": {"type": "string"},
+            "persistence": {"$ref": "#/definitions/toggle"}
+          }
+        },
+        "extraEnv": {"type": "array"},
+        "extraVolumes": {"type": "array"},
+        "extraVolumeMounts": {"type": "array"},
+        "tolerations": {"type": "array"},
+        "resources": {"type": "object"},
+        "nodeSelector": {"type": "object"},
+        "affinity": {"type": "object"},
+        "podAnnotations": {"type": "object"},
+        "podLabels": {"type": "object"}
+      }
+    },
+    "nameOverride": {
+      "description": "Override the chart name used in resource names.",
+      "type": "string"
+    },
+    "podSecurityContext": {
+      "description": "Pod-level security context, passed through to the pod spec.",
+      "type": "object"
+    },
+    "runner": {
+      "description": "The SmartMet Verify backend calculator.",
+      "type": "object",
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "replicaCount": false,
+        "springProfile": {"type": "string"},
+        "managementPort": {"type": "integer"},
+        "image": {"$ref": "#/definitions/image"},
+        "service": {"$ref": "#/definitions/service"},
+        "tmpDir": {"$ref": "#/definitions/toggle"},
+        "config": {"$ref": "#/definitions/config"},
+        "persistence": {"$ref": "#/definitions/persistence"},
+        "probes": {"$ref": "#/definitions/probes"},
+        "extraEnv": {"type": "array"},
+        "extraEnvFrom": {"type": "array"},
+        "extraVolumes": {"type": "array"},
+        "extraVolumeMounts": {"type": "array"},
+        "env": {"type": "array"},
+        "tolerations": {"type": "array"},
+        "resources": {"type": "object"},
+        "nodeSelector": {"type": "object"},
+        "affinity": {"type": "object"},
+        "podAnnotations": {"type": "object"},
+        "podLabels": {"type": "object"}
+      }
+    },
+    "securityContext": {
+      "description": "Container-level security context, passed through to every container.",
+      "type": "object"
+    },
+    "serviceAccount": {
+      "description": "ServiceAccount used by every pod in this chart.",
+      "type": "object",
+      "properties": {
+        "create": {"type": "boolean"},
+        "name": {"type": "string"},
+        "annotations": {"type": "object"}
+      }
+    }
+  },
+  "definitions": {
+    "image": {
+      "type": "object",
+      "properties": {
+        "repository": {"type": "string"},
+        "tag": {
+          "description": "Image tag. Must be a string: quote numeric-looking tags, or the template renders them as a Go type literal.",
+          "type": "string"
+        },
+        "pullPolicy": {"type": "string"}
+      }
+    },
+    "service": {
+      "type": "object",
+      "properties": {
+        "type": {"type": "string"},
+        "port": {"type": "integer"}
+      }
+    },
+    "toggle": {
+      "type": "object",
+      "properties": {
+        "enabled": {"type": "boolean"}
+      }
+    },
+    "config": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "description": "How the application config file reaches the container.",
+          "type": "string",
+          "enum": ["secretFile", "configMapFile", "env", "none"]
+        },
+        "secretFile": {"type": "object"},
+        "configMapFile": {"type": "object"},
+        "envFrom": {"type": "object"}
+      }
+    },
+    "persistence": {
+      "type": "object",
+      "properties": {
+        "logs": {
+          "type": "object",
+          "properties": {
+            "enabled": {"type": "boolean"},
+            "size": {"type": ["string", "integer"]},
+            "storageClassName": {"type": "string"},
+            "mountPath": {"type": "string"},
+            "accessModes": {"type": "array"}
+          }
+        }
+      }
+    },
+    "probes": {
+      "type": "object",
+      "properties": {
+        "liveness": {"$ref": "#/definitions/probe"},
+        "readiness": {"$ref": "#/definitions/probe"}
+      }
+    },
+    "probe": {
+      "type": "object",
+      "properties": {
+        "enabled": {"type": "boolean"}
+      }
+    }
+  }
+}
