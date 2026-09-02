@@ -49,7 +49,8 @@ use the `Recreate` strategy, so not even a rollout overlaps two pods. Setting
 instead of being silently ignored:
 
 ```text
-- at '/runner/replicaCount': false schema
+- at '/runner/replicaCount': false schema         # Helm 4
+- runner.replicaCount: False always fails validation   # Helm 3
 ```
 
 ## Prerequisites
@@ -504,8 +505,10 @@ smartmet-verify:
 - at '': additional properties 'database' not allowed
 ```
 
-(The exact wording comes from Helm's validator and differs between Helm 3 and
-Helm 4; the path and the offending key are the parts to read.)
+Helm 3 reports the same rejection as
+`- (root): Additional property database is not allowed`; the wording comes from
+the validator and differs between Helm versions, so read the path and the
+offending key, not the sentence.
 
 This matters most on `helm upgrade`: a values key that Helm ignores renders a
 manifest without the resources it was meant to configure, and Helm prunes
