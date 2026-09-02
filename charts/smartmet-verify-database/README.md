@@ -36,7 +36,7 @@ helm install verification-db fmi/smartmet-verify-database \
   --set cluster.storage.storageClass=local-path
 ```
 
-Then watch it come up — first bootstrap takes a while, as it loads a ~686 KB
+Then watch it come up — first bootstrap takes a while, as it loads a ~432 KB
 dump with 186 tables:
 
 ```shell
@@ -165,7 +165,52 @@ different files that share a name. Maintain this one here.
 It requires an authenticated `gh` with access to the (private) upstream repo,
 and rejects any file containing CR bytes, trailing whitespace, invalid UTF-8, or
 psql meta-commands — each of which would either break Helm's YAML block-scalar
-rendering or fail to execute under CNPG. Bump the chart `version` afterwards.
+rendering or fail to execute under CNPG. Bump the chart `version` afterwards:
+`ct lint` requires it, and without it chart-releaser publishes nothing, so the
+new SQL never reaches a deployment.
+
+### The schema dump is normalised on the way in
+
+`0001-production-schema.sql` is passed through `normalize_dump()` before those
+checks run. `pg_dump` wraps every object in a three-line
+`-- Name: …; Type: …; Owner: …` banner, and across roughly 2 700 objects that is
+**251 KB — 37 % of the file** — read by nothing, since CloudNativePG hands the
+contents straight to the server as SQL. Stripping it takes the production
+ConfigMap from **65 % of the 1 MiB object limit to 41 %**.
+
+It is a text transformation on a file that must keep meaning exactly, so it is
+narrower than it first appears:
+
+- **dollar-quote aware.** A PL/pgSQL body may contain a line beginning `--`, and
+  deleting it would rewrite the function's stored source.
+- **blank runs are collapsed only outside a body**, for the same reason. Doing
+  it inside leaves every catalog identical while making `pg_dump`'s output
+  differ — silent drift that a later schema comparison reports as a real change.
+  This was observed during development, not theorised.
+- **`COMMENT ON` is untouched.** Those statements do not begin with `--`, and
+  they are schema content rather than commentary about it.
+- **`-- Intentionally commented out:` annotations are kept**, along with the line
+  they annotate: they record why `pg_partman` is absent and carry the statement
+  someone would re-enable.
+- **trailing whitespace is trimmed outside a body and rejected inside one.**
+  Inside, it is part of `prosrc`, and silently rewriting a function's source is
+  the one thing this must not do.
+
+Two guards fail the sync rather than ship a damaged file: the count of lines that
+are neither a banner nor blank must not change, and dollar quoting must balance
+at end of file.
+
+The strip also happens to unblock moving the pin. Current upstream output
+carries 17 lines with trailing whitespace, all of them inside
+`-- … Owner:` banners with an empty owner; they are removed before the trailing-whitespace
+check ever sees them.
+
+**Equivalence is verified by building the database, not by reading the diff.**
+Applying the original and the normalised file to two throwaway
+`ghcr.io/cloudnative-pg/postgis:16-3.4` containers and dumping each schema back
+out gives byte-identical output — 322 060 B each — with all of tables, columns,
+constraints, indexes, functions, triggers, views, extensions, partitioned
+tables, comments and sequences matching exactly.
 
 ## Roles and passwords
 
