@@ -4,6 +4,10 @@ fullnameOverride: ""
 commonLabels: {}
 commonAnnotations: {}
 
+# The default images are published publicly to GitHub Container Registry, so no
+# pull secret is needed to deploy this chart as shipped. Set this only when
+# pointing the image repositories at a registry that does require credentials --
+# a private mirror, or an air-gapped copy.
 imagePullSecrets: []
 # Example:
 # imagePullSecrets:
@@ -38,7 +42,7 @@ gui:
   replicaCount: 1
 
   image:
-    repository: quay.io/fmi/fmi-verification-gui
+    repository: ghcr.io/fmidev/fmi-verification-gui
     tag: ""
     pullPolicy: IfNotPresent
 
@@ -165,10 +169,12 @@ gui:
 runner:
   enabled: false
 
-  replicaCount: 1
+  # No replicaCount: the runner is single-instance by design, see
+  # runner-deployment.yaml. Setting one is rejected by values.schema.json
+  # rather than being silently ignored.
 
   image:
-    repository: quay.io/fmi/fmi-verification-runner
+    repository: ghcr.io/fmidev/fmi-verification-runner
     tag: ""
     pullPolicy: IfNotPresent
 
@@ -238,7 +244,11 @@ runner:
 
   # Spring Boot Actuator management port. Must match management.server.port
   # in the app's application.yaml.
-  managementPort: 8081
+  #
+  # 8082, not the GUI's 8081: the runner sets management.server.port: 8082 so
+  # the two do not collide on a host where both share a network namespace.
+  # Aligning this with the GUI's value points the probes at a closed port.
+  managementPort: 8082
 
   # Probe action. By default httpGet against the management port.
   # Set one of `httpGet`, `tcpSocket` or `exec` to override.
@@ -262,87 +272,91 @@ runner:
       timeoutSeconds: 3
       failureThreshold: 6
 
-# Optional PostgreSQL/PostGIS database managed by the CloudNativePG operator.
-#
-# The operator itself is NOT installed by this chart. Before setting
-# `database.enabled: true` you must install CloudNativePG (see README).
-#
-# The fields under `spec` are passed through to the `Cluster` resource verbatim,
-# so anything the CNPG API supports can be configured from here.
-database:
+# Optional model data loader: reads model forecasts from a SmartMet Server EDR API and writes them
+# into model_data. Off by default -- FMI fills that table another way, so only deployments that
+# rely on the EDR loader (e.g. international ones) enable it.
+loader:
   enabled: false
 
-  # Cluster name. Also becomes the stem of the CNPG-generated services
-  # (`<name>-rw`, `<name>-ro`, `<name>-r`). Applications that use a different
-  # hostname (e.g. `verification-db`) can add an alias via
-  # `database.spec.managed.services.additional`.
-  name: verification-db
+  image:
+    repository: ghcr.io/fmidev/fmi-verification-loader
+    tag: ""
+    pullPolicy: IfNotPresent
 
-  # Expose the database primary outside the cluster so that bare-metal servers
-  # or other environments outside the namespace can connect directly.
-  # Disabled by default — enable only when external PostgreSQL access is needed.
-  externalAccess:
-    enabled: false
-    # NodePort — works on any cluster; connects via <any-node-IP>:<nodePort>.
-    # LoadBalancer — requires a cloud provider or MetalLB; gets a dedicated external IP.
-    type: NodePort
-    # nodePort: 30432  # Specific port in range 30000–32767 (NodePort only). Omit to auto-assign.
-    annotations: {}  # e.g. metallb.universe.tf/address-pool: "default"
+  # The verification database. jdbcUrl, not url: the app binds a Hikari DataSource by its own
+  # property names. In-cluster this is the CNPG service; the password comes from a secret.
+  db:
+    jdbcUrl: jdbc:postgresql://verification-db:5432/verifapi
+    username: verifrun
+    passwordSecret:
+      name: smartmet-verify-loader-db-password
+      key: password
 
-  spec:
-    instances: 1
-    imageName: ghcr.io/cloudnative-pg/postgis:16-3.4
+  edr:
+    # SmartMet Server EDR endpoint, in-cluster DNS (<service>.<namespace>), not the public name.
+    baseUrl: ""
 
-    env:
-      - name: TZ
-        value: UTC
+  # Ephemeral spool by default (emptyDir). Enable persistence to keep spooled runs across a pod
+  # reschedule -- worth it where a maintenance window can outlast the EDR's short instance
+  # retention. mountPath must match loader.spool.path in the application config.
+  # Writable /tmp for the embedded servlet container under the read-only root filesystem.
+  tmpDir:
+    enabled: true
 
-    postgresql:
-      parameters:
-        timezone: UTC
-        log_timezone: UTC
+  # The spool holds forecasts fetched while the verification database was unavailable, replayed
+  # when it returns. Persistent by default: an emptyDir spool is discarded on a pod reschedule,
+  # which loses precisely the runs it exists to protect -- and the loader only spools at all for an
+  # outage longer than EDR's instance retention, so those runs cannot simply be re-fetched.
+  #
+  # mountPath must match loader.spool.path in the application config, and size should match
+  # loader.spool.max-size, which is the cap the application evicts against.
+  spool:
+    mountPath: /var/spool/verification-loader
+    persistence:
+      enabled: true
+      accessModes:
+        - ReadWriteOnce
+      size: 5Gi
+      # Empty -> the cluster's default StorageClass.
+      storageClassName: ""
 
-    storage:
-      size: 100Gi
-      # storageClass: ""
+  resources:
+    requests:
+      memory: 1Gi
+      cpu: "1"
+    limits:
+      memory: 1Gi
+      cpu: "1"
 
-    # By keeping `owner: app` the operator creates a throw-away `app` role,
-    # which lets pre-init SQL CREATE ROLE verifadmin without colliding.
-    # A post-init SQL should transfer ownership of the application database
-    # to verifadmin before the production schema runs.
-    bootstrap:
-      initdb:
-        database: verifapi
-        owner: app
-        # References to ConfigMap/Secret keys containing SQL scripts.
-        # Supply these as existing ConfigMaps — the chart does not vendor
-        # the SmartMet Verify schema.
-        postInitSQLRefs:
-          configMapRefs: []
-          # - name: verification-db-init-sql
-          #   key: 0000-pre-init.sql
-        postInitApplicationSQLRefs:
-          configMapRefs: []
-          # - name: verification-db-init-sql
-          #   key: 0001-production-schema.sql
-          # - name: verification-db-init-sql
-          #   key: 0002-post-ownership.sql
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  podAnnotations: {}
+  podLabels: {}
+  extraEnv: []
+  extraVolumes: []
+  extraVolumeMounts: []
 
-    # managed.roles and managed.services below give applications access to the
-    # DB under their expected role names and service hostnames.
-    managed:
-      roles: []
-      # - name: verifwww
-      #   ensure: present
-      #   login: true
-      #   inherit: true
-      #   inRoles:
-      #     - verif_ro
-      #   passwordSecret:
-      #     name: verification-db-verifwww
-      services:
-        additional: []
-        # - selectorType: rw
-        #   serviceTemplate:
-        #     metadata:
-        #       name: verification-db
+  # Spring Boot Actuator management port. Must match management.server.port in the loader's
+  # application.yaml. 8083: the GUI holds 8081 and the runner 8082, so all three can share a
+  # network namespace without colliding.
+  managementPort: 8083
+
+  # Liveness only. The loader answers no application traffic and has no Service, so readiness
+  # gates nothing; a loader that cannot momentarily reach EDR or the database is still healthy and
+  # retrying, and must not be marked unready for it. Liveness catches a wedged process.
+  probes:
+    liveness:
+      enabled: true
+      httpGet:
+        path: /actuator/health/liveness
+        port: management
+      initialDelaySeconds: 30
+      periodSeconds: 20
+      timeoutSeconds: 3
+      failureThreshold: 6
+    readiness:
+      enabled: false
+      httpGet:
+        path: /actuator/health/readiness
+        port: management

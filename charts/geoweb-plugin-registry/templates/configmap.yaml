@@ -1,0 +1,31 @@
+{{- if not (or (eq .Values.storage.backend "local") (eq .Values.storage.backend "s3")) }}
+{{- fail "storage.backend must be either local or s3" }}
+{{- end }}
+{{- if and (eq .Values.storage.backend "s3") (not .Values.persistence.enabled) }}
+{{- fail "persistence.enabled must remain true in s3 mode because OpenID state is stored on the PVC" }}
+{{- end }}
+{{- if and (eq .Values.storage.backend "s3") (not .Values.auth.secretName) }}
+{{- fail "auth.secretName is required when storage.backend=s3" }}
+{{- end }}
+{{- if and .Values.auth.secretProviderClass.enabled (not .Values.auth.secretName) }}
+{{- fail "auth.secretName is required when auth.secretProviderClass.enabled=true" }}
+{{- end }}
+{{- if and .Values.auth.secretProviderClass.enabled (not .Values.auth.secretProviderClass.region) }}
+{{- fail "auth.secretProviderClass.region is required when auth.secretProviderClass.enabled=true" }}
+{{- end }}
+{{- if and .Values.auth.secretProviderClass.enabled (not .Values.auth.secretProviderClass.objectName) }}
+{{- fail "auth.secretProviderClass.objectName is required when auth.secretProviderClass.enabled=true" }}
+{{- end }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "geoweb-plugin-registry.fullname" . }}-config
+  labels:
+    {{- include "geoweb-plugin-registry.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+{{ if eq .Values.storage.backend "s3" }}
+{{ .Files.Get "files/config.yaml" | indent 4 }}
+{{- else }}
+{{ .Files.Get "files/config.local.yaml" | indent 4 }}
+{{- end }}

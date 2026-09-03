@@ -1,0 +1,176 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "geoweb-plugin-registry.fullname" . }}
+  labels:
+    {{- include "geoweb-plugin-registry.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+    rollingUpdate: null
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "geoweb-plugin-registry.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- with .Values.commitHash }}
+        commitHash: {{ . | quote }}
+        {{- end }}
+      labels:
+        {{- include "geoweb-plugin-registry.labels" . | nindent 8 }}
+    spec:
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ include "geoweb-plugin-registry.serviceAccountName" . }}
+      {{- else if .Values.serviceAccount.name }}
+      serviceAccountName: {{ .Values.serviceAccount.name | quote }}
+      {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: geoweb-plugin-registry
+          image: "{{ .Values.image.repository }}:{{ default .Values.image.tag .Values.versions.pluginRegistry }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if or .Values.publicUrl (eq .Values.storage.backend "s3") }}
+          env:
+            {{- with .Values.publicUrl }}
+            - name: VERDACCIO_PUBLIC_URL
+              value: {{ . | quote }}
+            {{- end }}
+            {{- if eq .Values.storage.backend "s3" }}
+            # Never fall back to the EKS node role when workload credentials are
+            # unavailable. IRSA and explicit credentials remain supported.
+            - name: AWS_EC2_METADATA_DISABLED
+              value: "true"
+            {{- if or .Values.storage.s3.existingSecret (and .Values.storage.s3.accessKeyId .Values.storage.s3.secretAccessKey) }}
+            - name: AWS_ACCESS_KEY_ID
+              {{- if .Values.storage.s3.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.storage.s3.existingSecret | quote }}
+                  key: {{ .Values.storage.s3.accessKeyIdKey | quote }}
+              {{- else }}
+              value: {{ .Values.storage.s3.accessKeyId | quote }}
+              {{- end }}
+            - name: AWS_SECRET_ACCESS_KEY
+              {{- if .Values.storage.s3.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.storage.s3.existingSecret | quote }}
+                  key: {{ .Values.storage.s3.secretAccessKeyKey | quote }}
+              {{- else }}
+              value: {{ .Values.storage.s3.secretAccessKey | quote }}
+              {{- end }}
+            {{- end }}
+            {{- if or .Values.storage.s3.sessionToken .Values.storage.s3.existingSecret }}
+            - name: AWS_SESSION_TOKEN
+              {{- if .Values.storage.s3.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.storage.s3.existingSecret | quote }}
+                  key: {{ .Values.storage.s3.sessionTokenKey | quote }}
+                  optional: true
+              {{- else }}
+              value: {{ .Values.storage.s3.sessionToken | quote }}
+              {{- end }}
+            {{- end }}
+            - name: AWS_REGION
+              value: {{ required "storage.s3.region is required when storage.backend=s3" .Values.storage.s3.region | quote }}
+            - name: AWS_S3_ENDPOINT
+              value: {{ .Values.storage.s3.endpoint | quote }}
+            - name: AWS_S3_PATH_STYLE
+              value: {{ .Values.storage.s3.pathStyle | quote }}
+            - name: AWS_S3_BUCKET
+              value: {{ required "storage.s3.bucket is required when storage.backend=s3" .Values.storage.s3.bucket | quote }}
+            - name: AWS_S3_PLUGIN_PREFIX
+              value: {{ .Values.storage.s3.prefix | quote }}
+            {{- with .Values.auth.secretName }}
+            - name: VERDACCIO_OPENID_PROVIDER_TYPE
+              value: gitlab
+            - name: VERDACCIO_OPENID_PROVIDER_HOST
+              value: https://gitlab.com
+            - name: VERDACCIO_OPENID_ISSUER
+              value: https://gitlab.com
+            - name: VERDACCIO_OPENID_AUTHORIZATION_ENDPOINT
+              value: https://gitlab.com/oauth/authorize
+            - name: VERDACCIO_OPENID_TOKEN_ENDPOINT
+              value: https://gitlab.com/oauth/token
+            - name: VERDACCIO_OPENID_USERINFO_ENDPOINT
+              value: https://gitlab.com/oauth/userinfo
+            - name: VERDACCIO_OPENID_JWKS_URI
+              value: https://gitlab.com/oauth/discovery/keys
+            - name: VERDACCIO_OPENID_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ . | quote }}
+                  key: {{ $.Values.auth.clientIdKey | quote }}
+            - name: VERDACCIO_OPENID_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ . | quote }}
+                  key: {{ $.Values.auth.clientSecretKey | quote }}
+            - name: VERDACCIO_OPENID_SCOPE
+              value: {{ $.Values.auth.scope | quote }}
+            - name: VERDACCIO_OPENID_USERNAME_CLAIM
+              value: {{ $.Values.auth.usernameClaim | quote }}
+            {{- end }}
+            {{- end }}
+          {{- end }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /-/ping
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /-/ping
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /verdaccio/conf/config.yaml
+              subPath: config.yaml
+              readOnly: true
+            {{- if .Values.persistence.enabled }}
+            - name: storage
+              mountPath: /verdaccio/storage
+            {{- end }}
+            {{- if .Values.auth.secretProviderClass.enabled }}
+            - name: secrets-store-inline
+              mountPath: /mnt/secrets-store
+              readOnly: true
+            {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "geoweb-plugin-registry.fullname" . }}-config
+        {{- if .Values.persistence.enabled }}
+        - name: storage
+          persistentVolumeClaim:
+            claimName: {{ include "geoweb-plugin-registry.fullname" . }}-storage
+        {{- end }}
+        {{- if .Values.auth.secretProviderClass.enabled }}
+        - name: secrets-store-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: {{ default (printf "%s-oidc" (include "geoweb-plugin-registry.fullname" .)) .Values.auth.secretProviderClass.name | quote }}
+        {{- end }}

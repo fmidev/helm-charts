@@ -1,0 +1,117 @@
+# Application version overrides used by environment deployment configuration.
+versions:
+  pluginRegistry: ""
+
+# Optional deployment marker used to force a rollout for mutable image tags.
+commitHash: ""
+
+# Canonical externally accessible registry URL. Leave empty to let Verdaccio
+# derive it from the request headers.
+publicUrl: ""
+
+image:
+  # Container image repository.
+  repository: registry.gitlab.com/opengeoweb/backend-services/plugin-registry-backend/plugin-registry-backend
+  # Image tag. `versions.pluginRegistry` takes precedence when set.
+  tag: v0.4.3
+  # Kubernetes image pull policy.
+  pullPolicy: IfNotPresent
+
+# Registry credentials for private container images.
+imagePullSecrets: []
+
+service:
+  # Kubernetes Service type.
+  type: ClusterIP
+  # Service and container port.
+  port: 4873
+
+route:
+  # Enable the OpenShift Route.
+  enabled: true
+  # Optional explicit hostname; empty lets OpenShift assign one.
+  host: ""
+  tls:
+    enabled: false
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+
+persistence:
+  # Use a PVC for Verdaccio state. In S3 mode this stores authentication data;
+  # package content is stored in S3.
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 10Gi
+  storageClassName: ""
+
+storage:
+  # Select local filesystem storage or an S3-compatible backend.
+  backend: local
+  s3:
+    bucket: ""
+    prefix: verdaccio
+    region: ""
+    # Leave empty for native AWS S3. Set this to the MinIO endpoint for local testing.
+    endpoint: ""
+    pathStyle: false
+    # Prefer an IAM role through serviceAccount.annotations for AWS.
+    existingSecret: ""
+    accessKeyIdKey: AWS_ACCESS_KEY_ID
+    secretAccessKeyKey: AWS_SECRET_ACCESS_KEY
+    sessionTokenKey: AWS_SESSION_TOKEN
+    accessKeyId: ""
+    secretAccessKey: ""
+    sessionToken: ""
+
+auth:
+  # Kubernetes Secret containing the GitLab OAuth client credentials.
+  secretName: ""
+  clientIdKey: VERDACCIO_OPENID_CLIENT_ID
+  clientSecretKey: VERDACCIO_OPENID_CLIENT_SECRET
+  scope: openid email read_api
+  usernameClaim: email
+  # Optionally synchronize secretName from one JSON object in AWS Secrets
+  # Manager. The pod mounts the CSI volume required to trigger synchronization.
+  secretProviderClass:
+    enabled: false
+    # Empty uses the release fullname with an "-oidc" suffix.
+    name: ""
+    region: ""
+    objectName: ""
+
+ingress:
+  enabled: false
+  className: ""
+  host: ""
+  annotations: {}
+  tls: []
+
+serviceAccount:
+  create: false
+  name: ""
+  annotations: {}
+  automountServiceAccountToken: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# Pod-level security settings.
+podSecurityContext:
+  runAsNonRoot: true
+  fsGroup: 65533
+  fsGroupChangePolicy: OnRootMismatch
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  # Container-level security settings.
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL

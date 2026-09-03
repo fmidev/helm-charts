@@ -1,0 +1,35 @@
+{{/*
+Operator-supplied SQL from `schema.extraSql`, executed as superuser on the
+application database after the vendored 0002-post-ownership.sql.
+
+Rendered whenever schema.enabled is true -- including when extraSql is empty --
+and always referenced from bootstrap.initdb as EXACTLY ONE ref.
+
+That single-key shape is deliberate. CNPG treats Cluster.spec.bootstrap as
+immutable once the cluster is initialised, so adding a migration later must
+change only this ConfigMap's CONTENTS, never the length or order of the refs
+list. All extraSql entries are therefore concatenated in sorted key order into
+one key rather than becoming one ref each.
+*/}}
+{{- if .Values.schema.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "smartmet-verify-database.clusterName" . }}-sql-extra
+  labels:
+    {{- include "smartmet-verify-database.componentLabels" (list . "database") | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+data:
+  extra.sql: |
+    -- Generated from `schema.extraSql`. Entries are concatenated in sorted key
+    -- order. Empty by default, which is a valid no-op for CNPG.
+    {{- range $name := (keys .Values.schema.extraSql | sortAlpha) }}
+    --
+    -- {{ $name }}
+    --
+    {{- index $.Values.schema.extraSql $name | nindent 4 }}
+    {{- end }}
+{{- end }}

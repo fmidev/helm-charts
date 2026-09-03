@@ -1,0 +1,128 @@
+{{- if .Values.loader.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "smartmet-verify.componentFullname" (list . "loader") }}
+  labels:
+    {{- include "smartmet-verify.componentLabels" (list . "loader") | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  # Exactly one: the loader reconciles shared state (the forecasts ledger and a spool volume);
+  # two replicas would duplicate work and contend on the spool. Recreate, not RollingUpdate, so a
+  # new pod never shares the ReadWriteOnce spool PVC with the old one during a rollout.
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "smartmet-verify.componentSelectorLabels" (list . "loader") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "smartmet-verify.componentSelectorLabels" (list . "loader") | nindent 8 }}
+        {{- with .Values.loader.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.loader.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "smartmet-verify.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: loader
+          image: {{ include "smartmet-verify.image" (list . .Values.loader.image) }}
+          imagePullPolicy: {{ .Values.loader.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          ports:
+            - name: management
+              containerPort: {{ .Values.loader.managementPort }}
+              protocol: TCP
+          env:
+            # The loader is configured by environment, not a mounted config file: its
+            # application.yml reads DB_URL / EDR_BASE_URL and friends as placeholders. Note DB_URL
+            # is a jdbcUrl -- fmi-verification-common supplies a DataSource bound to Hikari's own
+            # property names, not Spring Boot's `url`.
+            - name: DB_URL
+              value: {{ .Values.loader.db.jdbcUrl | quote }}
+            - name: DB_USER
+              value: {{ .Values.loader.db.username | quote }}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.loader.db.passwordSecret.name }}
+                  key: {{ .Values.loader.db.passwordSecret.key }}
+            - name: EDR_BASE_URL
+              value: {{ .Values.loader.edr.baseUrl | quote }}
+            {{- with .Values.loader.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- if .Values.loader.probes.liveness.enabled }}
+          livenessProbe:
+            {{- include "smartmet-verify.probe" .Values.loader.probes.liveness | nindent 12 }}
+          {{- end }}
+          {{- if .Values.loader.probes.readiness.enabled }}
+          readinessProbe:
+            {{- include "smartmet-verify.probe" .Values.loader.probes.readiness | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.loader.resources | nindent 12 }}
+          volumeMounts:
+            - name: spool
+              mountPath: {{ .Values.loader.spool.mountPath }}
+            {{- if .Values.loader.tmpDir.enabled }}
+            - name: tmp
+              mountPath: /tmp
+            {{- end }}
+            {{- with .Values.global.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- with .Values.loader.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+      volumes:
+        {{- if .Values.loader.tmpDir.enabled }}
+        # Writable /tmp: the image runs with a read-only root filesystem, and the embedded
+        # servlet container needs to create its work directory under /tmp. Mirrors gui/runner.
+        - name: tmp
+          emptyDir: {}
+        {{- end }}
+        - name: spool
+          {{- if .Values.loader.spool.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "smartmet-verify.componentFullname" (list . "loader") }}-spool
+          {{- else }}
+          # Ephemeral spool: survives a container restart within the pod but not a reschedule.
+          # Fine for testing; a production loader that must not lose runs across a reschedule
+          # should enable persistence below.
+          emptyDir: {}
+          {{- end }}
+        {{- with .Values.global.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.loader.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.loader.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.loader.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.loader.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

@@ -4,27 +4,54 @@ This Helm chart deploys the **SmartMet Verify** system, consisting of:
 
 - `fmi-verification-gui` (web application)
 - `fmi-verification-runner` (background processing)
+- `fmi-verification-loader` (optional EDR model-data loader)
 
-Both applications can be deployed together or independently. An optional PostgreSQL/PostGIS database can also be provisioned in the same namespace via the CloudNativePG operator.
+Each component can be deployed on its own or alongside the others. This chart
+deploys applications only; the PostgreSQL/PostGIS database is a separate
+concern, handled by the sibling
+[`smartmet-verify-database`](../smartmet-verify-database/) chart — see
+[Database](#database).
 
 ## Overview
 
 The chart is designed to:
 
 - Work on standard Kubernetes (RKE2) and OpenShift
-- Support separate deployments of GUI and runner
+- Support separate deployments of GUI, runner and the optional EDR model-data loader
 - Use **external services**:
   - PostgreSQL/PostGIS database
   - SmartMet Server (HTTP API)
 - Use **Secrets for configuration** (recommended)
 
-> **Both components are disabled by default.** You must explicitly enable at least one:
+> **All components are disabled by default.** You must explicitly enable at
+> least one:
 > ```yaml
 > gui:
 >   enabled: true
 > runner:
 >   enabled: true
+> loader:
+>   enabled: true
 > ```
+
+### Replicas
+
+The GUI is the only component that scales. `gui.replicaCount` is yours to set;
+the runner and loader are pinned to a single pod each and have no
+`replicaCount` at all.
+
+Both reconcile shared state — the runner polls one queue of result orders and
+marks them done, the loader owns the forecasts ledger and a spool volume — so a
+second replica would repeat the work rather than share it, and would contend on
+a `ReadWriteOnce` PVC. Their Deployments therefore hardcode `replicas: 1` and
+use the `Recreate` strategy, so not even a rollout overlaps two pods. Setting
+`runner.replicaCount` or `loader.replicaCount` is rejected by the schema
+instead of being silently ignored:
+
+```text
+- at '/runner/replicaCount': false schema         # Helm 4
+- runner.replicaCount: False always fails validation   # Helm 3
+```
 
 ## Prerequisites
 
@@ -37,42 +64,35 @@ Before installing:
    - An ingress controller (Kubernetes) or Route support (OpenShift) — RKE2 includes Traefik by default
    - A DNS record for the GUI hostname pointing to the cluster's ingress IP
    - [cert-manager](https://cert-manager.io/) with a `letsencrypt` ClusterIssuer for automated TLS (Kubernetes); on OpenShift TLS is handled by the Route
+   - A PostgreSQL/PostGIS database — see [Database](#database)
 
 2. You must create:
-   - A **pull secret** for Quay.io
    - **configuration Secrets** for GUI and/or runner
 
-## Private container images
+## Container images
 
-The application images are private and hosted in Quay.io
+The application images are public on GitHub Container Registry:
 
-- `quay.io/fmi/fmi-verification-gui`
-- `quay.io/fmi/fmi-verification-runner`
+- `ghcr.io/fmidev/fmi-verification-gui`
+- `ghcr.io/fmidev/fmi-verification-runner`
+- `ghcr.io/fmidev/fmi-verification-loader` (only when `loader.enabled: true`)
 
-You must create an image pull secret. The recommended approach is to download the
-pull secret directly from the Quay.io robot account settings:
+**No image pull secret is needed** to deploy this chart as shipped.
 
-1. Download the Kubernetes pull secret YAML from the Quay.io robot account settings
-   (e.g. to `pull-secret.yaml`).
-2. Apply it to the cluster:
-```shell
-kubectl create -f pull-secret.yaml --namespace=smartmet-verify
-```
-3. If the secret name in the downloaded file differs from `pull-secret`, update
-   `imagePullSecrets` in your values file accordingly:
+`imagePullSecrets` remains available for deployments that point the image
+repositories somewhere that does require credentials — a private mirror, or an
+air-gapped copy:
+
 ```yaml
 imagePullSecrets:
   - name: pull-secret
 ```
 
-Alternatively (option B), create the secret manually with credentials:
-
 ```shell
 kubectl create secret docker-registry pull-secret \
-  --docker-server=quay.io \
+  --docker-server=<REGISTRY> \
   --docker-username=<USERNAME> \
   --docker-password=<PASSWORD> \
-  --docker-email=<EMAIL> \
   --namespace=smartmet-verify
 ```
 
@@ -85,7 +105,8 @@ global:
   imageRegistry: my-registry.example.org
 ```
 
-Tags must be set per component, as GUI and runner are versioned independently:
+Tags must be set per component, as the three applications are versioned
+independently:
 
 ```yaml
 gui:
@@ -94,6 +115,9 @@ gui:
 runner:
   image:
     tag: "4.5.6"
+loader:
+  image:
+    tag: "0.3.7"
 ```
 
 ## Configuration
@@ -312,8 +336,11 @@ Do not enable both `ingress` and `route` at the same time.
 
 ## Management port
 
-Both GUI and runner expose Spring Boot Actuator on a dedicated management port
-(default **8081**), separate from the main HTTP port 8080. This port starts its
+All three applications expose Spring Boot Actuator on a dedicated management
+port, separate from the main HTTP port 8080 — **8081** for the GUI, **8082** for
+the runner and **8083** for the loader, so they do not collide on a host where
+they share a network namespace. Each value must match `management.server.port`
+in that application's own `application.yaml`. This port starts its
 own HTTP listener that is independent of Spring Security, so health endpoints
 are always reachable by probes regardless of the authentication profile active
 on the main port.
@@ -325,7 +352,7 @@ scraped by Prometheus. It is configurable independently per component:
 gui:
   managementPort: 8081   # default
 runner:
-  managementPort: 8081   # default
+  managementPort: 8082   # default
 ```
 
 ## Writable `/tmp` volume
@@ -348,7 +375,8 @@ Disable only if you provide an alternative writable location for `/tmp`.
 
 ## Probes
 
-Both components default to `httpGet` probes against the management port (8081).
+Both components default to `httpGet` probes against their own management port
+(8081 for the GUI, 8082 for the runner).
 Because the management port is a separate HTTP listener that bypasses Spring
 Security, probes work correctly regardless of which authentication profile is
 active — no special probe configuration is needed.
@@ -402,165 +430,43 @@ helm install smartmet-verify fmi/smartmet-verify \
   -f values.yaml
 ```
 
-## Database (optional)
+## Database
 
-The chart can optionally provision a PostgreSQL/PostGIS database using
-[CloudNativePG](https://cloudnative-pg.io/) (CNPG). This is a convenience for
-clusters that do not already have an external database; any existing
-PostgreSQL/PostGIS instance continues to work unchanged.
+**This chart does not deploy a database.** It expects the verification
+PostgreSQL/PostGIS database to already exist, and is pointed at it through the
+GUI, runner and loader configuration (`spring.datasource.jdbcUrl` and
+`loader.db.jdbcUrl`).
 
-### Install the CloudNativePG operator
-
-**The CloudNativePG operator is NOT installed by this chart.** You must install
-it separately, cluster-wide, before enabling the database:
-
-```shell
-kubectl apply --server-side -f \
-  https://github.com/cloudnative-pg/cloudnative-pg/releases/download/v1.29.0/cnpg-1.29.0.yaml
-```
-
-The above is the version this chart has been tested against. Any reasonably
-current CNPG release should work.
-
-### Enable the database
-
-```yaml
-database:
-  enabled: true
-  name: verification-db   # default
-```
-
-When enabled, the chart creates a `postgresql.cnpg.io/v1` `Cluster` named by
-`database.name` (default `verification-db`). The default image is
-`ghcr.io/cloudnative-pg/postgis:16-3.4`.
-
-`database.spec` is a pass-through to the CNPG `Cluster.spec` — anything CNPG
-supports goes there.
-
-### Init SQL
-
-The chart does not vendor the SmartMet Verify schema. You must provide the init
-SQL yourself as an existing ConfigMap and reference it from `database.spec`.
-
-Create the ConfigMap:
+To run the database inside the same cluster, use the separate
+[`smartmet-verify-database`](../smartmet-verify-database/) chart, installed as
+its own Helm release:
 
 ```shell
-kubectl -n smartmet-verify create configmap verification-db-init-sql \
-  --from-file=0000-pre-init.sql \
-  --from-file=0001-production-schema.sql \
-  --from-file=0002-post-ownership.sql
+helm install verification-db fmi/smartmet-verify-database \
+  --namespace smartmet-verify
 ```
 
-Reference it via CNPG's `postInitSQLRefs` and `postInitApplicationSQLRefs`:
+That chart renders the CloudNativePG `Cluster`, vendors the SmartMet Verify
+schema and FMI's reference metadata, and manages the login roles. Exactly one
+Helm release may own `Cluster/verification-db`.
 
-```yaml
-database:
-  spec:
-    bootstrap:
-      initdb:
-        postInitSQLRefs:
-          configMapRefs:
-            - { name: verification-db-init-sql, key: 0000-pre-init.sql }
-        postInitApplicationSQLRefs:
-          configMapRefs:
-            - { name: verification-db-init-sql, key: 0001-production-schema.sql }
-            - { name: verification-db-init-sql, key: 0002-post-ownership.sql }
-```
-
-`0002-post-ownership.sql` is a small user-supplied wrapper that transfers the
-application database's ownership to `verifadmin` after the schema loads. It is
-needed because the CNPG initdb `owner: app` default avoids conflicting with the
-`CREATE ROLE verifadmin` in `0000-pre-init.sql`, so ownership has to be handed
-over explicitly. Example contents:
-
-```sql
-ALTER DATABASE verifapi OWNER TO verifadmin;
-ALTER SCHEMA public OWNER TO verifadmin;
-GRANT USAGE ON SCHEMA public TO verif_ro;
-GRANT CREATE ON SCHEMA public TO verifadmin;
-```
-
-### Role passwords
-
-Role passwords come from `kubernetes.io/basic-auth` secrets that you create,
-one per managed role:
-
-```shell
-kubectl -n smartmet-verify create secret generic verification-db-verifadmin \
-  --type=kubernetes.io/basic-auth \
-  --from-literal=username=verifadmin --from-literal=password=<password>
-kubectl -n smartmet-verify create secret generic verification-db-verifwww \
-  --type=kubernetes.io/basic-auth \
-  --from-literal=username=verifwww --from-literal=password=<password>
-kubectl -n smartmet-verify create secret generic verification-db-verifrun \
-  --type=kubernetes.io/basic-auth \
-  --from-literal=username=verifrun --from-literal=password=<password>
-kubectl -n smartmet-verify create secret generic verification-db-verifimport \
-  --type=kubernetes.io/basic-auth \
-  --from-literal=username=verifimport --from-literal=password=<password>
-```
-
-The `verifwww` and `verifrun` passwords must also appear in the application
-config Secrets (`smartmet-verify-gui-config` and `smartmet-verify-runner-config`
-respectively). Keep the two in sync whenever you rotate a password.
-
-### Managed role memberships
-
-**Pitfall:** CNPG's `managed.roles` reconciliation removes any role memberships
-it did not declare itself. If a role's privileges come from a
-`GRANT <group_role> TO <user>` line in `0000-pre-init.sql`, you must **also**
-repeat that via the `inRoles:` field on the managed role — otherwise CNPG will
-revoke it on the next reconcile.
-
-`examples/values-rke2.yaml` shows `verifwww` with `inRoles: [verif_ro]` and
-`verifrun` with `inRoles: [verif_data_rw]` for exactly this reason.
-
-### Service hostname
-
-CNPG creates `<name>-rw`, `<name>-ro` and `<name>-r` services for the cluster.
-Applications that hard-code `verification-db` as the database hostname (e.g.
-in a pre-existing `application.yaml`) can get that name via
-`database.spec.managed.services.additional` — a `selectorType: rw` service
-template named `verification-db`. See `examples/values-rke2.yaml` for the exact
-shape.
-
-### Full example
-
-See [`examples/values-rke2.yaml`](./examples/values-rke2.yaml) for a complete
-working database configuration, including managed roles, additional services
-and init SQL wiring.
-
-### External access
-
-By default the database is only reachable within the cluster. To allow
-connections from bare-metal servers or other environments outside the namespace,
-enable the external access Service:
-
-```yaml
-database:
-  externalAccess:
-    enabled: true
-    type: NodePort      # or LoadBalancer
-    # nodePort: 30432   # optional fixed port (NodePort only, 30000–32767)
-```
-
-When `type: NodePort`, clients connect to `<any-node-IP>:<nodePort>` on port 5432.
-When `type: LoadBalancer`, a dedicated external IP is provisioned (requires a
-cloud provider or [MetalLB](https://metallb.universe.tf/) on bare-metal clusters).
-
-The Service name is `<database.name>-external` (e.g. `verification-db-external`)
-and it always routes to the **primary** (read-write) pod.
-
-> **Security note:** direct PostgreSQL exposure over the network should be paired
-> with TLS (CNPG supports server-side TLS via `database.spec.certificates`) and
-> tight `pg_hba.conf` rules (`database.spec.postgresql.pg_hba`) so that only
-> known client IPs and authenticated users are accepted. Consider firewall or
-> network-policy rules in addition.
+Any existing external PostgreSQL/PostGIS instance also works unchanged — point
+the application configs at it and install neither database chart.
 
 ## Notes for operators
 
+> **Upgrading a release that used to render the database.** Earlier versions of
+> this chart could render the CloudNativePG `Cluster` themselves. If a release
+> was installed that way, its `Cluster` and PVCs belong to *this* release, and
+> upgrading to a version that no longer renders them makes Helm prune them —
+> deleting the database with them. Move the database to the
+> [`smartmet-verify-database`](../smartmet-verify-database/) chart, or to an
+> external instance, **before** upgrading, and verify with
+> `helm get manifest <release>` that no `Cluster` remains in this release's
+> manifest.
+
 - Always use Secrets for database credentials
-- Keep GUI and runner configs separate
+- Keep the GUI, runner and loader configs separate
 - Use different database users for each app
 - Deploy into a dedicated namespace — the conventional default is `smartmet-verify` (may vary, especially on OpenShift where project names are customer-specific)
 
@@ -583,6 +489,47 @@ Check mounted configuration:
 ```shell
 kubectl exec -it <pod> -- ls /var/app/config
 ```
+
+## Values schema
+
+The chart ships a `values.schema.json`, which Helm enforces on `install`,
+`upgrade`, `template` and `lint`.
+
+It rejects **unknown top-level keys**. Values that this chart no longer reads --
+`database.*`, removed in 0.8.0 -- and simple typos now fail with a clear message
+instead of being silently ignored:
+
+```text
+Error: values don't meet the specifications of the schema(s) in the following chart(s):
+smartmet-verify:
+- at '': additional properties 'database' not allowed
+```
+
+Helm 3 reports the same rejection as
+`- (root): Additional property database is not allowed`; the wording comes from
+the validator and differs between Helm versions, so read the path and the
+offending key, not the sentence.
+
+This matters most on `helm upgrade`: a values key that Helm ignores renders a
+manifest without the resources it was meant to configure, and Helm prunes
+whatever is missing. Failing the render is the safe outcome.
+
+Nested configuration stays deliberately open. `extraEnv`, `podAnnotations`,
+`resources`, `nodeSelector`, `tolerations`, `affinity`, probe bodies and the
+whole of `global` accept any content, so pass-through Kubernetes fragments are
+never blocked. Only well-defined leaves are typed -- `enabled` as a boolean,
+`gui.replicaCount` and the ports as integers, image fields as strings. Quote
+numeric-looking image tags (`tag: "1.2"`), or the schema rejects them; unquoted
+they used to render as a broken image reference.
+
+Two keys are rejected outright rather than typed: `runner.replicaCount` and
+`loader.replicaCount`, because those Deployments hardcode `replicas: 1` (see
+[Replicas](#replicas)). A key the templates never read is worse than no key --
+it reads like a supported control and changes nothing.
+
+**If a legitimate key is rejected, the schema is out of date, not the values.**
+Do not work around it by removing the file: add the property to
+`values.schema.json` alongside the template change that reads it, and open a PR.
 
 ## Chart Configuration
 
@@ -616,8 +563,8 @@ The following table lists all configurable parameters and their defaults.
 | Parameter | Description | Default |
 |---|---|---|
 | `gui.enabled` | Deploy the GUI | `false` |
-| `gui.replicaCount` | Number of GUI pod replicas | `1` |
-| `gui.image.repository` | GUI image repository | `quay.io/fmi/fmi-verification-gui` |
+| `gui.replicaCount` | GUI pod replicas (runner/loader are pinned to 1) | `1` |
+| `gui.image.repository` | GUI image repository | `ghcr.io/fmidev/fmi-verification-gui` |
 | `gui.image.tag` | GUI image tag — **required** | `""` |
 | `gui.image.pullPolicy` | Image pull policy | `IfNotPresent` |
 | `gui.service.type` | Kubernetes Service type | `ClusterIP` |
@@ -686,8 +633,7 @@ The following table lists all configurable parameters and their defaults.
 | Parameter | Description | Default |
 |---|---|---|
 | `runner.enabled` | Deploy the runner | `false` |
-| `runner.replicaCount` | Number of runner pod replicas | `1` |
-| `runner.image.repository` | Runner image repository | `quay.io/fmi/fmi-verification-runner` |
+| `runner.image.repository` | Runner image repository | `ghcr.io/fmidev/fmi-verification-runner` |
 | `runner.image.tag` | Runner image tag — **required** | `""` |
 | `runner.image.pullPolicy` | Image pull policy | `IfNotPresent` |
 | `runner.service.type` | Kubernetes Service type | `ClusterIP` |
@@ -723,7 +669,7 @@ The following table lists all configurable parameters and their defaults.
 | `runner.persistence.logs.storageClassName` | Storage class for the log PVC | `""` |
 | `runner.persistence.logs.mountPath` | Log directory mount path | `/var/log/tomcat` |
 | `runner.tmpDir.enabled` | Mount a writable `emptyDir` at `/tmp` | `true` |
-| `runner.managementPort` | Spring Boot Actuator management port | `8081` |
+| `runner.managementPort` | Spring Boot Actuator management port | `8082` |
 | `runner.probes.liveness.enabled` | Enable liveness probe | `true` |
 | `runner.probes.liveness.httpGet.path` | Liveness probe HTTP path | `/actuator/health/liveness` |
 | `runner.probes.liveness.httpGet.port` | Liveness probe port | `management` |
@@ -738,24 +684,3 @@ The following table lists all configurable parameters and their defaults.
 | `runner.probes.readiness.periodSeconds` | Seconds between readiness checks | `20` |
 | `runner.probes.readiness.timeoutSeconds` | Probe timeout | `3` |
 | `runner.probes.readiness.failureThreshold` | Failures before pod marked unready | `6` |
-
-### Database (CloudNativePG)
-
-| Parameter | Description | Default |
-|---|---|---|
-| `database.enabled` | Provision a PostgreSQL/PostGIS database via CloudNativePG | `false` |
-| `database.name` | CNPG `Cluster` name; also the stem of generated services (`<name>-rw`, `-ro`, `-r`) | `verification-db` |
-| `database.externalAccess.enabled` | Expose the database primary outside the cluster via a NodePort or LoadBalancer Service | `false` |
-| `database.externalAccess.type` | Service type: `NodePort` or `LoadBalancer` | `NodePort` |
-| `database.externalAccess.nodePort` | Fixed NodePort number (30000–32767, NodePort only). Omit to auto-assign. | `""` |
-| `database.externalAccess.annotations` | Annotations on the external Service (e.g. MetalLB address pool) | `{}` |
-| `database.spec.instances` | Number of PostgreSQL instances | `1` |
-| `database.spec.imageName` | PostgreSQL + PostGIS container image | `ghcr.io/cloudnative-pg/postgis:16-3.4` |
-| `database.spec.storage.size` | PVC size for database storage | `100Gi` |
-| `database.spec.storage.storageClass` | Storage class for the database PVC | `""` |
-| `database.spec.bootstrap.initdb.database` | Name of the application database to create | `verifapi` |
-| `database.spec.bootstrap.initdb.owner` | Initial database owner role | `app` |
-| `database.spec.bootstrap.initdb.postInitSQLRefs` | ConfigMap/Secret refs for SQL run before app init (e.g. `0000-pre-init.sql`) | `[]` |
-| `database.spec.bootstrap.initdb.postInitApplicationSQLRefs` | ConfigMap/Secret refs for SQL run after app init (e.g. schema + ownership SQL) | `[]` |
-| `database.spec.managed.roles` | CNPG managed roles with passwords from Kubernetes Secrets | `[]` |
-| `database.spec.managed.services.additional` | Extra services (e.g. a `verification-db` alias for the primary) | `[]` |
