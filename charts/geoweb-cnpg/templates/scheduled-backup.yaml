@@ -1,0 +1,21 @@
+{{- if ne .Values.backup.method "none" }}
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: {{ include "geoweb-cnpg.name" . }}
+  labels:
+    {{- include "geoweb-cnpg.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.backup.schedule | quote }}
+  immediate: {{ .Values.backup.immediate }}
+  suspend: {{ .Values.backup.suspend }}
+  backupOwnerReference: {{ .Values.backup.backupOwnerReference }}
+  method: {{ ternary "plugin" "volumeSnapshot" (eq .Values.backup.method "barmanCloud") }}
+  target: {{ .Values.backup.target }}
+  cluster:
+    name: {{ include "geoweb-cnpg.name" . }}
+  {{- if eq .Values.backup.method "barmanCloud" }}
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io
+  {{- end }}
+{{- end }}
