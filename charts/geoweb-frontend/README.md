@@ -191,7 +191,6 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.env.GW_AUTH_ROLE_CLAIM_VALUE_PRESETS_ADMIN` | The name of the security group required for the preset-admin role | |
 | `frontend.env.GW_INITIAL_PRESETS_FILENAME` | Filename to fetch initial presets | `initialPresets.json` |
 | `frontend.env.GW_CAP_CONFIGURATION_FILENAME` | Filename to fetch CAP Warnings configured feeds | `capWarningPresets.json` |
-| `frontend.env.GW_TIMESERIES_CONFIGURATION_FILENAME` | Filename to fetch TimeSeries preset locations | `timeSeriesPresetLocations.json` |
 | `frontend.env.GW_FEATURE_FORCE_AUTHENTICATION` | Force authentication (block Guest access) | `false` |
 | `frontend.env.GW_FEATURE_MODULE_SPACE_WEATHER` | Enable Space Weather module | `false` |
 | `frontend.env.GW_FEATURE_MENU_FEEDBACK` | Enable Feedback menu option | `false` |
@@ -233,6 +232,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 
 | Chart version | frontend version |
 |---------------|------------------|
+| 3.22.0        | 19.5.1           |
 | 3.21.2        | 19.1.0           |
 | 3.21.1        | 19.0.0           |
 | 3.21.0        | 18.0.0           |
