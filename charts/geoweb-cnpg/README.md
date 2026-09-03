@@ -2,7 +2,7 @@
 
 Creates one CloudNativePG `Cluster` for one GeoWeb service. The CloudNativePG operator and CRDs must already exist in the target cluster.
 
-Use a separate Helm release for every service and environment. Database lifecycle must remain separate from the consuming application release.
+Use a separate Helm release for every service and environment.
 
 ## Presets example
 
@@ -40,11 +40,11 @@ presets:
       secretKey: uri
 ```
 
-The database and application must be deployed in the same namespace for this example. Kubernetes Pods cannot reference a Secret in another namespace, and the `uri` value uses a namespace-local service name. If an environment deliberately copies the connection Secret into another namespace, consume CNPG's `fqdn-uri` key instead so the database service name remains resolvable. Treat any copied Secret as a separate credential asset with its own secure synchronization and rotation process.
+The database and application must be deployed in the same namespace.
 
 ## PostgreSQL image and version
 
-`cluster.imageName` is the complete CNPG-compatible PostgreSQL container image reference, including its tag or digest. The image determines the PostgreSQL major and minor version; it is not merely an image repository override. When empty, CloudNativePG uses the operator's default operand image.
+`cluster.imageName` is the complete CNPG-compatible PostgreSQL container image reference, including its tag or digest. The image determines the PostgreSQL major and minor version. When empty, CloudNativePG uses the operator's default operand image.
 
 For production, select an image published for the installed CNPG operator and pin it explicitly, preferably by digest. For example:
 
@@ -59,15 +59,15 @@ Use a tag that actually exists in the [CloudNativePG PostgreSQL container regist
 
 ## Initial database
 
-With `cluster.bootstrap.mode: initdb`, CNPG initializes a new PostgreSQL cluster and creates one database for the consuming application. `cluster.bootstrap.initdb.database` is that database's name; when empty, this chart uses the Cluster `name`. `cluster.bootstrap.initdb.owner` is the login role that owns it and whose credentials CNPG exposes through the generated `<cluster>-app` Secret. The owner defaults to the organization-wide `geoweb` application role.
+With `cluster.bootstrap.mode: initdb`, CNPG initializes a new PostgreSQL cluster and creates one database for the consuming application. `cluster.bootstrap.initdb.database` is that database's name; when empty, this chart uses the Cluster `name`. `cluster.bootstrap.initdb.owner` is the login role that owns it and whose credentials CNPG exposes through the generated `<cluster>-app` Secret.
 
 Override the database when its established application name differs from the Cluster name, as in the presets example. These settings only initialize a new cluster; changing them later does not rename an existing database or role.
 
-The chart leaves encoding and locale settings to CNPG, whose `initdb` defaults are `UTF8` and `C`. These provide deterministic byte-order sorting and do not introduce environment-dependent locale behavior. Supporting a service that requires language-specific collation should be an explicit chart change accompanied by migration planning because collation choices cannot be changed safely in place.
+The chart leaves encoding and locale settings to CNPG, whose `initdb` defaults are `UTF8` and `C`.
 
 ## Data lifecycle
 
-Installing this chart with `bootstrap.initdb` creates an empty database. It does not migrate an existing sidecar or Zalando database.
+Installing this chart with `bootstrap.initdb` creates an empty database.
 
 Treat `name` as immutable after installation. Changing it does not rename the existing Cluster or database: Helm or Argo CD submits a new CNPG `Cluster` with new services and Secrets. With the default resource policy, the old Cluster is retained, so changing `name` requires an explicit migration and decommission plan.
 
@@ -85,7 +85,7 @@ Set `cluster.affinity.podAntiAffinityType: required` only when the target enviro
 
 ## Backups
 
-Backups are disabled by default because the chart cannot infer an environment's snapshot class, object store, credentials, retention, RPO, or RTO.
+Backups are disabled by default.
 
 ### CSI volume snapshots
 
@@ -100,11 +100,11 @@ backup:
     className: ocs-storagecluster-rbdplugin-snapclass
 ```
 
-The schedule uses six fields, including seconds. The example runs daily at midnight. Volume snapshots share the storage cluster's failure domain and are not sufficient as the only production backup.
+The schedule uses six fields, including seconds. The example runs daily at midnight. Volume snapshots alone cannot generally be considered backups.
 
 ### Barman Cloud object-store backups
 
-Use the Barman Cloud plugin for off-cluster backups, WAL archiving, and point-in-time recovery. The operator administrators must install the plugin, and an `ObjectStore` resource plus its storage-access Secret must already exist:
+Use the Barman Cloud plugin for off-cluster backups, WAL archiving, and point-in-time recovery. The CNPG operator must have the plugin installed and configured.
 
 ```yaml
 backup:
@@ -166,10 +166,6 @@ This chart requires `database` and `owner` in recovery mode so the post-recovery
 Leave `secretName` empty to generate replacement application credentials. To select the password explicitly, first create a `kubernetes.io/basic-auth` Secret containing `username` and `password`, then set `cluster.bootstrap.recovery.secretName`. The Secret username must match `owner` for CNPG to apply its password after recovery.
 
 Object-store recovery requires the plugin, `ObjectStore`, and storage-access Secret to be recreated before the Cluster. Use a different writable object store or `serverName` for backups made by the restored Cluster so it cannot overwrite the source archive.
-
-Back up externally managed Secrets with the platform's encrypted Kubernetes backup system or recreate them from a secrets manager. Never put plaintext database or object-store credentials in chart values or Git.
-
-Role reconciliation, pooling, and NetworkPolicies are still deferred until their environment-specific requirements are defined. Do not promote this first iteration to production without a tested restore procedure and those controls.
 
 ## Configuration
 
