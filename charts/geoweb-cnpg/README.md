@@ -175,7 +175,7 @@ Role reconciliation, pooling, and NetworkPolicies are still deferred until their
 
 | Parameter | Description | Default |
 | --- | --- | --- |
-| `name` | CNPG Cluster name (required) | `""` |
+| `name` | CNPG Cluster name | `geoweb-db` |
 | `helm.resourcePolicy` | Value of the `helm.sh/resource-policy` annotation; empty omits it | `keep` |
 | `cluster.instances` | Number of PostgreSQL instances | `1` |
 | `cluster.affinity.podAntiAffinityType` | Instance anti-affinity mode _(preferred\|required)_ | `preferred` |
