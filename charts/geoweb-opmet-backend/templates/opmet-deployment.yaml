@@ -1,3 +1,9 @@
+{{- $dbMode := default "sidecar" .Values.opmet.db.mode }}
+{{- $databaseUsesSecretProvider := and (eq $dbMode "external") (eq (default "inline" .Values.opmet.db.external.source) "secretProvider") }}
+{{- $publisherSecrets := .Values.opmet.publisher.secrets }}
+{{- $hasPublisherSecrets := or (gt (len $publisherSecrets.sshKeys) 0) (gt (len $publisherSecrets.sshPassphrases) 0) }}
+{{- $publisherUsesSecretProvider := and $hasPublisherSecrets (not (empty $publisherSecrets.provider)) }}
+{{- $usesAwsSecretProvider := or (and $databaseUsesSecretProvider (eq .Values.opmet.db.external.secretProvider.provider "aws")) (and $publisherUsesSecretProvider (eq $publisherSecrets.provider "aws")) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -19,7 +25,7 @@ spec:
         commitHash: {{ .Values.opmet.commitHash }}
       {{- end }}
     spec:
-    {{- if eq .Values.secretProvider "aws" }}
+    {{- if $usesAwsSecretProvider }}
       serviceAccountName: {{ .Values.opmet.secretServiceAccount }}
     {{- end }}
       initContainers:
@@ -38,7 +44,7 @@ spec:
         - mountPath: "/opmet/"
           name: {{ .Values.opmet.name }}-volume
     {{- end }}
-    {{- if .Values.opmet.db.useZalandoOperatorDb }}
+    {{- if eq $dbMode "zalando" }}
       - name: wait-for-db
         image: busybox
         command: ['sh', '-c', "until nc -z -v -w30 {{ .Values.opmet.db.name }} 5432; do echo 'Waiting for database...'; sleep 5; done"]
@@ -67,36 +73,40 @@ spec:
         - configMapRef:
             name: {{ .Values.opmet.name }}
         env:
-      {{- if .Values.opmet.db.useZalandoOperatorDb }}
+      {{- if eq $dbMode "zalando" }}
         - name: PG_PASS
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.opmet.db.POSTGRES_USER }}.{{ .Values.opmet.db.name }}.credentials.postgresql.acid.zalan.do
+              name: {{ .Values.opmet.db.username }}.{{ .Values.opmet.db.name }}.credentials.postgresql.acid.zalan.do
               key: password
         - name: PG_USER
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.opmet.db.POSTGRES_USER }}.{{ .Values.opmet.db.name }}.credentials.postgresql.acid.zalan.do
+              name: {{ .Values.opmet.db.username }}.{{ .Values.opmet.db.name }}.credentials.postgresql.acid.zalan.do
               key: username
       {{- end }}
         - name: SQLALCHEMY_DATABASE_URL
-        {{- if .Values.opmet.db.useZalandoOperatorDb }}
-          value: "postgresql://$(PG_USER):$(PG_PASS)@{{ .Values.opmet.db.name }}:5432/{{ .Values.opmet.db.POSTGRES_DB }}"
+        {{- if eq $dbMode "zalando" }}
+          value: "postgresql://$(PG_USER):$(PG_PASS)@{{ .Values.opmet.db.name }}:5432/{{ .Values.opmet.db.databaseName }}"
+        {{- else if eq $dbMode "sidecar" }}
+          value: "postgresql://{{ .Values.opmet.db.username }}:{{ .Values.opmet.db.sidecar.password }}@localhost:{{ .Values.opmet.db.sidecar.port }}/{{ .Values.opmet.db.databaseName }}"
         {{- else }}
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.opmet.db_secretName }}
-              key: OPMET_BACKEND_DB
+              name: {{ .Values.opmet.db.external.secretName }}
+              key: {{ .Values.opmet.db.external.secretKey }}
         {{- end }}
+      {{- if or $databaseUsesSecretProvider .Values.opmet.useCustomConfigurationFiles }}
         volumeMounts:
-      {{- if not .Values.opmet.db.useZalandoOperatorDb }}
-        - name: secrets-store-inline
+      {{- if $databaseUsesSecretProvider }}
+        - name: database-secrets-store
           mountPath: "/mnt/secrets-store"
           readOnly: true
       {{- end }}
       {{- if and .Values.opmet.useCustomConfigurationFiles }}
         - mountPath: {{ .Values.opmet.customConfigurationMountPath }}
           name: {{ .Values.opmet.name }}-volume
+      {{- end }}
       {{- end }}
         command: ["/bin/sh"]
         args: ["-c", "sleep 10 ; gunicorn --bind 0.0.0.0:{{ .Values.opmet.env.OPMET_BACKEND_PORT_HTTP }} -k uvicorn.workers.UvicornWorker --log-config opmet_logging.conf opmet_backend.main:app"]
@@ -142,11 +152,11 @@ spec:
         readinessProbe: {{ toYaml .Values.opmet.publisher.readinessProbe | nindent 10 }}
       {{- end }}
         env:
-      {{- range $ssh_passphrase_secret := .Values.opmet.ssh_passphrase_secrets }}
-        - name: {{ $ssh_passphrase_secret.name }}
+      {{- range $sshPassphrase := $publisherSecrets.sshPassphrases }}
+        - name: {{ $sshPassphrase.name }}
           valueFrom:
             secretKeyRef:
-              name: {{ $ssh_passphrase_secret.name }}
+              name: {{ $sshPassphrase.name }}
               key: SSH_KEY_PASSPHRASE
       {{- end }}
         - name: SERVERS
@@ -155,8 +165,8 @@ spec:
         - configMapRef:
             name: {{ .Values.opmet.publisher.name }}
         volumeMounts:
-      {{- if and .Values.opmet.ssh_secrets .Values.opmet.ssh_passphrase_secrets }}
-        - name: secrets-store-inline
+      {{- if $hasPublisherSecrets }}
+        - name: publisher-secrets-store
           mountPath: "/mnt/secrets-store"
           readOnly: true
       {{- end }}
@@ -184,26 +194,30 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Values.opmet.nginx.name }}
-      {{- if and .Values.opmet.useCustomConfigurationFiles }}
         volumeMounts:
+        - name: nginx-run
+          mountPath: "/run"
+      {{- if and .Values.opmet.useCustomConfigurationFiles }}
         - mountPath: "/nginx.conf"
           subPath: "nginx.conf"
           name: {{ .Values.opmet.name }}-volume
       {{- end }}
-      {{- if .Values.opmet.db.enableDefaultDb }}
+      {{- if eq $dbMode "sidecar" }}
       - name: {{ .Values.opmet.db.name }}
-        image: {{ .Values.opmet.db.image }}
+        image: {{ .Values.opmet.db.sidecar.image }}
         ports:
-          - containerPort: {{ .Values.opmet.db.port }}
+          - containerPort: {{ .Values.opmet.db.sidecar.port }}
         env:
           - name: POSTGRES_DB
-            value: {{ .Values.opmet.db.POSTGRES_DB }}
+            value: {{ .Values.opmet.db.databaseName }}
           - name: POSTGRES_USER
-            value: {{ .Values.opmet.db.POSTGRES_USER }}
+            value: {{ .Values.opmet.db.username }}
           - name: POSTGRES_PASSWORD
-            value: {{ .Values.opmet.db.POSTGRES_PASSWORD }}
+            value: {{ .Values.opmet.db.sidecar.password }}
       {{- end }}
       volumes:
+      - name: nginx-run
+        emptyDir: {}
     {{- if .Values.opmet.useCustomConfigurationFiles }}
       - name: {{ .Values.opmet.name }}-volume
       {{- if eq .Values.opmet.customConfigurationLocation "s3"}}
@@ -213,28 +227,32 @@ spec:
           claimName: {{ .Values.opmet.name }}-claim
       {{- end }}
     {{- end }}
-    {{- if or (and .Values.opmet.db_secret (not .Values.opmet.db.useZalandoOperatorDb)) (and .Values.opmet.ssh_secrets .Values.opmet.ssh_passphrase_secrets) }}
-      - name: secrets-store-inline
-      {{- if .Values.secretProvider }}
+    {{- if $databaseUsesSecretProvider }}
+      - name: database-secrets-store
         csi:
           driver: secrets-store.csi.k8s.io
           readOnly: true
           volumeAttributes:
-            secretProviderClass: {{ .Values.opmet.spcName | quote }}
+            secretProviderClass: {{ .Values.opmet.db.external.secretProvider.className | quote }}
+    {{- end }}
+    {{- if $hasPublisherSecrets }}
+      - name: publisher-secrets-store
+      {{- if $publisherUsesSecretProvider }}
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: {{ $publisherSecrets.className | quote }}
       {{- else }}
         projected:
           sources:
-          {{- if and .Values.opmet.db_secret (not .Values.opmet.db.useZalandoOperatorDb) }}
+          {{- range $sshKey := $publisherSecrets.sshKeys }}
           - secret:
-              name: {{ .Values.opmet.db_secretName }}
+              name: {{ $sshKey.name }}
           {{- end }}
-          {{- range $ssh_secret := .Values.opmet.ssh_secrets }}
+          {{- range $sshPassphrase := $publisherSecrets.sshPassphrases }}
           - secret:
-              name: {{ $ssh_secret.name }}
-          {{- end }}
-          {{- range $ssh_passphrase_secret := .Values.opmet.ssh_passphrase_secrets }}
-          - secret:
-              name: {{ $ssh_passphrase_secret.name }}
+              name: {{ $sshPassphrase.name }}
           {{- end }}
       {{- end }}
     {{- end }}

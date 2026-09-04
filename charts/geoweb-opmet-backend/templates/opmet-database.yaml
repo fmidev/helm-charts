@@ -1,26 +1,36 @@
-{{- if .Values.opmet.db.useZalandoOperatorDb }}
+{{- $dbMode := default "sidecar" .Values.opmet.db.mode }}
+{{- if not (has $dbMode (list "sidecar" "external" "zalando")) }}
+{{- fail "opmet.db.mode must be one of: sidecar, external, zalando" }}
+{{- end }}
+{{- if or (hasKey .Values.opmet "db_secret") (hasKey .Values.opmet "db_secretName") (hasKey .Values.opmet "db_secretType") (hasKey .Values.opmet "db_secretPath") (hasKey .Values.opmet "db_secretKey") }}
+{{- fail "opmet.db_secret* values were removed in chart 4.0.0. Use opmet.db.external.* instead." }}
+{{- end }}
+{{- if or (hasKey .Values.opmet.db "enableDefaultDb") (hasKey .Values.opmet.db "useZalandoOperatorDb") (hasKey .Values.opmet.db "POSTGRES_DB") (hasKey .Values.opmet.db "POSTGRES_USER") (hasKey .Values.opmet.db "POSTGRES_PASSWORD") (hasKey .Values.opmet.db "POSTGRES_VERSION") (hasKey .Values.opmet.db "numberOfInstances") (hasKey .Values.opmet.db "instanceSize") (hasKey .Values.opmet.db "zalandoTeamId") (hasKey .Values.opmet.db "enableLogicalBackup") (hasKey .Values.opmet.db "cleanInstall") (hasKey .Values.opmet.db "backupTimestamp") (hasKey .Values.opmet.db "backupBucket") }}
+{{- fail "Legacy opmet.db values were removed in chart 4.0.0. Set opmet.db.mode and migrate database settings using the README migration map." }}
+{{- end }}
+{{- if eq $dbMode "zalando" }}
 apiVersion: "acid.zalan.do/v1"
 kind: postgresql
 metadata:
   name: {{ .Values.opmet.db.name }}
 spec:
-  teamId: {{ .Values.opmet.db.zalandoTeamId }}
+  teamId: {{ .Values.opmet.db.zalando.teamId }}
   volume:
-    size: {{ .Values.opmet.db.instanceSize }}
-  numberOfInstances: {{ .Values.opmet.db.numberOfInstances }}
+    size: {{ .Values.opmet.db.zalando.volumeSize }}
+  numberOfInstances: {{ .Values.opmet.db.zalando.instances }}
   users:
-    {{ .Values.opmet.db.POSTGRES_USER }}:
+    {{ .Values.opmet.db.username }}:
     - superuser
     - createdb
   databases:
-    {{ .Values.opmet.db.POSTGRES_DB }}: {{ .Values.opmet.db.POSTGRES_USER }}
+    {{ .Values.opmet.db.databaseName }}: {{ .Values.opmet.db.username }}
   postgresql:
-    version: {{ .Values.opmet.db.POSTGRES_VERSION | quote }}
-  enableLogicalBackup: {{ .Values.opmet.db.enableLogicalBackup }}
-  {{- if not .Values.opmet.db.cleanInstall }}
+    version: {{ .Values.opmet.db.zalando.postgresVersion | quote }}
+  enableLogicalBackup: {{ .Values.opmet.db.zalando.enableLogicalBackup }}
+  {{- if .Values.opmet.db.zalando.clone.enabled }}
   clone:
     cluster: {{ .Values.opmet.db.name | quote }}
-    timestamp: {{ .Values.opmet.db.backupTimestamp | quote }}
-    s3_wal_path: {{ .Values.opmet.db.backupBucket | quote }}
+    timestamp: {{ .Values.opmet.db.zalando.clone.timestamp | quote }}
+    s3_wal_path: {{ .Values.opmet.db.zalando.clone.backupBucket | quote }}
   {{- end }}
 {{- end }}
