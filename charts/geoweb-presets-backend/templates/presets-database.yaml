@@ -5,7 +5,7 @@
 {{- if or (hasKey .Values.presets "db_secret") (hasKey .Values.presets "db_secretName") (hasKey .Values.presets "db_secretType") (hasKey .Values.presets "db_secretPath") (hasKey .Values.presets "db_secretKey") }}
 {{- fail "presets.db_secret* values were removed in chart 3.0.0. Use presets.db.external.* instead." }}
 {{- end }}
-{{- if or (hasKey .Values "secretProvider") (hasKey .Values "secretProviderParameters") (hasKey .Values.presets "iamRoleARN") }}
+{{- if or (hasKey .Values "secretProvider") (hasKey .Values "secretProviderParameters") (hasKey .Values.presets "iamRoleARN") (hasKey .Values.presets "spcName") }}
 {{- fail "Legacy secret provider values were removed in chart 3.0.0. Use presets.db.external.secretProvider.* instead." }}
 {{- end }}
 {{- if or (hasKey .Values.presets.db "enableDefaultDb") (hasKey .Values.presets.db "useZalandoOperatorDb") (hasKey .Values.presets.db "POSTGRES_DB") (hasKey .Values.presets.db "POSTGRES_USER") (hasKey .Values.presets.db "POSTGRES_PASSWORD") (hasKey .Values.presets.db "POSTGRES_VERSION") (hasKey .Values.presets.db "numberOfInstances") (hasKey .Values.presets.db "instanceSize") (hasKey .Values.presets.db "zalandoTeamId") (hasKey .Values.presets.db "enableLogicalBackup") (hasKey .Values.presets.db "cleanInstall") (hasKey .Values.presets.db "backupTimestamp") (hasKey .Values.presets.db "backupBucket") }}
