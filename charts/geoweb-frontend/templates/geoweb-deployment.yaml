@@ -73,6 +73,7 @@ spec:
               name: {{ .Values.frontend.client_id_secretName }}
               key: GW_AUTH_CLIENT_ID
       {{- end }}
+      {{- if or $nginx.headers .Values.secretProvider .Values.frontend.useCustomConfigurationFiles .Values.frontend.customConfiguration.enabled }}
         volumeMounts:
       {{- with $nginx.headers }}
         - name: nginx-headers
@@ -93,6 +94,8 @@ spec:
         - name: generated-configs
           mountPath: {{ .Values.frontend.customConfigurationMountPath }}
       {{- end }}
+      {{- end }}
+    {{- if or $nginx.headers .Values.secretProvider .Values.frontend.useCustomConfigurationFiles .Values.frontend.customConfiguration.enabled }}
       volumes:
       {{- with $nginx.headers }}
       - name: nginx-headers
@@ -118,17 +121,15 @@ spec:
             path: {{ $filename }}
           {{- end }}
       {{- end }}
-      - name: secrets-store-inline
       {{- if .Values.secretProvider }}
+      - name: secrets-store-inline
         csi:
           driver: secrets-store.csi.k8s.io
           readOnly: true
           volumeAttributes:
             secretProviderClass: {{ .Values.frontend.spcName | quote }}
-      {{ else }}
-        secret:
-          secretName: {{ .Values.frontend.client_id_secretName | quote }}
       {{- end }}
+    {{- end }}
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
