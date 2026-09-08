@@ -8,6 +8,13 @@
 {{- if or (hasKey .Values.opmet.db "enableDefaultDb") (hasKey .Values.opmet.db "useZalandoOperatorDb") (hasKey .Values.opmet.db "POSTGRES_DB") (hasKey .Values.opmet.db "POSTGRES_USER") (hasKey .Values.opmet.db "POSTGRES_PASSWORD") (hasKey .Values.opmet.db "POSTGRES_VERSION") (hasKey .Values.opmet.db "numberOfInstances") (hasKey .Values.opmet.db "instanceSize") (hasKey .Values.opmet.db "zalandoTeamId") (hasKey .Values.opmet.db "enableLogicalBackup") (hasKey .Values.opmet.db "cleanInstall") (hasKey .Values.opmet.db "backupTimestamp") (hasKey .Values.opmet.db "backupBucket") }}
 {{- fail "Legacy opmet.db values were removed in chart 4.0.0. Set opmet.db.mode and migrate database settings using the README migration map." }}
 {{- end }}
+{{- $clone := .Values.opmet.db.zalando.clone }}
+{{- if and (eq $dbMode "zalando") $clone.enabled (not $clone.backupBucket) }}
+{{- fail "opmet.db.zalando.clone.backupBucket is required when cloning is enabled" }}
+{{- end }}
+{{- if and (eq $dbMode "zalando") $clone.enabled (not $clone.timestamp) }}
+{{- fail "opmet.db.zalando.clone.timestamp is required when cloning is enabled" }}
+{{- end }}
 {{- if eq $dbMode "zalando" }}
 apiVersion: "acid.zalan.do/v1"
 kind: postgresql
@@ -27,10 +34,10 @@ spec:
   postgresql:
     version: {{ .Values.opmet.db.zalando.postgresVersion | quote }}
   enableLogicalBackup: {{ .Values.opmet.db.zalando.enableLogicalBackup }}
-  {{- if .Values.opmet.db.zalando.clone.enabled }}
+  {{- if $clone.enabled }}
   clone:
     cluster: {{ .Values.opmet.db.name | quote }}
-    timestamp: {{ .Values.opmet.db.zalando.clone.timestamp | quote }}
-    s3_wal_path: {{ .Values.opmet.db.zalando.clone.backupBucket | quote }}
+    timestamp: {{ $clone.timestamp | quote }}
+    s3_wal_path: {{ $clone.backupBucket | quote }}
   {{- end }}
 {{- end }}

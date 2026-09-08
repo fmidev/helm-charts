@@ -27,6 +27,8 @@ spec:
     spec:
     {{- if $usesAwsSecretProvider }}
       serviceAccountName: {{ .Values.opmet.secretServiceAccount }}
+    {{- else }}
+      serviceAccountName: default
     {{- end }}
       initContainers:
     {{- if and .Values.opmet.useCustomConfigurationFiles (eq .Values.opmet.customConfigurationLocation "s3")}}

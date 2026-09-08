@@ -263,7 +263,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.db.external.source`                    | Connection Secret source *(inline\|secretProvider\|existingSecret)* | `inline` |
 | `opmet.db.external.secretName`                | Kubernetes Secret containing the connection string | `opmet-db` |
 | `opmet.db.external.secretKey`                 | Connection-string key in the Kubernetes Secret | `OPMET_BACKEND_DB` |
-| `opmet.db.external.encodedConnectionString`   | Base64 connection string used by `inline` | See `values.yaml` |
+| `opmet.db.external.encodedConnectionString`   | Base64 connection string; required when `source: inline` | |
 | `opmet.db.external.secretProvider.provider`   | CSI provider *(aws\|azure\|gcp\|vault)* | |
 | `opmet.db.external.secretProvider.className`  | Database SecretProviderClass name | `opmet-db-spc` |
 | `opmet.db.external.secretProvider.objectName` | External database-secret object name | |
@@ -277,8 +277,8 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.db.zalando.volumeSize`                 | Zalando database volume size | `100Mi` |
 | `opmet.db.zalando.enableLogicalBackup`        | Enable Zalando logical backups | `true` |
 | `opmet.db.zalando.clone.enabled`              | Restore a Zalando cluster from backup | `false` |
-| `opmet.db.zalando.clone.timestamp`            | Zalando restore timestamp | `"2030-01-01T00:00:00+00:00"` |
-| `opmet.db.zalando.clone.backupBucket`         | Zalando backup bucket | |
+| `opmet.db.zalando.clone.timestamp`            | Zalando restore timestamp; required when cloning is enabled | |
+| `opmet.db.zalando.clone.backupBucket`         | Zalando backup bucket; required when cloning is enabled | |
 | `opmet.env.AIRMET_CONFIG`                     | Location of AIRMET configuration file that is used (application defaults to `configuration_files/airmetConfig.json`) |                                                                                              |
 | `opmet.env.BACKEND_CONFIG`                    | Location of backend configuration file that is used (application defaults to `configuration_files/backendConfig.json`) |                                                                                              |
 | `opmet.env.OPMET_BACKEND_PORT_HTTP`           | Port used for container | `8000`                                                                                       |
