@@ -573,6 +573,18 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/geoweb-cap-backend-1.0.0/geoweb-cap-backend-1.0.0.tgz
     version: 1.0.0
+  geoweb-cnpg:
+  - apiVersion: v2
+    created: "2026-09-08T09:35:09.574854806Z"
+    description: A CloudNativePG database chart for GeoWeb services
+    digest: 2917b7ed93393f71188629e808d13c38b676d7fb6a7ea930174f64463d46106b
+    maintainers:
+    - name: FMI
+    name: geoweb-cnpg
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-cnpg-0.1.0/geoweb-cnpg-0.1.0.tgz
+    version: 0.1.0
   geoweb-frontend:
   - apiVersion: v2
     appVersion: v19.5.1
@@ -6202,4 +6214,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2026-09-07T07:46:46.490828898Z"
+generated: "2026-09-08T09:35:09.575645131Z"
