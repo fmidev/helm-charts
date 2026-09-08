@@ -93,7 +93,7 @@ warnings:
       source: inline
       secretName: warnings-db
       secretKey: WARNINGS_BACKEND_DB
-      encodedConnectionString: cG9zdGdyZXNxbDovL2dlb3dlYjpwb3N0Z3Jlc0Bsb2NhbGhvc3Q6NTQzMi93YXJuaW5ncw==
+      encodedConnectionString: ""
       secretProvider:
         provider: ""
         className: warnings-spc
@@ -111,7 +111,7 @@ warnings:
       enableLogicalBackup: true
       clone:
         enabled: false
-        timestamp: "2030-01-01T00:00:00+00:00"
+        timestamp: ""
         backupBucket: ""
   useCustomConfigurationFiles: false
   customConfigurationLocation: local

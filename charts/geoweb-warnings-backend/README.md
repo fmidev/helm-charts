@@ -138,6 +138,7 @@ warnings:
     zalando:
       clone:
         enabled: true
+        timestamp: "2030-01-01T00:00:00+00:00"
         backupBucket: s3://<S3-bucket-name>/
 ```
 
@@ -236,7 +237,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.db.external.source` | Connection Secret source *(inline\|secretProvider\|existingSecret)* | `inline` |
 | `warnings.db.external.secretName` | Kubernetes Secret containing the connection string | `warnings-db` |
 | `warnings.db.external.secretKey` | Connection-string key in the Kubernetes Secret | `WARNINGS_BACKEND_DB` |
-| `warnings.db.external.encodedConnectionString` | Base64-encoded connection string used by `inline` | see `values.yaml` |
+| `warnings.db.external.encodedConnectionString` | Base64-encoded connection string; required when `source: inline` | |
 | `warnings.db.external.secretProvider.provider` | CSI provider *(aws\|azure\|gcp\|vault)* | |
 | `warnings.db.external.secretProvider.className` | SecretProviderClass name | `warnings-spc` |
 | `warnings.db.external.secretProvider.objectName` | External database-secret object name | |
@@ -251,8 +252,8 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.db.zalando.volumeSize` | Zalando PostgreSQL volume size | `100Mi` |
 | `warnings.db.zalando.enableLogicalBackup` | Enable Zalando logical backups | `true` |
 | `warnings.db.zalando.clone.enabled` | Add the Zalando clone bootstrap stanza | `false` |
-| `warnings.db.zalando.clone.timestamp` | Zalando clone recovery timestamp | `2030-01-01T00:00:00+00:00` |
-| `warnings.db.zalando.clone.backupBucket` | Zalando clone WAL backup path | |
+| `warnings.db.zalando.clone.timestamp` | Zalando clone recovery timestamp; required when cloning is enabled | |
+| `warnings.db.zalando.clone.backupBucket` | Zalando clone WAL backup path; required when cloning is enabled | |
 | `warnings.useCustomConfigurationFiles` | Use custom configurations | `false` |
 | `warnings.customConfigurationLocation` | Where custom configurations are located *(local\|s3)* | `local` |
 | `warnings.customConfigurationFolderPath` | Path to the folder which contains custom configurations | |

@@ -11,6 +11,13 @@
 {{- if or (hasKey .Values.warnings.db "enableDefaultDb") (hasKey .Values.warnings.db "useZalandoOperatorDb") (hasKey .Values.warnings.db "POSTGRES_DB") (hasKey .Values.warnings.db "POSTGRES_USER") (hasKey .Values.warnings.db "POSTGRES_PASSWORD") (hasKey .Values.warnings.db "POSTGRES_VERSION") (hasKey .Values.warnings.db "numberOfInstances") (hasKey .Values.warnings.db "instanceSize") (hasKey .Values.warnings.db "zalandoTeamId") (hasKey .Values.warnings.db "enableLogicalBackup") (hasKey .Values.warnings.db "cleanInstall") (hasKey .Values.warnings.db "backupTimestamp") (hasKey .Values.warnings.db "backupBucket") }}
 {{- fail "Legacy warnings.db values were removed in chart 2.0.0. Set warnings.db.mode and migrate database settings using the README migration map." }}
 {{- end }}
+{{- $clone := .Values.warnings.db.zalando.clone }}
+{{- if and (eq $dbMode "zalando") $clone.enabled (not $clone.backupBucket) }}
+{{- fail "warnings.db.zalando.clone.backupBucket is required when cloning is enabled" }}
+{{- end }}
+{{- if and (eq $dbMode "zalando") $clone.enabled (not $clone.timestamp) }}
+{{- fail "warnings.db.zalando.clone.timestamp is required when cloning is enabled" }}
+{{- end }}
 {{- if eq $dbMode "zalando" }}
 apiVersion: "acid.zalan.do/v1"
 kind: postgresql
@@ -30,10 +37,10 @@ spec:
   postgresql:
     version: {{ .Values.warnings.db.zalando.postgresVersion | quote }}
   enableLogicalBackup: {{ .Values.warnings.db.zalando.enableLogicalBackup }}
-  {{- if .Values.warnings.db.zalando.clone.enabled }}
+  {{- if $clone.enabled }}
   clone:
     cluster: {{ .Values.warnings.db.name | quote }}
-    timestamp: {{ .Values.warnings.db.zalando.clone.timestamp | quote }}
-    s3_wal_path: {{ .Values.warnings.db.zalando.clone.backupBucket | quote }}
+    timestamp: {{ $clone.timestamp | quote }}
+    s3_wal_path: {{ $clone.backupBucket | quote }}
   {{- end }}
 {{- end }}
