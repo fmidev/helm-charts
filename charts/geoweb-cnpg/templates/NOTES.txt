@@ -1,0 +1,16 @@
+CloudNativePG cluster {{ include "geoweb-cnpg.name" . }} has been submitted.
+
+The application connection Secret is managed by CloudNativePG:
+  Secret: {{ include "geoweb-cnpg.name" . }}-app
+  URI key: uri
+
+Wait for the database before deploying an application:
+  kubectl wait --namespace {{ .Release.Namespace }} --for=condition=Ready cluster/{{ include "geoweb-cnpg.name" . }} --timeout=5m
+{{- if ne .Values.backup.method "none" }}
+
+Scheduled backup method: {{ .Values.backup.method }}
+  kubectl get --namespace {{ .Release.Namespace }} scheduledbackup,backup -l app.kubernetes.io/instance={{ .Release.Name }}
+{{- else }}
+
+WARNING: Backups are disabled. Set backup.method to volumeSnapshot or barmanCloud and configure that method.
+{{- end }}

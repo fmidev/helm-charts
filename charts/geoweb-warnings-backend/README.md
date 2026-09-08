@@ -1,3 +1,59 @@
+# GeoWeb Warnings Backend Helm Chart
+
+Deploys the GeoWeb warnings backend, auth proxy sidecar, and optional development or Zalando PostgreSQL resources. CloudNativePG databases are managed separately with the `geoweb-cnpg` chart.
+
+# Upgrade notes for chart 2.0.0
+
+Chart `2.0.0` introduces a breaking database values cleanup. The old `warnings.db.enableDefaultDb` and `warnings.db.useZalandoOperatorDb` booleans are replaced by the new `warnings.db.mode` value, and database settings now live under common fields and mode-specific blocks. Removed 1.x database values cause template rendering to fail until they are migrated.
+
+Migration map:
+
+| Removed value | New value |
+| - | - |
+| `warnings.db.enableDefaultDb: true` | `warnings.db.mode: sidecar` |
+| `warnings.db.enableDefaultDb: false` with `warnings.db.useZalandoOperatorDb: false` | `warnings.db.mode: external` |
+| `warnings.db.useZalandoOperatorDb: true` | `warnings.db.mode: zalando` |
+| `warnings.db_secret` | `warnings.db.external.encodedConnectionString` for `source: inline`, or `warnings.db.external.secretProvider.objectName` for `source: secretProvider` |
+| `warnings.db_secretName` | `warnings.db.external.secretName` |
+| `warnings.db_secretType` | `warnings.db.external.secretProvider.objectType` |
+| `warnings.db_secretPath` | `warnings.db.external.secretProvider.path` |
+| `warnings.db_secretKey` | `warnings.db.external.secretProvider.key` |
+| `warnings.iamRoleARN` | `warnings.db.external.secretProvider.iamRoleARN` |
+| `warnings.spcName` | `warnings.db.external.secretProvider.className` |
+| `secretProvider` | `warnings.db.external.secretProvider.provider` |
+| `secretProviderParameters` | `warnings.db.external.secretProvider.parameters` |
+| `warnings.db.POSTGRES_DB` | `warnings.db.databaseName` |
+| `warnings.db.POSTGRES_USER` | `warnings.db.username` |
+| `warnings.db.POSTGRES_PASSWORD` | `warnings.db.sidecar.password` |
+| `warnings.db.POSTGRES_VERSION` | `warnings.db.zalando.postgresVersion` |
+| `warnings.db.numberOfInstances` | `warnings.db.zalando.instances` |
+| `warnings.db.instanceSize` | `warnings.db.zalando.volumeSize` |
+| `warnings.db.zalandoTeamId` | `warnings.db.zalando.teamId` |
+| `warnings.db.enableLogicalBackup` | `warnings.db.zalando.enableLogicalBackup` |
+| `warnings.db.cleanInstall: false` | `warnings.db.zalando.clone.enabled: true` |
+| `warnings.db.backupTimestamp` | `warnings.db.zalando.clone.timestamp` |
+| `warnings.db.backupBucket` | `warnings.db.zalando.clone.backupBucket` |
+
+For existing Zalando deployments, render old and migrated values before upgrading and compare the generated `postgresql` resource. The resource name, users, database name, team ID, instance count, and volume size should stay unchanged.
+
+For existing external database deployments, verify that the rendered Deployment still reads `WARNINGS_BACKEND_DB` from the intended Kubernetes Secret name and key.
+
+An upgrade from 1.x does not require changing database technology. First migrate the values to `mode: sidecar`, `mode: zalando`, or the corresponding external source and verify the rendered resources. Moving the data to CloudNativePG is a separate operation and should not be combined with the chart values migration.
+
+## Migrating an existing database to CloudNativePG
+
+The `geoweb-cnpg` chart creates a new, empty database. It does not adopt or copy a 1.x sidecar, Zalando, or external database.
+
+1. Migrate and validate the 1.x values while retaining the existing database mode.
+2. Back up the source database and verify that the dump can be read.
+3. Install `geoweb-cnpg` as a separate release with a different resource name from the source database.
+4. Stop writes to warnings, take a final consistent dump, and restore it into the CNPG database.
+5. Verify schema, row counts, and required warnings before changing the application release.
+6. Upgrade warnings with `mode: external`, `source: existingSecret`, and the CNPG-generated `<cluster-name>-app` Secret key `uri`.
+7. Keep the source database and backup until application validation and the rollback window are complete.
+
+Do not uninstall the source database release as part of the application upgrade. The exact dump and restore commands depend on the source mode and environment; rehearse the procedure on a copy before production migration.
+
 # Install the chart repository
 
 ```bash
@@ -7,27 +63,45 @@ helm repo update
 
 # Create required dependencies
 
-Create values.yaml file for required variables:
-* Using aws as the secret provider
-```yaml
-warnings: 
-  url: geoweb.example.com
-  db_secret: secretName # Secret should contain postgresql database connection string
-  iamRoleARN: arn:aws:iam::123456789012:role/example-iam-role-with-permissions-to-secret
+Create a values file for the required variables.
 
-secretProvider: aws
-secretProviderParameters:
-  region: your-region
-```
+- Using an external database connection string from AWS Secrets Manager
 
-* Using base64 encoded secret
 ```yaml
 warnings:
   url: geoweb.example.com
-  db_secret: base64_encoded_postgresql_connection_string
+  db:
+    mode: external
+    external:
+      source: secretProvider
+      secretName: warnings-db
+      secretKey: WARNINGS_BACKEND_DB
+      secretProvider:
+        provider: aws
+        className: warnings-spc
+        objectName: secretName # Secret should contain the PostgreSQL database connection string
+        objectType: secretsmanager
+        iamRoleARN: arn:aws:iam::123456789012:role/example-iam-role-with-permissions-to-secret
+        parameters:
+          region: your-region
 ```
 
-* Using custom configuration files stored locally
+- Using a base64-encoded connection string
+
+```yaml
+warnings:
+  url: geoweb.example.com
+  db:
+    mode: external
+    external:
+      source: inline
+      secretName: warnings-db
+      secretKey: WARNINGS_BACKEND_DB
+      encodedConnectionString: base64_encoded_postgresql_connection_string
+```
+
+- Using custom configuration files stored locally
+
 ```yaml
 warnings:
   url: geoweb.example.com
@@ -35,7 +109,8 @@ warnings:
   customConfigurationFolderPath: /example/path/
 ```
 
-* Using custom configuration files stored in AWS S3
+- Using custom configuration files stored in AWS S3
+
 ```yaml
 warnings:
   url: geoweb.example.com
@@ -48,16 +123,39 @@ warnings:
   awsDefaultRegion: <AWS_DEFAULT_REGION>
 ```
 
-* Using Zalando Operator Database
+- Using a Zalando Operator database
+
+Database selection is controlled by `warnings.db.mode`.
+
 ```yaml
 warnings:
   url: geoweb.example.com
   db:
-    enableDefaultDb: false
-    useZalandoOperatorDb: true
-    cleanInstall: false # Add this line only after first install
-    backupBucket: s3://<S3-bucket-name>/
+    mode: zalando
+    name: warnings-db
+    databaseName: warnings
+    username: geoweb
+    zalando:
+      clone:
+        enabled: true
+        timestamp: "2030-01-01T00:00:00+00:00"
+        backupBucket: s3://<S3-bucket-name>/
 ```
+
+- Using a separately managed CloudNativePG database
+
+```yaml
+warnings:
+  url: geoweb.example.com
+  db:
+    mode: external
+    external:
+      source: existingSecret
+      secretName: warnings-db-app
+      secretKey: uri
+```
+
+Install the database separately using `charts/geoweb-cnpg` and wait for the CNPG `Cluster` to become ready before deploying warnings. Both releases must use the same namespace for this configuration. Set `secretName` to `<geoweb-cnpg name>-app`; CNPG's backup method does not change this application Secret contract.
 
 # Testing the Chart
 Execute the following for testing the chart:
@@ -91,7 +189,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 | - | - | - |
 | `versions.warnings` | Possibility to override application version | |
 | `warnings.name` | Name of backend | `warnings` |
-| `warnings.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/warnings-backend` |
+| `warnings.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/warnings-backend/warnings-backend` |
 | `warnings.commitHash` | Adds commitHash annotation to the deployment | |
 | `warnings.imagePullPolicy` | Adds option to modify imagePullPolicy | |
 | `warnings.url` | Url which the application can be accessed | |
@@ -99,12 +197,6 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.svcPort` | Port used for service | `80` |
 | `warnings.replicas` | Amount of replicas deployed | `1` |
 | `warnings.minPodsAvailable` | Minimum available pods in pod disruption budget. Value `0` omits the pdb. | `0` | 
-| `warnings.db_secret` | Secret containing base64 encoded Postgresql database connection string | |
-| `warnings.db_secretName` | Name of db secret | `warnings-db` |
-| `warnings.db_secretType` | Type to db secret | `secretsmanager` |
-| `warnings.db_secretPath` | Path to db secret | |
-| `warnings.db_secretKey` | Key of db secret | |
-| `warnings.iamRoleARN` | IAM Role with permissions to access db_secret secret | |
 | `warnings.secretServiceAccount` | Service Account created for handling secrets | `warnings-service-account` |
 | `warnings.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `warnings.startupProbe` | Configure main container startupProbe | see defaults from `values.yaml` |
@@ -112,8 +204,6 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.readinessProbe` | Configure main container readinessProbe | see defaults from `values.yaml` |
 | `warnings.env.WARNINGS_PORT_HTTP` | Port used for container | `8080` |
 | `warnings.env.APPLICATION_ROOT_PATH` | Application root path for FastAPI. Generally same as `warnings.path` without the wildcard. | `/warnings-backend` |
-| `secretProvider` | Option to use secret provider instead of passing base64 encoded database connection string as warnings.db_secret *(aws\|azure\|gcp\|vault)* | |
-| `secretProviderParameters` | Option to add custom parameters to the secretProvider, for example with aws you can specify region | |
 | `warnings.nginx.name` | Name of nginx container | `nginx` |
 | `warnings.nginx.registry` | Registry to fetch nginx image | `registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend` |
 | `warnings.nginx.version` | Possibility to override Nginx version | see default from `values.yaml` |
@@ -131,18 +221,39 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.nginx.BACKEND_HOST` | Warning-backend container address where Nginx reverse proxy forwards the requests | `0.0.0.0:8080` |
 | `warnings.nginx.NGINX_PORT_HTTP` | Port used for Nginx reverse proxy | `80` |
 | `warnings.nginx.NGINX_PORT_HTTPS` | Port used for Nginx reverse proxy when SSL is enabled | `443` |
+| `warnings.nginx.TRUST_FORWARDED_HEADERS` | Trust forwarded request headers in the auth proxy | |
 | `warnings.nginx.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `warnings.nginx.startupProbe` | Configure nginx container startupProbe | see defaults from `values.yaml` |
 | `warnings.nginx.livenessProbe` | Configure nginx container livenessProbe | see defaults from `values.yaml` |
 | `warnings.nginx.readinessProbe` | Configure nginx container readinessProbe | see defaults from `values.yaml` |
 | `warnings.nginx.ENV_VAR_STRICT_MODE` | Enable check if all necessary variables for authentication and authorization are set | `false` |
-| `warnings.db.enableDefaultDb` | Enable default postgres database | `true` |
-| `warnings.db.name` | Default postgres database container name | `postgres` |
-| `warnings.db.image` | Default postgres database image | `postgres` |
-| `warnings.db.port` | Default postgres database port | `5432` |
-| `warnings.db.POSTGRES_DB` | Default postgres database name | `warnings` |
-| `warnings.db.POSTGRES_USER` | Default postgres database user | `postgres` |
-| `warnings.db.POSTGRES_PASSWORD` | Default postgres database password | `postgres` |
+| `warnings.db.mode` | Database mode *(sidecar\|external\|zalando)* | `sidecar` |
+| `warnings.db.name` | Database resource or sidecar name | `warnings-db` |
+| `warnings.db.databaseName` | PostgreSQL database name | `warnings` |
+| `warnings.db.username` | PostgreSQL username | `geoweb` |
+| `warnings.db.sidecar.image` | Sidecar PostgreSQL image | `postgres` |
+| `warnings.db.sidecar.port` | Sidecar PostgreSQL port | `5432` |
+| `warnings.db.sidecar.password` | Sidecar PostgreSQL password | `postgres` |
+| `warnings.db.external.source` | Connection Secret source *(inline\|secretProvider\|existingSecret)* | `inline` |
+| `warnings.db.external.secretName` | Kubernetes Secret containing the connection string | `warnings-db` |
+| `warnings.db.external.secretKey` | Connection-string key in the Kubernetes Secret | `WARNINGS_BACKEND_DB` |
+| `warnings.db.external.encodedConnectionString` | Base64-encoded connection string; required when `source: inline` | |
+| `warnings.db.external.secretProvider.provider` | CSI provider *(aws\|azure\|gcp\|vault)* | |
+| `warnings.db.external.secretProvider.className` | SecretProviderClass name | `warnings-spc` |
+| `warnings.db.external.secretProvider.objectName` | External database-secret object name | |
+| `warnings.db.external.secretProvider.objectType` | External object type for AWS or Azure | `secretsmanager` |
+| `warnings.db.external.secretProvider.path` | Provider-specific secret path | |
+| `warnings.db.external.secretProvider.key` | Provider-specific secret key | |
+| `warnings.db.external.secretProvider.iamRoleARN` | IAM role used by the AWS secret provider | |
+| `warnings.db.external.secretProvider.parameters` | Additional provider parameters | `{}` |
+| `warnings.db.zalando.teamId` | Zalando operator team ID | `geoweb` |
+| `warnings.db.zalando.postgresVersion` | PostgreSQL major version | `15` |
+| `warnings.db.zalando.instances` | Zalando PostgreSQL instance count | `1` |
+| `warnings.db.zalando.volumeSize` | Zalando PostgreSQL volume size | `100Mi` |
+| `warnings.db.zalando.enableLogicalBackup` | Enable Zalando logical backups | `true` |
+| `warnings.db.zalando.clone.enabled` | Add the Zalando clone bootstrap stanza | `false` |
+| `warnings.db.zalando.clone.timestamp` | Zalando clone recovery timestamp; required when cloning is enabled | |
+| `warnings.db.zalando.clone.backupBucket` | Zalando clone WAL backup path; required when cloning is enabled | |
 | `warnings.useCustomConfigurationFiles` | Use custom configurations | `false` |
 | `warnings.customConfigurationLocation` | Where custom configurations are located *(local\|s3)* | `local` |
 | `warnings.customConfigurationFolderPath` | Path to the folder which contains custom configurations | |
@@ -160,6 +271,10 @@ The following table lists the configurable parameters of the Warnings backend ch
 
 | Chart version | warnings version |
 |---------------|------------------|
+| 2.0.1         | 3.1.1            |
+| 2.0.0         | 3.1.1            |
+| 1.3.13        | 3.1.1            |
+| 1.3.12        | 3.0.0            |
 | 1.3.11        | 2.1.2            |
 | 1.3.10        | 2.1.1            |
 | 1.3.9         | 2.0.3            |
