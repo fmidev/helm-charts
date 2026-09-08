@@ -16,6 +16,9 @@
 {{- if and .Values.auth.secretProviderClass.enabled (not .Values.auth.secretProviderClass.objectName) }}
 {{- fail "auth.secretProviderClass.objectName is required when auth.secretProviderClass.enabled=true" }}
 {{- end }}
+{{- if and .Values.auth.gitlabCi.enabled (ne .Values.storage.backend "s3") }}
+{{- fail "auth.gitlabCi.enabled requires storage.backend=s3" }}
+{{- end }}
 {{- if and .Values.auth.gitlabCi.enabled (not .Values.auth.gitlabCi.issuer) }}
 {{- fail "auth.gitlabCi.issuer is required when auth.gitlabCi.enabled=true" }}
 {{- end }}
@@ -36,5 +39,5 @@ data:
 {{ if eq .Values.storage.backend "s3" }}
 {{ tpl (.Files.Get "files/config.yaml") . | indent 4 }}
 {{- else }}
-{{ tpl (.Files.Get "files/config.local.yaml") . | indent 4 }}
+{{ .Files.Get "files/config.local.yaml" | indent 4 }}
 {{- end }}

@@ -58,7 +58,7 @@ sanitized values file is available at
 | `auth.secretName` | Kubernetes Secret consumed for GitLab OAuth client credentials | `""` |
 | `auth.scope` | GitLab OAuth scopes | `openid email read_api` |
 | `auth.usernameClaim` | GitLab identity claim used as username | `email` |
-| `auth.gitlabCi.enabled` | Authenticate headless publishers with GitLab CI ID tokens | `false` |
+| `auth.gitlabCi.enabled` | Authenticate headless publishers with GitLab CI ID tokens (`storage.backend=s3` only) | `false` |
 | `auth.gitlabCi.issuer` | Expected GitLab ID-token issuer | `""` |
 | `auth.gitlabCi.audience` | Environment-specific expected ID-token audience | `""` |
 | `auth.gitlabCi.allowedNamespaces` | GitLab namespaces permitted to publish from CI | `[]` |
