@@ -23,6 +23,8 @@ spec:
     spec:
     {{- if and $usesExternalSecretProvider (eq .Values.warnings.db.external.secretProvider.provider "aws") }}
       serviceAccountName: {{ .Values.warnings.secretServiceAccount }}
+    {{- else }}
+      serviceAccountName: default
     {{- end }}
       initContainers:
     {{- if and .Values.warnings.useCustomConfigurationFiles (eq .Values.warnings.customConfigurationLocation "s3")}}
