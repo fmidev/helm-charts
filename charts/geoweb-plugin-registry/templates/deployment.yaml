@@ -38,11 +38,17 @@ spec:
         - name: geoweb-plugin-registry
           image: "{{ .Values.image.repository }}:{{ default .Values.image.tag .Values.versions.pluginRegistry }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if or .Values.publicUrl (eq .Values.storage.backend "s3") }}
+          {{- if or .Values.publicUrl (eq .Values.storage.backend "s3") .Values.auth.gitlabCi.enabled }}
           env:
             {{- with .Values.publicUrl }}
             - name: VERDACCIO_PUBLIC_URL
               value: {{ . | quote }}
+            {{- end }}
+            {{- if .Values.auth.gitlabCi.enabled }}
+            - name: VERDACCIO_GITLAB_CI_ISSUER
+              value: {{ .Values.auth.gitlabCi.issuer | quote }}
+            - name: VERDACCIO_GITLAB_CI_AUDIENCE
+              value: {{ .Values.auth.gitlabCi.audience | quote }}
             {{- end }}
             {{- if eq .Values.storage.backend "s3" }}
             # Never fall back to the EKS node role when workload credentials are

@@ -71,6 +71,14 @@ auth:
   clientSecretKey: VERDACCIO_OPENID_CLIENT_SECRET
   scope: openid email read_api
   usernameClaim: email
+  # Authenticate headless publishers with short-lived GitLab CI ID tokens.
+  # These settings are non-secret. Keep a namespace allowlist configured so
+  # projects outside the trusted GitLab group cannot request a usable token.
+  gitlabCi:
+    enabled: false
+    issuer: ""
+    audience: ""
+    allowedNamespaces: []
   # Optionally synchronize secretName from one JSON object in AWS Secrets
   # Manager. The pod mounts the CSI volume required to trigger synchronization.
   secretProviderClass:
