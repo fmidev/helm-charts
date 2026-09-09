@@ -95,7 +95,7 @@ spec:
         {{- if eq $dbMode "zalando" }}
           value: "postgresql://$(PG_USER):$(PG_PASS)@{{ .Values.warnings.db.name }}:5432/{{ .Values.warnings.db.databaseName }}"
         {{- else if eq $dbMode "sidecar" }}
-          value: "postgresql://{{ .Values.warnings.db.username }}:{{ .Values.warnings.db.sidecar.password }}@localhost:{{ .Values.warnings.db.sidecar.port }}/{{ .Values.warnings.db.databaseName }}"
+          value: "postgresql://{{ .Values.warnings.db.username | urlquery | replace "+" "%20" }}:{{ .Values.warnings.db.sidecar.password | urlquery | replace "+" "%20" }}@localhost:{{ .Values.warnings.db.sidecar.port }}/{{ .Values.warnings.db.databaseName | urlquery | replace "+" "%20" }}"
         {{- else }}
           valueFrom:
             secretKeyRef:

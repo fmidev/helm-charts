@@ -24,6 +24,8 @@ Migration map:
 | `secretProviderParameters` | `warnings.db.external.secretProvider.parameters` |
 | `warnings.db.POSTGRES_DB` | `warnings.db.databaseName` |
 | `warnings.db.POSTGRES_USER` | `warnings.db.username` |
+| `warnings.db.image` | `warnings.db.sidecar.image` |
+| `warnings.db.port` | `warnings.db.sidecar.port` |
 | `warnings.db.POSTGRES_PASSWORD` | `warnings.db.sidecar.password` |
 | `warnings.db.POSTGRES_VERSION` | `warnings.db.zalando.postgresVersion` |
 | `warnings.db.numberOfInstances` | `warnings.db.zalando.instances` |
@@ -221,7 +223,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.nginx.BACKEND_HOST` | Warning-backend container address where Nginx reverse proxy forwards the requests | `0.0.0.0:8080` |
 | `warnings.nginx.NGINX_PORT_HTTP` | Port used for Nginx reverse proxy | `80` |
 | `warnings.nginx.NGINX_PORT_HTTPS` | Port used for Nginx reverse proxy when SSL is enabled | `443` |
-| `warnings.nginx.TRUST_FORWARDED_HEADERS` | Trust forwarded request headers in the auth proxy | |
+| `warnings.nginx.TRUST_FORWARDED_HEADERS` | Preserve incoming `X-Forwarded-*` headers only behind a trusted proxy that sanitizes them | Auth proxy default |
 | `warnings.nginx.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `warnings.nginx.startupProbe` | Configure nginx container startupProbe | see defaults from `values.yaml` |
 | `warnings.nginx.livenessProbe` | Configure nginx container livenessProbe | see defaults from `values.yaml` |
@@ -271,6 +273,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 
 | Chart version | warnings version |
 |---------------|------------------|
+| 2.0.3         | 3.1.1            |
 | 2.0.2         | 3.1.1            |
 | 2.0.1         | 3.1.1            |
 | 2.0.0         | 3.1.1            |
