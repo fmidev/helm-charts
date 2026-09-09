@@ -13,7 +13,7 @@ image:
   # Container image repository.
   repository: registry.gitlab.com/opengeoweb/backend-services/plugin-registry-backend/plugin-registry-backend
   # Image tag. `versions.pluginRegistry` takes precedence when set.
-  tag: v0.4.3
+  tag: v0.4.5
   # Kubernetes image pull policy.
   pullPolicy: IfNotPresent
 
