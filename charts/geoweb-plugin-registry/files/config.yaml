@@ -30,11 +30,25 @@ web:
 packages:
   "**":
     access: $all
-    publish: plugin-development
+    publish:
+      - plugin-development
+{{ if .Values.auth.gitlabCi.enabled }}
+      - gitlab-ci
+{{ end }}
     unpublish: plugin-development
 
 auth:
+{{ if .Values.auth.gitlabCi.enabled }}
+  gitlab-ci:
+    issuer: ${VERDACCIO_GITLAB_CI_ISSUER}
+    audience: ${VERDACCIO_GITLAB_CI_AUDIENCE}
+    allowed-namespaces:
+{{ range .Values.auth.gitlabCi.allowedNamespaces }}
+      - {{ . | quote }}
+{{ end }}
+{{ end }}
   openid:
+    keep-passwd-login: false
     provider-host: ${VERDACCIO_OPENID_PROVIDER_HOST}
     client-id: ${VERDACCIO_OPENID_CLIENT_ID}
     client-secret: ${VERDACCIO_OPENID_CLIENT_SECRET}

@@ -45,6 +45,9 @@ data:
 {{- if .Values.opmet.nginx.NGINX_PORT_HTTPS }}
   NGINX_PORT_HTTPS: {{ .Values.opmet.nginx.NGINX_PORT_HTTPS | quote }}
 {{- end }}
+{{- if hasKey .Values.opmet.nginx "TRUST_FORWARDED_HEADERS" }}
+  TRUST_FORWARDED_HEADERS: {{ .Values.opmet.nginx.TRUST_FORWARDED_HEADERS | quote }}
+{{- end }}
 {{- if .Values.opmet.nginx.ENV_VAR_STRICT_MODE }}
   ENV_VAR_STRICT_MODE: {{ .Values.opmet.nginx.ENV_VAR_STRICT_MODE | quote }}
 {{- end }}
