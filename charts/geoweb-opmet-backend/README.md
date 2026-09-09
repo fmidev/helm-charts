@@ -199,6 +199,9 @@ produced by the provider; for AWS this is normally the `objectName`. Set the
 corresponding `private_key_path` in `SERVERS` to that mounted path. A
 passphrase `envName` can be referenced as `$(ENV_NAME)` in `SERVERS`, as shown
 above. Secret names and passphrase environment-variable names must be unique.
+GCP-backed entries also require `path`; Vault-backed entries require both
+`path` and `key`. Additional provider `parameters` are rendered as strings, as
+required by the `SecretProviderClass` API.
 
 ## Custom configuration files
 
