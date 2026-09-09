@@ -240,10 +240,10 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.db.external.encodedConnectionString` | Base64-encoded connection string; required when `source: inline` | |
 | `warnings.db.external.secretProvider.provider` | CSI provider *(aws\|azure\|gcp\|vault)* | |
 | `warnings.db.external.secretProvider.className` | SecretProviderClass name | `warnings-spc` |
-| `warnings.db.external.secretProvider.objectName` | External database-secret object name | |
-| `warnings.db.external.secretProvider.objectType` | External object type for AWS or Azure | `secretsmanager` |
-| `warnings.db.external.secretProvider.path` | Provider-specific secret path | |
-| `warnings.db.external.secretProvider.key` | Provider-specific secret key | |
+| `warnings.db.external.secretProvider.objectName` | External database-secret object identifier (resource name for GCP) | |
+| `warnings.db.external.secretProvider.objectType` | External object type; defaults to `secretsmanager` for AWS and `secret` for Azure | `""` |
+| `warnings.db.external.secretProvider.path` | Required GCP mounted filename or Vault secret path | |
+| `warnings.db.external.secretProvider.key` | Required Vault secret key | |
 | `warnings.db.external.secretProvider.iamRoleARN` | IAM role used by the AWS secret provider | |
 | `warnings.db.external.secretProvider.parameters` | Additional provider parameters | `{}` |
 | `warnings.db.zalando.teamId` | Zalando operator team ID | `geoweb` |
@@ -271,6 +271,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 
 | Chart version | warnings version |
 |---------------|------------------|
+| 2.0.2         | 3.1.1            |
 | 2.0.1         | 3.1.1            |
 | 2.0.0         | 3.1.1            |
 | 1.3.13        | 3.1.1            |

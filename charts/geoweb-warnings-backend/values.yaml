@@ -98,7 +98,8 @@ warnings:
         provider: ""
         className: warnings-spc
         objectName: ""
-        objectType: secretsmanager
+        # Defaults to secretsmanager for AWS and secret for Azure.
+        objectType: ""
         path: ""
         key: ""
         iamRoleARN: ""
