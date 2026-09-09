@@ -241,7 +241,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.db.external.secretProvider.provider` | CSI provider *(aws\|azure\|gcp\|vault)* | |
 | `warnings.db.external.secretProvider.className` | SecretProviderClass name | `warnings-spc` |
 | `warnings.db.external.secretProvider.objectName` | External database-secret object identifier (resource name for GCP) | |
-| `warnings.db.external.secretProvider.objectType` | External object type; defaults to `secretsmanager` for AWS and `secret` for Azure | Provider-specific |
+| `warnings.db.external.secretProvider.objectType` | External object type; defaults to `secretsmanager` for AWS and `secret` for Azure | `""` |
 | `warnings.db.external.secretProvider.path` | Required GCP mounted filename or Vault secret path | |
 | `warnings.db.external.secretProvider.key` | Required Vault secret key | |
 | `warnings.db.external.secretProvider.iamRoleARN` | IAM role used by the AWS secret provider | |
