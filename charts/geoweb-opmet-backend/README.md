@@ -282,7 +282,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.db.external.secretProvider.provider`   | CSI provider *(aws\|azure\|gcp\|vault)* | |
 | `opmet.db.external.secretProvider.className`  | Database SecretProviderClass name | `opmet-db-spc` |
 | `opmet.db.external.secretProvider.objectName` | External database-secret object identifier (resource name for GCP) | |
-| `opmet.db.external.secretProvider.objectType` | External object type; defaults to `secretsmanager` for AWS and `secret` for Azure | Provider-specific |
+| `opmet.db.external.secretProvider.objectType` | External object type; defaults to `secretsmanager` for AWS and `secret` for Azure | `""` |
 | `opmet.db.external.secretProvider.path`       | GCP mounted filename or Vault secret path | |
 | `opmet.db.external.secretProvider.key`        | Vault secret key | |
 | `opmet.db.external.secretProvider.parameters` | Additional provider parameters | `{}` |
@@ -373,6 +373,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 
 | Chart version | opmet version |
 |---------------|---------------|
+| 4.0.1         | 5.11.0        |
 | 4.0.0         | 5.11.0        |
 | 3.10.16       | 5.11.0        |
 | 3.10.15       | 5.10.2        |
