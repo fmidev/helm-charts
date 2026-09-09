@@ -1696,6 +1696,18 @@ entries:
   geoweb-opmet-backend:
   - apiVersion: v2
     appVersion: v5.11.0
+    created: "2026-09-09T14:12:11.105454801Z"
+    description: A Helm chart for geoweb opmet backend resources in Kubernetes
+    digest: 2dd2da5ed10c8ddce397ccbea8b18a0fa5555c6b14de227411a53cadcb5f323c
+    maintainers:
+    - name: FMI
+    name: geoweb-opmet-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-opmet-backend-4.0.1/geoweb-opmet-backend-4.0.1.tgz
+    version: 4.0.1
+  - apiVersion: v2
+    appVersion: v5.11.0
     created: "2026-09-09T09:24:51.63702259Z"
     description: A Helm chart for geoweb opmet backend resources in Kubernetes
     digest: e721833e1eb7b8b266c5a302fb307cd3b0977b08b38843f4aeb408e703e925b4
@@ -6281,4 +6293,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2026-09-09T14:05:05.518634303Z"
+generated: "2026-09-09T14:12:11.106357333Z"
