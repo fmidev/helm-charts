@@ -232,6 +232,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 
 | Chart version | frontend version |
 |---------------|------------------|
+| 3.22.1        | 19.5.1           |
 | 3.22.0        | 19.5.1           |
 | 3.21.2        | 19.1.0           |
 | 3.21.1        | 19.0.0           |

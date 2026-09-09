@@ -1,0 +1,7 @@
+apiVersion: v2
+name: geoweb-cnpg
+description: A CloudNativePG database chart for GeoWeb services
+type: application
+version: 0.1.0
+maintainers:
+  - name: FMI
