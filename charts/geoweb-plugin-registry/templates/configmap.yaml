@@ -16,6 +16,18 @@
 {{- if and .Values.auth.secretProviderClass.enabled (not .Values.auth.secretProviderClass.objectName) }}
 {{- fail "auth.secretProviderClass.objectName is required when auth.secretProviderClass.enabled=true" }}
 {{- end }}
+{{- if and .Values.auth.gitlabCi.enabled (ne .Values.storage.backend "s3") }}
+{{- fail "auth.gitlabCi.enabled requires storage.backend=s3" }}
+{{- end }}
+{{- if and .Values.auth.gitlabCi.enabled (not .Values.auth.gitlabCi.issuer) }}
+{{- fail "auth.gitlabCi.issuer is required when auth.gitlabCi.enabled=true" }}
+{{- end }}
+{{- if and .Values.auth.gitlabCi.enabled (not .Values.auth.gitlabCi.audience) }}
+{{- fail "auth.gitlabCi.audience is required when auth.gitlabCi.enabled=true" }}
+{{- end }}
+{{- if and .Values.auth.gitlabCi.enabled (empty .Values.auth.gitlabCi.allowedNamespaces) }}
+{{- fail "auth.gitlabCi.allowedNamespaces must contain at least one namespace when auth.gitlabCi.enabled=true" }}
+{{- end }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -25,7 +37,7 @@ metadata:
 data:
   config.yaml: |
 {{ if eq .Values.storage.backend "s3" }}
-{{ .Files.Get "files/config.yaml" | indent 4 }}
+{{ tpl (.Files.Get "files/config.yaml") . | indent 4 }}
 {{- else }}
 {{ .Files.Get "files/config.local.yaml" | indent 4 }}
 {{- end }}
