@@ -91,7 +91,7 @@ spec:
         {{- if eq $dbMode "zalando" }}
           value: "postgresql://$(PG_USER):$(PG_PASS)@{{ .Values.opmet.db.name }}:5432/{{ .Values.opmet.db.databaseName }}"
         {{- else if eq $dbMode "sidecar" }}
-          value: "postgresql://{{ .Values.opmet.db.username }}:{{ .Values.opmet.db.sidecar.password }}@localhost:{{ .Values.opmet.db.sidecar.port }}/{{ .Values.opmet.db.databaseName }}"
+          value: "postgresql://{{ .Values.opmet.db.username | urlquery | replace "+" "%20" }}:{{ .Values.opmet.db.sidecar.password | urlquery | replace "+" "%20" }}@localhost:{{ .Values.opmet.db.sidecar.port }}/{{ .Values.opmet.db.databaseName | urlquery | replace "+" "%20" }}"
         {{- else }}
           valueFrom:
             secretKeyRef:
