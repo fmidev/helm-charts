@@ -5,7 +5,7 @@
 {{- if or (hasKey .Values.opmet "db_secret") (hasKey .Values.opmet "db_secretName") (hasKey .Values.opmet "db_secretType") (hasKey .Values.opmet "db_secretPath") (hasKey .Values.opmet "db_secretKey") }}
 {{- fail "opmet.db_secret* values were removed in chart 4.0.0. Use opmet.db.external.* instead." }}
 {{- end }}
-{{- if or (hasKey .Values.opmet.db "enableDefaultDb") (hasKey .Values.opmet.db "useZalandoOperatorDb") (hasKey .Values.opmet.db "POSTGRES_DB") (hasKey .Values.opmet.db "POSTGRES_USER") (hasKey .Values.opmet.db "POSTGRES_PASSWORD") (hasKey .Values.opmet.db "POSTGRES_VERSION") (hasKey .Values.opmet.db "numberOfInstances") (hasKey .Values.opmet.db "instanceSize") (hasKey .Values.opmet.db "zalandoTeamId") (hasKey .Values.opmet.db "enableLogicalBackup") (hasKey .Values.opmet.db "cleanInstall") (hasKey .Values.opmet.db "backupTimestamp") (hasKey .Values.opmet.db "backupBucket") }}
+{{- if or (hasKey .Values.opmet.db "enableDefaultDb") (hasKey .Values.opmet.db "useZalandoOperatorDb") (hasKey .Values.opmet.db "image") (hasKey .Values.opmet.db "port") (hasKey .Values.opmet.db "POSTGRES_DB") (hasKey .Values.opmet.db "POSTGRES_USER") (hasKey .Values.opmet.db "POSTGRES_PASSWORD") (hasKey .Values.opmet.db "POSTGRES_VERSION") (hasKey .Values.opmet.db "numberOfInstances") (hasKey .Values.opmet.db "instanceSize") (hasKey .Values.opmet.db "zalandoTeamId") (hasKey .Values.opmet.db "enableLogicalBackup") (hasKey .Values.opmet.db "cleanInstall") (hasKey .Values.opmet.db "backupTimestamp") (hasKey .Values.opmet.db "backupBucket") }}
 {{- fail "Legacy opmet.db values were removed in chart 4.0.0. Set opmet.db.mode and migrate database settings using the README migration map." }}
 {{- end }}
 {{- $clone := .Values.opmet.db.zalando.clone }}
