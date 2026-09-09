@@ -48,8 +48,10 @@ PostgreSQL installation is a separate operation.
 
 For provider-backed publisher entries, rename `secret` to `objectName` and
 `type` to `objectType`. For inline entries, rename `secret` to `encodedValue`.
-The entry `name` remains the Kubernetes Secret name. The pod-level
-`opmet.secretServiceAccount` and `opmet.iamRoleARN` values remain unchanged.
+Rename each entry's `name` to `secretName`. Passphrase entries also require a
+separate `envName`; use a valid environment-variable name and reference it from
+`SERVERS`. The pod-level `opmet.secretServiceAccount` and
+`opmet.iamRoleARN` values remain unchanged.
 
 When the old shared `SecretProviderClass` contained both database and publisher
 objects, configure both new provider blocks. Chart 4.0 creates independent
@@ -171,24 +173,32 @@ opmet:
   secretServiceAccount: opmet-service-account
   iamRoleARN: arn:aws:iam::123456789012:role/opmet-secrets
   publisher:
+    SERVERS: >-
+      [{"name":"example","username":"opmet","hostname":"sftp.example.com","remote_dir":"/incoming","private_key_path":"/mnt/secrets-store/publisher-key","private_key_passphrase":"$(PUBLISHER_KEY_PASSPHRASE)"}]
     secrets:
       provider: aws
       className: opmet-publisher-spc
       parameters:
         region: eu-north-1
       sshKeys:
-        - name: publisher-key
-          objectName: opmet/publisher/private-key
+        - secretName: publisher-key
+          objectName: publisher-key
           objectType: secretsmanager
       sshPassphrases:
-        - name: PUBLISHER_KEY_PASSPHRASE
-          objectName: opmet/publisher/passphrase
+        - secretName: publisher-key-passphrase
+          envName: PUBLISHER_KEY_PASSPHRASE
+          objectName: publisher-key-passphrase
           objectType: secretsmanager
 ```
 
 Leave `provider` empty and use `encodedValue` instead of `objectName` to create
 the publisher Secrets directly from base64-encoded values. Do not store such
-values in Git.
+values in Git. Inline SSH keys are mounted at
+`/mnt/secrets-store/<secretName>`. Provider-backed keys use the filename
+produced by the provider; for AWS this is normally the `objectName`. Set the
+corresponding `private_key_path` in `SERVERS` to that mounted path. A
+passphrase `envName` can be referenced as `$(ENV_NAME)` in `SERVERS`, as shown
+above. Secret names and passphrase environment-variable names must be unique.
 
 ## Custom configuration files
 
@@ -266,10 +276,10 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.db.external.encodedConnectionString`   | Base64 connection string; required when `source: inline` | |
 | `opmet.db.external.secretProvider.provider`   | CSI provider *(aws\|azure\|gcp\|vault)* | |
 | `opmet.db.external.secretProvider.className`  | Database SecretProviderClass name | `opmet-db-spc` |
-| `opmet.db.external.secretProvider.objectName` | External database-secret object name | |
-| `opmet.db.external.secretProvider.objectType` | External object type for AWS or Azure | `secretsmanager` |
-| `opmet.db.external.secretProvider.path`       | Provider-specific secret path | |
-| `opmet.db.external.secretProvider.key`        | Provider-specific secret key | |
+| `opmet.db.external.secretProvider.objectName` | External database-secret object identifier (resource name for GCP) | |
+| `opmet.db.external.secretProvider.objectType` | External object type; defaults to `secretsmanager` for AWS and `secret` for Azure | Provider-specific |
+| `opmet.db.external.secretProvider.path`       | GCP mounted filename or Vault secret path | |
+| `opmet.db.external.secretProvider.key`        | Vault secret key | |
 | `opmet.db.external.secretProvider.parameters` | Additional provider parameters | `{}` |
 | `opmet.db.zalando.teamId`                     | Zalando team ID | `geoweb` |
 | `opmet.db.zalando.postgresVersion`            | Zalando PostgreSQL major version | `15` |
@@ -331,12 +341,12 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.publisher.registry`                    | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/opmet-backend/opmet-backend-publisher-local` |
 | `opmet.publisher.resources`                   | Configure resource limits & requests | see defaults from `values.yaml`                                                              |
 | `opmet.publisher.S3_BUCKET_NAME`              | S3 Bucket used to publish files to |                                                                                              |
-| `opmet.publisher.SERVERS`                     | List of configuration options used to access SFTP server. List of jsons. Note that ssh secrets get mounted to `/mnt/secrets-store`. Details https://gitlab.com/opengeoweb/backend-services/opmet-backend#sftp-publisher |                                                                                              |
+| `opmet.publisher.SERVERS`                     | JSON list of SFTP servers. Set each `private_key_path` to its key's mounted path and reference passphrases as `$(ENV_NAME)` |                                                                                              |
 | `opmet.publisher.secrets.provider`            | Publisher CSI provider; empty creates inline Secrets *(aws\|azure\|gcp\|vault)* | |
 | `opmet.publisher.secrets.className`           | Publisher SecretProviderClass name | `opmet-publisher-spc` |
 | `opmet.publisher.secrets.parameters`          | Additional publisher provider parameters | `{}` |
-| `opmet.publisher.secrets.sshKeys`             | Publisher SSH-key entries | `[]` |
-| `opmet.publisher.secrets.sshPassphrases`      | Publisher SSH-passphrase entries | `[]` |
+| `opmet.publisher.secrets.sshKeys`             | SSH-key entries with a unique Kubernetes `secretName`, plus provider `objectName` or inline `encodedValue` | `[]` |
+| `opmet.publisher.secrets.sshPassphrases`      | Passphrase entries with separate, unique `secretName` and `envName`, plus provider `objectName` or inline `encodedValue` | `[]` |
 | `opmet.publisher.startupProbe`              | Configure publisher startupProbe | see defaults from `values.yaml`                                                              |
 | `opmet.publisher.version`                     | Publisher version | defaults to Chart.AppVersion                                                                 |
 | `opmet.publisher.volumeOptions`               | yaml including the definition of the volume where TACs are published to, for example: <pre>hostPath:<br>&nbsp;&nbsp; path: /test/path</pre> or <pre>emptyDir:<br>&nbsp;&nbsp;</pre>| `emptyDir:`                                                                                  |

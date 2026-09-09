@@ -155,10 +155,10 @@ spec:
       {{- end }}
         env:
       {{- range $sshPassphrase := $publisherSecrets.sshPassphrases }}
-        - name: {{ $sshPassphrase.name }}
+        - name: {{ $sshPassphrase.envName }}
           valueFrom:
             secretKeyRef:
-              name: {{ $sshPassphrase.name }}
+              name: {{ $sshPassphrase.secretName }}
               key: SSH_KEY_PASSPHRASE
       {{- end }}
         - name: SERVERS
@@ -250,11 +250,17 @@ spec:
           sources:
           {{- range $sshKey := $publisherSecrets.sshKeys }}
           - secret:
-              name: {{ $sshKey.name }}
+              name: {{ $sshKey.secretName }}
+              items:
+              - key: ssh-privatekey
+                path: {{ $sshKey.secretName }}
           {{- end }}
           {{- range $sshPassphrase := $publisherSecrets.sshPassphrases }}
           - secret:
-              name: {{ $sshPassphrase.name }}
+              name: {{ $sshPassphrase.secretName }}
+              items:
+              - key: SSH_KEY_PASSPHRASE
+                path: {{ $sshPassphrase.secretName }}
           {{- end }}
       {{- end }}
     {{- end }}

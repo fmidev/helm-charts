@@ -93,7 +93,12 @@ opmet:
       provider: ""
       className: opmet-publisher-spc
       parameters: {}
+      # SSH keys require a unique Kubernetes secretName. Inline keys are
+      # mounted at /mnt/secrets-store/<secretName>; provider-backed keys use
+      # the filename produced by that provider.
       sshKeys: []
+      # Passphrases require separate secretName and envName fields. Reference
+      # envName as $(ENV_NAME) in publisher.SERVERS.
       sshPassphrases: []
     startupProbe:
       httpGet:
@@ -172,7 +177,8 @@ opmet:
         provider: ""
         className: opmet-db-spc
         objectName: ""
-        objectType: secretsmanager
+        # Defaults to secretsmanager for AWS and secret for Azure.
+        objectType: ""
         path: ""
         key: ""
         parameters: {}
