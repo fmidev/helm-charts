@@ -341,7 +341,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.publisher.registry`                    | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/opmet-backend/opmet-backend-publisher-local` |
 | `opmet.publisher.resources`                   | Configure resource limits & requests | see defaults from `values.yaml`                                                              |
 | `opmet.publisher.S3_BUCKET_NAME`              | S3 Bucket used to publish files to |                                                                                              |
-| `opmet.publisher.SERVERS`                     | JSON list of SFTP servers. Set each `private_key_path` to its key's mounted path and reference passphrases as `$(ENV_NAME)` |                                                                                              |
+| `opmet.publisher.SERVERS`                     | JSON list of SFTP servers. Set each `private_key_path` to its key's mounted path and reference passphrases as `$(ENV_NAME)`. See the [SFTP publisher documentation](https://gitlab.com/opengeoweb/backend-services/opmet-backend#sftp-publisher) for the complete server configuration |                                                                                              |
 | `opmet.publisher.secrets.provider`            | Publisher CSI provider; empty creates inline Secrets *(aws\|azure\|gcp\|vault)* | |
 | `opmet.publisher.secrets.className`           | Publisher SecretProviderClass name | `opmet-publisher-spc` |
 | `opmet.publisher.secrets.parameters`          | Additional publisher provider parameters | `{}` |
