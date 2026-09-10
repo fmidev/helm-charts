@@ -2750,6 +2750,18 @@ entries:
   geoweb-presets-backend:
   - apiVersion: v2
     appVersion: v4.2.1
+    created: "2026-09-10T10:39:14.525478547Z"
+    description: A Helm chart for geoweb presets backend resources in Kubernetes
+    digest: 7e9647b68bce30f5bd6e3995e5fdd4efd209523fff211b8618a3ab1cf7fd4efc
+    maintainers:
+    - name: FMI
+    name: geoweb-presets-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-presets-backend-3.0.0/geoweb-presets-backend-3.0.0.tgz
+    version: 3.0.0
+  - apiVersion: v2
+    appVersion: v4.2.1
     created: "2026-09-03T09:44:40.499083031Z"
     description: A Helm chart for geoweb presets backend resources in Kubernetes
     digest: 3769449737a1a1b8204f3b22228202732ad9349c2c9264d85da2b608e47fd316
@@ -6317,4 +6329,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2026-09-09T15:03:05.114916034Z"
+generated: "2026-09-10T10:39:14.525864129Z"
