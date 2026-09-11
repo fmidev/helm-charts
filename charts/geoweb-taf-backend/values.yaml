@@ -8,10 +8,6 @@ taf:
   svcPort: 80
   replicas: 1
   minPodsAvailable: 0
-  db_secret: cG9zdGdyZXNxbDovL2dlb3dlYjpwb3N0Z3Jlc0Bsb2NhbGhvc3Q6NTQzMi90YWY=
-  db_secretName: taf-db
-  db_secretType: secretsmanager
-  spcName: taf-spc
   postStartCommand: bin/admin.sh
   secretServiceAccount: taf-service-account
   resources:
@@ -182,21 +178,41 @@ taf:
       periodSeconds: 5
       failureThreshold: 1
   db:
-    enableDefaultDb: true
-    useZalandoOperatorDb: false
+    # Supported values: sidecar, external, zalando.
+    mode: sidecar
     name: taf-db
-    image: postgres
-    port: 5432
-    POSTGRES_DB: taf
-    POSTGRES_USER: geoweb
-    POSTGRES_PASSWORD: postgres
-    POSTGRES_VERSION: 15
-    numberOfInstances: 1
-    instanceSize: 100Mi
-    zalandoTeamId: geoweb
-    enableLogicalBackup: true
-    cleanInstall: true
-    backupTimestamp: "2030-01-01T00:00:00+00:00"
+    databaseName: taf
+    username: geoweb
+    sidecar:
+      image: postgres
+      port: 5432
+      password: postgres
+    external:
+      # Supported values: inline, secretProvider, existingSecret.
+      source: inline
+      secretName: taf-db
+      secretKey: AVIATION_TAF_BACKEND_DB
+      encodedConnectionString: ""
+      secretProvider:
+        provider: ""
+        className: taf-spc
+        objectName: ""
+        # Defaults to secretsmanager for AWS and secret for Azure.
+        objectType: ""
+        path: ""
+        key: ""
+        iamRoleARN: ""
+        parameters: {}
+    zalando:
+      teamId: geoweb
+      postgresVersion: 15
+      instances: 1
+      volumeSize: 100Mi
+      enableLogicalBackup: true
+      clone:
+        enabled: false
+        timestamp: ""
+        backupBucket: ""
   useCustomConfigurationFiles: false
   customConfigurationLocation: local
   customConfigurationMountPath: /app/custom

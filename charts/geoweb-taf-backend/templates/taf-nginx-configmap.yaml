@@ -49,6 +49,12 @@ data:
 {{- if .Values.taf.nginx.NGINX_PORT_HTTPS }}
   NGINX_PORT_HTTPS: {{ .Values.taf.nginx.NGINX_PORT_HTTPS | quote }}
 {{- end }}
+{{- if hasKey .Values.taf.nginx "NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE" }}
+  NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE: {{ .Values.taf.nginx.NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE | quote }}
+{{- end }}
+{{- if hasKey .Values.taf.nginx "TRUST_FORWARDED_HEADERS" }}
+  TRUST_FORWARDED_HEADERS: {{ .Values.taf.nginx.TRUST_FORWARDED_HEADERS | quote }}
+{{- end }}
 {{- if .Values.taf.nginx.ENV_VAR_STRICT_MODE }}
   ENV_VAR_STRICT_MODE: {{ .Values.taf.nginx.ENV_VAR_STRICT_MODE | quote }}
 {{- end }}

@@ -1,26 +1,46 @@
-{{- if .Values.taf.db.useZalandoOperatorDb }}
+{{- $dbMode := default "sidecar" .Values.taf.db.mode }}
+{{- if not (has $dbMode (list "sidecar" "external" "zalando")) }}
+{{- fail "taf.db.mode must be one of: sidecar, external, zalando" }}
+{{- end }}
+{{- if or (hasKey .Values.taf "db_secret") (hasKey .Values.taf "db_secretName") (hasKey .Values.taf "db_secretType") (hasKey .Values.taf "db_secretPath") (hasKey .Values.taf "db_secretKey") }}
+{{- fail "taf.db_secret* values were removed in chart 2.0.0. Use taf.db.external.* instead." }}
+{{- end }}
+{{- if or (hasKey .Values "secretProvider") (hasKey .Values "secretProviderParameters") (hasKey .Values.taf "iamRoleARN") (hasKey .Values.taf "spcName") }}
+{{- fail "Legacy secret provider values were removed in chart 2.0.0. Use taf.db.external.secretProvider.* instead." }}
+{{- end }}
+{{- if or (hasKey .Values.taf.db "enableDefaultDb") (hasKey .Values.taf.db "useZalandoOperatorDb") (hasKey .Values.taf.db "image") (hasKey .Values.taf.db "port") (hasKey .Values.taf.db "POSTGRES_DB") (hasKey .Values.taf.db "POSTGRES_USER") (hasKey .Values.taf.db "POSTGRES_PASSWORD") (hasKey .Values.taf.db "POSTGRES_VERSION") (hasKey .Values.taf.db "numberOfInstances") (hasKey .Values.taf.db "instanceSize") (hasKey .Values.taf.db "zalandoTeamId") (hasKey .Values.taf.db "enableLogicalBackup") (hasKey .Values.taf.db "cleanInstall") (hasKey .Values.taf.db "backupTimestamp") (hasKey .Values.taf.db "backupBucket") }}
+{{- fail "Legacy taf.db values were removed in chart 2.0.0. Set taf.db.mode and migrate database settings using the README migration map." }}
+{{- end }}
+{{- $clone := .Values.taf.db.zalando.clone }}
+{{- if and (eq $dbMode "zalando") $clone.enabled (not $clone.backupBucket) }}
+{{- fail "taf.db.zalando.clone.backupBucket is required when cloning is enabled" }}
+{{- end }}
+{{- if and (eq $dbMode "zalando") $clone.enabled (not $clone.timestamp) }}
+{{- fail "taf.db.zalando.clone.timestamp is required when cloning is enabled" }}
+{{- end }}
+{{- if eq $dbMode "zalando" }}
 apiVersion: "acid.zalan.do/v1"
 kind: postgresql
 metadata:
   name: {{ .Values.taf.db.name }}
 spec:
-  teamId: {{ .Values.taf.db.zalandoTeamId }}
+  teamId: {{ .Values.taf.db.zalando.teamId }}
   volume:
-    size: {{ .Values.taf.db.instanceSize }}
-  numberOfInstances: {{ .Values.taf.db.numberOfInstances }}
+    size: {{ .Values.taf.db.zalando.volumeSize }}
+  numberOfInstances: {{ .Values.taf.db.zalando.instances }}
   users:
-    {{ .Values.taf.db.POSTGRES_USER }}:
+    {{ .Values.taf.db.username }}:
     - superuser
     - createdb
   databases:
-    {{ .Values.taf.db.POSTGRES_DB }}: {{ .Values.taf.db.POSTGRES_USER }}
+    {{ .Values.taf.db.databaseName }}: {{ .Values.taf.db.username }}
   postgresql:
-    version: {{ .Values.taf.db.POSTGRES_VERSION | quote }}
-  enableLogicalBackup: {{ .Values.taf.db.enableLogicalBackup }}
-  {{- if not .Values.taf.db.cleanInstall }}
+    version: {{ .Values.taf.db.zalando.postgresVersion | quote }}
+  enableLogicalBackup: {{ .Values.taf.db.zalando.enableLogicalBackup }}
+  {{- if $clone.enabled }}
   clone:
     cluster: {{ .Values.taf.db.name | quote }}
-    timestamp: {{ .Values.taf.db.backupTimestamp | quote }}
-    s3_wal_path: {{ .Values.taf.db.backupBucket | quote }}
+    timestamp: {{ $clone.timestamp | quote }}
+    s3_wal_path: {{ $clone.backupBucket | quote }}
   {{- end }}
 {{- end }}
