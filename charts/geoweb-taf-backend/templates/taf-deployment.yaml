@@ -1,3 +1,5 @@
+{{- $dbMode := default "sidecar" .Values.taf.db.mode }}
+{{- $usesExternalSecretProvider := and (eq $dbMode "external") (eq (default "inline" .Values.taf.db.external.source) "secretProvider") }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -19,8 +21,10 @@ spec:
         commitHash: {{ .Values.taf.commitHash }}
       {{- end }}
     spec:
-    {{- if eq .Values.secretProvider "aws" }}
+    {{- if and $usesExternalSecretProvider (eq .Values.taf.db.external.secretProvider.provider "aws") }}
       serviceAccountName: {{ .Values.taf.secretServiceAccount }}
+    {{- else }}
+      serviceAccountName: default
     {{- end }}
       initContainers:
     {{- if and .Values.taf.useCustomConfigurationFiles (eq .Values.taf.customConfigurationLocation "s3")}}
@@ -38,7 +42,7 @@ spec:
         - mountPath: "/taf/"
           name: {{ .Values.taf.name }}-volume
     {{- end }}
-    {{- if .Values.taf.db.useZalandoOperatorDb }}
+    {{- if eq $dbMode "zalando" }}
       - name: wait-for-db
         image: busybox
         command: ['sh', '-c', "until nc -z -v -w30 {{ .Values.taf.db.name }} 5432; do echo 'Waiting for database...'; sleep 5; done"]
@@ -73,29 +77,32 @@ spec:
         - configMapRef:
             name: {{ .Values.taf.name }}
         env:
-      {{- if .Values.taf.db.useZalandoOperatorDb }}
+      {{- if eq $dbMode "zalando" }}
         - name: PG_PASS
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.taf.db.POSTGRES_USER }}.{{ .Values.taf.db.name }}.credentials.postgresql.acid.zalan.do
+              name: {{ .Values.taf.db.username }}.{{ .Values.taf.db.name }}.credentials.postgresql.acid.zalan.do
               key: password
         - name: PG_USER
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.taf.db.POSTGRES_USER }}.{{ .Values.taf.db.name }}.credentials.postgresql.acid.zalan.do
+              name: {{ .Values.taf.db.username }}.{{ .Values.taf.db.name }}.credentials.postgresql.acid.zalan.do
               key: username
       {{- end }}
         - name: AVIATION_TAF_BACKEND_DB
-        {{- if .Values.taf.db.useZalandoOperatorDb }}
-          value: "postgresql://$(PG_USER):$(PG_PASS)@{{ .Values.taf.db.name }}:5432/{{ .Values.taf.db.POSTGRES_DB }}"
+        {{- if eq $dbMode "zalando" }}
+          value: "postgresql://$(PG_USER):$(PG_PASS)@{{ .Values.taf.db.name }}:5432/{{ .Values.taf.db.databaseName }}"
+        {{- else if eq $dbMode "sidecar" }}
+          value: "postgresql://{{ .Values.taf.db.username | urlquery | replace "+" "%20" }}:{{ .Values.taf.db.sidecar.password | urlquery | replace "+" "%20" }}@localhost:{{ .Values.taf.db.sidecar.port }}/{{ .Values.taf.db.databaseName | urlquery | replace "+" "%20" }}"
         {{- else }}
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.taf.db_secretName }}
-              key: AVIATION_TAF_BACKEND_DB
+              name: {{ .Values.taf.db.external.secretName }}
+              key: {{ .Values.taf.db.external.secretKey }}
         {{- end }}
+      {{- if or $usesExternalSecretProvider .Values.taf.useCustomConfigurationFiles }}
         volumeMounts:
-      {{- if not .Values.taf.db.useZalandoOperatorDb }}
+      {{- if $usesExternalSecretProvider }}
         - name: secrets-store-inline
           mountPath: "/mnt/secrets-store"
           readOnly: true
@@ -103,6 +110,7 @@ spec:
       {{- if .Values.taf.useCustomConfigurationFiles }}
         - mountPath: {{ .Values.taf.customConfigurationMountPath }}
           name: {{ .Values.taf.name }}-volume
+      {{- end }}
       {{- end }}
       - name: {{ .Values.taf.placeholder.name }}
         image: {{ .Values.taf.placeholder.registry }}:{{ default .Chart.AppVersion .Values.versions.taf }}
@@ -122,32 +130,34 @@ spec:
         readinessProbe: {{ toYaml .Values.taf.placeholder.readinessProbe | nindent 10 }}
       {{- end }}
         env:
-      {{- if .Values.taf.db.useZalandoOperatorDb }}
+      {{- if eq $dbMode "zalando" }}
         - name: PG_PASS
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.taf.db.POSTGRES_USER }}.{{ .Values.taf.db.name }}.credentials.postgresql.acid.zalan.do
+              name: {{ .Values.taf.db.username }}.{{ .Values.taf.db.name }}.credentials.postgresql.acid.zalan.do
               key: password
         - name: PG_USER
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.taf.db.POSTGRES_USER }}.{{ .Values.taf.db.name }}.credentials.postgresql.acid.zalan.do
+              name: {{ .Values.taf.db.username }}.{{ .Values.taf.db.name }}.credentials.postgresql.acid.zalan.do
               key: username
       {{- end }}
         - name: AVIATION_TAF_BACKEND_DB
-        {{- if .Values.taf.db.useZalandoOperatorDb }}
-          value: "postgresql://$(PG_USER):$(PG_PASS)@{{ .Values.taf.db.name }}:5432/{{ .Values.taf.db.POSTGRES_DB }}"
+        {{- if eq $dbMode "zalando" }}
+          value: "postgresql://$(PG_USER):$(PG_PASS)@{{ .Values.taf.db.name }}:5432/{{ .Values.taf.db.databaseName }}"
+        {{- else if eq $dbMode "sidecar" }}
+          value: "postgresql://{{ .Values.taf.db.username | urlquery | replace "+" "%20" }}:{{ .Values.taf.db.sidecar.password | urlquery | replace "+" "%20" }}@localhost:{{ .Values.taf.db.sidecar.port }}/{{ .Values.taf.db.databaseName | urlquery | replace "+" "%20" }}"
         {{- else }}
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.taf.db_secretName }}
-              key: AVIATION_TAF_BACKEND_DB
+              name: {{ .Values.taf.db.external.secretName }}
+              key: {{ .Values.taf.db.external.secretKey }}
         {{- end }}
       {{- if .Values.taf.placeholder.TAFPLACEHOLDER_KEEPRUNNING }}
         - name: TAFPLACEHOLDER_KEEPRUNNING
           value: {{ .Values.taf.placeholder.TAFPLACEHOLDER_KEEPRUNNING | quote }}
       {{- end }}
-      {{- if not .Values.taf.db.useZalandoOperatorDb }}
+      {{- if $usesExternalSecretProvider }}
         volumeMounts:
         - name: secrets-store-inline
           mountPath: "/mnt/secrets-store"
@@ -225,26 +235,30 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Values.taf.nginx.name }}
-      {{- if and .Values.taf.useCustomConfigurationFiles }}
         volumeMounts:
+        - name: nginx-run
+          mountPath: "/run"
+      {{- if and .Values.taf.useCustomConfigurationFiles }}
         - mountPath: "/nginx.conf"
           subPath: "nginx.conf"
           name: {{ .Values.taf.name }}-volume
       {{- end }}
-      {{- if .Values.taf.db.enableDefaultDb }}
+      {{- if eq $dbMode "sidecar" }}
       - name: {{ .Values.taf.db.name }}
-        image: {{ .Values.taf.db.image }}
+        image: {{ .Values.taf.db.sidecar.image }}
         ports:
-          - containerPort: {{ .Values.taf.db.port }}
+          - containerPort: {{ .Values.taf.db.sidecar.port }}
         env:
           - name: POSTGRES_DB
-            value: {{ .Values.taf.db.POSTGRES_DB }}
+            value: {{ .Values.taf.db.databaseName }}
           - name: POSTGRES_USER
-            value: {{ .Values.taf.db.POSTGRES_USER }}
+            value: {{ .Values.taf.db.username }}
           - name: POSTGRES_PASSWORD
-            value: {{ .Values.taf.db.POSTGRES_PASSWORD }}
+            value: {{ .Values.taf.db.sidecar.password }}
       {{- end }}
       volumes:
+      - name: nginx-run
+        emptyDir: {}
     {{- if .Values.taf.useCustomConfigurationFiles }}
       - name: {{ .Values.taf.name }}-volume
       {{- if eq .Values.taf.customConfigurationLocation "s3"}}
@@ -254,18 +268,13 @@ spec:
           claimName: {{ .Values.taf.name }}-claim
       {{- end }}
     {{- end }}
-    {{- if not .Values.taf.db.useZalandoOperatorDb }}
+    {{- if $usesExternalSecretProvider }}
       - name: secrets-store-inline
-      {{- if .Values.secretProvider }}
         csi:
           driver: secrets-store.csi.k8s.io
           readOnly: true
           volumeAttributes:
-            secretProviderClass: {{ .Values.taf.spcName | quote }}
-      {{- else }}
-        secret:
-          secretName: {{ .Values.taf.db_secretName | quote }}
-      {{- end }}
+            secretProviderClass: {{ .Values.taf.db.external.secretProvider.className | quote }}
     {{- end }}
       - name: publisher-volume
       {{- if .Values.taf.publisher.volumeOptions }}
