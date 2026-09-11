@@ -29,10 +29,10 @@ server:
   keepAliveTimeout: 60
 
 middlewares:
-  verdaccio-registry-api:
+  registry-api:
     enabled: true
 
-logs:
+log:
   - {type: stdout, format: pretty, level: debug}
 
 security:
