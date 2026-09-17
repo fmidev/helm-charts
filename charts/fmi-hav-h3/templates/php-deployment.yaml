@@ -1,0 +1,89 @@
+# Symfony PHP-FPM (h3-php image).
+# Exposes port 9000 (FastCGI) consumed only by the app (Nginx) Service —
+# no public port is exposed.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "h3.fullname" . }}-php
+  labels:
+    {{- include "h3.labels" . | nindent 4 }}
+    app.kubernetes.io/component: php
+spec:
+  replicas: {{ .Values.php.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "h3.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: php
+  template:
+    metadata:
+      labels:
+        {{- include "h3.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: php
+    spec:
+      {{- if .Values.image.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecret }}
+      {{- end }}
+      containers:
+        - name: php
+          image: {{ .Values.php.image.repository }}:{{ .Values.php.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: fpm
+              containerPort: 9000
+              protocol: TCP
+          envFrom:
+            # Non-secret config (APP_ENV, APP_PREFIX)
+            - configMapRef:
+                name: {{ include "h3.fullname" . }}-php-env
+            # Secrets (APP_SECRET, MONGODB_URL, OIDC_*) — must be a pre-existing OpenShift Secret
+            - secretRef:
+                name: {{ required "php.existingSecret must be set to the name of a pre-existing OpenShift Secret" .Values.php.existingSecret }}
+          env:
+            {{- if .Values.mongodb.enabled }}
+            # Override MONGODB_URL from the secret with the in-cluster Service hostname.
+            # Direct env entries take precedence over envFrom.
+            - name: MONGODB_URL
+              value: {{ printf "mongodb://%s-mongodb:27017" (include "h3.fullname" .) | quote }}
+            {{- end }}
+          livenessProbe:
+            tcpSocket:
+              port: fpm
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: fpm
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.php.resources | nindent 12 }}
+          volumeMounts:
+            - name: symfony-var
+              mountPath: /var/www/backend/var
+      volumes:
+        - name: symfony-var
+          emptyDir: {}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+# Internal-only Service — not exposed outside the cluster.
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "h3.fullname" . }}-php
+  labels:
+    {{- include "h3.labels" . | nindent 4 }}
+    app.kubernetes.io/component: php
+spec:
+  selector:
+    {{- include "h3.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: php
+  ports:
+    - name: fpm
+      port: 9000
+      targetPort: fpm
+      protocol: TCP

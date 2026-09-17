@@ -1,0 +1,94 @@
+# helm/h3/values.yaml — chart defaults.
+# Override per environment in helm/values.dev.yaml / helm/values.prod.yaml.
+# Secret values (APP_SECRET, OIDC_*, MONGODB_URL) must NEVER appear here;
+# supply them via --set or a pre-existing OCP Secret (php.existingSecret).
+
+# ──────────────────────────────────────────────
+# Global image settings
+# ──────────────────────────────────────────────
+image:
+  pullPolicy: IfNotPresent
+  pullSecret: "fmi-hav-openshift-pull-secret"
+
+nameOverride: ""
+fullnameOverride: ""
+
+# Optional: node affinity / tolerations
+nodeSelector: {}
+
+# ──────────────────────────────────────────────
+# app — Nginx + pre-built SPA (h3-app image)
+# ──────────────────────────────────────────────
+app:
+  image:
+    repository: quay.io/fmi/h3-app
+    tag: latest
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# ──────────────────────────────────────────────
+# php — Symfony PHP-FPM (h3-php image)
+# ──────────────────────────────────────────────
+php:
+  image:
+    repository: quay.io/fmi/h3-php
+    tag: latest
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi
+
+  # Name of a pre-existing OpenShift Secret that holds:
+  # APP_SECRET, MONGODB_URL, MONGODB_DB, OIDC_CLIENT_ID, OIDC_CLIENT_SECRET, OIDC_ISSUER_URL
+  existingSecret: "h3-sealedsecrets"
+
+  # Non-secret runtime config
+  env:
+    appEnv: "prod"
+    appPrefix: "/h3"
+    logLevel: "warning"
+
+# ──────────────────────────────────────────────
+# mongodb — in-cluster MongoDB StatefulSet
+# Set enabled: false and populate php.secret.mongodbUrl for managed databases.
+# ──────────────────────────────────────────────
+mongodb:
+  enabled: true
+  image: 
+    repository: quay.io/fmi/h3-mongo
+    tag: "8.0"
+  database: h3_settings
+  storage: 2Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi
+# ──────────────────────────────────────────────
+# redis — in-cluster Redis (session / cache)
+# Set enabled: false and supply REDIS_URL via php.existingSecret for managed Redis.
+# ──────────────────────────────────────────────
+redis:
+  enabled: true
+  image:
+    repository: quay.io/fmi/h3-redis
+    tag: "8.8"
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
