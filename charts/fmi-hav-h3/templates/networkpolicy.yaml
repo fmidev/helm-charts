@@ -1,0 +1,49 @@
+# Allow the app (Nginx) pods to reach PHP-FPM on port 9000.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "h3.fullname" . }}-allow-app-to-php
+  labels:
+    {{- include "h3.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "h3.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: php
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "h3.selectorLabels" . | nindent 14 }}
+              app.kubernetes.io/component: app
+      ports:
+        - protocol: TCP
+          port: 9000
+{{- if .Values.redis.enabled }}
+---
+# Allow PHP-FPM pods to reach Redis on port 6379.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "h3.fullname" . }}-allow-php-to-redis
+  labels:
+    {{- include "h3.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "h3.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: redis
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "h3.selectorLabels" . | nindent 14 }}
+              app.kubernetes.io/component: php
+      ports:
+        - protocol: TCP
+          port: 6379
+{{- end }}
