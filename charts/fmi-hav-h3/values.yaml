@@ -64,7 +64,7 @@ php:
 # ──────────────────────────────────────────────
 mongodb:
   enabled: true
-  image: 
+  image:
     repository: quay.io/fmi/h3-mongo
     tag: "8.0"
   database: h3_settings
