@@ -1,0 +1,17 @@
+{{- if .Values.pv.enable }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.smartmetDataGfs.name }}-{{ .Values.pv.name }}
+spec:
+  storageClassName: {{ .Values.pvc.storageClass }}
+  capacity:
+    storage: {{ .Values.pvc.storage }}
+  accessModes:
+    - {{ .Values.pvc.accessModes }}
+  claimRef:
+    namespace: {{ .Release.Namespace }}
+    name: {{ .Values.smartmetDataGfs.name }}-{{ .Values.pvc.name }}
+  hostPath:
+    path: {{ .Values.pv.path | quote }}
+{{- end }}
