@@ -109,7 +109,7 @@ taf:
   nginx:
     name: taf-nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend
-    version: "v0.6.0"
+    version: "v1.0.3"
     ENABLE_SSL: "FALSE"
     NGINX_PORT_HTTP: 80
     NGINX_PORT_HTTPS: 443
