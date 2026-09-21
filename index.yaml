@@ -1696,6 +1696,18 @@ entries:
   geoweb-opmet-backend:
   - apiVersion: v2
     appVersion: v5.11.0
+    created: "2026-09-21T08:08:47.67526439Z"
+    description: A Helm chart for geoweb opmet backend resources in Kubernetes
+    digest: 4f2dcd34890aaf560cdcdbb43001b43b5190125fbe0fd6a33bba2702c8c4566d
+    maintainers:
+    - name: FMI
+    name: geoweb-opmet-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-opmet-backend-4.0.3/geoweb-opmet-backend-4.0.3.tgz
+    version: 4.0.3
+  - apiVersion: v2
+    appVersion: v5.11.0
     created: "2026-09-09T15:03:05.114021138Z"
     description: A Helm chart for geoweb opmet backend resources in Kubernetes
     digest: df4a765f61f8062e139413cbaf9a6392b8dddb70d8e5d31dea7215d557b70d5f
@@ -2769,6 +2781,18 @@ entries:
   geoweb-presets-backend:
   - apiVersion: v2
     appVersion: v4.2.1
+    created: "2026-09-21T08:08:47.858343067Z"
+    description: A Helm chart for geoweb presets backend resources in Kubernetes
+    digest: 6fd7417bf842f6928cc03f48feba84a16a1b98ed99e6e2b48bc7454d27df8b56
+    maintainers:
+    - name: FMI
+    name: geoweb-presets-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-presets-backend-3.0.1/geoweb-presets-backend-3.0.1.tgz
+    version: 3.0.1
+  - apiVersion: v2
+    appVersion: v4.2.1
     created: "2026-09-10T10:39:14.525478547Z"
     description: A Helm chart for geoweb presets backend resources in Kubernetes
     digest: 7e9647b68bce30f5bd6e3995e5fdd4efd209523fff211b8618a3ab1cf7fd4efc
@@ -3663,6 +3687,18 @@ entries:
   geoweb-taf-backend:
   - apiVersion: v2
     appVersion: v4.2.1
+    created: "2026-09-21T08:08:48.12348381Z"
+    description: A Helm chart for geoweb taf backend resources in Kubernetes
+    digest: c40408e8ebf24bfc34daf300119625a5db8b6a26d638938df6458127a913e008
+    maintainers:
+    - name: Jusaa
+    name: geoweb-taf-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-taf-backend-2.0.1/geoweb-taf-backend-2.0.1.tgz
+    version: 2.0.1
+  - apiVersion: v2
+    appVersion: v4.2.1
     created: "2026-09-11T07:57:09.786263857Z"
     description: A Helm chart for geoweb taf backend resources in Kubernetes
     digest: 7e1345dfe8ec7fa3755d088e7be0f6ca0eb3b55884a5a33a9c21426a9186396a
@@ -4270,6 +4306,18 @@ entries:
     - https://github.com/fmidev/helm-charts/releases/download/geoweb-taf-backend-0.0.1/geoweb-taf-backend-0.0.1.tgz
     version: 0.0.1
   geoweb-warnings-backend:
+  - apiVersion: v2
+    appVersion: v3.1.1
+    created: "2026-09-21T08:08:48.301536174Z"
+    description: A Helm chart for geoweb warnings backend resources in Kubernetes
+    digest: b7b215024669298df9502827f5895909144f3781013bba70cebe02af0a698db0
+    maintainers:
+    - name: FMI
+    name: geoweb-warnings-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-warnings-backend-2.0.4/geoweb-warnings-backend-2.0.4.tgz
+    version: 2.0.4
   - apiVersion: v2
     appVersion: v3.1.1
     created: "2026-09-09T14:57:07.192891414Z"
@@ -6360,4 +6408,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2026-09-11T11:03:09.095243715Z"
+generated: "2026-09-21T08:08:48.302573231Z"
