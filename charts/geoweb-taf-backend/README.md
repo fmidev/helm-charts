@@ -226,7 +226,7 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.messageconverter.readinessProbe` | Configure message converter readinessProbe | see defaults from `values.yaml` |
 | `taf.nginx.name` | Name of nginx container | `taf-nginx` |
 | `taf.nginx.registry` | Registry to fetch nginx image | `registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend` |
-| `taf.nginx.version` | Possibility to override Nginx version | see default from `values.yaml` |
+| `taf.nginx.version` | Auth-backend image version | see default from `values.yaml` |
 | `taf.nginx.ENABLE_SSL` | Toggle SSL termination | `"FALSE"` |
 | `taf.nginx.OAUTH2_USERINFO` | Userinfo endpoint to retrieve consented claims, or assertions, about the logged in end-user | |
 | `taf.nginx.GEOWEB_USERNAME_CLAIM` | Claim name used as a user identifier in the taf-backend | `"email"` |
@@ -241,8 +241,8 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.nginx.BACKEND_HOST` | TAF-backend container address where Nginx reverse proxy forwards the requests | `localhost:8000` |
 | `taf.nginx.NGINX_PORT_HTTP` | Port used for Nginx reverse proxy | `80` |
 | `taf.nginx.NGINX_PORT_HTTPS` | Port used for Nginx reverse proxy when SSL is enabled | `443` |
-| `taf.nginx.NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE` | Tune Nginx worker processes to the container CPU limit when supported by the auth-backend image | Auth proxy default |
-| `taf.nginx.TRUST_FORWARDED_HEADERS` | Preserve incoming `X-Forwarded-*` headers only behind a trusted proxy that sanitizes them | Auth proxy default |
+| `taf.nginx.NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE` | Tune Nginx worker processes to the container CPU limit when supported by the auth-backend image | Auth backend default |
+| `taf.nginx.TRUST_FORWARDED_HEADERS` | Preserve incoming `X-Forwarded-*` headers only behind a trusted proxy that sanitizes them | Auth backend default |
 | `taf.nginx.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `taf.nginx.startupProbe` | Configure nginx container startupProbe | see defaults from `values.yaml` |
 | `taf.nginx.livenessProbe` | Configure nginx container livenessProbe | see defaults from `values.yaml` |

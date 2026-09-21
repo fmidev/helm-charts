@@ -329,13 +329,14 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.nginx.name`                            | Name of nginx container | `opmet-nginx`                                                                                |
 | `opmet.nginx.NGINX_PORT_HTTP`                 | Port used for nginx | `80`                                                                                         |
 | `opmet.nginx.NGINX_PORT_HTTPS`                | Port used for nginx when SSL is enabled | `443`                                                                                        |
-| `opmet.nginx.TRUST_FORWARDED_HEADERS`         | Preserve incoming `X-Forwarded-*` headers when running behind a trusted proxy | Auth proxy default |
+| `opmet.nginx.NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE` | Tune Nginx worker processes to the container CPU limit when supported by the auth-backend image | Auth backend default |
+| `opmet.nginx.TRUST_FORWARDED_HEADERS`         | Preserve incoming `X-Forwarded-*` headers when running behind a trusted proxy | Auth backend default |
 | `opmet.nginx.OAUTH2_USERINFO`                 | Userinfo endpoint to retrieve consented claims, or assertions, about the logged in end-user | |
 | `opmet.nginx.readinessProbe`                  | Configure nginx container readinessProbe | see defaults from `values.yaml`                                                              |
 | `opmet.nginx.registry`                        | Registry to fetch nginx image | `registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend`          |
 | `opmet.nginx.resources`                       | Configure resource limits & requests | see defaults from `values.yaml`|
 | `opmet.nginx.startupProbe  `                  | Configure nginx container startupProbe | see defaults from `values.yaml`                                                              |
-| `opmet.nginx.version`                         | Possibility to override Nginx version | see default from `values.yaml` |
+| `opmet.nginx.version`                         | Auth-backend image version | see default from `values.yaml` |
 | `opmet.nginx.ENV_VAR_STRICT_MODE`             | Enable check if all necessary variables for authentication and authorization are set | `false` |
 | `opmet.path`                                  | Path suffix added to url | `/opmet/(.*)`                                                                                |
 | `opmet.publisher.DESTINATION`                 | Folder inside publisher container where TACs are stored (used with local-publisher) | `/app/output`                                                                                |

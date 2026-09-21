@@ -208,7 +208,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.env.APPLICATION_ROOT_PATH` | Application root path for FastAPI. Generally same as `warnings.path` without the wildcard. | `/warnings-backend` |
 | `warnings.nginx.name` | Name of nginx container | `nginx` |
 | `warnings.nginx.registry` | Registry to fetch nginx image | `registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend` |
-| `warnings.nginx.version` | Possibility to override Nginx version | see default from `values.yaml` |
+| `warnings.nginx.version` | Auth-backend image version | see default from `values.yaml` |
 | `warnings.nginx.ENABLE_SSL` | Toggle SSL termination | `"FALSE"` |
 | `warnings.nginx.OAUTH2_USERINFO` | Userinfo endpoint to retrieve consented claims, or assertions, about the logged in end-user | - |
 | `warnings.nginx.GEOWEB_USERNAME_CLAIM` | Claim name used as a user identifier in the warnings-backend | `"email"` |
@@ -223,7 +223,8 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.nginx.BACKEND_HOST` | Warning-backend container address where Nginx reverse proxy forwards the requests | `0.0.0.0:8080` |
 | `warnings.nginx.NGINX_PORT_HTTP` | Port used for Nginx reverse proxy | `80` |
 | `warnings.nginx.NGINX_PORT_HTTPS` | Port used for Nginx reverse proxy when SSL is enabled | `443` |
-| `warnings.nginx.TRUST_FORWARDED_HEADERS` | Preserve incoming `X-Forwarded-*` headers only behind a trusted proxy that sanitizes them | Auth proxy default |
+| `warnings.nginx.NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE` | Tune Nginx worker processes to the container CPU limit when supported by the auth-backend image | Auth backend default |
+| `warnings.nginx.TRUST_FORWARDED_HEADERS` | Preserve incoming `X-Forwarded-*` headers only behind a trusted proxy that sanitizes them | Auth backend default |
 | `warnings.nginx.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `warnings.nginx.startupProbe` | Configure nginx container startupProbe | see defaults from `values.yaml` |
 | `warnings.nginx.livenessProbe` | Configure nginx container livenessProbe | see defaults from `values.yaml` |
