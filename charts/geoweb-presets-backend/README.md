@@ -148,6 +148,22 @@ presets:
   awsDefaultRegion: <AWS_DEFAULT_REGION>
 ```
 
+## Using workspace labels from an existing ConfigMap
+
+```yaml
+presets:
+  env:
+    PRESETS_WORKSPACE_LABEL_CONFIG: /app/runtime-config/workspaceLabelsConfig.json
+  runtimeConfiguration:
+    source: existingConfigMap
+    existingConfigMap:
+      name: presets-runtime-config
+      checksum: <sha256-of-workspaceLabelsConfig.json>
+```
+
+The ConfigMap must contain `workspaceLabelsConfig.json`. The chart mounts it at `/app/runtime-config`; set `PRESETS_WORKSPACE_LABEL_CONFIG` to the mounted file in `presets.env`. Update the checksum whenever the file changes so the backend reloads it at startup.
+
+
 - Using Zalando Operator database
 
 Database selection is controlled by `presets.db.mode`.
@@ -355,18 +371,3 @@ The following table lists the configurable parameters of the Presets backend cha
 | 2.11.0        | 3.12.0          |
 | 2.10.1        | 3.11.1          |
 | 2.10.0        | 3.11.0          |
-
-## Workspace labels from a preset repository
-
-```yaml
-presets:
-  env:
-    PRESETS_WORKSPACE_LABEL_CONFIG: /app/runtime-config/workspaceLabelsConfig.json
-  runtimeConfiguration:
-    source: existingConfigMap
-    existingConfigMap:
-      name: presets-runtime-config
-      checksum: <sha256-of-workspaceLabelsConfig.json>
-```
-
-The ConfigMap must contain `workspaceLabelsConfig.json`. The chart mounts it at `/app/runtime-config`; set `PRESETS_WORKSPACE_LABEL_CONFIG` to the mounted file in `presets.env`. Update the checksum whenever the file changes so the backend reloads it at startup.
