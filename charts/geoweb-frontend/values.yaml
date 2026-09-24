@@ -56,8 +56,12 @@ frontend:
   customConfigurationMountPath: /usr/share/nginx/html/assets/custom
   volumeAccessMode: ReadOnlyMany
   volumeSize: 100Mi
-  customConfiguration:
-    enabled: false  # Set to true to generate the custom initialPresets JSON file
+  runtimeConfiguration:
+    mountPath: /usr/share/nginx/html/assets/custom
+    source: none  # none, inline, existingConfigMap
+    existingConfigMap:
+      name: ""
+      checksum: ""  # SHA-256 of the published file content
     files:
       "initialPresets.json":  # This file will be generated and available at /usr/share/nginx/html/assets/custom/
         # Configure all the settings below you want to be included in the custom initialPresets JSON file

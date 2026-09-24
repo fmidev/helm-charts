@@ -1,0 +1,25 @@
+# auth-backend v1.0.3 cannot bind privileged port 80 during Kind install tests.
+presets:
+  nginx:
+    NGINX_PORT_HTTP: 8081
+    startupProbe:
+      httpGet:
+        path: /health_check?startup=true
+        port: 8081
+      periodSeconds: 5
+      timeoutSeconds: 5
+      failureThreshold: 12
+    livenessProbe:
+      httpGet:
+        path: /health_check
+        port: 8081
+      periodSeconds: 5
+      timeoutSeconds: 3
+      failureThreshold: 2
+    readinessProbe:
+      httpGet:
+        path: /health_check?readiness=true
+        port: 8081
+      periodSeconds: 5
+      timeoutSeconds: 3
+      failureThreshold: 1

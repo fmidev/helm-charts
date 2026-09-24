@@ -1,3 +1,13 @@
+{{- $runtimeSource := default "none" .Values.presets.runtimeConfiguration.source -}}
+{{- if not (has $runtimeSource (list "none" "inline" "existingConfigMap")) -}}
+{{- fail "presets.runtimeConfiguration.source must be none, inline, or existingConfigMap" -}}
+{{- end -}}
+{{- if and (eq $runtimeSource "existingConfigMap") (or (empty .Values.presets.runtimeConfiguration.existingConfigMap.name) (empty .Values.presets.runtimeConfiguration.existingConfigMap.checksum)) -}}
+{{- fail "presets.runtimeConfiguration.existingConfigMap.name and checksum are required" -}}
+{{- end -}}
+{{- if and (eq $runtimeSource "inline") (empty .Values.presets.runtimeConfiguration.files) -}}
+{{- fail "presets.runtimeConfiguration.files is required for inline source" -}}
+{{- end -}}
 {{- $dbMode := default "sidecar" .Values.presets.db.mode }}
 {{- $usesExternalSecretProvider := and (eq $dbMode "external") (eq (default "inline" .Values.presets.db.external.source) "secretProvider") }}
 apiVersion: apps/v1
@@ -19,6 +29,11 @@ spec:
         eks.amazonaws.com/compute-type: ec2
       {{- if .Values.presets.commitHash }}
         commitHash: {{ .Values.presets.commitHash }}
+      {{- end }}
+      {{- if eq $runtimeSource "inline" }}
+        checksum/runtime-configuration: {{ .Values.presets.runtimeConfiguration.files | toJson | sha256sum | quote }}
+      {{- else if eq $runtimeSource "existingConfigMap" }}
+        checksum/runtime-configuration: {{ .Values.presets.runtimeConfiguration.existingConfigMap.checksum | quote }}
       {{- end }}
     spec:
     {{- if and $usesExternalSecretProvider (eq .Values.presets.db.external.secretProvider.provider "aws") }}
@@ -115,7 +130,7 @@ spec:
               name: {{ .Values.presets.db.external.secretName }}
               key: {{ .Values.presets.db.external.secretKey }}
         {{- end }}
-      {{- if or $usesExternalSecretProvider .Values.presets.useCustomWorkspacePresets }}
+      {{- if or $usesExternalSecretProvider .Values.presets.useCustomWorkspacePresets (ne $runtimeSource "none") }}
         volumeMounts:
       {{- if $usesExternalSecretProvider }}
         - name: secrets-store-inline
@@ -125,6 +140,11 @@ spec:
       {{- if .Values.presets.useCustomWorkspacePresets }}
         - mountPath: "/app/staticpresets"
           name: {{ .Values.presets.name }}-custom-presets-volume
+      {{- end }}
+      {{- if ne $runtimeSource "none" }}
+        - mountPath: {{ .Values.presets.runtimeConfiguration.mountPath }}
+          name: {{ .Values.presets.name }}-runtime-config
+          readOnly: true
       {{- end }}
       {{- end }}
       - name: {{ .Values.presets.nginx.name }}
@@ -173,6 +193,11 @@ spec:
       volumes:
       - name: nginx-run
         emptyDir: {}
+    {{- if ne $runtimeSource "none" }}
+      - name: {{ .Values.presets.name }}-runtime-config
+        configMap:
+          name: {{ ternary .Values.presets.runtimeConfiguration.existingConfigMap.name (printf "%s-runtime-config" .Values.presets.name) (eq $runtimeSource "existingConfigMap") }}
+    {{- end }}
     {{- if .Values.presets.useCustomConfigurationFiles }}
       - name: {{ .Values.presets.name }}-volume
       {{- if eq .Values.presets.customConfigurationLocation "s3"}}

@@ -1,3 +1,19 @@
+{{- if hasKey .Values.frontend "customConfiguration" -}}
+{{- fail "frontend.customConfiguration was removed; use frontend.runtimeConfiguration" -}}
+{{- end -}}
+{{- $runtimeSource := default "none" .Values.frontend.runtimeConfiguration.source -}}
+{{- if not (has $runtimeSource (list "none" "inline" "existingConfigMap")) -}}
+{{- fail "frontend.runtimeConfiguration.source must be none, inline, or existingConfigMap" -}}
+{{- end -}}
+{{- if and .Values.frontend.useCustomConfigurationFiles (ne $runtimeSource "none") -}}
+{{- fail "frontend.useCustomConfigurationFiles cannot be combined with frontend.runtimeConfiguration.source" -}}
+{{- end -}}
+{{- if and (eq $runtimeSource "existingConfigMap") (or (empty .Values.frontend.runtimeConfiguration.existingConfigMap.name) (empty .Values.frontend.runtimeConfiguration.existingConfigMap.checksum)) -}}
+{{- fail "frontend.runtimeConfiguration.existingConfigMap.name and checksum are required" -}}
+{{- end -}}
+{{- if and (eq $runtimeSource "inline") (empty .Values.frontend.runtimeConfiguration.files) -}}
+{{- fail "frontend.runtimeConfiguration.files is required for inline source" -}}
+{{- end -}}
 {{- $nginx := default dict .Values.frontend.nginx -}}
 apiVersion: apps/v1
 kind: Deployment
@@ -18,6 +34,11 @@ spec:
         eks.amazonaws.com/compute-type: ec2
       {{- if .Values.frontend.commitHash }}
         commitHash: {{ .Values.frontend.commitHash }}
+      {{- end }}
+      {{- if eq $runtimeSource "inline" }}
+        checksum/runtime-configuration: {{ .Values.frontend.runtimeConfiguration.files | toJson | sha256sum | quote }}
+      {{- else if eq $runtimeSource "existingConfigMap" }}
+        checksum/runtime-configuration: {{ .Values.frontend.runtimeConfiguration.existingConfigMap.checksum | quote }}
       {{- end }}
       {{- with $nginx.headers }}
         checksum/nginx-headers: {{ default "" .config | sha256sum | quote }}
@@ -73,7 +94,7 @@ spec:
               name: {{ .Values.frontend.client_id_secretName }}
               key: GW_AUTH_CLIENT_ID
       {{- end }}
-      {{- if or $nginx.headers .Values.secretProvider .Values.frontend.useCustomConfigurationFiles .Values.frontend.customConfiguration.enabled }}
+      {{- if or $nginx.headers .Values.secretProvider .Values.frontend.useCustomConfigurationFiles (ne $runtimeSource "none") }}
         volumeMounts:
       {{- with $nginx.headers }}
         - name: nginx-headers
@@ -90,12 +111,13 @@ spec:
         - mountPath: {{ .Values.frontend.customConfigurationMountPath }}
           name: {{ .Values.frontend.name }}-volume
       {{- end }}
-      {{- if .Values.frontend.customConfiguration.enabled }}
+      {{- if ne $runtimeSource "none" }}
         - name: generated-configs
-          mountPath: {{ .Values.frontend.customConfigurationMountPath }}
+          mountPath: {{ .Values.frontend.runtimeConfiguration.mountPath }}
+          readOnly: true
       {{- end }}
       {{- end }}
-    {{- if or $nginx.headers .Values.secretProvider .Values.frontend.useCustomConfigurationFiles .Values.frontend.customConfiguration.enabled }}
+    {{- if or $nginx.headers .Values.secretProvider .Values.frontend.useCustomConfigurationFiles (ne $runtimeSource "none") }}
       volumes:
       {{- with $nginx.headers }}
       - name: nginx-headers
@@ -111,15 +133,10 @@ spec:
           claimName: {{ .Values.frontend.name }}-claim
       {{- end }}
       {{- end }}
-      {{- if .Values.frontend.customConfiguration.enabled }}
+      {{- if ne $runtimeSource "none" }}
       - name: generated-configs
         configMap:
-          name: {{ .Values.frontend.name }}
-          items:
-          {{- range $filename, $content := .Values.frontend.customConfiguration.files }}
-          - key: {{ $filename }}
-            path: {{ $filename }}
-          {{- end }}
+          name: {{ ternary .Values.frontend.runtimeConfiguration.existingConfigMap.name (printf "%s-runtime-config" .Values.frontend.name) (eq $runtimeSource "existingConfigMap") }}
       {{- end }}
       {{- if .Values.secretProvider }}
       - name: secrets-store-inline
