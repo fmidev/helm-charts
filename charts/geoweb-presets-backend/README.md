@@ -287,6 +287,11 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.db.zalando.clone.enabled`                    | Restore Zalando cluster from backup instead of clean install                                                                                              | `false`                                                                     |
 | `presets.db.zalando.clone.timestamp`                  | Zalando clone timestamp; required when cloning is enabled                                                                                                 |                                                                             |
 | `presets.db.zalando.clone.backupBucket`               | Zalando clone backup bucket; required when cloning is enabled                                                                                             |                                                                             |
+| `presets.runtimeConfiguration.source` | Workspace labels source: `none`, `inline`, or `existingConfigMap` | `none` |
+| `presets.runtimeConfiguration.files` | Map of filename to JSON content structured as YAML | `{}` |
+| `presets.runtimeConfiguration.mountPath` | Directory where runtime files are mounted | `/app/runtime-config` |
+| `presets.runtimeConfiguration.existingConfigMap.name` | Name of an externally managed ConfigMap | `""` |
+| `presets.runtimeConfiguration.existingConfigMap.checksum` | SHA-256 of published file content; changes restart backend pods | `""` |
 | `presets.useCustomConfigurationFiles`                 | Use custom configurations                                                                                                                                 | `false`                                                                     |
 | `presets.customConfigurationLocation`                 | Where custom configurations are located _(local\|s3)_                                                                                                     | `local`                                                                     |
 | `presets.customConfigurationFolderPath`               | Path to the folder which contains custom configurations                                                                                                   |                                                                             |
@@ -308,6 +313,7 @@ The following table lists the configurable parameters of the Presets backend cha
 
 | Chart version | presets version |
 | ------------- | --------------- |
+| 3.1.0         | 4.2.1           |
 | 3.0.1         | 4.2.1           |
 | 3.0.0         | 4.2.1           |
 | 2.15.16       | 4.2.1           |
@@ -349,3 +355,18 @@ The following table lists the configurable parameters of the Presets backend cha
 | 2.11.0        | 3.12.0          |
 | 2.10.1        | 3.11.1          |
 | 2.10.0        | 3.11.0          |
+
+## Workspace labels from a preset repository
+
+```yaml
+presets:
+  env:
+    PRESETS_WORKSPACE_LABEL_CONFIG: /app/runtime-config/workspaceLabelsConfig.json
+  runtimeConfiguration:
+    source: existingConfigMap
+    existingConfigMap:
+      name: presets-runtime-config
+      checksum: <sha256-of-workspaceLabelsConfig.json>
+```
+
+The ConfigMap must contain `workspaceLabelsConfig.json`. The chart mounts it at `/app/runtime-config`; set `PRESETS_WORKSPACE_LABEL_CONFIG` to the mounted file in `presets.env`. Update the checksum whenever the file changes so the backend reloads it at startup.

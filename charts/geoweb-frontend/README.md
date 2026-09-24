@@ -1,3 +1,14 @@
+# Upgrade notes for chart 4.0.0
+
+Chart `4.0.0` removes `frontend.customConfiguration.enabled`. Set `frontend.runtimeConfiguration.source: inline` to keep generating files from `files`, or `source: none` to use the image defaults. `frontend.useCustomConfigurationFiles` remains available for existing local and S3 mounts; it cannot be combined with the ConfigMap source modes.
+
+Migration map:
+
+| Removed value                                | New value                                      |
+| -------------------------------------------- | ---------------------------------------------- |
+| `frontend.customConfiguration.enabled: true` | `frontend.runtimeConfiguration.source: inline` |
+| `frontend.customConfiguration.files`         | `frontend.runtimeConfiguration.files`          |
+
 # Install the chart repository
 
 ```bash
@@ -73,6 +84,19 @@ frontend:
   awsDefaultRegion: <AWS_DEFAULT_REGION>
 ```
 
+* Use initialPresets.json from an existing ConfigMap
+```yaml
+frontend:
+  env:
+    GW_INITIAL_PRESETS_FILENAME: custom/initialPresets.json
+  runtimeConfiguration:
+    source: existingConfigMap
+    existingConfigMap:
+      name: geoweb-initial-presets
+      checksum: <sha256-of-initialPresets.json>
+```
+The ConfigMap must contain the `initialPresets.json` key. The checksum must change with the file content. `useCustomConfigurationFiles` cannot be combined with the `inline` or `existingConfigMap` runtime configuration sources.
+
 * Generate custom initialPresets.json from YAML values
   * The configuration will be converted to JSON and mounted into the containers filesystem
   * The structure of the JSON file should conform to the InitialAppPresetProps type, see https://opengeoweb.gitlab.io/opengeoweb/typescript-docs/core/interfaces/InitialAppPresetProps.html
@@ -82,8 +106,8 @@ frontend:
   url: geoweb.example.com
   env:
     GW_INITIAL_PRESETS_FILENAME: custom/initialPresets.json  # Configure app to use the generated custom configuration JSON
-  customConfiguration:
-    enabled: true  # Enable initialPresets JSON generation from YAML values
+  runtimeConfiguration:
+    source: inline  # Generate a dedicated ConfigMap from YAML values
     files:
       "initialPresets.json":  # File will be available at /usr/share/nginx/html/assets/custom/
         # All the settings configured below will be included in the generated initialPresets JSON file
@@ -209,8 +233,12 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.env.GW_INITIAL_WORKSPACE_PRESET` | Name of the workspace preset that is opened initially | |
 | `frontend.useCustomConfigurationFiles` | Mount custom application configuration files at `frontend.customConfigurationMountPath` | `false` |
 | `frontend.customConfigurationLocation` | Where custom configurations are located *(local\|s3)* | `local` |
-| `frontend.customConfiguration.files` | Map of filename to JSON content structured as YAML | `{}` |
-| `frontend.customConfiguration.files."initialPresets.json"` | Configuration for map presets, services, layers, etc. | See example in `values.yaml` |
+| `frontend.runtimeConfiguration.source` | Runtime files source: `none`, `inline`, or `existingConfigMap` | `none` |
+| `frontend.runtimeConfiguration.mountPath` | Directory where ConfigMap runtime files are mounted | `/usr/share/nginx/html/assets/custom` |
+| `frontend.runtimeConfiguration.existingConfigMap.name` | Name of an externally managed ConfigMap | `""` |
+| `frontend.runtimeConfiguration.existingConfigMap.checksum` | SHA-256 of published file content; used for restarting pods | `""` |
+| `frontend.runtimeConfiguration.files` | Map of filename to JSON content structured as YAML | `{}` |
+| `frontend.runtimeConfiguration.files."initialPresets.json"` | Configuration for map presets, services, layers, etc. | See example in `values.yaml` |
 | `frontend.volumeAccessMode` | Permissions of the application for the custom configurations PersistentVolume used | `ReadOnlyMany` |
 | `frontend.volumeSize` | Size of the custom configurations PersistentVolume | `100Mi` |
 | `frontend.customConfigurationFolderPath` | Path to the folder which contains custom configurations | |
@@ -232,6 +260,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 
 | Chart version | frontend version |
 |---------------|------------------|
+| 4.0.0         | 19.5.1           |
 | 3.22.1        | 19.5.1           |
 | 3.22.0        | 19.5.1           |
 | 3.21.2        | 19.1.0           |

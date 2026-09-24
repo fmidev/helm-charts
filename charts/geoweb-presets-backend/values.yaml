@@ -10,6 +10,13 @@ presets:
   minPodsAvailable: 0
   PRESETS_PORT_HTTP: 8080
   DEPLOY_ENVIRONMENT: open
+  runtimeConfiguration:
+    source: none  # none, inline, existingConfigMap
+    mountPath: /app/runtime-config
+    files: {}
+    existingConfigMap:
+      name: ""
+      checksum: ""  # SHA-256 of the published file content
   postStartCommand: bin/admin.sh
   secretServiceAccount: presets-service-account
   resources:
