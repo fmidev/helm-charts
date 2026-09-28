@@ -1,0 +1,31 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: {{ include "mlflow.fullname" . }}
+spec:
+  source:
+    type: Dockerfile
+    dockerfile: |
+      FROM {{ .Values.mlflow.image.repository }}:{{ .Values.mlflow.image.tag }}
+      RUN apt-get -y update && \
+          apt-get -y install python3-dev build-essential pkg-config && \
+          pip install --upgrade pip && \
+          pip install psycopg2-binary boto3 s3fs mlflow[auth]=={{ .Values.mlflow.image.tag }}
+
+  strategy:
+    type: Docker
+
+  triggers:
+    - type: ConfigChange
+
+  output:
+    to:
+      kind: ImageStreamTag
+      name: "{{ include "mlflow.name" . }}:{{ .Values.mlflow.image.tag }}"
+
+  importPolicy:
+    scheduled: true
+
+
+  resources:
+    {{- toYaml .Values.mlflow.image.build.resources | nindent 4 }}
