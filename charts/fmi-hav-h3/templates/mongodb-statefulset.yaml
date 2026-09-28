@@ -1,0 +1,120 @@
+{{- if .Values.mongodb.enabled }}
+# ConfigMap holds the seed script and site config data.
+# Mounted into /docker-entrypoint-initdb.d/ so the MongoDB entrypoint runs it
+# automatically the first time the data directory is initialised.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "h3.fullname" . }}-mongo-init
+  labels:
+    {{- include "h3.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mongodb
+data:
+  init-site-config.sh: |
+    #!/bin/bash
+    set -e
+    SETTINGS=$(cat /docker-entrypoint-initdb.d/siteConfig.json)
+    mongosh "${MONGO_INITDB_DATABASE:-h3_settings}" --eval "
+      db.site_settings.updateOne(
+        { key: 'config' },
+        {
+          \$setOnInsert: {
+            key: 'config',
+            settings: ${SETTINGS},
+            createdAt: new Date(),
+          },
+          \$set: { updatedAt: new Date() },
+        },
+        { upsert: true }
+      );
+    "
+  siteConfig.json: {{ .Files.Get "files/siteConfig.json" | quote }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "h3.fullname" . }}-mongodb
+  labels:
+    {{- include "h3.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mongodb
+spec:
+  serviceName: {{ include "h3.fullname" . }}-mongodb
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "h3.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: mongodb
+  template:
+    metadata:
+      labels:
+        {{- include "h3.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: mongodb
+    spec:
+      {{- if .Values.image.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecret }}
+      {{- end }}
+      containers:
+        - name: mongodb
+          image: {{ .Values.mongodb.image.repository }}:{{ .Values.mongodb.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: mongodb
+              containerPort: 27017
+              protocol: TCP
+          env:
+            - name: MONGO_INITDB_DATABASE
+              value: {{ .Values.mongodb.database | quote }}
+          volumeMounts:
+            - name: data
+              mountPath: /data/db
+            - name: init-scripts
+              mountPath: /docker-entrypoint-initdb.d
+          livenessProbe:
+            exec:
+              command: ["mongosh", "--eval", "db.adminCommand('ping')"]
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command: ["mongosh", "--eval", "db.adminCommand('ping')"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.mongodb.resources | nindent 12 }}
+      volumes:
+        - name: init-scripts
+          configMap:
+            name: {{ include "h3.fullname" . }}-mongo-init
+            defaultMode: 0755
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: {{ .Values.mongodb.storage }}
+---
+# Headless service — required by StatefulSet for stable DNS names.
+# PHP-FPM connects via mongodb://{{ include "h3.fullname" . }}-mongodb:27017
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "h3.fullname" . }}-mongodb
+  labels:
+    {{- include "h3.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mongodb
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: mongodb
+      port: 27017
+      targetPort: mongodb
+      protocol: TCP
+  selector:
+    {{- include "h3.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: mongodb
+{{- end }}

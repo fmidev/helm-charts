@@ -1,0 +1,14 @@
+# Non-secret runtime configuration consumed by the PHP-FPM container.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "h3.fullname" . }}-php-env
+  labels:
+    {{- include "h3.labels" . | nindent 4 }}
+data:
+  APP_ENV: {{ .Values.php.env.appEnv | default "prod" | quote }}
+  APP_PREFIX: {{ .Values.php.env.appPrefix | default "/h3" | quote }}
+  LOG_LEVEL: {{ .Values.php.env.logLevel | default "warning" | quote }}
+  {{- if .Values.redis.enabled }}
+  REDIS_URL: {{ printf "redis://%s-redis:6379" (include "h3.fullname" .) | quote }}
+  {{- end }}

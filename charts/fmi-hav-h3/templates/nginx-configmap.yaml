@@ -1,0 +1,56 @@
+# Nginx configuration for the app (Nginx + SPA) container.
+# Overrides the default.conf baked into the image so that the PHP-FPM upstream
+# resolves to the Kubernetes Service name rather than the bare "php" hostname.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "h3.fullname" . }}-nginx-conf
+  labels:
+    {{- include "h3.labels" . | nindent 4 }}
+data:
+  default.conf: |
+        upstream php_fpm {
+            server {{ include "h3.fullname" . }}-php:9000;
+        }
+        server {
+            listen 8080;
+            server_name _;
+
+            root /var/www/frontend/dist;
+            index index.html;
+
+            # ── Symfony backend (API + hav) ──
+            location /api/ {
+                try_files $uri /index.php$is_args$args;
+            }
+
+            location /locale {
+                try_files $uri /index.php$is_args$args;
+            }
+
+            location /hav {
+                root /var/www/backend/public;
+                try_files $uri /index.php$is_args$args;
+            }
+
+            location ~ ^/index\.php(/|$) {
+                root /var/www/backend/public;
+                fastcgi_pass php_fpm;
+                fastcgi_split_path_info ^(.+\.php)(/.*)$;
+                include fastcgi_params;
+                fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+                fastcgi_param DOCUMENT_ROOT $document_root;
+                internal;
+            }
+
+            # ── Static assets with caching ──
+            location /assets/ {
+                expires 1y;
+                add_header Cache-Control "public, immutable";
+            }
+
+            # ── SPA fallback ──
+            location / {
+                try_files $uri $uri/ /index.html;
+            }
+        }

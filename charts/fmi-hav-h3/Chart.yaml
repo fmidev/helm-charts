@@ -1,0 +1,14 @@
+apiVersion: v2
+name: h3
+description: Helm chart for hav.fmi.fi 3.0 aka H3
+type: application
+version: 0.0.1
+keywords:
+- fmi
+- hav
+home: https://github.com/fmidev/helm-charts
+maintainers:
+  - name: fmi-build-bot
+    email: lassi.virtanen@fmi.fi
+    url: https://github.com/fmi-build-bot
+appVersion: "latest"
