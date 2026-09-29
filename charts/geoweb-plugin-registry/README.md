@@ -35,7 +35,7 @@ sanitized values file is available at
 | `commitHash` | Optional deployment marker used to force a rollout for mutable image tags | `""` |
 | `publicUrl` | Canonical external registry URL used for UI assets and package metadata | `""` |
 | `image.repository` | Container image repository | `registry.gitlab.com/opengeoweb/backend-services/plugin-registry-backend/plugin-registry-backend` |
-| `image.tag` | Container image tag | `v0.4.5` |
+| `image.tag` | Container image tag | `v0.5.1` |
 | `image.pullPolicy` | Kubernetes image pull policy | `IfNotPresent` |
 | `imagePullSecrets` | Optional image pull secrets for private images | `[]` |
 | `service.port` | Service and container port | `4873` |
@@ -51,6 +51,7 @@ sanitized values file is available at
 | `storage.s3.bucket` | S3 bucket name | `""` |
 | `storage.s3.prefix` | Object key prefix shared by Verdaccio and the API | `verdaccio` |
 | `storage.s3.region` | AWS/S3 region | `""` |
+| `storage.s3.dynamoTableName` | DynamoDB table for registry state; `none` keeps it in S3 | `none` |
 | `storage.s3.endpoint` | Optional S3-compatible endpoint; empty for AWS | `""` |
 | `storage.s3.pathStyle` | Use path-style S3 addressing | `false` |
 | `storage.s3.existingSecret` | Secret containing AWS credential keys | `""` |
@@ -76,6 +77,7 @@ sanitized values file is available at
 
 | Chart version | plugin-registry-backend version |
 |---------------|---------------------------------|
+| 0.2.4         | v0.5.1                          |
 | 0.2.3         | v0.4.5                          |
 | 0.2.2         | v0.4.5                          |
 | 0.2.1         | v0.4.3                          |
