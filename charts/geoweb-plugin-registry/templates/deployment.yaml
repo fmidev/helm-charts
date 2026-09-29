@@ -87,6 +87,8 @@ spec:
               value: {{ .Values.storage.s3.sessionToken | quote }}
               {{- end }}
             {{- end }}
+            - name: AWS_DYNAMO_TABLE_NAME
+              value: {{ .Values.storage.s3.dynamoTableName | quote }}
             - name: AWS_REGION
               value: {{ required "storage.s3.region is required when storage.backend=s3" .Values.storage.s3.region | quote }}
             - name: AWS_S3_ENDPOINT

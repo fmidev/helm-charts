@@ -9,6 +9,8 @@ store:
     accessKeyId: ${AWS_ACCESS_KEY_ID}
     secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
     sessionToken: ${AWS_SESSION_TOKEN}
+    # Set to 'none' to keep the registry database in S3 instead of DynamoDB.
+    dynamoTableName: ${AWS_DYNAMO_TABLE_NAME}
 
 pluginStorage:
   type: s3
