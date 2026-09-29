@@ -77,7 +77,7 @@ sanitized values file is available at
 
 | Chart version | plugin-registry-backend version |
 |---------------|---------------------------------|
-| 0.2.4         | v0.5.1                          |
+| 0.3.0         | v0.5.1                          |
 | 0.2.3         | v0.4.5                          |
 | 0.2.2         | v0.4.5                          |
 | 0.2.1         | v0.4.3                          |
