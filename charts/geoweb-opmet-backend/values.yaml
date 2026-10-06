@@ -86,7 +86,9 @@ opmet:
         cpu: "50m"
       limits:
         memory: "128Mi"
+    environmentSecret: ""  # existing Secret with SFTP destination environment variables
     secrets:
+      source: inline  # inline, secretProvider, existingSecret; provider also selects secretProvider
       # Leave provider empty to create Secrets from encodedValue. Set a
       # provider to fetch objectName values through the Secrets Store CSI
       # driver. Publisher secrets are independent from database credentials.
@@ -193,7 +195,10 @@ opmet:
         timestamp: ""
         backupBucket: ""
   useCustomConfigurationFiles: false
-  customConfigurationLocation: local
+  customConfigurationLocation: local  # local, s3, configMap
+  customConfigurationConfigMap:
+    name: ""
+    checksum: ""
   customConfigurationMountPath: /app/configuration_files/custom
   volumeAccessMode: ReadOnlyMany
   volumeSize: 100Mi
