@@ -1,3 +1,10 @@
+{{- $configMapConfiguration := and .Values.opmet.useCustomConfigurationFiles (eq .Values.opmet.customConfigurationLocation "configMap") }}
+{{- if and $configMapConfiguration (or (empty .Values.opmet.customConfigurationConfigMap.name) (empty .Values.opmet.customConfigurationConfigMap.checksum)) }}
+{{- fail "opmet.customConfigurationConfigMap.name and checksum are required for configMap configuration" }}
+{{- end }}
+{{- if and .Values.opmet.useCustomConfigurationFiles (not (has .Values.opmet.customConfigurationLocation (list "local" "s3" "configMap"))) }}
+{{- fail "opmet.customConfigurationLocation must be local, s3, or configMap" }}
+{{- end }}
 {{- $dbMode := default "sidecar" .Values.opmet.db.mode }}
 {{- $databaseUsesSecretProvider := and (eq $dbMode "external") (eq (default "inline" .Values.opmet.db.external.source) "secretProvider") }}
 {{- $publisherSecrets := .Values.opmet.publisher.secrets }}
@@ -21,6 +28,9 @@ spec:
         app: {{ .Values.opmet.name }}
       annotations:
         eks.amazonaws.com/compute-type: ec2
+      {{- if $configMapConfiguration }}
+        checksum/custom-configuration: {{ .Values.opmet.customConfigurationConfigMap.checksum | quote }}
+      {{- end }}
       {{- if .Values.opmet.commitHash }}
         commitHash: {{ .Values.opmet.commitHash }}
       {{- end }}
@@ -166,6 +176,10 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Values.opmet.publisher.name }}
+      {{- if .Values.opmet.publisher.environmentSecret }}
+        - secretRef:
+            name: {{ .Values.opmet.publisher.environmentSecret }}
+      {{- end }}
         volumeMounts:
       {{- if $hasPublisherSecrets }}
         - name: publisher-secrets-store
@@ -222,7 +236,10 @@ spec:
         emptyDir: {}
     {{- if .Values.opmet.useCustomConfigurationFiles }}
       - name: {{ .Values.opmet.name }}-volume
-      {{- if eq .Values.opmet.customConfigurationLocation "s3"}}
+      {{- if $configMapConfiguration }}
+        configMap:
+          name: {{ .Values.opmet.customConfigurationConfigMap.name }}
+      {{- else if eq .Values.opmet.customConfigurationLocation "s3"}}
         emptyDir: {}
       {{- else if eq .Values.opmet.customConfigurationLocation "local"}}
         persistentVolumeClaim:

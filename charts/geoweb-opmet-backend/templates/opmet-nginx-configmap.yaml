@@ -54,3 +54,12 @@ data:
 {{- if .Values.opmet.nginx.ENV_VAR_STRICT_MODE }}
   ENV_VAR_STRICT_MODE: {{ .Values.opmet.nginx.ENV_VAR_STRICT_MODE | quote }}
 {{- end }}
+{{- if hasKey .Values.opmet.nginx "ENABLE_IPV6" }}
+  ENABLE_IPV6: {{ .Values.opmet.nginx.ENABLE_IPV6 | quote }}
+{{- end }}
+{{- if hasKey .Values.opmet.nginx "ENABLE_ACCESS_LOG" }}
+  ENABLE_ACCESS_LOG: {{ .Values.opmet.nginx.ENABLE_ACCESS_LOG | quote }}
+{{- end }}
+{{- if hasKey .Values.opmet.nginx "PROXY_HTTP_VERSION" }}
+  PROXY_HTTP_VERSION: {{ .Values.opmet.nginx.PROXY_HTTP_VERSION | quote }}
+{{- end }}

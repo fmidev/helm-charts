@@ -205,11 +205,17 @@ GCP-backed entries also require `path`; Vault-backed entries require both
 `path` and `key`. Additional provider `parameters` are rendered as strings, as
 required by the `SecretProviderClass` API.
 
+For existing publisher Secrets, set `opmet.publisher.secrets.source: existingSecret`
+and leave `provider` empty. SSH keys use `ssh-privatekey`; passphrases use
+`SSH_KEY_PASSPHRASE`. Restart pods after changing environment-based credentials.
+
 ## Custom configuration files
 
-Set `opmet.useCustomConfigurationFiles` and select `local` or `s3` with
-`opmet.customConfigurationLocation`. Configure the existing S3 and mount values
-as required for the selected source.
+Set `opmet.useCustomConfigurationFiles` and choose `local`, `s3`, or `configMap`
+with `opmet.customConfigurationLocation`. For `configMap`, set
+`opmet.customConfigurationConfigMap.name`. The existing ConfigMap must contain all configured runtime files. Update
+`opmet.customConfigurationConfigMap.checksum` when its data changes to trigger
+a pod rollout.
 
 ## OpenShift runtime
 
@@ -266,7 +272,9 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.awsDefaultRegion`                      | Region where your S3 bucket is located |                                                                                              |
 | `opmet.commitHash`                            | Adds commitHash annotation to the deployment |                                                                                              |
 | `opmet.customConfigurationFolderPath`         | Path to the folder which contains custom configurations |                                                                                              |
-| `opmet.customConfigurationLocation`           | Where custom configurations are located *(local\|s3)* | `local`                                                                                      |
+| `opmet.customConfigurationLocation`           | Where custom configurations are located *(local\|s3\|configMap)* | `local`                                                                                      |
+| `opmet.customConfigurationConfigMap.name` | Existing ConfigMap containing runtime files and `nginx.conf` | `""` |
+| `opmet.customConfigurationConfigMap.checksum` | ConfigMap data checksum. Changes trigger a pod rollout | `""` |
 | `opmet.customConfigurationMountPath`          | Folder used to mount custom configurations | `/app/configuration_files/custom`                                                            |
 | `opmet.db.mode`                               | Database mode *(sidecar\|external\|zalando)* | `sidecar` |
 | `opmet.db.name`                               | Sidecar container or Zalando database resource name | `opmet-db` |
@@ -319,6 +327,9 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.nginx.AUD_CLAIM_VALUE`                 | Required value for the audience claim |  |
 | `opmet.nginx.BACKEND_HOST`                    | Address where nginx accesses the backend | `localhost:8080`                                                                             |
 | `opmet.nginx.ENABLE_SSL`                      | Toggle SSL termination | `"FALSE"`                                                                                    |
+| `opmet.nginx.ENABLE_IPV6` | Enable IPv6 listeners (`"TRUE"`/`"FALSE"`) | Auth backend default |
+| `opmet.nginx.ENABLE_ACCESS_LOG` | Enable access logging (`"TRUE"`/`"FALSE"`) | Auth backend default |
+| `opmet.nginx.PROXY_HTTP_VERSION` | HTTP version for auth upstreams (`"1.0"`/`"1.1"`) | Auth backend default |
 | `opmet.nginx.GEOWEB_REQUIRE_READ_PERMISSION`  | Required OAUTH claim name and value to be present in the userinfo response for read operations | `"FALSE"`                                                                                    |
 | `opmet.nginx.GEOWEB_REQUIRE_WRITE_PERMISSION` | Required OAUTH claim name and value to be present in the userinfo response for write operations | `"FALSE"`                                                                                    |
 | `opmet.nginx.GEOWEB_USERNAME_CLAIM`           | Claim name used as a user identifier in the opmet backend | `"email"`|
@@ -348,7 +359,9 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.publisher.resources`                   | Configure resource limits & requests | see defaults from `values.yaml`                                                              |
 | `opmet.publisher.S3_BUCKET_NAME`              | S3 Bucket used to publish files to |                                                                                              |
 | `opmet.publisher.SERVERS`                     | JSON list of SFTP servers. Set each `private_key_path` to its key's mounted path and reference passphrases as `$(ENV_NAME)`. See the [SFTP publisher documentation](https://gitlab.com/opengeoweb/backend-services/opmet-backend#sftp-publisher) for the complete server configuration |                                                                                              |
+| `opmet.publisher.environmentSecret` | Existing Secret imported as publisher environment variables, referenced via `$(VARIABLE_NAME)` in `SERVERS` | `""` |
 | `opmet.publisher.secrets.provider`            | Publisher CSI provider; empty creates inline Secrets *(aws\|azure\|gcp\|vault)* | |
+| `opmet.publisher.secrets.source` | Publisher Secret source *(inline\|secretProvider\|existingSecret)* | `inline` |
 | `opmet.publisher.secrets.className`           | Publisher SecretProviderClass name | `opmet-publisher-spc` |
 | `opmet.publisher.secrets.parameters`          | Additional publisher provider parameters | `{}` |
 | `opmet.publisher.secrets.sshKeys`             | SSH-key entries with a unique Kubernetes `secretName`, plus provider `objectName` or inline `encodedValue` | `[]` |
@@ -374,6 +387,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 
 | Chart version | opmet version |
 |---------------|---------------|
+| 4.1.0         | 5.11.1        |
 | 4.0.4         | 5.11.1        |
 | 4.0.3         | 5.11.0        |
 | 4.0.2         | 5.11.0        |
