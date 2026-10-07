@@ -1732,6 +1732,18 @@ entries:
   geoweb-opmet-backend:
   - apiVersion: v2
     appVersion: v5.11.1
+    created: "2026-10-07T11:53:57.259457093Z"
+    description: A Helm chart for geoweb opmet backend resources in Kubernetes
+    digest: 8a73fb338efe09469865363d1c87489559123564461eab569cb22323c9c67d0e
+    maintainers:
+    - name: FMI
+    name: geoweb-opmet-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-opmet-backend-4.1.1/geoweb-opmet-backend-4.1.1.tgz
+    version: 4.1.1
+  - apiVersion: v2
+    appVersion: v5.11.1
     created: "2026-10-06T07:56:28.270047684Z"
     description: A Helm chart for geoweb opmet backend resources in Kubernetes
     digest: 35c7f5a0ce47381803001aa3ddf75944db6f8f197c5d1543384ded7a2492a238
@@ -2858,6 +2870,18 @@ entries:
     - https://github.com/fmidev/helm-charts/releases/download/geoweb-plugin-registry-0.1.0/geoweb-plugin-registry-0.1.0.tgz
     version: 0.1.0
   geoweb-presets-backend:
+  - apiVersion: v2
+    appVersion: v4.2.2
+    created: "2026-10-07T11:53:57.479269825Z"
+    description: A Helm chart for geoweb presets backend resources in Kubernetes
+    digest: 0b9bd416b15f3eab289c9d037e695e59d273daff00f7562bdd3ecbdc0e3c835c
+    maintainers:
+    - name: FMI
+    name: geoweb-presets-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-presets-backend-3.2.0/geoweb-presets-backend-3.2.0.tgz
+    version: 3.2.0
   - apiVersion: v2
     appVersion: v4.2.2
     created: "2026-10-01T11:37:54.499337506Z"
@@ -6535,4 +6559,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2026-10-06T07:56:28.270983797Z"
+generated: "2026-10-07T11:53:57.480070837Z"
