@@ -28,6 +28,9 @@ spec:
         app: {{ .Values.opmet.name }}
       annotations:
         eks.amazonaws.com/compute-type: ec2
+        checksum/backend-env: {{ include (print $.Template.BasePath "/opmet-configmap.yaml") . | sha256sum | quote }}
+        checksum/nginx-env: {{ include (print $.Template.BasePath "/opmet-nginx-configmap.yaml") . | sha256sum | quote }}
+        checksum/publisher-env: {{ include (print $.Template.BasePath "/opmet-publisher-configmap.yaml") . | sha256sum | quote }}
       {{- if $configMapConfiguration }}
         checksum/custom-configuration: {{ .Values.opmet.customConfigurationConfigMap.checksum | quote }}
       {{- end }}
