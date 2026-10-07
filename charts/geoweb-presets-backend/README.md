@@ -125,6 +125,18 @@ presets:
   awsDefaultRegion: <AWS_DEFAULT_REGION>
 ```
 
+- Using an existing ConfigMap containing backend configuration files such as `nginx.conf`
+
+```yaml
+presets:
+  useCustomConfigurationFiles: true
+  customConfigurationLocation: configMap
+  customConfigurationMountPath: /app/configuration_files/custom
+  customConfigurationConfigMap:
+    name: presets-configuration
+    checksum: "<SHA-256 of ConfigMap data>"
+```
+
 - Using custom presets stored locally
 
 ```yaml
@@ -309,7 +321,10 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.runtimeConfiguration.existingConfigMap.name` | Name of an externally managed ConfigMap | `""` |
 | `presets.runtimeConfiguration.existingConfigMap.checksum` | SHA-256 of published file content; changes restart backend pods | `""` |
 | `presets.useCustomConfigurationFiles`                 | Use custom configurations                                                                                                                                 | `false`                                                                     |
-| `presets.customConfigurationLocation`                 | Where custom configurations are located _(local\|s3)_                                                                                                     | `local`                                                                     |
+| `presets.customConfigurationLocation`                 | Where custom configurations are located _(local\|s3\|configMap)_                                                                                           | `local`                                                                     |
+| `presets.customConfigurationConfigMap.name` | Existing ConfigMap containing `nginx.conf` and any backend configuration files | `""` |
+| `presets.customConfigurationConfigMap.checksum` | ConfigMap data checksum; changes trigger a pod rollout | `""` |
+| `presets.customConfigurationMountPath` | Directory where custom configuration files are mounted in the backend | `/app/configuration_files/custom` |
 | `presets.customConfigurationFolderPath`               | Path to the folder which contains custom configurations                                                                                                   |                                                                             |
 | `presets.useCustomWorkspacePresets`                   | Use custom presets                                                                                                                                        | `false`                                                                     |
 | `presets.customWorkspacePresetLocation`               | Where custom presets are located _(local\|s3)_                                                                                                            | `local`                                                                     |
@@ -329,6 +344,7 @@ The following table lists the configurable parameters of the Presets backend cha
 
 | Chart version | presets version |
 | ------------- | --------------- |
+| 3.2.0         | 4.2.2           |
 | 3.1.1         | 4.2.2           |
 | 3.1.0         | 4.2.1           |
 | 3.0.1         | 4.2.1           |

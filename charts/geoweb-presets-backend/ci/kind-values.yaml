@@ -1,4 +1,4 @@
-# auth-backend v1.0.3 cannot bind privileged port 80 during Kind install tests.
+# use unprivileged ports in CI
 presets:
   nginx:
     NGINX_PORT_HTTP: 8081
