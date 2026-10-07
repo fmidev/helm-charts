@@ -124,7 +124,11 @@ presets:
         timestamp: ""
         backupBucket: ""
   useCustomConfigurationFiles: false
-  customConfigurationLocation: local
+  customConfigurationLocation: local  # local, s3, configMap
+  customConfigurationConfigMap:
+    name: ""
+    checksum: ""
+  customConfigurationMountPath: /app/configuration_files/custom
   useCustomWorkspacePresets: false
   customWorkspacePresetLocation: local
   volumeAccessMode: ReadOnlyMany
