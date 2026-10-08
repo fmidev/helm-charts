@@ -32,6 +32,7 @@ spec:
         app: {{ .Values.frontend.name }}
       annotations:
         eks.amazonaws.com/compute-type: ec2
+        checksum/frontend-env: {{ include (print $.Template.BasePath "/geoweb-configmap.yaml") . | sha256sum | quote }}
       {{- if .Values.frontend.commitHash }}
         commitHash: {{ .Values.frontend.commitHash }}
       {{- end }}
