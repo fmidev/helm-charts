@@ -20,6 +20,8 @@ frontend:
       cpu: "15m"
     limits:
       memory: "256Mi"
+  extraVolumes: []
+  extraVolumeMounts: []
   startupProbe:
     httpGet:
       path: /assets/config.json?startup=true

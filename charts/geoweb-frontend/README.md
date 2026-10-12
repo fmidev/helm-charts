@@ -194,6 +194,8 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.iamRoleARN` | IAM Role with permissions to access secrets | |
 | `frontend.secretServiceAccount` | Service Account created for handling secrets | `geoweb-service-account` |
 | `frontend.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
+| `frontend.extraVolumes` | Additional volumes for the frontend pod, for example existing Secrets | `[]` |
+| `frontend.extraVolumeMounts` | Additional volume mounts for the frontend container | `[]` |
 | `frontend.startupProbe` | Configure startupProbe | see defaults from `values.yaml` |
 | `frontend.livenessProbe` | Configure livenessProbe | see defaults from `values.yaml` |
 | `frontend.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
@@ -260,6 +262,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 
 | Chart version | frontend version |
 |---------------|------------------|
+| 4.1.0         | 19.6.0           |
 | 4.0.2         | 19.6.0           |
 | 4.0.1         | 19.6.0           |
 | 4.0.0         | 19.5.1           |

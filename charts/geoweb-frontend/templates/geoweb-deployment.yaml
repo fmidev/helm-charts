@@ -95,7 +95,7 @@ spec:
               name: {{ .Values.frontend.client_id_secretName }}
               key: GW_AUTH_CLIENT_ID
       {{- end }}
-      {{- if or $nginx.headers .Values.secretProvider .Values.frontend.useCustomConfigurationFiles (ne $runtimeSource "none") }}
+      {{- if or $nginx.headers .Values.secretProvider .Values.frontend.useCustomConfigurationFiles (ne $runtimeSource "none") .Values.frontend.extraVolumeMounts }}
         volumeMounts:
       {{- with $nginx.headers }}
         - name: nginx-headers
@@ -117,8 +117,11 @@ spec:
           mountPath: {{ .Values.frontend.runtimeConfiguration.mountPath }}
           readOnly: true
       {{- end }}
+      {{- with .Values.frontend.extraVolumeMounts }}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
-    {{- if or $nginx.headers .Values.secretProvider .Values.frontend.useCustomConfigurationFiles (ne $runtimeSource "none") }}
+      {{- end }}
+    {{- if or $nginx.headers .Values.secretProvider .Values.frontend.useCustomConfigurationFiles (ne $runtimeSource "none") .Values.frontend.extraVolumes }}
       volumes:
       {{- with $nginx.headers }}
       - name: nginx-headers
@@ -146,6 +149,9 @@ spec:
           readOnly: true
           volumeAttributes:
             secretProviderClass: {{ .Values.frontend.spcName | quote }}
+      {{- end }}
+      {{- with .Values.frontend.extraVolumes }}
+      {{- toYaml . | nindent 6 }}
       {{- end }}
     {{- end }}
       affinity:
