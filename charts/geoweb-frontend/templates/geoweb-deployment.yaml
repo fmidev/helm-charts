@@ -32,7 +32,6 @@ spec:
         app: {{ .Values.frontend.name }}
       annotations:
         eks.amazonaws.com/compute-type: ec2
-        checksum/frontend-env: {{ include (print $.Template.BasePath "/geoweb-configmap.yaml") . | sha256sum | quote }}
       {{- if .Values.frontend.commitHash }}
         commitHash: {{ .Values.frontend.commitHash }}
       {{- end }}
@@ -84,11 +83,16 @@ spec:
       {{- if .Values.frontend.readinessProbe }}
         readinessProbe: {{ toYaml .Values.frontend.readinessProbe | nindent 10 }}
       {{- end }}
-        envFrom:
-        - configMapRef:
-            name: {{ .Values.frontend.name }}
-      {{- if .Values.frontend.client_id_secret }}
+      {{- if or .Values.frontend.env .Values.frontend.client_id_secret }}
         env:
+      {{- end }}
+      {{- range $key, $value := .Values.frontend.env }}
+      {{- if not (and $.Values.frontend.client_id_secret (eq ($key | upper) "GW_AUTH_CLIENT_ID")) }}
+        - name: {{ $key | upper }}
+          value: {{ $value | quote }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.frontend.client_id_secret }}
         - name: GW_AUTH_CLIENT_ID
           valueFrom:
             secretKeyRef:

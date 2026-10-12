@@ -4,6 +4,10 @@ Deploys the GeoWeb opmet backend, message converter, publisher and auth proxy.
 The chart can use a development PostgreSQL sidecar, a separately managed
 PostgreSQL database, or a Zalando Postgres Operator database.
 
+## Upgrading to 4.2
+
+Chart `4.2.0` no longer creates ConfigMaps for container environment variables. `opmet.env`, `opmet.publisher` and `opmet.nginx` variables are rendered directly into the Deployment, so changing them rolls out new pods without setting `opmet.commitHash`. Values files do not need changes. As before, a variable in `opmet.env` that the chart already sets for a container (`SQLALCHEMY_DATABASE_URL`, and `PG_USER`/`PG_PASS` with Zalando) is ignored for that container.
+
 ## Upgrading from 3.x to 4.0
 
 Chart 4.0 replaces the database booleans with the explicit
@@ -387,6 +391,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 
 | Chart version | opmet version |
 |---------------|---------------|
+| 4.2.0         | 5.11.1        |
 | 4.1.1         | 5.11.1        |
 | 4.1.0         | 5.11.1        |
 | 4.0.4         | 5.11.1        |

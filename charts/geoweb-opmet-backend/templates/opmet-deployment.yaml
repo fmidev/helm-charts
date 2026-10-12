@@ -11,6 +11,8 @@
 {{- $hasPublisherSecrets := or (gt (len $publisherSecrets.sshKeys) 0) (gt (len $publisherSecrets.sshPassphrases) 0) }}
 {{- $publisherUsesSecretProvider := and $hasPublisherSecrets (not (empty $publisherSecrets.provider)) }}
 {{- $usesAwsSecretProvider := or (and $databaseUsesSecretProvider (eq .Values.opmet.db.external.secretProvider.provider "aws")) (and $publisherUsesSecretProvider (eq $publisherSecrets.provider "aws")) }}
+{{- $managedEnv := ternary (list "PG_PASS" "PG_USER" "SQLALCHEMY_DATABASE_URL") (list "SQLALCHEMY_DATABASE_URL") (eq $dbMode "zalando") }}
+{{- $nginx := .Values.opmet.nginx }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -28,9 +30,6 @@ spec:
         app: {{ .Values.opmet.name }}
       annotations:
         eks.amazonaws.com/compute-type: ec2
-        checksum/backend-env: {{ include (print $.Template.BasePath "/opmet-configmap.yaml") . | sha256sum | quote }}
-        checksum/nginx-env: {{ include (print $.Template.BasePath "/opmet-nginx-configmap.yaml") . | sha256sum | quote }}
-        checksum/publisher-env: {{ include (print $.Template.BasePath "/opmet-publisher-configmap.yaml") . | sha256sum | quote }}
       {{- if $configMapConfiguration }}
         checksum/custom-configuration: {{ .Values.opmet.customConfigurationConfigMap.checksum | quote }}
       {{- end }}
@@ -84,10 +83,8 @@ spec:
       {{- if .Values.opmet.readinessProbe }}
         readinessProbe: {{ toYaml .Values.opmet.readinessProbe | nindent 10 }}
       {{- end }}
-        envFrom:
-        - configMapRef:
-            name: {{ .Values.opmet.name }}
         env:
+        {{- include "geoweb-opmet-backend.env" (dict "root" $ "skip" $managedEnv) | trim | nindent 8 }}
       {{- if eq $dbMode "zalando" }}
         - name: PG_PASS
           valueFrom:
@@ -144,9 +141,8 @@ spec:
       {{- if .Values.opmet.messageconverter.readinessProbe }}
         readinessProbe: {{ toYaml .Values.opmet.messageconverter.readinessProbe | nindent 10 }}
       {{- end }}
-        envFrom:
-        - configMapRef:
-            name: {{ .Values.opmet.name }}
+        env:
+        {{- include "geoweb-opmet-backend.env" (dict "root" $ "skip" (list)) | trim | nindent 8 }}
       - name: {{ .Values.opmet.publisher.name }}
         image: {{ .Values.opmet.publisher.registry }}:{{ coalesce .Values.opmet.publisher.version .Values.versions.opmet .Chart.AppVersion }}
       {{- if .Values.opmet.imagePullPolicy }}
@@ -176,10 +172,16 @@ spec:
       {{- end }}
         - name: SERVERS
           value: {{ .Values.opmet.publisher.SERVERS | quote }}
-        envFrom:
-        - configMapRef:
-            name: {{ .Values.opmet.publisher.name }}
+      {{- if .Values.opmet.publisher.DESTINATION }}
+        - name: DESTINATION
+          value: {{ .Values.opmet.publisher.DESTINATION | quote }}
+      {{- end }}
+      {{- if .Values.opmet.publisher.S3_BUCKET_NAME }}
+        - name: S3_BUCKET_NAME
+          value: {{ .Values.opmet.publisher.S3_BUCKET_NAME | quote }}
+      {{- end }}
       {{- if .Values.opmet.publisher.environmentSecret }}
+        envFrom:
         - secretRef:
             name: {{ .Values.opmet.publisher.environmentSecret }}
       {{- end }}
@@ -210,9 +212,19 @@ spec:
       {{- if .Values.opmet.nginx.readinessProbe }}
         readinessProbe: {{ toYaml .Values.opmet.nginx.readinessProbe | nindent 10 }}
       {{- end }}
-        envFrom:
-        - configMapRef:
-            name: {{ .Values.opmet.nginx.name }}
+        env:
+      {{- range $name := list "ENABLE_SSL" "OAUTH2_USERINFO" "JWKS_URI" "AUD_CLAIM" "AUD_CLAIM_VALUE" "ISS_CLAIM" "ISS_CLAIM_VALUE" "GEOWEB_USERNAME_CLAIM" "GEOWEB_REQUIRE_READ_PERMISSION" "GEOWEB_REQUIRE_WRITE_PERMISSION" "ALLOW_ANONYMOUS_ACCESS" "BACKEND_HOST" "NGINX_PORT_HTTP" "NGINX_PORT_HTTPS" "ENV_VAR_STRICT_MODE" }}
+      {{- if index $nginx $name }}
+        - name: {{ $name }}
+          value: {{ index $nginx $name | quote }}
+      {{- end }}
+      {{- end }}
+      {{- range $name := list "NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE" "TRUST_FORWARDED_HEADERS" "ENABLE_IPV6" "ENABLE_ACCESS_LOG" "PROXY_HTTP_VERSION" }}
+      {{- if hasKey $nginx $name }}
+        - name: {{ $name }}
+          value: {{ index $nginx $name | quote }}
+      {{- end }}
+      {{- end }}
         volumeMounts:
         - name: nginx-run
           mountPath: "/run"

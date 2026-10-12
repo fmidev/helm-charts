@@ -1,3 +1,7 @@
+# Upgrade notes for chart 1.9.0
+
+Chart `1.9.0` no longer creates ConfigMaps for container environment variables. Variables from `cap.env` are rendered directly into the Deployment, so changing them rolls out new pods without setting `cap.commitHash`. Values files do not need changes.
+
 # Install the chart repository
 
 ```bash
@@ -68,6 +72,7 @@ The following table lists the configurable parameters of the CAP backend chart a
 
 | Chart version | cap version |
 |---------------|-------------|
+| 1.9.0         | 0.11.0      |
 | 1.8.6         | 0.11.0      |
 | 1.8.5         | 0.10.17     |
 | 1.8.4         | 0.10.15     |

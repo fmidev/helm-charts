@@ -1,3 +1,7 @@
+# Upgrade notes for chart 1.2.0
+
+Chart `1.2.0` no longer creates ConfigMaps for container environment variables. Variables from `location.env` are rendered directly into the Deployment, so changing them rolls out new pods without setting `location.commitHash`. Values files do not need changes.
+
 # Install the chart repository
 
 ```bash
@@ -78,6 +82,7 @@ The following table lists the configurable parameters of the location backend ch
 
 | Chart version | location version |
 |---------------|------------------|
+| 1.2.0         | 0.3.1            |
 | 1.1.10        | 0.3.1            |
 | 1.1.9         | 0.3.0            |
 | 1.1.8         | 0.2.6            |

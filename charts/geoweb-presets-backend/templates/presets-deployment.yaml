@@ -17,6 +17,18 @@
 {{- end -}}
 {{- $dbMode := default "sidecar" .Values.presets.db.mode }}
 {{- $usesExternalSecretProvider := and (eq $dbMode "external") (eq (default "inline" .Values.presets.db.external.source) "secretProvider") }}
+{{- $managedEnv := ternary (list "PG_PASS" "PG_USER" "PRESETS_BACKEND_DB") (list "PRESETS_BACKEND_DB") (eq $dbMode "zalando") }}
+{{- $backendEnv := dict "VERSION" (default .Chart.AppVersion .Values.versions.presets) }}
+{{- if .Values.presets.PRESETS_PORT_HTTP }}
+{{- $_ := set $backendEnv "PRESETS_PORT_HTTP" .Values.presets.PRESETS_PORT_HTTP }}
+{{- end }}
+{{- if .Values.presets.DEPLOY_ENVIRONMENT }}
+{{- $_ := set $backendEnv "DEPLOY_ENVIRONMENT" .Values.presets.DEPLOY_ENVIRONMENT }}
+{{- end }}
+{{- range $key, $value := .Values.presets.env }}
+{{- $_ := set $backendEnv (upper $key) $value }}
+{{- end }}
+{{- $nginx := .Values.presets.nginx }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -34,8 +46,6 @@ spec:
         app: {{ .Values.presets.name }}
       annotations:
         eks.amazonaws.com/compute-type: ec2
-        checksum/backend-env: {{ include (print $.Template.BasePath "/presets-configmap.yaml") . | sha256sum | quote }}
-        checksum/nginx-env: {{ include (print $.Template.BasePath "/presets-nginx-configmap.yaml") . | sha256sum | quote }}
       {{- if $configMapConfiguration }}
         checksum/custom-configuration: {{ .Values.presets.customConfigurationConfigMap.checksum | quote }}
       {{- end }}
@@ -115,10 +125,13 @@ spec:
       {{- if .Values.presets.readinessProbe }}
         readinessProbe: {{ toYaml .Values.presets.readinessProbe | nindent 10 }}
       {{- end }}
-        envFrom:
-        - configMapRef:
-            name: {{ .Values.presets.name }}
         env:
+      {{- range $key, $value := $backendEnv }}
+      {{- if not (has $key $managedEnv) }}
+        - name: {{ $key }}
+          value: {{ $value | quote }}
+      {{- end }}
+      {{- end }}
       {{- if eq $dbMode "zalando" }}
         - name: PG_PASS
           valueFrom:
@@ -183,9 +196,19 @@ spec:
       {{- if .Values.presets.nginx.readinessProbe }}
         readinessProbe: {{ toYaml .Values.presets.nginx.readinessProbe | nindent 10 }}
       {{- end }}
-        envFrom:
-        - configMapRef:
-            name: {{ .Values.presets.nginx.name }}
+        env:
+      {{- range $name := list "ENABLE_SSL" "OAUTH2_USERINFO" "JWKS_URI" "AUD_CLAIM" "AUD_CLAIM_VALUE" "ISS_CLAIM" "ISS_CLAIM_VALUE" "GEOWEB_USERNAME_CLAIM" "GEOWEB_REQUIRE_READ_PERMISSION" "GEOWEB_REQUIRE_WRITE_PERMISSION" "ALLOW_ANONYMOUS_ACCESS" "GEOWEB_ROLE_CLAIM_NAME" "GEOWEB_ROLE_CLAIM_VALUE_PRESETS_ADMIN" "BACKEND_HOST" "NGINX_PORT_HTTP" "NGINX_PORT_HTTPS" "ENV_VAR_STRICT_MODE" }}
+      {{- if index $nginx $name }}
+        - name: {{ $name }}
+          value: {{ index $nginx $name | quote }}
+      {{- end }}
+      {{- end }}
+      {{- range $name := list "NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE" "TRUST_FORWARDED_HEADERS" }}
+      {{- if hasKey $nginx $name }}
+        - name: {{ $name }}
+          value: {{ index $nginx $name | quote }}
+      {{- end }}
+      {{- end }}
         volumeMounts:
         - name: nginx-run
           mountPath: "/run"

@@ -2,6 +2,10 @@
 
 Deploys the GeoWeb TAF backend, placeholder, message converter, publisher, auth proxy, and optional development or Zalando PostgreSQL resources. CloudNativePG databases are managed separately with the `geoweb-cnpg` chart.
 
+# Upgrade notes for chart 2.1.0
+
+Chart `2.1.0` no longer creates ConfigMaps for container environment variables. `taf.env`, `taf.publisher` and `taf.nginx` variables are rendered directly into the Deployment, so changing them rolls out new pods without setting `taf.commitHash`. Values files do not need changes. As before, a variable in `taf.env` that the chart already sets for a container (`AVIATION_TAF_BACKEND_DB`, and `PG_USER`/`PG_PASS` with Zalando) is ignored for that container.
+
 # Upgrade notes for chart 2.0.0
 
 Chart `2.0.0` introduces a breaking database values cleanup. The old `taf.db.enableDefaultDb` and `taf.db.useZalandoOperatorDb` booleans are replaced by `taf.db.mode`, and database settings now live under common fields and mode-specific blocks. Removed 1.x database values cause template rendering to fail until they are migrated.
@@ -299,6 +303,7 @@ The following table lists the configurable parameters of the Taf backend chart a
 
 | Chart version | taf version |
 |---------------|-------------|
+| 2.1.0         | 4.2.2       |
 | 2.0.2         | 4.2.2       |
 | 2.0.1         | 4.2.1       |
 | 2.0.0         | 4.2.1       |

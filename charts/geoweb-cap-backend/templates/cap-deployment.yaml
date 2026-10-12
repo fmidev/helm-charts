@@ -39,9 +39,13 @@ spec:
       {{- if .Values.cap.readinessProbe }}
         readinessProbe: {{ toYaml .Values.cap.readinessProbe | nindent 10 }}
       {{- end }}
-        envFrom:
-        - configMapRef:
-            name: {{ .Values.cap.name }}
+      {{- with .Values.cap.env }}
+        env:
+        {{- range $key, $value := . }}
+        - name: {{ $key | upper }}
+          value: {{ $value | quote }}
+        {{- end }}
+      {{- end }}
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
