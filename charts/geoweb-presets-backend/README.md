@@ -2,6 +2,15 @@
 
 Deploys the GeoWeb presets backend, auth proxy sidecar, and optional development or Zalando PostgreSQL resources. CloudNativePG databases are managed separately with the `geoweb-cnpg` chart.
 
+# Upgrade notes for chart 3.3.0
+
+Chart `3.3.0` sets the variables from `presets.env` and `presets.nginx` directly in the Deployment instead of in ConfigMaps.
+
+- Values files do not need changes.
+- Changing a variable now restarts the pods automatically, so `presets.commitHash` is not needed for that.
+- Values are passed to the containers as is, like before: Kubernetes does not expand `$(NAME)` or `$$` in them.
+- Variables the chart sets itself (`PRESETS_BACKEND_DB`, and `PG_USER`/`PG_PASS` with Zalando) still take precedence over the same names in `presets.env`.
+
 # Upgrade notes for chart 3.0.0
 
 Chart `3.0.0` introduces a breaking database values cleanup. The old `presets.db.enableDefaultDb` and `presets.db.useZalandoOperatorDb` booleans are replaced by the new `presets.db.mode` value, and database settings now live under common fields and mode-specific blocks. Removed 2.x database values cause template rendering to fail until they are migrated.
@@ -344,6 +353,7 @@ The following table lists the configurable parameters of the Presets backend cha
 
 | Chart version | presets version |
 | ------------- | --------------- |
+| 3.3.0         | 4.2.2           |
 | 3.2.0         | 4.2.2           |
 | 3.1.1         | 4.2.2           |
 | 3.1.0         | 4.2.1           |

@@ -1,3 +1,12 @@
+# Upgrade notes for chart 4.2.0
+
+Chart `4.2.0` sets the variables from `frontend.env` directly in the Deployment instead of in a ConfigMap.
+
+- Values files do not need changes.
+- Changing a variable now restarts the pods automatically, so `frontend.commitHash` is not needed for that.
+- Values are passed to the containers as is, like before: Kubernetes does not expand `$(NAME)` or `$$` in them.
+- When `frontend.client_id_secret` is set, `GW_AUTH_CLIENT_ID` still comes from the Secret, not from `frontend.env`.
+
 # Upgrade notes for chart 4.0.0
 
 Chart `4.0.0` removes `frontend.customConfiguration.enabled`. Set `frontend.runtimeConfiguration.source: inline` to keep generating files from `files`, or `source: none` to use the image defaults. `frontend.useCustomConfigurationFiles` remains available for existing local and S3 mounts; it cannot be combined with the ConfigMap source modes.
@@ -262,6 +271,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 
 | Chart version | frontend version |
 |---------------|------------------|
+| 4.2.0         | 19.6.0           |
 | 4.1.0         | 19.6.0           |
 | 4.0.2         | 19.6.0           |
 | 4.0.1         | 19.6.0           |

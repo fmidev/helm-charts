@@ -1,3 +1,11 @@
+# Upgrade notes for chart 1.2.0
+
+Chart `1.2.0` sets the variables from `location.env` directly in the Deployment instead of in a ConfigMap.
+
+- Values files do not need changes.
+- Changing a variable now restarts the pods automatically, so `location.commitHash` is not needed for that.
+- Values are passed to the containers as is, like before: Kubernetes does not expand `$(NAME)` or `$$` in them.
+
 # Install the chart repository
 
 ```bash
@@ -78,6 +86,7 @@ The following table lists the configurable parameters of the location backend ch
 
 | Chart version | location version |
 |---------------|------------------|
+| 1.2.0         | 0.3.1            |
 | 1.1.10        | 0.3.1            |
 | 1.1.9         | 0.3.0            |
 | 1.1.8         | 0.2.6            |

@@ -1,5 +1,7 @@
 {{- $dbMode := default "sidecar" .Values.taf.db.mode }}
 {{- $usesExternalSecretProvider := and (eq $dbMode "external") (eq (default "inline" .Values.taf.db.external.source) "secretProvider") }}
+{{- $managedEnv := ternary (list "PG_PASS" "PG_USER" "AVIATION_TAF_BACKEND_DB") (list "AVIATION_TAF_BACKEND_DB") (eq $dbMode "zalando") }}
+{{- $nginx := .Values.taf.nginx }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -73,10 +75,8 @@ spec:
       {{- if .Values.taf.readinessProbe }}
         readinessProbe: {{ toYaml .Values.taf.readinessProbe | nindent 10 }}
       {{- end }}
-        envFrom:
-        - configMapRef:
-            name: {{ .Values.taf.name }}
         env:
+        {{- include "geoweb-taf-backend.env" (dict "root" $ "skip" $managedEnv) | trim | nindent 8 }}
       {{- if eq $dbMode "zalando" }}
         - name: PG_PASS
           valueFrom:
@@ -169,6 +169,7 @@ spec:
         imagePullPolicy: {{ .Values.taf.imagePullPolicy }}
       {{- end }}
         env:
+        {{- include "geoweb-taf-backend.env" (dict "root" $ "skip" (list "AVI_CONTAINER_PORT")) | trim | nindent 8 }}
         - name: AVI_CONTAINER_PORT
           value: {{ .Values.taf.messageconverter.port | quote }}
         ports:
@@ -185,9 +186,6 @@ spec:
       {{- if .Values.taf.messageconverter.readinessProbe }}
         readinessProbe: {{ toYaml .Values.taf.messageconverter.readinessProbe | nindent 10 }}
       {{- end }}
-        envFrom:
-        - configMapRef:
-            name: {{ .Values.taf.name }}
       - name: {{ .Values.taf.publisher.name }}
         image: {{ .Values.taf.publisher.registry }}:{{ default .Chart.AppVersion .Values.versions.taf }}
       {{- if .Values.taf.imagePullPolicy }}
@@ -207,9 +205,17 @@ spec:
       {{- if .Values.taf.publisher.readinessProbe }}
         readinessProbe: {{ toYaml .Values.taf.publisher.readinessProbe | nindent 10 }}
       {{- end }}
-        envFrom:
-        - configMapRef:
-            name: {{ .Values.taf.publisher.name }}
+      {{- if or .Values.taf.publisher.PUBLISH_DIR .Values.taf.publisher.port }}
+        env:
+      {{- end }}
+      {{- if .Values.taf.publisher.PUBLISH_DIR }}
+        - name: PUBLISH_DIR
+          value: {{ include "geoweb-taf-backend.envValue" .Values.taf.publisher.PUBLISH_DIR }}
+      {{- end }}
+      {{- if .Values.taf.publisher.port }}
+        - name: AVIATION_TAF_PORT_HTTP
+          value: {{ include "geoweb-taf-backend.envValue" .Values.taf.publisher.port }}
+      {{- end }}
         volumeMounts:
         - name: publisher-volume
           mountPath: {{ .Values.taf.publisher.PUBLISH_DIR | quote }}
@@ -232,9 +238,19 @@ spec:
       {{- if .Values.taf.nginx.readinessProbe }}
         readinessProbe: {{ toYaml .Values.taf.nginx.readinessProbe | nindent 10 }}
       {{- end }}
-        envFrom:
-        - configMapRef:
-            name: {{ .Values.taf.nginx.name }}
+        env:
+      {{- range $name := list "ENABLE_SSL" "OAUTH2_USERINFO" "JWKS_URI" "AUD_CLAIM" "AUD_CLAIM_VALUE" "ISS_CLAIM" "ISS_CLAIM_VALUE" "GEOWEB_USERNAME_CLAIM" "GEOWEB_REQUIRE_READ_PERMISSION" "GEOWEB_REQUIRE_WRITE_PERMISSION" "ALLOW_ANONYMOUS_ACCESS" "BACKEND_HOST" "NGINX_PORT_HTTP" "NGINX_PORT_HTTPS" "ENV_VAR_STRICT_MODE" }}
+      {{- if index $nginx $name }}
+        - name: {{ $name }}
+          value: {{ include "geoweb-taf-backend.envValue" (index $nginx $name) }}
+      {{- end }}
+      {{- end }}
+      {{- range $name := list "NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE" "TRUST_FORWARDED_HEADERS" }}
+      {{- if hasKey $nginx $name }}
+        - name: {{ $name }}
+          value: {{ include "geoweb-taf-backend.envValue" (index $nginx $name) }}
+      {{- end }}
+      {{- end }}
         volumeMounts:
         - name: nginx-run
           mountPath: "/run"

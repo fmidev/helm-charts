@@ -2,6 +2,15 @@
 
 Deploys the GeoWeb warnings backend, auth proxy sidecar, and optional development or Zalando PostgreSQL resources. CloudNativePG databases are managed separately with the `geoweb-cnpg` chart.
 
+# Upgrade notes for chart 2.1.0
+
+Chart `2.1.0` sets the variables from `warnings.env` and `warnings.nginx` directly in the Deployment instead of in ConfigMaps.
+
+- Values files do not need changes.
+- Changing a variable now restarts the pods automatically, so `warnings.commitHash` is not needed for that.
+- Values are passed to the containers as is, like before: Kubernetes does not expand `$(NAME)` or `$$` in them.
+- Variables the chart sets itself (`WARNINGS_BACKEND_DB`, and `PG_USER`/`PG_PASS` with Zalando) still take precedence over the same names in `warnings.env`.
+
 # Upgrade notes for chart 2.0.0
 
 Chart `2.0.0` introduces a breaking database values cleanup. The old `warnings.db.enableDefaultDb` and `warnings.db.useZalandoOperatorDb` booleans are replaced by the new `warnings.db.mode` value, and database settings now live under common fields and mode-specific blocks. Removed 1.x database values cause template rendering to fail until they are migrated.
@@ -274,6 +283,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 
 | Chart version | warnings version |
 |---------------|------------------|
+| 2.1.0         | 3.2.0            |
 | 2.0.5         | 3.2.0            |
 | 2.0.4         | 3.1.1            |
 | 2.0.3         | 3.1.1            |

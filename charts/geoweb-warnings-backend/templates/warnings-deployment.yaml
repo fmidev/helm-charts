@@ -1,5 +1,11 @@
 {{- $dbMode := default "sidecar" .Values.warnings.db.mode }}
 {{- $usesExternalSecretProvider := and (eq $dbMode "external") (eq (default "inline" .Values.warnings.db.external.source) "secretProvider") }}
+{{- $managedEnv := ternary (list "PG_PASS" "PG_USER" "WARNINGS_BACKEND_DB") (list "WARNINGS_BACKEND_DB") (eq $dbMode "zalando") }}
+{{- $backendEnv := dict "VERSION" (default .Chart.AppVersion .Values.versions.warnings) }}
+{{- range $key, $value := .Values.warnings.env }}
+{{- $_ := set $backendEnv (upper $key) $value }}
+{{- end }}
+{{- $nginx := .Values.warnings.nginx }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -75,10 +81,13 @@ spec:
       {{- if .Values.warnings.readinessProbe }}
         readinessProbe: {{ toYaml .Values.warnings.readinessProbe | nindent 10 }}
       {{- end }}
-        envFrom:
-        - configMapRef:
-            name: {{ .Values.warnings.name }}
         env:
+      {{- range $key, $value := $backendEnv }}
+      {{- if not (has $key $managedEnv) }}
+        - name: {{ $key }}
+          value: {{ include "geoweb-warnings-backend.envValue" $value }}
+      {{- end }}
+      {{- end }}
       {{- if eq $dbMode "zalando" }}
         - name: PG_PASS
           valueFrom:
@@ -127,9 +136,19 @@ spec:
       {{- if .Values.warnings.nginx.readinessProbe }}
         readinessProbe: {{ toYaml .Values.warnings.nginx.readinessProbe | nindent 10 }}
       {{- end }}
-        envFrom:
-        - configMapRef:
-            name: {{ .Values.warnings.nginx.name }}
+        env:
+      {{- range $name := list "ENABLE_SSL" "OAUTH2_USERINFO" "JWKS_URI" "AUD_CLAIM" "AUD_CLAIM_VALUE" "ISS_CLAIM" "ISS_CLAIM_VALUE" "GEOWEB_USERNAME_CLAIM" "GEOWEB_REQUIRE_READ_PERMISSION" "GEOWEB_REQUIRE_WRITE_PERMISSION" "ALLOW_ANONYMOUS_ACCESS" "BACKEND_HOST" "NGINX_PORT_HTTP" "NGINX_PORT_HTTPS" "ENV_VAR_STRICT_MODE" }}
+      {{- if index $nginx $name }}
+        - name: {{ $name }}
+          value: {{ include "geoweb-warnings-backend.envValue" (index $nginx $name) }}
+      {{- end }}
+      {{- end }}
+      {{- range $name := list "NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE" "TRUST_FORWARDED_HEADERS" }}
+      {{- if hasKey $nginx $name }}
+        - name: {{ $name }}
+          value: {{ include "geoweb-warnings-backend.envValue" (index $nginx $name) }}
+      {{- end }}
+      {{- end }}
         volumeMounts:
         - name: nginx-run
           mountPath: "/run"

@@ -15,6 +15,13 @@
 {{- fail "frontend.runtimeConfiguration.files is required for inline source" -}}
 {{- end -}}
 {{- $nginx := default dict .Values.frontend.nginx -}}
+{{- $env := dict -}}
+{{- range $key, $value := .Values.frontend.env -}}
+{{- $_ := set $env (upper $key) $value -}}
+{{- end -}}
+{{- if .Values.frontend.client_id_secret -}}
+{{- $_ := unset $env "GW_AUTH_CLIENT_ID" -}}
+{{- end -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -32,7 +39,6 @@ spec:
         app: {{ .Values.frontend.name }}
       annotations:
         eks.amazonaws.com/compute-type: ec2
-        checksum/frontend-env: {{ include (print $.Template.BasePath "/geoweb-configmap.yaml") . | sha256sum | quote }}
       {{- if .Values.frontend.commitHash }}
         commitHash: {{ .Values.frontend.commitHash }}
       {{- end }}
@@ -84,11 +90,14 @@ spec:
       {{- if .Values.frontend.readinessProbe }}
         readinessProbe: {{ toYaml .Values.frontend.readinessProbe | nindent 10 }}
       {{- end }}
-        envFrom:
-        - configMapRef:
-            name: {{ .Values.frontend.name }}
-      {{- if .Values.frontend.client_id_secret }}
+      {{- if or $env .Values.frontend.client_id_secret }}
         env:
+      {{- end }}
+      {{- range $key, $value := $env }}
+        - name: {{ $key }}
+          value: {{ include "geoweb-frontend.envValue" $value }}
+      {{- end }}
+      {{- if .Values.frontend.client_id_secret }}
         - name: GW_AUTH_CLIENT_ID
           valueFrom:
             secretKeyRef:

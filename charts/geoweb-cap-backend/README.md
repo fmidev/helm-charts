@@ -1,3 +1,11 @@
+# Upgrade notes for chart 1.9.0
+
+Chart `1.9.0` sets the variables from `cap.env` directly in the Deployment instead of in a ConfigMap.
+
+- Values files do not need changes.
+- Changing a variable now restarts the pods automatically, so `cap.commitHash` is not needed for that.
+- Values are passed to the containers as is, like before: Kubernetes does not expand `$(NAME)` or `$$` in them.
+
 # Install the chart repository
 
 ```bash
@@ -68,6 +76,7 @@ The following table lists the configurable parameters of the CAP backend chart a
 
 | Chart version | cap version |
 |---------------|-------------|
+| 1.9.0         | 0.11.0      |
 | 1.8.6         | 0.11.0      |
 | 1.8.5         | 0.10.17     |
 | 1.8.4         | 0.10.15     |
