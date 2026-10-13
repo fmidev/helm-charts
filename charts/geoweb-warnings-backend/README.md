@@ -21,7 +21,12 @@ ingress:
 
 # Upgrade notes for chart 2.1.0
 
-Chart `2.1.0` no longer creates ConfigMaps for container environment variables. `warnings.env` and `warnings.nginx` variables are rendered directly into the Deployment, so changing them rolls out new pods without setting `warnings.commitHash`. Values files do not need changes. As before, a variable in `warnings.env` that the chart already sets for a container (`WARNINGS_BACKEND_DB`, and `PG_USER`/`PG_PASS` with Zalando) is ignored for that container. Values stay literal, as they were in the ConfigMaps: Kubernetes does not expand `$(NAME)` references or `$$` in them.
+Chart `2.1.0` sets the variables from `warnings.env` and `warnings.nginx` directly in the Deployment instead of in ConfigMaps.
+
+- Values files do not need changes.
+- Changing a variable now restarts the pods automatically, so `warnings.commitHash` is not needed for that.
+- Values are passed to the containers as is, like before: Kubernetes does not expand `$(NAME)` or `$$` in them.
+- Variables the chart sets itself (`WARNINGS_BACKEND_DB`, and `PG_USER`/`PG_PASS` with Zalando) still take precedence over the same names in `warnings.env`.
 
 # Upgrade notes for chart 2.0.0
 

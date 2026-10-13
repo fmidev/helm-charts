@@ -23,7 +23,14 @@ ingress:
 
 ## Upgrading to 4.2
 
-Chart `4.2.0` no longer creates ConfigMaps for container environment variables. `opmet.env` and `opmet.nginx` variables are rendered directly into the Deployment, so changing them rolls out new pods without setting `opmet.commitHash`. `opmet.publisher.DESTINATION` and `opmet.publisher.S3_BUCKET_NAME` are still read from a ConfigMap, so that `opmet.publisher.environmentSecret` and passphrase `envName`s can override them and `opmet.publisher.SERVERS` can reference them, but changing them now also rolls out new pods. Values files do not need changes. As before, a variable in `opmet.env` that the chart already sets for a container (`SQLALCHEMY_DATABASE_URL`, and `PG_USER`/`PG_PASS` with Zalando) is ignored for that container. Values stay literal, as they were in the ConfigMaps: Kubernetes does not expand `$(NAME)` references or `$$` in them.
+Chart `4.2.0` sets the variables from `opmet.env` and `opmet.nginx` directly in the Deployment instead of in ConfigMaps.
+
+The exception is `opmet.publisher.DESTINATION` and `opmet.publisher.S3_BUCKET_NAME`. They stay in the `opmet-publisher` ConfigMap, so `opmet.publisher.environmentSecret` and passphrase `envName`s can still override them, and `opmet.publisher.SERVERS` can still refer to them as `$(DESTINATION)` and `$(S3_BUCKET_NAME)`.
+
+- Values files do not need changes.
+- Changing any of these variables, including the publisher ones, now restarts the pods automatically, so `opmet.commitHash` is not needed for that.
+- Values are passed to the containers as is, like before: Kubernetes does not expand `$(NAME)` or `$$` in them.
+- Variables the chart sets itself (`SQLALCHEMY_DATABASE_URL`, and `PG_USER`/`PG_PASS` with Zalando) still take precedence over the same names in `opmet.env`.
 
 ## Upgrading from 3.x to 4.0
 
