@@ -1,6 +1,10 @@
 # Upgrade notes for chart 1.2.0
 
-Chart `1.2.0` no longer creates ConfigMaps for container environment variables. Variables from `location.env` are rendered directly into the Deployment, so changing them rolls out new pods without setting `location.commitHash`. Values files do not need changes. Values stay literal, as they were in the ConfigMaps: Kubernetes does not expand `$(NAME)` references or `$$` in them.
+Chart `1.2.0` sets the variables from `location.env` directly in the Deployment instead of in a ConfigMap.
+
+- Values files do not need changes.
+- Changing a variable now restarts the pods automatically, so `location.commitHash` is not needed for that.
+- Values are passed to the containers as is, like before: Kubernetes does not expand `$(NAME)` or `$$` in them.
 
 # Install the chart repository
 

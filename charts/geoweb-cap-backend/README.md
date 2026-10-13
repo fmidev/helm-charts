@@ -1,6 +1,10 @@
 # Upgrade notes for chart 1.9.0
 
-Chart `1.9.0` no longer creates ConfigMaps for container environment variables. Variables from `cap.env` are rendered directly into the Deployment, so changing them rolls out new pods without setting `cap.commitHash`. Values files do not need changes. Values stay literal, as they were in the ConfigMaps: Kubernetes does not expand `$(NAME)` references or `$$` in them.
+Chart `1.9.0` sets the variables from `cap.env` directly in the Deployment instead of in a ConfigMap.
+
+- Values files do not need changes.
+- Changing a variable now restarts the pods automatically, so `cap.commitHash` is not needed for that.
+- Values are passed to the containers as is, like before: Kubernetes does not expand `$(NAME)` or `$$` in them.
 
 # Install the chart repository
 
