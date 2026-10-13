@@ -30,6 +30,7 @@ spec:
         app: {{ .Values.opmet.name }}
       annotations:
         eks.amazonaws.com/compute-type: ec2
+        checksum/publisher-env: {{ include (print $.Template.BasePath "/opmet-publisher-configmap.yaml") . | sha256sum | quote }}
       {{- if $configMapConfiguration }}
         checksum/custom-configuration: {{ .Values.opmet.customConfigurationConfigMap.checksum | quote }}
       {{- end }}
@@ -172,16 +173,10 @@ spec:
       {{- end }}
         - name: SERVERS
           value: {{ .Values.opmet.publisher.SERVERS | quote }}
-      {{- if .Values.opmet.publisher.DESTINATION }}
-        - name: DESTINATION
-          value: {{ .Values.opmet.publisher.DESTINATION | quote }}
-      {{- end }}
-      {{- if .Values.opmet.publisher.S3_BUCKET_NAME }}
-        - name: S3_BUCKET_NAME
-          value: {{ .Values.opmet.publisher.S3_BUCKET_NAME | quote }}
-      {{- end }}
-      {{- if .Values.opmet.publisher.environmentSecret }}
         envFrom:
+        - configMapRef:
+            name: {{ .Values.opmet.publisher.name }}
+      {{- if .Values.opmet.publisher.environmentSecret }}
         - secretRef:
             name: {{ .Values.opmet.publisher.environmentSecret }}
       {{- end }}
@@ -216,13 +211,13 @@ spec:
       {{- range $name := list "ENABLE_SSL" "OAUTH2_USERINFO" "JWKS_URI" "AUD_CLAIM" "AUD_CLAIM_VALUE" "ISS_CLAIM" "ISS_CLAIM_VALUE" "GEOWEB_USERNAME_CLAIM" "GEOWEB_REQUIRE_READ_PERMISSION" "GEOWEB_REQUIRE_WRITE_PERMISSION" "ALLOW_ANONYMOUS_ACCESS" "BACKEND_HOST" "NGINX_PORT_HTTP" "NGINX_PORT_HTTPS" "ENV_VAR_STRICT_MODE" }}
       {{- if index $nginx $name }}
         - name: {{ $name }}
-          value: {{ index $nginx $name | quote }}
+          value: {{ include "geoweb-opmet-backend.envValue" (index $nginx $name) }}
       {{- end }}
       {{- end }}
       {{- range $name := list "NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE" "TRUST_FORWARDED_HEADERS" "ENABLE_IPV6" "ENABLE_ACCESS_LOG" "PROXY_HTTP_VERSION" }}
       {{- if hasKey $nginx $name }}
         - name: {{ $name }}
-          value: {{ index $nginx $name | quote }}
+          value: {{ include "geoweb-opmet-backend.envValue" (index $nginx $name) }}
       {{- end }}
       {{- end }}
         volumeMounts:

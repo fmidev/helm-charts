@@ -17,7 +17,21 @@ Usage: include "geoweb-taf-backend.env" (dict "root" $ "skip" (list "NAME"))
 {{- range $key, $value := $env }}
 {{- if not (has $key $skip) }}
 - name: {{ $key }}
-  value: {{ $value | quote }}
+  value: {{ include "geoweb-taf-backend.envValue" $value }}
 {{- end }}
 {{- end }}
+{{- end }}
+
+{{/*
+Quoted container env value that Kubernetes does not expand. "$" is escaped so that
+values such as "$(NAME)" and "$$" stay literal, as they did when the variables were
+read from a ConfigMap. A null value renders as an empty string.
+Usage: value: {{ include "geoweb-taf-backend.envValue" $value }}
+*/}}
+{{- define "geoweb-taf-backend.envValue" -}}
+{{- if kindIs "invalid" . -}}
+""
+{{- else -}}
+{{- toString . | replace "$" "$$" | quote -}}
+{{- end -}}
 {{- end }}

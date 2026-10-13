@@ -6,7 +6,7 @@ PostgreSQL database, or a Zalando Postgres Operator database.
 
 ## Upgrading to 4.2
 
-Chart `4.2.0` no longer creates ConfigMaps for container environment variables. `opmet.env`, `opmet.publisher` and `opmet.nginx` variables are rendered directly into the Deployment, so changing them rolls out new pods without setting `opmet.commitHash`. Values files do not need changes. As before, a variable in `opmet.env` that the chart already sets for a container (`SQLALCHEMY_DATABASE_URL`, and `PG_USER`/`PG_PASS` with Zalando) is ignored for that container.
+Chart `4.2.0` no longer creates ConfigMaps for container environment variables. `opmet.env` and `opmet.nginx` variables are rendered directly into the Deployment, so changing them rolls out new pods without setting `opmet.commitHash`. `opmet.publisher.DESTINATION` and `opmet.publisher.S3_BUCKET_NAME` are still read from a ConfigMap, so that `opmet.publisher.environmentSecret` and passphrase `envName`s can override them and `opmet.publisher.SERVERS` can reference them, but changing them now also rolls out new pods. Values files do not need changes. As before, a variable in `opmet.env` that the chart already sets for a container (`SQLALCHEMY_DATABASE_URL`, and `PG_USER`/`PG_PASS` with Zalando) is ignored for that container. Values stay literal, as they were in the ConfigMaps: Kubernetes does not expand `$(NAME)` references or `$$` in them.
 
 ## Upgrading from 3.x to 4.0
 

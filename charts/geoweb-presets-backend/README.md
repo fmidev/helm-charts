@@ -4,7 +4,7 @@ Deploys the GeoWeb presets backend, auth proxy sidecar, and optional development
 
 # Upgrade notes for chart 3.3.0
 
-Chart `3.3.0` no longer creates ConfigMaps for container environment variables. `presets.env` and `presets.nginx` variables are rendered directly into the Deployment, so changing them rolls out new pods without setting `presets.commitHash`. Values files do not need changes. As before, a variable in `presets.env` that the chart already sets for a container (`PRESETS_BACKEND_DB`, and `PG_USER`/`PG_PASS` with Zalando) is ignored for that container.
+Chart `3.3.0` no longer creates ConfigMaps for container environment variables. `presets.env` and `presets.nginx` variables are rendered directly into the Deployment, so changing them rolls out new pods without setting `presets.commitHash`. Values files do not need changes. As before, a variable in `presets.env` that the chart already sets for a container (`PRESETS_BACKEND_DB`, and `PG_USER`/`PG_PASS` with Zalando) is ignored for that container. Values stay literal, as they were in the ConfigMaps: Kubernetes does not expand `$(NAME)` references or `$$` in them.
 
 # Upgrade notes for chart 3.0.0
 

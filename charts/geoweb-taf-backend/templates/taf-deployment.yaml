@@ -210,11 +210,11 @@ spec:
       {{- end }}
       {{- if .Values.taf.publisher.PUBLISH_DIR }}
         - name: PUBLISH_DIR
-          value: {{ .Values.taf.publisher.PUBLISH_DIR | quote }}
+          value: {{ include "geoweb-taf-backend.envValue" .Values.taf.publisher.PUBLISH_DIR }}
       {{- end }}
       {{- if .Values.taf.publisher.port }}
         - name: AVIATION_TAF_PORT_HTTP
-          value: {{ .Values.taf.publisher.port | quote }}
+          value: {{ include "geoweb-taf-backend.envValue" .Values.taf.publisher.port }}
       {{- end }}
         volumeMounts:
         - name: publisher-volume
@@ -242,13 +242,13 @@ spec:
       {{- range $name := list "ENABLE_SSL" "OAUTH2_USERINFO" "JWKS_URI" "AUD_CLAIM" "AUD_CLAIM_VALUE" "ISS_CLAIM" "ISS_CLAIM_VALUE" "GEOWEB_USERNAME_CLAIM" "GEOWEB_REQUIRE_READ_PERMISSION" "GEOWEB_REQUIRE_WRITE_PERMISSION" "ALLOW_ANONYMOUS_ACCESS" "BACKEND_HOST" "NGINX_PORT_HTTP" "NGINX_PORT_HTTPS" "ENV_VAR_STRICT_MODE" }}
       {{- if index $nginx $name }}
         - name: {{ $name }}
-          value: {{ index $nginx $name | quote }}
+          value: {{ include "geoweb-taf-backend.envValue" (index $nginx $name) }}
       {{- end }}
       {{- end }}
       {{- range $name := list "NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE" "TRUST_FORWARDED_HEADERS" }}
       {{- if hasKey $nginx $name }}
         - name: {{ $name }}
-          value: {{ index $nginx $name | quote }}
+          value: {{ include "geoweb-taf-backend.envValue" (index $nginx $name) }}
       {{- end }}
       {{- end }}
         volumeMounts:

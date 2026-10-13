@@ -1,0 +1,16 @@
+{{/*
+Publisher defaults are read through envFrom before opmet.publisher.environmentSecret,
+so the Secret and explicit publisher env, such as passphrase envNames, can override
+them, and SERVERS can reference them as $(DESTINATION) or $(S3_BUCKET_NAME).
+*/}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.opmet.publisher.name }}
+data:
+{{- if .Values.opmet.publisher.DESTINATION }}
+  DESTINATION: {{ .Values.opmet.publisher.DESTINATION | quote }}
+{{- end }}
+{{- if .Values.opmet.publisher.S3_BUCKET_NAME }}
+  S3_BUCKET_NAME: {{ .Values.opmet.publisher.S3_BUCKET_NAME | quote }}
+{{- end }}

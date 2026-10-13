@@ -1,6 +1,6 @@
 # Upgrade notes for chart 4.2.0
 
-Chart `4.2.0` no longer creates ConfigMaps for container environment variables. Variables from `frontend.env` are rendered directly into the Deployment, so changing them rolls out new pods without setting `frontend.commitHash`. Values files do not need changes. As before, a variable in `frontend.env` that the chart already sets for a container (`GW_AUTH_CLIENT_ID` when `frontend.client_id_secret` is set) is ignored for that container.
+Chart `4.2.0` no longer creates ConfigMaps for container environment variables. Variables from `frontend.env` are rendered directly into the Deployment, so changing them rolls out new pods without setting `frontend.commitHash`. Values files do not need changes. As before, a variable in `frontend.env` that the chart already sets for a container (`GW_AUTH_CLIENT_ID` when `frontend.client_id_secret` is set) is ignored for that container. Values stay literal, as they were in the ConfigMaps: Kubernetes does not expand `$(NAME)` references or `$$` in them.
 
 # Upgrade notes for chart 4.0.0
 

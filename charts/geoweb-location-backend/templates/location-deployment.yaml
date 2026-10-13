@@ -1,3 +1,7 @@
+{{- $env := dict }}
+{{- range $key, $value := .Values.location.env }}
+{{- $_ := set $env (upper $key) $value }}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -39,11 +43,11 @@ spec:
       {{- if .Values.location.readinessProbe }}
         readinessProbe: {{ toYaml .Values.location.readinessProbe | nindent 10 }}
       {{- end }}
-      {{- with .Values.location.env }}
+      {{- with $env }}
         env:
         {{- range $key, $value := . }}
-        - name: {{ $key | upper }}
-          value: {{ $value | quote }}
+        - name: {{ $key }}
+          value: {{ include "geoweb-location-backend.envValue" $value }}
         {{- end }}
       {{- end }}
       affinity:

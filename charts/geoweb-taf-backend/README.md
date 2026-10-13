@@ -4,7 +4,7 @@ Deploys the GeoWeb TAF backend, placeholder, message converter, publisher, auth 
 
 # Upgrade notes for chart 2.1.0
 
-Chart `2.1.0` no longer creates ConfigMaps for container environment variables. `taf.env`, `taf.publisher` and `taf.nginx` variables are rendered directly into the Deployment, so changing them rolls out new pods without setting `taf.commitHash`. Values files do not need changes. As before, a variable in `taf.env` that the chart already sets for a container (`AVIATION_TAF_BACKEND_DB`, and `PG_USER`/`PG_PASS` with Zalando) is ignored for that container.
+Chart `2.1.0` no longer creates ConfigMaps for container environment variables. `taf.env`, `taf.publisher` and `taf.nginx` variables are rendered directly into the Deployment, so changing them rolls out new pods without setting `taf.commitHash`. Values files do not need changes. As before, a variable in `taf.env` that the chart already sets for a container (`AVIATION_TAF_BACKEND_DB`, and `PG_USER`/`PG_PASS` with Zalando) is ignored for that container. Values stay literal, as they were in the ConfigMaps: Kubernetes does not expand `$(NAME)` references or `$$` in them.
 
 # Upgrade notes for chart 2.0.0
 
