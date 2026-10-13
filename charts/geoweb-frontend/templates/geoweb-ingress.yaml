@@ -1,26 +1,21 @@
+{{- if .Values.ingress.customAnnotations }}
+{{- fail "ingress.customAnnotations has been renamed to ingress.annotations. Note that ingress.annotations is merged with the chart's default nginx annotations, set a default annotation to null to remove it." }}
+{{- end }}
+{{- $annotations := deepCopy (.Values.ingress.annotations | default dict) }}
+{{- if .Values.frontend.auth_secret }}
+{{- $_ := set $annotations "nginx.ingress.kubernetes.io/auth-type" "basic" }}
+{{- $_ := set $annotations "nginx.ingress.kubernetes.io/auth-secret" .Values.frontend.auth_secretName }}
+{{- end }}
+{{- if .Values.ingress.rules }}
+{{- $_ := set $annotations "nginx.ingress.kubernetes.io/configuration-snippet" .Values.ingress.rules }}
+{{- end }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ .Values.ingress.name }}-{{ .Values.frontend.name }}
+  {{- with $annotations }}
   annotations:
-  {{- if .Values.ingress.customAnnotations }}
-    {{- with .Values.ingress.customAnnotations }}
-      {{- toYaml . | nindent 4 }}
-    {{- end }}
-  {{- else }}
-  {{- if .Values.frontend.auth_secret }}
-    nginx.ingress.kubernetes.io/auth-type: basic
-    nginx.ingress.kubernetes.io/auth-secret: {{ .Values.frontend.auth_secretName }}
-  {{- end }}
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-methods: "GET"
-  {{- if .Values.ingress.rules }}
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-    {{- .Values.ingress.rules | nindent 6 }}
-  {{- end }}
+    {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
 {{- if .Values.ingress.ingressClassName }}

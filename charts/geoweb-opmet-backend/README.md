@@ -4,6 +4,23 @@ Deploys the GeoWeb opmet backend, message converter, publisher and auth proxy.
 The chart can use a development PostgreSQL sidecar, a separately managed
 PostgreSQL database, or a Zalando Postgres Operator database.
 
+## Upgrading to 5.0
+
+Chart `5.0.0` renames `ingress.customAnnotations` to `ingress.annotations`. The default nginx annotations are no longer hardcoded in the Ingress template but set as the default value of `ingress.annotations` in `values.yaml`. Template rendering fails if `ingress.customAnnotations` is still set. Values files that do not set `ingress.customAnnotations` do not need changes.
+
+Annotations set in `ingress.annotations` are merged with the default annotations. To remove a default annotation, for example when using another ingress controller than nginx, set it to `null`:
+
+```yaml
+ingress:
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: null
+    nginx.ingress.kubernetes.io/force-ssl-redirect: null
+    nginx.ingress.kubernetes.io/rewrite-target: null
+    nginx.ingress.kubernetes.io/enable-cors: null
+    nginx.ingress.kubernetes.io/cors-allow-methods: null
+    traefik.annotation: exampleValue
+```
+
 ## Upgrading to 4.2
 
 Chart `4.2.0` no longer creates ConfigMaps for container environment variables. `opmet.env` and `opmet.nginx` variables are rendered directly into the Deployment, so changing them rolls out new pods without setting `opmet.commitHash`. `opmet.publisher.DESTINATION` and `opmet.publisher.S3_BUCKET_NAME` are still read from a ConfigMap, so that `opmet.publisher.environmentSecret` and passphrase `envName`s can override them and `opmet.publisher.SERVERS` can reference them, but changing them now also rolls out new pods. Values files do not need changes. As before, a variable in `opmet.env` that the chart already sets for a container (`SQLALCHEMY_DATABASE_URL`, and `PG_USER`/`PG_PASS` with Zalando) is ignored for that container. Values stay literal, as they were in the ConfigMaps: Kubernetes does not expand `$(NAME)` references or `$$` in them.
@@ -267,7 +284,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 
 | Parameter                                     | Description | Default                                                                                      |
 |-----------------------------------------------| - |----------------------------------------------------------------------------------------------|
-| `ingress.customAnnotations`                   | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations if set |                                                                                              |
+| `ingress.annotations` | Annotations for the ingress. Merged with the default nginx annotations, set a default annotation to `null` to remove it | See `values.yaml` |
 | `ingress.ingressClassName`                    | Set ingressClassName parameter to not use default ingressClass | `nginx`                                                                                      |
 | `ingress.name`                                | Name of the ingress controller in use | `nginx-ingress-controller`                                                                   |
 | `ingress.tls`                                 | TLS configuration section for the ingress | |
@@ -391,6 +408,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 
 | Chart version | opmet version |
 |---------------|---------------|
+| 5.0.0         | 5.11.1        |
 | 4.2.0         | 5.11.1        |
 | 4.1.1         | 5.11.1        |
 | 4.1.0         | 5.11.1        |

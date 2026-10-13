@@ -1,3 +1,22 @@
+# Upgrade notes for chart 5.0.0
+
+Chart `5.0.0` renames `ingress.customAnnotations` to `ingress.annotations`. The default nginx annotations are no longer hardcoded in the Ingress template but set as the default value of `ingress.annotations` in `values.yaml`. Template rendering fails if `ingress.customAnnotations` is still set. Values files that do not set `ingress.customAnnotations` do not need changes.
+
+Annotations set in `ingress.annotations` are merged with the default annotations. To remove a default annotation, for example when using another ingress controller than nginx, set it to `null`:
+
+```yaml
+ingress:
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: null
+    nginx.ingress.kubernetes.io/force-ssl-redirect: null
+    nginx.ingress.kubernetes.io/rewrite-target: null
+    nginx.ingress.kubernetes.io/enable-cors: null
+    nginx.ingress.kubernetes.io/cors-allow-methods: null
+    traefik.annotation: exampleValue
+```
+
+As before, `frontend.auth_secret` adds the nginx basic auth annotations and `ingress.rules` adds the `nginx.ingress.kubernetes.io/configuration-snippet` annotation. These are now added also when `ingress.annotations` is changed, whereas setting `ingress.customAnnotations` used to disable them. Set `ingress.rules: ""` to leave out the configuration snippet.
+
 # Upgrade notes for chart 4.2.0
 
 Chart `4.2.0` no longer creates ConfigMaps for container environment variables. Variables from `frontend.env` are rendered directly into the Deployment, so changing them rolls out new pods without setting `frontend.commitHash`. Values files do not need changes. As before, a variable in `frontend.env` that the chart already sets for a container (`GW_AUTH_CLIENT_ID` when `frontend.client_id_secret` is set) is ignored for that container. Values stay literal, as they were in the ConfigMaps: Kubernetes does not expand `$(NAME)` references or `$$` in them.
@@ -260,12 +279,13 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | `nginx` |
 | `ingress.tls` | TLS configuration section for the ingress | |
 | `ingress.rules` | Extra nginx ingress-controller configuration rules, like path-based cache headers | See reference in `values.yaml` |
-| `ingress.customAnnotations` | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations and `frontend.auth_secret`, `frontend.auth_secretName` and `ingress.rules` can't be used if set | |
+| `ingress.annotations` | Annotations for the ingress. Merged with the default nginx annotations, set a default annotation to `null` to remove it | See `values.yaml` |
 
 # Chart versions
 
 | Chart version | frontend version |
 |---------------|------------------|
+| 5.0.0         | 19.6.0           |
 | 4.2.0         | 19.6.0           |
 | 4.1.0         | 19.6.0           |
 | 4.0.2         | 19.6.0           |

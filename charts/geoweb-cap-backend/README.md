@@ -1,3 +1,20 @@
+# Upgrade notes for chart 2.0.0
+
+Chart `2.0.0` renames `ingress.customAnnotations` to `ingress.annotations`. The default nginx annotations are no longer hardcoded in the Ingress template but set as the default value of `ingress.annotations` in `values.yaml`. Template rendering fails if `ingress.customAnnotations` is still set. Values files that do not set `ingress.customAnnotations` do not need changes.
+
+Annotations set in `ingress.annotations` are merged with the default annotations. To remove a default annotation, for example when using another ingress controller than nginx, set it to `null`:
+
+```yaml
+ingress:
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: null
+    nginx.ingress.kubernetes.io/force-ssl-redirect: null
+    nginx.ingress.kubernetes.io/rewrite-target: null
+    nginx.ingress.kubernetes.io/enable-cors: null
+    nginx.ingress.kubernetes.io/cors-allow-methods: null
+    traefik.annotation: exampleValue
+```
+
 # Upgrade notes for chart 1.9.0
 
 Chart `1.9.0` no longer creates ConfigMaps for container environment variables. Variables from `cap.env` are rendered directly into the Deployment, so changing them rolls out new pods without setting `cap.commitHash`. Values files do not need changes. Values stay literal, as they were in the ConfigMaps: Kubernetes does not expand `$(NAME)` references or `$$` in them.
@@ -66,12 +83,13 @@ The following table lists the configurable parameters of the CAP backend chart a
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |
 | `ingress.tls` | TLS configuration section for the ingress | |
 | `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | `nginx` |
-| `ingress.customAnnotations` | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations if set | |
+| `ingress.annotations` | Annotations for the ingress. Merged with the default nginx annotations, set a default annotation to `null` to remove it | See `values.yaml` |
 
 # Chart versions
 
 | Chart version | cap version |
 |---------------|-------------|
+| 2.0.0         | 0.11.0      |
 | 1.9.0         | 0.11.0      |
 | 1.8.6         | 0.11.0      |
 | 1.8.5         | 0.10.17     |

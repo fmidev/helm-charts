@@ -2,6 +2,23 @@
 
 Deploys the GeoWeb warnings backend, auth proxy sidecar, and optional development or Zalando PostgreSQL resources. CloudNativePG databases are managed separately with the `geoweb-cnpg` chart.
 
+# Upgrade notes for chart 3.0.0
+
+Chart `3.0.0` renames `ingress.customAnnotations` to `ingress.annotations`. The default nginx annotations are no longer hardcoded in the Ingress template but set as the default value of `ingress.annotations` in `values.yaml`. Template rendering fails if `ingress.customAnnotations` is still set. Values files that do not set `ingress.customAnnotations` do not need changes.
+
+Annotations set in `ingress.annotations` are merged with the default annotations. To remove a default annotation, for example when using another ingress controller than nginx, set it to `null`:
+
+```yaml
+ingress:
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: null
+    nginx.ingress.kubernetes.io/force-ssl-redirect: null
+    nginx.ingress.kubernetes.io/rewrite-target: null
+    nginx.ingress.kubernetes.io/enable-cors: null
+    nginx.ingress.kubernetes.io/cors-allow-methods: null
+    traefik.annotation: exampleValue
+```
+
 # Upgrade notes for chart 2.1.0
 
 Chart `2.1.0` no longer creates ConfigMaps for container environment variables. `warnings.env` and `warnings.nginx` variables are rendered directly into the Deployment, so changing them rolls out new pods without setting `warnings.commitHash`. Values files do not need changes. As before, a variable in `warnings.env` that the chart already sets for a container (`WARNINGS_BACKEND_DB`, and `PG_USER`/`PG_PASS` with Zalando) is ignored for that container. Values stay literal, as they were in the ConfigMaps: Kubernetes does not expand `$(NAME)` references or `$$` in them.
@@ -272,12 +289,13 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |
 | `ingress.tls` | TLS configuration section for the ingress | |
 | `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | `nginx` |
-| `ingress.customAnnotations` | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations if set | |
+| `ingress.annotations` | Annotations for the ingress. Merged with the default nginx annotations, set a default annotation to `null` to remove it | See `values.yaml` |
 
 # Chart versions
 
 | Chart version | warnings version |
 |---------------|------------------|
+| 3.0.0         | 3.2.0            |
 | 2.1.0         | 3.2.0            |
 | 2.0.5         | 3.2.0            |
 | 2.0.4         | 3.1.1            |
