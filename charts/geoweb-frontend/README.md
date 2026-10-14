@@ -29,13 +29,13 @@ helm repo update
 
 Create your own values file for required variables:
 
-* Minimal setup
+- Minimal setup
 ```yaml
 frontend:
   url: geoweb.example.com
 ```
 
-* Using aws as the secret provider
+- Using aws as the secret provider
 ```yaml
 # Example envs: https://gitlab.com/opengeoweb/opengeoweb/-/blob/master/apps/geoweb/src/assets/config.example.json
 # Secret creation docs: https://kubernetes.github.io/ingress-nginx/examples/auth/basic/
@@ -57,7 +57,7 @@ secretProviderParameters:
   region: your-region
 ```
 
-* Using base64 encoded secrets
+- Using base64 encoded secrets
 ```yaml
 frontend:
   url: geoweb.example.com
@@ -72,7 +72,7 @@ frontend:
 
 ```
 
-* Using custom configuration files stored locally
+- Using custom configuration files stored locally
 ```yaml
 frontend:
   url: geoweb.example.com
@@ -80,7 +80,7 @@ frontend:
   customConfigurationFolderPath: /example/path/
 ```
 
-* Using custom configuration files stored in AWS S3
+- Using custom configuration files stored in AWS S3
 ```yaml
 frontend:
   url: geoweb.example.com
@@ -93,7 +93,7 @@ frontend:
   awsDefaultRegion: <AWS_DEFAULT_REGION>
 ```
 
-* Use initialPresets.json from an existing ConfigMap
+- Use initialPresets.json from an existing ConfigMap
 ```yaml
 frontend:
   env:
@@ -106,10 +106,10 @@ frontend:
 ```
 The ConfigMap must contain the `initialPresets.json` key. The checksum must change with the file content. `useCustomConfigurationFiles` cannot be combined with the `inline` or `existingConfigMap` runtime configuration sources.
 
-* Generate custom initialPresets.json from YAML values
-  * The configuration will be converted to JSON and mounted into the containers filesystem
-  * The structure of the JSON file should conform to the InitialAppPresetProps type, see https://opengeoweb.gitlab.io/opengeoweb/typescript-docs/core/interfaces/InitialAppPresetProps.html
-  * See also the default initialPresets.json file https://gitlab.com/opengeoweb/opengeoweb/-/blob/master/apps/geoweb/src/assets/initialPresets.json?ref_type=heads
+- Generate custom initialPresets.json from YAML values
+  - The configuration will be converted to JSON and mounted into the containers filesystem
+  - The structure of the JSON file should conform to the InitialAppPresetProps type, see https://opengeoweb.gitlab.io/opengeoweb/typescript-docs/core/interfaces/InitialAppPresetProps.html
+  - See also the default initialPresets.json file https://gitlab.com/opengeoweb/opengeoweb/-/blob/master/apps/geoweb/src/assets/initialPresets.json?ref_type=heads
 ```yaml
 frontend:
   url: geoweb.example.com

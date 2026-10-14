@@ -7,6 +7,20 @@ configuration uses a file-backed store on the mounted PVC, which cannot safely
 be shared by replicas across nodes. Supporting multiple replicas would require
 a shared OpenID store such as Redis or DynamoDB.
 
+## Create required dependencies
+
+Create a values file for the required variables:
+
+- Minimal setup
+
+```yaml
+route:
+  enabled: false
+ingress:
+  enabled: true
+  host: plugins.geoweb.example.com
+```
+
 ## Render and install
 
 ```bash

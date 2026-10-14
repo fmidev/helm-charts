@@ -16,6 +16,9 @@ helm repo update
 # Create requried dependencies
 
 Create values.yaml file for required variables:
+
+- Minimal setup
+
 ```yaml
 location:
   url: geoweb.example.com

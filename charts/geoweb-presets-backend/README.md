@@ -76,6 +76,13 @@ helm repo update
 
 Create values.yaml file for required variables:
 
+- Minimal setup
+
+```yaml
+presets:
+  url: geoweb.example.com
+```
+
 - Using an external database connection string from AWS Secrets Manager
 
 ```yaml
