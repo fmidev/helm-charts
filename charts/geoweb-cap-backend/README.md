@@ -16,6 +16,9 @@ helm repo update
 # Create requried dependencies
 
 Create values.yaml file for required variables:
+
+- Minimal setup
+
 ```yaml
 cap:
   url: geoweb.example.com
@@ -76,6 +79,7 @@ The following table lists the configurable parameters of the CAP backend chart a
 
 | Chart version | cap version |
 |---------------|-------------|
+| 1.9.1         | 0.11.0      |
 | 1.9.0         | 0.11.0      |
 | 1.8.6         | 0.11.0      |
 | 1.8.5         | 0.10.17     |

@@ -16,6 +16,9 @@ helm repo update
 # Create requried dependencies
 
 Create values.yaml file for required variables:
+
+- Minimal setup
+
 ```yaml
 location:
   url: geoweb.example.com
@@ -86,6 +89,7 @@ The following table lists the configurable parameters of the location backend ch
 
 | Chart version | location version |
 |---------------|------------------|
+| 1.2.1         | 0.3.1            |
 | 1.2.0         | 0.3.1            |
 | 1.1.10        | 0.3.1            |
 | 1.1.9         | 0.3.0            |

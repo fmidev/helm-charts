@@ -88,6 +88,17 @@ Do not uninstall the source database release as part of the application
 upgrade. The exact dump and restore commands depend on the source mode and
 environment; rehearse the procedure on a copy before production migration.
 
+## Create required dependencies
+
+Create a values file for the required variables:
+
+- Minimal setup
+
+```yaml
+opmet:
+  url: geoweb.example.com
+```
+
 ## Database modes
 
 The default `sidecar` mode is intended for development:
@@ -398,6 +409,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 
 | Chart version | opmet version |
 |---------------|---------------|
+| 4.2.1         | 5.11.1        |
 | 4.2.0         | 5.11.1        |
 | 4.1.1         | 5.11.1        |
 | 4.1.0         | 5.11.1        |

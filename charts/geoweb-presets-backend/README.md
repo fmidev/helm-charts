@@ -76,6 +76,13 @@ helm repo update
 
 Create values.yaml file for required variables:
 
+- Minimal setup
+
+```yaml
+presets:
+  url: geoweb.example.com
+```
+
 - Using an external database connection string from AWS Secrets Manager
 
 ```yaml
@@ -353,6 +360,7 @@ The following table lists the configurable parameters of the Presets backend cha
 
 | Chart version | presets version |
 | ------------- | --------------- |
+| 3.3.1         | 4.2.2           |
 | 3.3.0         | 4.2.2           |
 | 3.2.0         | 4.2.2           |
 | 3.1.1         | 4.2.2           |
