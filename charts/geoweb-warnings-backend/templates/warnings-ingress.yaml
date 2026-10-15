@@ -1,6 +1,7 @@
 {{- if .Values.ingress.customAnnotations }}
-{{- fail "ingress.customAnnotations has been renamed to ingress.annotations. Note that ingress.annotations is merged with the chart's default nginx annotations, set a default annotation to null to remove it." }}
+{{- fail "ingress.customAnnotations has been renamed to ingress.annotations" }}
 {{- end }}
+{{- if .Values.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -27,3 +28,4 @@ spec:
                 name: {{ .Values.warnings.name }}
                 port:
                   number: {{ .Values.warnings.svcPort }}
+{{- end }}

@@ -4,7 +4,7 @@ versions:
 location:
   name: location
   registry: registry.gitlab.com/opengeoweb/backend-services/location-backend/location-backend
-  path: /location-backend/(.*)
+  path: /location-backend
   svcPort: 80
   containerPort: 8080
   replicas: 1
@@ -45,11 +45,9 @@ location:
     LOG_LEVEL: "INFO"
 
 ingress:
+  enabled: true
   name: nginx-ingress-controller
-  ingressClassName: nginx
-  annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/rewrite-target: "/$1"
-    nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-methods: "DELETE, PUT, GET, POST, OPTIONS, PATCH, HEAD"
+  # Empty uses the cluster's default IngressClass
+  ingressClassName: ""
+  # Annotations for your ingress controller, see README
+  annotations: {}

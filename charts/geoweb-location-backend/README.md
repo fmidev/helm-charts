@@ -1,18 +1,27 @@
 # Upgrade notes for chart 2.0.0
 
-Chart `2.0.0` renames `ingress.customAnnotations` to `ingress.annotations`. The default nginx annotations are no longer hardcoded in the Ingress template but set as the default value of `ingress.annotations` in `values.yaml`. Template rendering fails if `ingress.customAnnotations` is still set. Values files that do not set `ingress.customAnnotations` do not need changes.
+Chart `2.0.0` no longer assumes the nginx ingress controller. The Ingress defaults are neutral, so the chart works with any controller, including OpenShift:
 
-Annotations set in `ingress.annotations` are merged with the default annotations. To remove a default annotation, for example when using another ingress controller than nginx, set it to `null`:
+- `ingress.customAnnotations` is renamed to `ingress.annotations`, which defaults to `{}`. The chart no longer sets nginx annotations itself. Template rendering fails if `ingress.customAnnotations` is still set.
+- `ingress.ingressClassName` defaults to `""`, which uses the cluster's default IngressClass, instead of `nginx`.
+- `location.path` defaults to the plain prefix `/location-backend` instead of the nginx regex `/location-backend/(.*)`.
+- The new `ingress.enabled` (default `true`) leaves the Ingress out when set to `false`.
+
+With a plain prefix path the controller passes the prefix on, and FastAPI removes it based on `location.env.APPLICATION_ROOT_PATH`, so keep that the same as `location.path`.
+
+To keep the previous nginx ingress controller setup, set:
 
 ```yaml
+location:
+  path: /location-backend/(.*)
 ingress:
+  ingressClassName: nginx
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: null
-    nginx.ingress.kubernetes.io/force-ssl-redirect: null
-    nginx.ingress.kubernetes.io/rewrite-target: null
-    nginx.ingress.kubernetes.io/enable-cors: null
-    nginx.ingress.kubernetes.io/cors-allow-methods: null
-    traefik.annotation: exampleValue
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "DELETE, PUT, GET, POST, OPTIONS, PATCH, HEAD"
 ```
 
 # Upgrade notes for chart 1.2.0
@@ -74,7 +83,7 @@ The following table lists the configurable parameters of the location backend ch
 | `location.commitHash` | Adds commitHash annotation to the deployment | |
 | `location.imagePullPolicy` | Adds option to modify imagePullPolicy | |
 | `location.url` | Url which the application can be accessed | |
-| `location.path` | Path suffix added to url | `/location-backend/(.*)` |
+| `location.path` | Path prefix of the service in the Ingress | `/location-backend` |
 | `location.svcPort` | Port used for service | `80` |
 | `location.containerPort` | Port used for container | `8080` |
 | `location.replicas` | Amount of replicas deployed | `1` |
@@ -84,7 +93,7 @@ The following table lists the configurable parameters of the location backend ch
 | `location.readinessProbe` | Configure readinessProbe | see defaults in `values.yaml` |
 | `location.startupProbe` | Configure startupProbe | see defaults in `values.yaml` |
 | `location.env.APPLICATION_DOC_ROOT` | Endpoint for OpenAPI specification. | `/api` |
-| `location.env.APPLICATION_ROOT_PATH` | Application root path for FastAPI. Generally same as `location.path` without the wildcard. | `/location-backend` |
+| `location.env.APPLICATION_ROOT_PATH` | Application root path for FastAPI. Generally the same as `location.path`, without any regex part | `/location-backend` |
 | `location.env.LOCALDATA` | Enable or disable searching local data sources. Either `True` or `False` | `True` |
 | `location.env.PDOK_SUGGEST_URL` | PDOK suggest URL. Set empty string to disable. | Default value is set in the application |
 | `location.env.PDOK_LOOKUP_URL` | PDOK lookup URL. Set empty string to disable. | Default value is set in the application |
@@ -96,8 +105,9 @@ The following table lists the configurable parameters of the location backend ch
 | `location.env.LOG_LEVEL` | Set the log level. Options are `DEBUG`, `INFO`, `WARNING`, `ERROR` | `INFO` |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |
 | `ingress.tls` | TLS configuration section for the ingress | |
-| `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | `nginx` |
-| `ingress.annotations` | Annotations for the ingress. Merged with the default nginx annotations, set a default annotation to `null` to remove it | See `values.yaml` |
+| `ingress.ingressClassName` | IngressClass for the Ingress. Empty uses the cluster's default IngressClass | `""` |
+| `ingress.annotations` | Annotations for your ingress controller, for example nginx rewrite or cert-manager annotations. See the upgrade notes for the previous nginx defaults | `{}` |
+| `ingress.enabled` | Create the Ingress | `true` |
 
 # Chart versions
 

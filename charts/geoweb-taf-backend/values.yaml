@@ -4,7 +4,7 @@ versions:
 taf:
   name: taf
   registry: registry.gitlab.com/opengeoweb/backend-services/aviation-taf-backend/aviation-taf-backend
-  path: /taf-backend/(.*)
+  path: /taf-backend
   svcPort: 80
   replicas: 1
   minPodsAvailable: 0
@@ -220,11 +220,9 @@ taf:
   volumeSize: 100Mi
 
 ingress:
+  enabled: true
   name: nginx-ingress-controller
-  ingressClassName: nginx
-  annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/rewrite-target: "/$1"
-    nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-methods: "DELETE, PUT, GET, POST, OPTIONS, PATCH, HEAD"
+  # Empty uses the cluster's default IngressClass
+  ingressClassName: ""
+  # Annotations for your ingress controller, see README
+  annotations: {}

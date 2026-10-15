@@ -1,21 +1,42 @@
 # Upgrade notes for chart 5.0.0
 
-Chart `5.0.0` renames `ingress.customAnnotations` to `ingress.annotations`. The default nginx annotations are no longer hardcoded in the Ingress template but set as the default value of `ingress.annotations` in `values.yaml`. Template rendering fails if `ingress.customAnnotations` is still set. Values files that do not set `ingress.customAnnotations` do not need changes.
+Chart `5.0.0` no longer assumes the nginx ingress controller. The Ingress defaults are neutral, so the chart works with any controller, including OpenShift:
 
-Annotations set in `ingress.annotations` are merged with the default annotations. To remove a default annotation, for example when using another ingress controller than nginx, set it to `null`:
+- `ingress.customAnnotations` is renamed to `ingress.annotations`, which defaults to `{}`. The chart no longer sets nginx annotations itself. Template rendering fails if `ingress.customAnnotations` is still set.
+- `ingress.ingressClassName` defaults to `""`, which uses the cluster's default IngressClass, instead of `nginx`.
+- `ingress.rules` is removed, so the chart no longer adds the nginx `configuration-snippet` with cache headers. Template rendering fails if `ingress.rules` is set.
+- `frontend.auth_secret` still creates the basic auth Secret, but no longer adds the nginx basic auth annotations. Template rendering fails if `frontend.auth_secret` is set and `ingress.annotations` is empty.
+- The new `ingress.enabled` (default `true`) leaves the Ingress out when set to `false`.
+
+To keep the previous nginx ingress controller setup, set the annotations the chart used to add. Leave out the auth annotations if you don't use `frontend.auth_secret`, and the snippet if your controller does not allow snippet annotations:
 
 ```yaml
 ingress:
+  ingressClassName: nginx
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: null
-    nginx.ingress.kubernetes.io/force-ssl-redirect: null
-    nginx.ingress.kubernetes.io/rewrite-target: null
-    nginx.ingress.kubernetes.io/enable-cors: null
-    nginx.ingress.kubernetes.io/cors-allow-methods: null
-    traefik.annotation: exampleValue
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET"
+    # Previously added by frontend.auth_secret
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: geoweb-auth  # frontend.auth_secretName
+    # Previously the ingress.rules default
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      add_header Document-Policy "js-profiling" always;
+      if ($request_uri ~* \.(json)) {
+        add_header Cache-Control "no-cache";
+      }
+      if ($request_uri ~* \.(woff2|svg)) {
+        add_header Cache-Control "max-age=604800";
+      }
+      if ($request_uri ~* \.(webmanifest)) {
+        more_clear_headers 'Content-Type';
+        add_header Content-Type "application/manifest+json";
+        add_header Cache-Control "max-age=604800";
+      }
 ```
-
-As before, `frontend.auth_secret` adds the nginx basic auth annotations and `ingress.rules` adds the `nginx.ingress.kubernetes.io/configuration-snippet` annotation. These are now added also when `ingress.annotations` is changed, whereas setting `ingress.customAnnotations` used to disable them. Set `ingress.rules: ""` to leave out the configuration snippet.
 
 # Upgrade notes for chart 4.2.0
 
@@ -209,7 +230,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.containerPort` | Port used for container | `8080` |
 | `frontend.replicas` | Amount of replicas deployed | `1` |
 | `frontend.minPodsAvailable` | Minimum available pods in pod disruption budget. Value `0` omits the pdb. | `0` |
-| `frontend.auth_secret` | Secret containing base64 encoded Basic auth secret | |
+| `frontend.auth_secret` | Secret containing base64 encoded Basic auth secret. Only creates the Secret: set the basic auth annotations for your ingress controller in `ingress.annotations` | |
 | `frontend.auth_secretName` | Name of auth secret | `geoweb-auth` |
 | `frontend.auth_secretType` | Type of auth secret | `secretsmanager` |
 | `frontend.auth_secretPath` | Path to auth secret | |
@@ -281,10 +302,10 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.nginx.headers.mountPath` | File path where the nginx headers configuration is mounted when `frontend.nginx.headers` is set | `/etc/nginx/headers.conf` |
 | `frontend.nginx.headers.config` | Contents of the nginx headers configuration file. Use this for global response headers such as security headers and CSP | |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |
-| `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | `nginx` |
+| `ingress.ingressClassName` | IngressClass for the Ingress. Empty uses the cluster's default IngressClass | `""` |
 | `ingress.tls` | TLS configuration section for the ingress | |
-| `ingress.rules` | Extra nginx ingress-controller configuration rules, like path-based cache headers | See reference in `values.yaml` |
-| `ingress.annotations` | Annotations for the ingress. Merged with the default nginx annotations, set a default annotation to `null` to remove it | See `values.yaml` |
+| `ingress.annotations` | Annotations for your ingress controller, for example basic auth or cert-manager annotations. See the upgrade notes for the previous nginx defaults | `{}` |
+| `ingress.enabled` | Create the Ingress | `true` |
 
 # Chart versions
 
