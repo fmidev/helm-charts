@@ -104,6 +104,13 @@ helm repo update
 
 Create a values file for the required variables.
 
+- Minimal setup
+
+```yaml
+warnings:
+  url: geoweb.example.com
+```
+
 - Using an external database connection string from AWS Secrets Manager
 
 ```yaml
@@ -313,6 +320,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 | Chart version | warnings version |
 |---------------|------------------|
 | 3.0.0         | 3.2.0            |
+| 2.1.1         | 3.2.0            |
 | 2.1.0         | 3.2.0            |
 | 2.0.5         | 3.2.0            |
 | 2.0.4         | 3.1.1            |
