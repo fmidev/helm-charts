@@ -9,6 +9,8 @@ location:
   containerPort: 8080
   replicas: 1
   minPodsAvailable: 0
+  podAntiAffinity:
+    topologyKey: topology.kubernetes.io/zone
   resources:
     requests:
       memory: "256Mi"

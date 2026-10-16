@@ -201,4 +201,4 @@ spec:
                   operator: In
                   values:
                   - {{ .Values.warnings.name }}
-              topologyKey: topology.kubernetes.io/zone
+              topologyKey: {{ .Values.warnings.podAntiAffinity.topologyKey | quote }}

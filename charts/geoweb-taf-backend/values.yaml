@@ -8,6 +8,8 @@ taf:
   svcPort: 80
   replicas: 1
   minPodsAvailable: 0
+  podAntiAffinity:
+    topologyKey: topology.kubernetes.io/zone
   postStartCommand: bin/admin.sh
   secretServiceAccount: taf-service-account
   resources:
