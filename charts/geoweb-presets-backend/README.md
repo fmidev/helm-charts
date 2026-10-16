@@ -389,7 +389,8 @@ The following table lists the configurable parameters of the Presets backend cha
 
 | Chart version | presets version |
 | ------------- | --------------- |
-| 4.0.0         | 4.2.2           |
+| 4.0.0         | 5.1.0           |
+| 3.3.2         | 5.1.0           |
 | 3.3.1         | 4.2.2           |
 | 3.3.0         | 4.2.2           |
 | 3.2.0         | 4.2.2           |

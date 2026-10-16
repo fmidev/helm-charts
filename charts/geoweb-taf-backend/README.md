@@ -344,7 +344,8 @@ The following table lists the configurable parameters of the Taf backend chart a
 
 | Chart version | taf version |
 |---------------|-------------|
-| 3.0.0         | 4.2.2       |
+| 3.0.0         | 4.2.5       |
+| 2.1.2         | 4.2.5       |
 | 2.1.1         | 4.2.2       |
 | 2.1.0         | 4.2.2       |
 | 2.0.2         | 4.2.2       |
