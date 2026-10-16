@@ -189,6 +189,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.svcPort` | Port used for service | `80` |
 | `frontend.containerPort` | Port used for container | `8080` |
 | `frontend.replicas` | Amount of replicas deployed | `1` |
+| `frontend.podAntiAffinity.topologyKey` | Prefer replicas on different workers (`kubernetes.io/hostname`) or in different zones (`topology.kubernetes.io/zone`). | `topology.kubernetes.io/zone` |
 | `frontend.minPodsAvailable` | Minimum available pods in pod disruption budget. Value `0` omits the pdb. | `0` |
 | `frontend.auth_secret` | Secret containing base64 encoded Basic auth secret | |
 | `frontend.auth_secretName` | Name of auth secret | `geoweb-auth` |
@@ -271,6 +272,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 
 | Chart version | frontend version |
 |---------------|------------------|
+| 4.3.0         | 20.1.0           |
 | 4.2.2         | 20.1.0           |
 | 4.2.1         | 19.6.0           |
 | 4.2.0         | 19.6.0           |

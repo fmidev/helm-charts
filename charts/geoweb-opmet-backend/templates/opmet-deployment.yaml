@@ -308,4 +308,4 @@ spec:
                   operator: In
                   values:
                   - {{ .Values.opmet.name }}
-              topologyKey: topology.kubernetes.io/zone
+              topologyKey: {{ .Values.opmet.podAntiAffinity.topologyKey | quote }}

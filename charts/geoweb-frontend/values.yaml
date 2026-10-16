@@ -8,6 +8,8 @@ frontend:
   containerPort: 8080
   replicas: 1
   minPodsAvailable: 0
+  podAntiAffinity:
+    topologyKey: topology.kubernetes.io/zone
   auth_secretName: geoweb-auth
   auth_secretType: secretsmanager
   client_id_secretName: geoweb-client-id

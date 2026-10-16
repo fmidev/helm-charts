@@ -64,6 +64,7 @@ The following table lists the configurable parameters of the location backend ch
 | `location.svcPort` | Port used for service | `80` |
 | `location.containerPort` | Port used for container | `8080` |
 | `location.replicas` | Amount of replicas deployed | `1` |
+| `location.podAntiAffinity.topologyKey` | Prefer replicas on different workers (`kubernetes.io/hostname`) or in different zones (`topology.kubernetes.io/zone`). | `topology.kubernetes.io/zone` |
 | `location.minPodsAvailable` | Minimum available pods in pod disruption budget. Value `0` omits the pdb. | `0` |
 | `location.resources` | Configure resource limits & requests | see defaults in `values.yaml` |
 | `location.livenessProbe` | Configure livenessProbe | see defaults in `values.yaml` |
@@ -89,6 +90,7 @@ The following table lists the configurable parameters of the location backend ch
 
 | Chart version | location version |
 |---------------|------------------|
+| 1.3.0         | 0.4.0            |
 | 1.2.2         | 0.4.0            |
 | 1.2.1         | 0.3.1            |
 | 1.2.0         | 0.3.1            |
