@@ -1,3 +1,29 @@
+# Upgrade notes for chart 2.0.0
+
+Chart `2.0.0` no longer assumes the nginx ingress controller. The Ingress defaults are neutral, so the chart works with any controller, including OpenShift:
+
+- `ingress.customAnnotations` is renamed to `ingress.annotations`, which defaults to `{}`. The chart no longer sets nginx annotations itself. Template rendering fails if `ingress.customAnnotations` is still set.
+- `ingress.ingressClassName` defaults to `""`, which uses the cluster's default IngressClass, instead of `nginx`.
+- `location.path` defaults to the plain prefix `/location-backend` instead of the nginx regex `/location-backend/(.*)`.
+- The new `ingress.enabled` (default `true`) leaves the Ingress out when set to `false`.
+
+With a plain prefix path the controller passes the prefix on, and FastAPI removes it based on `location.env.APPLICATION_ROOT_PATH`, so keep that the same as `location.path`.
+
+To keep the previous nginx ingress controller setup, set:
+
+```yaml
+location:
+  path: /location-backend/(.*)
+ingress:
+  ingressClassName: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "DELETE, PUT, GET, POST, OPTIONS, PATCH, HEAD"
+```
+
 # Upgrade notes for chart 1.2.0
 
 Chart `1.2.0` sets the variables from `location.env` directly in the Deployment instead of in a ConfigMap.
@@ -60,7 +86,7 @@ The following table lists the configurable parameters of the location backend ch
 | `location.commitHash` | Adds commitHash annotation to the deployment | |
 | `location.imagePullPolicy` | Adds option to modify imagePullPolicy | |
 | `location.url` | Url which the application can be accessed | |
-| `location.path` | Path suffix added to url | `/location-backend/(.*)` |
+| `location.path` | Path prefix of the service in the Ingress | `/location-backend` |
 | `location.svcPort` | Port used for service | `80` |
 | `location.containerPort` | Port used for container | `8080` |
 | `location.replicas` | Amount of replicas deployed | `1` |
@@ -70,7 +96,7 @@ The following table lists the configurable parameters of the location backend ch
 | `location.readinessProbe` | Configure readinessProbe | see defaults in `values.yaml` |
 | `location.startupProbe` | Configure startupProbe | see defaults in `values.yaml` |
 | `location.env.APPLICATION_DOC_ROOT` | Endpoint for OpenAPI specification. | `/api` |
-| `location.env.APPLICATION_ROOT_PATH` | Application root path for FastAPI. Generally same as `location.path` without the wildcard. | `/location-backend` |
+| `location.env.APPLICATION_ROOT_PATH` | Application root path for FastAPI. Generally the same as `location.path`, without any regex part | `/location-backend` |
 | `location.env.LOCALDATA` | Enable or disable searching local data sources. Either `True` or `False` | `True` |
 | `location.env.PDOK_SUGGEST_URL` | PDOK suggest URL. Set empty string to disable. | Default value is set in the application |
 | `location.env.PDOK_LOOKUP_URL` | PDOK lookup URL. Set empty string to disable. | Default value is set in the application |
@@ -82,13 +108,15 @@ The following table lists the configurable parameters of the location backend ch
 | `location.env.LOG_LEVEL` | Set the log level. Options are `DEBUG`, `INFO`, `WARNING`, `ERROR` | `INFO` |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |
 | `ingress.tls` | TLS configuration section for the ingress | |
-| `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | `nginx` |
-| `ingress.customAnnotations` | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations if set | |
+| `ingress.ingressClassName` | IngressClass for the Ingress. Empty uses the cluster's default IngressClass | `""` |
+| `ingress.annotations` | Annotations for your ingress controller, for example nginx rewrite or cert-manager annotations. See the upgrade notes for the previous nginx defaults | `{}` |
+| `ingress.enabled` | Create the Ingress | `true` |
 
 # Chart versions
 
 | Chart version | location version |
 |---------------|------------------|
+| 2.0.0         | 0.4.0            |
 | 1.2.2         | 0.4.0            |
 | 1.2.1         | 0.3.1            |
 | 1.2.0         | 0.3.1            |

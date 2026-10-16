@@ -4,6 +4,34 @@ Deploys the GeoWeb opmet backend, message converter, publisher and auth proxy.
 The chart can use a development PostgreSQL sidecar, a separately managed
 PostgreSQL database, or a Zalando Postgres Operator database.
 
+## Upgrading to 5.0
+
+Chart `5.0.0` no longer assumes the nginx ingress controller. The Ingress defaults are neutral, so the chart works with any controller, including OpenShift:
+
+- `ingress.customAnnotations` is renamed to `ingress.annotations`, which defaults to `{}`. The chart no longer sets nginx annotations itself. Template rendering fails if `ingress.customAnnotations` is still set.
+- `ingress.ingressClassName` defaults to `""`, which uses the cluster's default IngressClass, instead of `nginx`.
+- `opmet.path` defaults to the plain prefix `/opmet` instead of the nginx regex `/opmet/(.*)`.
+- The new `ingress.enabled` (default `true`) leaves the Ingress out when set to `false`.
+
+With a plain prefix path the controller passes the prefix on, and FastAPI removes it based on `opmet.env.APPLICATION_ROOT_PATH`, so keep that the same as `opmet.path`.
+
+To keep the previous nginx ingress controller setup, set:
+
+```yaml
+opmet:
+  path: /opmet/(.*)
+ingress:
+  ingressClassName: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "DELETE, PUT, GET, POST, OPTIONS, PATCH, HEAD"
+```
+
+**Custom auth proxy configuration:** the auth proxy's default `nginx.conf` requires a valid token on every path. A custom `nginx.conf` (`opmet.useCustomConfigurationFiles`) with per-path `location` blocks expects paths without the prefix. If the ingress controller does not strip the prefix, add a rewrite to the start of the `server` block, for example `rewrite ^/opmet(?:/(.*))?$ /$1 last;`. Otherwise prefixed requests skip those `location` blocks and their permission checks.
+
 ## Upgrading to 4.2
 
 Chart `4.2.0` sets the variables from `opmet.env` and `opmet.nginx` directly in the Deployment instead of in ConfigMaps.
@@ -285,8 +313,9 @@ The following table lists the configurable parameters of the Opmet backend chart
 
 | Parameter                                     | Description | Default                                                                                      |
 |-----------------------------------------------| - |----------------------------------------------------------------------------------------------|
-| `ingress.customAnnotations`                   | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations if set |                                                                                              |
-| `ingress.ingressClassName`                    | Set ingressClassName parameter to not use default ingressClass | `nginx`                                                                                      |
+| `ingress.annotations` | Annotations for your ingress controller, for example nginx rewrite or cert-manager annotations. See the upgrade notes for the previous nginx defaults | `{}` |
+| `ingress.enabled` | Create the Ingress | `true` |
+| `ingress.ingressClassName` | IngressClass for the Ingress. Empty uses the cluster's default IngressClass | `""` |
 | `ingress.name`                                | Name of the ingress controller in use | `nginx-ingress-controller`                                                                   |
 | `ingress.tls`                                 | TLS configuration section for the ingress | |
 | `opmet.awsAccessKeyId`                        | AWS_ACCESS_KEY_ID for authenticating to S3 |                                                                                              |
@@ -329,7 +358,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.env.OPMET_BACKEND_PORT_HTTP`           | Port used for container | `8000`                                                                                       |
 | `opmet.env.MESSAGECONVERTER_URL`              | - | `"http://localhost:8080"`                                                                    |
 | `opmet.env.PUBLISHER_URL`                     | - | `"http://localhost:8090/publish"`                                                            |
-| `opmet.env.APPLICATION_ROOT_PATH`             | Application root path for FastAPI. Generally same as `opmet.path` without the wildcard. | `/opmet`                                                                                |
+| `opmet.env.APPLICATION_ROOT_PATH` | Application root path for FastAPI. Generally the same as `opmet.path`, without any regex part | `/opmet` |
 | `opmet.env.SIGMET_CONFIG`                     | Location of SIGMET configuration file that is used (application defaults to `configuration_files/sigmetConfig.json`) |                                                                                              |
 | `opmet.iamRoleARN`                            | IAM Role with permissions to access secrets |                                                                                              |
 | `opmet.imagePullPolicy`                       | Adds option to modify imagePullPolicy |                                                                                              |
@@ -371,7 +400,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.nginx.startupProbe  `                  | Configure nginx container startupProbe | see defaults from `values.yaml`                                                              |
 | `opmet.nginx.version`                         | Auth-backend image version | see default from `values.yaml` |
 | `opmet.nginx.ENV_VAR_STRICT_MODE`             | Enable check if all necessary variables for authentication and authorization are set | `false` |
-| `opmet.path`                                  | Path suffix added to url | `/opmet/(.*)`                                                                                |
+| `opmet.path` | Path prefix of the service in the Ingress | `/opmet` |
 | `opmet.publisher.DESTINATION`                 | Folder inside publisher container where TACs are stored (used with local-publisher) | `/app/output`                                                                                |
 | `opmet.publisher.livenessProbe`               | Configure publisher livenessProbe | see defaults from `values.yaml`                                                              |
 | `opmet.publisher.name`                        | Name of publisher container  | `opmet-publisher`                                                                            |
@@ -409,6 +438,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 
 | Chart version | opmet version |
 |---------------|---------------|
+| 5.0.0         | 5.11.4        |
 | 4.2.2         | 5.11.4        |
 | 4.2.1         | 5.11.1        |
 | 4.2.0         | 5.11.1        |

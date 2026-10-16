@@ -4,7 +4,7 @@ versions:
 opmet:
   name: opmet
   registry: registry.gitlab.com/opengeoweb/backend-services/opmet-backend/opmet-backend
-  path: /opmet/(.*)
+  path: /opmet
   svcPort: 80
   replicas: 1
   minPodsAvailable: 0
@@ -204,5 +204,9 @@ opmet:
   volumeSize: 100Mi
 
 ingress:
+  enabled: true
   name: nginx-ingress-controller
-  ingressClassName: nginx
+  # Empty uses the cluster's default IngressClass
+  ingressClassName: ""
+  # Annotations for your ingress controller, see README
+  annotations: {}
