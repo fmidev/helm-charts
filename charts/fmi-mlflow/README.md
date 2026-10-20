@@ -64,6 +64,8 @@ By default the tag is derived from `appVersion` in Chart.yaml. Images can be fou
 | auth.adminUsername | string | "admin" | Admin user created on the first start |
 | auth.adminSecret | string | "mlflow-admin-credentials" | Optional secret with the admin `password` |
 | auth.flaskSecret | string | "flask-secret" | Secret with the flask `SECRET_KEY` |
+| workspaces.enabled | bool | `false` | Enable workspaces (`--enable-workspaces`). Changes the permission model, see values.yaml |
+| workspaces.grantDefaultAccess | bool | `true` | With workspaces enabled, users without a grant get auth.defaultPermission in the "default" workspace |
 | route.timeout | string | "5m" | Router timeout, artifacts are proxied through the server |
 | recovery.enabled | bool | `false` | Enable if recovering from backup |
 | recovery.ondemand | bool | `false` | Enable if recovering from manually created backup |

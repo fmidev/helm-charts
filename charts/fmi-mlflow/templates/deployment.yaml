@@ -84,6 +84,9 @@ spec:
             - --app-name=basic-auth
             - --allowed-hosts={{ include "mlflow.host" . }}
             - --cors-allowed-origins=https://{{ include "mlflow.host" . }}
+            {{- if .Values.workspaces.enabled }}
+            - --enable-workspaces
+            {{- end }}
 
           # /health is exempt from authentication and host validation
           startupProbe:

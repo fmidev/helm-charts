@@ -38,6 +38,18 @@ auth:
   # Secret with key SECRET_KEY, used for CSRF protection. Required.
   flaskSecret: flask-secret
 
+# Workspaces: logical separation of experiments, models and prompts (mlflow server --enable-workspaces)
+# Changes the permission model, test before enabling:
+#  * an ungranted user gets no access in named workspaces
+#  * creating experiments needs a workspace USE grant (e.g. the "user" role), READ is not enough
+#  * existing resources stay in the "default" workspace (move them with `mlflow db move-resources`)
+#  * clients select a workspace with the MLFLOW_WORKSPACE environment variable
+workspaces:
+  enabled: false
+  # Users without a grant get auth.defaultPermission in the "default" workspace.
+  # No effect while workspaces are disabled.
+  grantDefaultAccess: true
+
 route:
   # Router timeout, artifacts are proxied through the server so large uploads take time
   timeout: 5m
