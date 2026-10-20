@@ -19,15 +19,28 @@ mlflow:
       cpu: "1"
 
   image:
+    # https://github.com/mlflow/mlflow/pkgs/container/mlflow
+    # The -full image already contains the auth, postgresql and s3 dependencies.
     repository: ghcr.io/mlflow/mlflow
-    tag: "v3.4.0"
-    pullPolicy: Always
-    build:
-      resources:
-        limits:
-          memory: "4Gi"
-        requests:
-          memory: "2Gi"
+    tag: ""  # defaults to v<appVersion>-full
+    pullPolicy: IfNotPresent
+
+# Basic-auth plugin, rendered into basic-auth.ini (templates/auth-config.yaml)
+# https://mlflow.org/docs/latest/self-hosting/security/basic-http-auth/
+auth:
+  # Permission for any (user, resource) pair without an explicit grant. Explicit
+  # grants (EDIT, MANAGE, but also NO_PERMISSIONS/DENY) still win.
+  defaultPermission: READ
+  adminUsername: admin
+  # Admin password is only needed on the first start against an empty users database.
+  # Optional secret with key "password".
+  adminSecret: mlflow-admin-credentials
+  # Secret with key SECRET_KEY, used for CSRF protection. Required.
+  flaskSecret: flask-secret
+
+route:
+  # Router timeout, artifacts are proxied through the server so large uploads take time
+  timeout: 5m
 
 # Backups
 recovery:
@@ -42,6 +55,7 @@ recovery:
   # https://cloudnative-pg.io/documentation/1.27/appendixes/backup_barmanobjectstore/#recovery-from-an-object-store
   source: external-source  # dont change this
   serverName: pg-cluster-source  # name of the source cluster (where the backups are taken from)
+  backupPath:  # s3 path of the source backups, defaults to objectStorage.s3.backupPath
 
 # S3 storage for artifacts and backups
 objectStorage:
@@ -60,8 +74,8 @@ postgresql:
   owner: app
   instances: 3
   storageSize: 3Gi
+  # 1/4 of memory as suggested in https://www.postgresql.org/docs/current/runtime-config-resource.html
   parameters: {}
-    # 1/4 of memory as suggested in https://www.postgresql.org/docs/current/runtime-config-resource.html
   resources:
     requests:
       cpu: "200m"

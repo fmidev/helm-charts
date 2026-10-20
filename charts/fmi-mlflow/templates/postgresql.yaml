@@ -2,6 +2,12 @@ apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: {{ .Values.postgresql.clusterName }}
+  labels:
+    {{- include "mlflow.labels" . | nindent 4 }}
+  annotations:
+    # never let helm delete a database cluster, e.g. when clusterName changes.
+    # old clusters are deleted manually.
+    helm.sh/resource-policy: keep
 spec:
   imageName: {{ .Values.postgresql.imageName | default "ghcr.io/cloudnative-pg/postgresql" }}
   instances: {{ .Values.postgresql.instances | default 1 }}
@@ -87,5 +93,6 @@ spec:
       barmanObjectStore:
         <<: *barmanObjectStore
         serverName: {{ .Values.recovery.serverName }}
+        destinationPath: "s3://{{ .Values.objectStorage.s3.bucketName }}/{{ .Values.recovery.backupPath | default .Values.objectStorage.s3.backupPath }}"
   {{- end }}
 

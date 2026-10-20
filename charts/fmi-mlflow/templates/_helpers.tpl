@@ -5,10 +5,6 @@ Expand the name of the chart.
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
-{{- define "mlflow.project" -}}
-{{ .Release.Namespace }}
-{{- end -}}
-
 {{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
@@ -54,17 +50,45 @@ app.kubernetes.io/name: {{ include "mlflow.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "mlflow.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
-{{- default (include "mlflow.fullname" .) .Values.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.serviceAccount.name }}
-{{- end }}
-{{- end }}
-
 {{- define "environment" -}}
 {{- if eq .Values.environment "prod" }}ocp{{- else }}ock{{- end }}
+{{- end -}}
+
+{{/*
+MLflow image, tag defaults to v<appVersion>-full
+*/}}
+{{- define "mlflow.image" -}}
+{{- $tag := .Values.mlflow.image.tag | default (printf "v%s-full" .Chart.AppVersion) }}
+{{- printf "%s:%s" .Values.mlflow.image.repository $tag }}
+{{- end }}
+
+{{/*
+Public hostname of the route
+*/}}
+{{- define "mlflow.host" -}}
+{{ .Release.Namespace }}.out.{{ include "environment" . }}.{{ .Values.host }}
+{{- end -}}
+
+{{/*
+Read-write service of the postgresql cluster
+*/}}
+{{- define "mlflow.dbHost" -}}
+{{ .Values.postgresql.clusterName }}-rw.{{ .Release.Namespace }}:5432
+{{- end -}}
+
+{{/*
+Database credentials. The database uris don't contain credentials,
+libpq reads them from the PGUSER and PGPASSWORD environment variables.
+*/}}
+{{- define "mlflow.dbEnv" -}}
+- name: PGUSER
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.postgresql.secrets.mlflow }}
+      key: username
+- name: PGPASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.postgresql.secrets.mlflow }}
+      key: password
 {{- end -}}

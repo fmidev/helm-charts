@@ -1,3 +1,1 @@
-values-prod.yaml
-values-test.yaml
-
+values-*.yaml

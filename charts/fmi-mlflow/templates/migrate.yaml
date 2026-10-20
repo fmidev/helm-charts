@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "mlflow.labels" . | nindent 4 }}
   annotations:
-    description: Template to upgrade database
+    description: Template to upgrade the mlflow databases. Run with the server stopped.
 objects:
 - apiVersion: batch/v1
   kind: Job
@@ -21,22 +21,13 @@ objects:
       spec:
         restartPolicy: Never
         containers:
-          - name: {{ include "mlflow.fullname" . }}
-            image: image-registry.openshift-image-registry.svc:5000/{{ .Release.Namespace }}/{{ include "mlflow.name" . }}:{{ .Values.mlflow.image.tag | default "latest" }}
-            imagePullPolicy: {{ .Values.mlflow.image.pullPolicy | default "Always" }}
+          - name: {{ include "mlflow.fullname" . }}-migrate
+            image: {{ include "mlflow.image" . }}
+            imagePullPolicy: {{ .Values.mlflow.image.pullPolicy }}
             env:
-            - name: POSTGRESQL_USER
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.postgresql.secrets.mlflow }}
-                  key: username
-            - name: POSTGRESQL_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.postgresql.secrets.mlflow }}
-                  key: password
-            - name: MLFLOW_AUTH_CONFIG_PATH
-              value: "/opt/basic-auth.ini"
+              {{- include "mlflow.dbEnv" . | nindent 14 }}
+              - name: HOME
+                value: /tmp
 
             resources:
               requests:
@@ -47,18 +38,18 @@ objects:
             command: ["sh", "-c"]
             args:
               - |
-                mlflow db upgrade postgresql://$(POSTGRESQL_USER):$(POSTGRESQL_PASSWORD)@{{ .Values.postgresql.clusterName }}-rw.{{ .Release.Namespace }}:5432/{{ .Values.postgresql.database }}
-                # NOTE: no need to run migrations to users database for now! 
-                # https://mlflow.org/docs/latest/self-hosting/security/basic-http-auth/#permissions-database
-                # python -m mlflow.server.auth db upgrade --url postgresql://$(POSTGRESQL_USER):$(POSTGRESQL_PASSWORD)@{{ .Values.postgresql.clusterName }}-rw.{{ .Release.Namespace }}:5432/users
+                set -e
+                # tracking database (experiments, runs, models, ...)
+                mlflow db upgrade postgresql://{{ include "mlflow.dbHost" . }}/{{ .Values.postgresql.database }}
+                # users database (basic-auth users and permissions)
+                # https://mlflow.org/docs/latest/self-hosting/security/basic-http-auth/
+                python -m mlflow.server.auth db upgrade --url postgresql://{{ include "mlflow.dbHost" . }}/users
+                echo "Migrations done"
 
             volumeMounts:
-              - name: auth-config
-                mountPath: /opt/
-                readOnly: true
-                #subPath: basic-auth.ini
+              - name: tmp
+                mountPath: /tmp
 
         volumes:
-          - name: auth-config
-            secret:
-              secretName: mlflow-auth-config # manually created for now
+          - name: tmp
+            emptyDir: {}

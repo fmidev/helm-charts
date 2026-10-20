@@ -3,9 +3,14 @@ kind: Route
 metadata:
   name: {{ include "mlflow.fullname" . }}
   labels:
+    {{- include "mlflow.labels" . | nindent 4 }}
     type: external
+  {{- with .Values.route.timeout }}
+  annotations:
+    haproxy.router.openshift.io/timeout: {{ . }}
+  {{- end }}
 spec:
-  host: {{ .Release.Namespace }}.out.{{ include "environment" . }}.{{ .Values.host }}
+  host: {{ include "mlflow.host" . }}
   port:
     targetPort: {{ .Values.mlflow.servicePort }}
   to:
