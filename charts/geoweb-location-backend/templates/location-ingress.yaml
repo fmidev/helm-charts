@@ -22,7 +22,7 @@ spec:
       http:
         paths:
           - path: {{ .Values.location.path }}
-            pathType: Prefix
+            pathType: {{ .Values.ingress.pathType | default "Prefix" }}
             backend:
               service:
                 name: {{ .Values.location.name }}

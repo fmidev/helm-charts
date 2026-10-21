@@ -10,6 +10,7 @@ Chart `4.0.0` no longer assumes the nginx ingress controller. The Ingress defaul
 - `ingress.ingressClassName` defaults to `""`, which uses the cluster's default IngressClass, instead of `nginx`.
 - `presets.path` defaults to the plain prefix `/presets` instead of the nginx regex `/presets/(.*)`.
 - The new `ingress.enabled` (default `true`) leaves the Ingress out when set to `false`.
+- The new `ingress.pathType` (default `Prefix`) sets the Ingress path type. Use `ImplementationSpecific` with nginx regex paths.
 
 With a plain prefix path the controller passes the prefix on, and FastAPI removes it based on `presets.env.APPLICATION_ROOT_PATH`, so keep that the same as `presets.path`.
 
@@ -20,6 +21,7 @@ presets:
   path: /presets/(.*)
 ingress:
   ingressClassName: nginx
+  pathType: ImplementationSpecific
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
@@ -384,6 +386,7 @@ The following table lists the configurable parameters of the Presets backend cha
 | `ingress.ingressClassName` | IngressClass for the Ingress. Empty uses the cluster's default IngressClass | `""` |
 | `ingress.annotations` | Annotations for your ingress controller, for example nginx rewrite or cert-manager annotations. See the upgrade notes for the previous nginx defaults | `{}` |
 | `ingress.enabled` | Create the Ingress | `true` |
+| `ingress.pathType` | Path type of the Ingress path. Use `ImplementationSpecific` with nginx regex paths | `Prefix` |
 
 # Chart versions
 

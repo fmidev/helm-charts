@@ -5,7 +5,7 @@ Chart `5.0.0` no longer assumes the nginx ingress controller. The Ingress defaul
 - `ingress.customAnnotations` is renamed to `ingress.annotations`, which defaults to `{}`. The chart no longer sets nginx annotations itself. Template rendering fails if `ingress.customAnnotations` is still set.
 - `ingress.ingressClassName` defaults to `""`, which uses the cluster's default IngressClass, instead of `nginx`.
 - `ingress.rules` is removed, so the chart no longer adds the nginx `configuration-snippet` with cache headers. Template rendering fails if `ingress.rules` is set.
-- `frontend.auth_secret` still creates the basic auth Secret, but no longer adds the nginx basic auth annotations. Template rendering fails if `frontend.auth_secret` is set and `ingress.annotations` is empty.
+- `frontend.auth_secret` still creates the basic auth Secret, but no longer adds the nginx basic auth annotations. Template rendering fails if `frontend.auth_secret` is set unless `ingress.annotations` sets `nginx.ingress.kubernetes.io/auth-type` and `nginx.ingress.kubernetes.io/auth-secret`, or `ingress.basicAuthManagedElsewhere` is `true` for basic auth configured another way.
 - The new `ingress.enabled` (default `true`) leaves the Ingress out when set to `false`.
 
 To keep the previous nginx ingress controller setup, set the annotations the chart used to add. Leave out the auth annotations if you don't use `frontend.auth_secret`, and the snippet if your controller does not allow snippet annotations:
@@ -230,7 +230,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.containerPort` | Port used for container | `8080` |
 | `frontend.replicas` | Amount of replicas deployed | `1` |
 | `frontend.minPodsAvailable` | Minimum available pods in pod disruption budget. Value `0` omits the pdb. | `0` |
-| `frontend.auth_secret` | Secret containing base64 encoded Basic auth secret. Only creates the Secret: set the basic auth annotations for your ingress controller in `ingress.annotations` | |
+| `frontend.auth_secret` | Secret containing base64 encoded Basic auth secret. Only creates the Secret: set the nginx basic auth annotations in `ingress.annotations`, or set `ingress.basicAuthManagedElsewhere` | |
 | `frontend.auth_secretName` | Name of auth secret | `geoweb-auth` |
 | `frontend.auth_secretType` | Type of auth secret | `secretsmanager` |
 | `frontend.auth_secretPath` | Path to auth secret | |
@@ -306,6 +306,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `ingress.tls` | TLS configuration section for the ingress | |
 | `ingress.annotations` | Annotations for your ingress controller, for example basic auth or cert-manager annotations. See the upgrade notes for the previous nginx defaults | `{}` |
 | `ingress.enabled` | Create the Ingress | `true` |
+| `ingress.basicAuthManagedElsewhere` | Set to `true` when `frontend.auth_secret` basic auth is configured without the nginx basic auth annotations, for example with a Traefik middleware | `false` |
 
 # Chart versions
 

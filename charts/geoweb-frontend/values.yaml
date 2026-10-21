@@ -113,3 +113,6 @@ ingress:
   ingressClassName: ""
   # Annotations for your ingress controller, see README
   annotations: {}
+  # Set to true when frontend.auth_secret basic auth is configured without
+  # the nginx basic auth annotations, for example with a Traefik middleware
+  basicAuthManagedElsewhere: false

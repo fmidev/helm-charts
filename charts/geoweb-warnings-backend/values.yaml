@@ -124,5 +124,7 @@ ingress:
   name: nginx-ingress-controller
   # Empty uses the cluster's default IngressClass
   ingressClassName: ""
+  # Use ImplementationSpecific with nginx regex paths
+  pathType: Prefix
   # Annotations for your ingress controller, see README
   annotations: {}

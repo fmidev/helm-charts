@@ -4,8 +4,10 @@
 {{- if .Values.ingress.rules }}
 {{- fail "ingress.rules was removed. Set the snippet as an ingress.annotations entry for your ingress controller, for example nginx.ingress.kubernetes.io/configuration-snippet" }}
 {{- end }}
-{{- if and .Values.ingress.enabled .Values.frontend.auth_secret (not .Values.ingress.annotations) }}
-{{- fail "frontend.auth_secret no longer adds basic auth annotations to the Ingress. Set them in ingress.annotations, for example nginx.ingress.kubernetes.io/auth-type: basic and nginx.ingress.kubernetes.io/auth-secret: <frontend.auth_secretName>" }}
+{{- $annotations := .Values.ingress.annotations | default dict }}
+{{- $nginxBasicAuth := and (hasKey $annotations "nginx.ingress.kubernetes.io/auth-type") (hasKey $annotations "nginx.ingress.kubernetes.io/auth-secret") }}
+{{- if and .Values.frontend.auth_secret (not $nginxBasicAuth) (not .Values.ingress.basicAuthManagedElsewhere) }}
+{{- fail "frontend.auth_secret no longer adds basic auth annotations to the Ingress. Set nginx.ingress.kubernetes.io/auth-type: basic and nginx.ingress.kubernetes.io/auth-secret: <frontend.auth_secretName> in ingress.annotations, or set ingress.basicAuthManagedElsewhere: true if basic auth is configured another way" }}
 {{- end }}
 {{- if .Values.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
