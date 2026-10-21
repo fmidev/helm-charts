@@ -92,6 +92,7 @@ The following table lists the configurable parameters of the CAP backend chart a
 | `cap.svcPort` | Port used for service | `80` |
 | `cap.containerPort` | Port used for container | `8080` |
 | `cap.replicas` | Amount of replicas deployed | `1` |
+| `cap.podAntiAffinity.topologyKey` | Prefer replicas on different workers (`kubernetes.io/hostname`) or in different zones (`topology.kubernetes.io/zone`). | `topology.kubernetes.io/zone` |
 | `cap.minPodsAvailable` | Minimum available pods in pod disruption budget. Value `0` omits the pdb. | `0` |
 | `cap.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `cap.livenessProbe` | Configure livenessProbe | see defaults from `values.yaml` |
@@ -110,6 +111,7 @@ The following table lists the configurable parameters of the CAP backend chart a
 | Chart version | cap version |
 |---------------|-------------|
 | 2.0.0         | 0.11.0      |
+| 1.10.0        | 0.11.0      |
 | 1.9.1         | 0.11.0      |
 | 1.9.0         | 0.11.0      |
 | 1.8.6         | 0.11.0      |

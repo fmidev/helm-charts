@@ -242,6 +242,7 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.path` | Path prefix of the service in the Ingress | `/taf-backend` |
 | `taf.svcPort` | Port used for service | `80` |
 | `taf.replicas` | Amount of replicas deployed | `1` |
+| `taf.podAntiAffinity.topologyKey` | Prefer replicas on different workers (`kubernetes.io/hostname`) or in different zones (`topology.kubernetes.io/zone`). | `topology.kubernetes.io/zone` |
 | `taf.minPodsAvailable` | Minimum available pods in pod disruption budget. Value `0` omits the pdb. | `0` |
 | `taf.secretServiceAccount` | Service Account created for handling secrets | `taf-service-account` |
 | `taf.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
@@ -348,6 +349,7 @@ The following table lists the configurable parameters of the Taf backend chart a
 | Chart version | taf version |
 |---------------|-------------|
 | 3.0.0         | 4.2.5       |
+| 2.2.0         | 4.2.5       |
 | 2.1.2         | 4.2.5       |
 | 2.1.1         | 4.2.2       |
 | 2.1.0         | 4.2.2       |

@@ -8,6 +8,8 @@ presets:
   svcPort: 80
   replicas: 1
   minPodsAvailable: 0
+  podAntiAffinity:
+    topologyKey: topology.kubernetes.io/zone
   PRESETS_PORT_HTTP: 8080
   DEPLOY_ENVIRONMENT: open
   runtimeConfiguration:

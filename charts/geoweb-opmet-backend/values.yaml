@@ -8,6 +8,8 @@ opmet:
   svcPort: 80
   replicas: 1
   minPodsAvailable: 0
+  podAntiAffinity:
+    topologyKey: topology.kubernetes.io/zone
   secretServiceAccount: opmet-service-account
   iamRoleARN: ""
   resources:

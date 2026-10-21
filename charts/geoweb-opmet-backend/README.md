@@ -426,6 +426,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.readinessProbe`                        | Configure main container readinessProbe | see defaults from `values.yaml`                                                              |
 | `opmet.registry`                              | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/opmet-backend`                              |
 | `opmet.replicas`                              | Amount of replicas deployed | `1`                                                                                          |
+| `opmet.podAntiAffinity.topologyKey` | Prefer replicas on different workers (`kubernetes.io/hostname`) or in different zones (`topology.kubernetes.io/zone`). | `topology.kubernetes.io/zone` |
 | `opmet.resources`                             | Configure resource limits & requests | see defaults from `values.yaml`                                                              |
 | `opmet.s3bucketName`                          | Name of the S3 bucket where custom configurations are stored |                                                                                              |
 | `opmet.secretServiceAccount`                  | Service Account created for handling secrets | `opmet-service-account`                                                                      |
@@ -442,6 +443,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 | Chart version | opmet version |
 |---------------|---------------|
 | 5.0.0         | 5.11.4        |
+| 4.3.0         | 5.11.4        |
 | 4.2.2         | 5.11.4        |
 | 4.2.1         | 5.11.1        |
 | 4.2.0         | 5.11.1        |

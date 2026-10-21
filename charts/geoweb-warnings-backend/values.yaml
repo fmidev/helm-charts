@@ -8,6 +8,8 @@ warnings:
   svcPort: 80
   replicas: 1
   minPodsAvailable: 0
+  podAntiAffinity:
+    topologyKey: topology.kubernetes.io/zone
   secretServiceAccount: warnings-service-account
   resources:
     requests:

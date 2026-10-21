@@ -244,6 +244,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.path` | Path prefix of the service in the Ingress | `/warnings-backend` |
 | `warnings.svcPort` | Port used for service | `80` |
 | `warnings.replicas` | Amount of replicas deployed | `1` |
+| `warnings.podAntiAffinity.topologyKey` | Prefer replicas on different workers (`kubernetes.io/hostname`) or in different zones (`topology.kubernetes.io/zone`). | `topology.kubernetes.io/zone` |
 | `warnings.minPodsAvailable` | Minimum available pods in pod disruption budget. Value `0` omits the pdb. | `0` | 
 | `warnings.secretServiceAccount` | Service Account created for handling secrets | `warnings-service-account` |
 | `warnings.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
@@ -323,6 +324,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 | Chart version | warnings version |
 |---------------|------------------|
 | 3.0.0         | 4.1.0            |
+| 2.2.0         | 4.1.0            |
 | 2.1.2         | 4.1.0            |
 | 2.1.1         | 3.2.0            |
 | 2.1.0         | 3.2.0            |

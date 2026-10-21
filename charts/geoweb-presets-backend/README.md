@@ -299,6 +299,7 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.svcPort`                                     | Port used for service                                                                                                                                     | `80`                                                                        |
 | `presets.PRESETS_PORT_HTTP`                           | Port used for presets-backend container                                                                                                                   | `8080`                                                                      |
 | `presets.replicas`                                    | Amount of replicas deployed                                                                                                                               | `1`                                                                         |
+| `presets.podAntiAffinity.topologyKey` | Prefer replicas on different workers (`kubernetes.io/hostname`) or in different zones (`topology.kubernetes.io/zone`). | `topology.kubernetes.io/zone` |
 | `presets.minPodsAvailable`                            | Minimum available pods in pod disruption budget. Value `0` omits the pdb.                                                                                 | `0`                                                                         |
 | `presets.DEPLOY_ENVIRONMENT`                          | Environment which presets should be seeded to the database                                                                                                | `open`                                                                      |
 | `presets.postStartCommand`                            | Command to run after presets-backend is started                                                                                                           | `bin/admin.sh`                                                              |
@@ -393,6 +394,7 @@ The following table lists the configurable parameters of the Presets backend cha
 | Chart version | presets version |
 | ------------- | --------------- |
 | 4.0.0         | 5.1.0           |
+| 3.4.0         | 5.1.0           |
 | 3.3.2         | 5.1.0           |
 | 3.3.1         | 4.2.2           |
 | 3.3.0         | 4.2.2           |

@@ -61,4 +61,4 @@ spec:
                   operator: In
                   values:
                   - {{ .Values.cap.name }}
-              topologyKey: topology.kubernetes.io/zone
+              topologyKey: {{ .Values.cap.podAntiAffinity.topologyKey | quote }}
