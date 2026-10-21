@@ -5,7 +5,7 @@ Chart `5.0.0` no longer assumes the nginx ingress controller. The Ingress defaul
 - `ingress.customAnnotations` is renamed to `ingress.annotations`, which defaults to `{}`. The chart no longer sets nginx annotations itself. Template rendering fails if `ingress.customAnnotations` is still set.
 - `ingress.ingressClassName` defaults to `""`, which uses the cluster's default IngressClass, instead of `nginx`.
 - `ingress.rules` is removed, so the chart no longer adds the nginx `configuration-snippet` with cache headers. Template rendering fails if `ingress.rules` is set.
-- `frontend.auth_secret` still creates the basic auth Secret, but no longer adds the nginx basic auth annotations. Template rendering fails if `frontend.auth_secret` is set unless `ingress.annotations` sets `nginx.ingress.kubernetes.io/auth-type` and `nginx.ingress.kubernetes.io/auth-secret`, or `ingress.basicAuthManagedElsewhere` is `true` for basic auth configured another way.
+- `frontend.auth_secret` still creates the basic auth Secret, but no longer adds the nginx basic auth annotations. Template rendering fails if `frontend.auth_secret` is set unless `ingress.annotations` sets `nginx.ingress.kubernetes.io/auth-type` to `basic` (or `digest`) and `nginx.ingress.kubernetes.io/auth-secret` to a non-empty Secret name, or `ingress.basicAuthManagedElsewhere` is `true` for basic auth configured another way.
 - The new `ingress.enabled` (default `true`) leaves the Ingress out when set to `false`.
 
 To keep the previous nginx ingress controller setup, set the annotations the chart used to add. Leave out the auth annotations if you don't use `frontend.auth_secret`, and the snippet if your controller does not allow snippet annotations:
