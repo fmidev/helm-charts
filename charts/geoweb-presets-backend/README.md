@@ -2,6 +2,36 @@
 
 Deploys the GeoWeb presets backend, auth proxy sidecar, and optional development or Zalando PostgreSQL resources. CloudNativePG databases are managed separately with the `geoweb-cnpg` chart.
 
+# Upgrade notes for chart 4.0.0
+
+Chart `4.0.0` no longer assumes the nginx ingress controller. The Ingress defaults are neutral, so the chart works with any controller, including OpenShift:
+
+- `ingress.customAnnotations` is renamed to `ingress.annotations`, which defaults to `{}`. The chart no longer sets nginx annotations itself. Template rendering fails if `ingress.customAnnotations` is still set.
+- `ingress.ingressClassName` defaults to `""`, which uses the cluster's default IngressClass, instead of `nginx`.
+- `presets.path` defaults to the plain prefix `/presets` instead of the nginx regex `/presets/(.*)`.
+- The new `ingress.enabled` (default `true`) leaves the Ingress out when set to `false`.
+- The new `ingress.pathType` (default `Prefix`) sets the Ingress path type. Use `ImplementationSpecific` with nginx regex paths.
+
+With a plain prefix path the controller passes the prefix on, and FastAPI removes it based on `presets.env.APPLICATION_ROOT_PATH`, so keep that the same as `presets.path`.
+
+To keep the previous nginx ingress controller setup, set:
+
+```yaml
+presets:
+  path: /presets/(.*)
+ingress:
+  ingressClassName: nginx
+  pathType: ImplementationSpecific
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "DELETE, PUT, GET, POST, OPTIONS, PATCH, HEAD"
+```
+
+**Custom auth proxy configuration:** the auth proxy's default `nginx.conf` requires a valid token on every path. A custom `nginx.conf` (`presets.useCustomConfigurationFiles`) with per-path `location` blocks expects paths without the prefix. If the ingress controller does not strip the prefix, add a rewrite to the start of the `server` block, for example `rewrite ^/presets(?:/(.*))?$ /$1 last;`. Otherwise prefixed requests skip those `location` blocks and their permission checks.
+
 # Upgrade notes for chart 3.3.0
 
 Chart `3.3.0` sets the variables from `presets.env` and `presets.nginx` directly in the Deployment instead of in ConfigMaps.
@@ -265,7 +295,7 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.commitHash`                                  | Adds commitHash annotation to the deployment                                                                                                              |                                                                             |
 | `presets.imagePullPolicy`                             | Adds option to modify imagePullPolicy                                                                                                                     |                                                                             |
 | `presets.url`                                         | Url which the application can be accessed                                                                                                                 |                                                                             |
-| `presets.path`                                        | Path suffix added to url                                                                                                                                  | `/presets/(.*)`                                                             |
+| `presets.path` | Path prefix of the service in the Ingress | `/presets` |
 | `presets.svcPort`                                     | Port used for service                                                                                                                                     | `80`                                                                        |
 | `presets.PRESETS_PORT_HTTP`                           | Port used for presets-backend container                                                                                                                   | `8080`                                                                      |
 | `presets.replicas`                                    | Amount of replicas deployed                                                                                                                               | `1`                                                                         |
@@ -278,7 +308,7 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.resources`                                   | Configure resource limits & requests                                                                                                                      | see defaults from `values.yaml`                                             |
 | `presets.secretServiceAccount`                        | Service Account created for handling secrets                                                                                                              | `presets-service-account`                                                   |
 | `presets.startupProbe`                                | Configure main container startupProbe                                                                                                                     | see defaults from `values.yaml`                                             |
-| `presets.env.APPLICATION_ROOT_PATH`                   | Application root path for FastAPI. Generally same as `presets.path` without the wildcard.                                                                 | `/presets`                                                                  |
+| `presets.env.APPLICATION_ROOT_PATH` | Application root path for FastAPI. Generally the same as `presets.path`, without any regex part | `/presets` |
 | `presets.nginx.name`                                  | Name of nginx container                                                                                                                                   | `nginx`                                                                     |
 | `presets.nginx.registry`                              | Registry to fetch nginx image                                                                                                                             | `registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend` |
 | `presets.nginx.version`                               | Auth-backend image version                                                                                                                                | see default from `values.yaml`                                              |
@@ -354,13 +384,16 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.awsDefaultRegion`                            | Region where your S3 bucket is located                                                                                                                    |                                                                             |
 | `ingress.name`                                        | Name of the ingress controller in use                                                                                                                     | `nginx-ingress-controller`                                                  |
 | `ingress.tls`                                         | TLS configuration section for the ingress                                                                                                                 |                                                                             |
-| `ingress.ingressClassName`                            | Set ingressClassName parameter to not use default ingressClass                                                                                            | `nginx`                                                                     |
-| `ingress.customAnnotations`                           | Custom annotations for ingress, for example <pre>customAnnotations:<br> traefik.annotation: exampleValue</pre> Overrides default nginx annotations if set |                                                                             |
+| `ingress.ingressClassName` | IngressClass for the Ingress. Empty uses the cluster's default IngressClass | `""` |
+| `ingress.annotations` | Annotations for your ingress controller, for example nginx rewrite or cert-manager annotations. See the upgrade notes for the previous nginx defaults | `{}` |
+| `ingress.enabled` | Create the Ingress | `true` |
+| `ingress.pathType` | Path type of the Ingress path. Use `ImplementationSpecific` with nginx regex paths | `Prefix` |
 
 # Chart versions
 
 | Chart version | presets version |
 | ------------- | --------------- |
+| 4.0.0         | 5.1.0           |
 | 3.4.0         | 5.1.0           |
 | 3.3.2         | 5.1.0           |
 | 3.3.1         | 4.2.2           |

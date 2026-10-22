@@ -4,7 +4,7 @@ versions:
 presets:
   name: presets
   registry: registry.gitlab.com/opengeoweb/backend-services/presets-backend/presets-backend
-  path: /presets/(.*)
+  path: /presets
   svcPort: 80
   replicas: 1
   minPodsAvailable: 0
@@ -137,5 +137,11 @@ presets:
   volumeSize: 100Mi
 
 ingress:
+  enabled: true
   name: nginx-ingress-controller
-  ingressClassName: nginx
+  # Empty uses the cluster's default IngressClass
+  ingressClassName: ""
+  # Use ImplementationSpecific with nginx regex paths
+  pathType: Prefix
+  # Annotations for your ingress controller, see README
+  annotations: {}

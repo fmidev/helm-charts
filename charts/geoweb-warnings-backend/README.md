@@ -2,6 +2,36 @@
 
 Deploys the GeoWeb warnings backend, auth proxy sidecar, and optional development or Zalando PostgreSQL resources. CloudNativePG databases are managed separately with the `geoweb-cnpg` chart.
 
+# Upgrade notes for chart 3.0.0
+
+Chart `3.0.0` no longer assumes the nginx ingress controller. The Ingress defaults are neutral, so the chart works with any controller, including OpenShift:
+
+- `ingress.customAnnotations` is renamed to `ingress.annotations`, which defaults to `{}`. The chart no longer sets nginx annotations itself. Template rendering fails if `ingress.customAnnotations` is still set.
+- `ingress.ingressClassName` defaults to `""`, which uses the cluster's default IngressClass, instead of `nginx`.
+- `warnings.path` defaults to the plain prefix `/warnings-backend` instead of the nginx regex `/warnings-backend/(.*)`.
+- The new `ingress.enabled` (default `true`) leaves the Ingress out when set to `false`.
+- The new `ingress.pathType` (default `Prefix`) sets the Ingress path type. Use `ImplementationSpecific` with nginx regex paths.
+
+With a plain prefix path the controller passes the prefix on, and FastAPI removes it based on `warnings.env.APPLICATION_ROOT_PATH`, so keep that the same as `warnings.path`.
+
+To keep the previous nginx ingress controller setup, set:
+
+```yaml
+warnings:
+  path: /warnings-backend/(.*)
+ingress:
+  ingressClassName: nginx
+  pathType: ImplementationSpecific
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "DELETE, PUT, GET, POST, OPTIONS, PATCH, HEAD"
+```
+
+**Custom auth proxy configuration:** the auth proxy's default `nginx.conf` requires a valid token on every path. A custom `nginx.conf` (`warnings.useCustomConfigurationFiles`) with per-path `location` blocks expects paths without the prefix. If the ingress controller does not strip the prefix, add a rewrite to the start of the `server` block, for example `rewrite ^/warnings-backend(?:/(.*))?$ /$1 last;`. Otherwise prefixed requests skip those `location` blocks and their permission checks.
+
 # Upgrade notes for chart 2.1.0
 
 Chart `2.1.0` sets the variables from `warnings.env` and `warnings.nginx` directly in the Deployment instead of in ConfigMaps.
@@ -211,7 +241,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.commitHash` | Adds commitHash annotation to the deployment | |
 | `warnings.imagePullPolicy` | Adds option to modify imagePullPolicy | |
 | `warnings.url` | Url which the application can be accessed | |
-| `warnings.path` | Path suffix added to url | `/warnings-backend/(.*)` |
+| `warnings.path` | Path prefix of the service in the Ingress | `/warnings-backend` |
 | `warnings.svcPort` | Port used for service | `80` |
 | `warnings.replicas` | Amount of replicas deployed | `1` |
 | `warnings.podAntiAffinity.topologyKey` | Prefer replicas on different workers (`kubernetes.io/hostname`) or in different zones (`topology.kubernetes.io/zone`). | `topology.kubernetes.io/zone` |
@@ -222,7 +252,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.livenessProbe` | Configure main container livenessProbe | see defaults from `values.yaml` |
 | `warnings.readinessProbe` | Configure main container readinessProbe | see defaults from `values.yaml` |
 | `warnings.env.WARNINGS_PORT_HTTP` | Port used for container | `8080` |
-| `warnings.env.APPLICATION_ROOT_PATH` | Application root path for FastAPI. Generally same as `warnings.path` without the wildcard. | `/warnings-backend` |
+| `warnings.env.APPLICATION_ROOT_PATH` | Application root path for FastAPI. Generally the same as `warnings.path`, without any regex part | `/warnings-backend` |
 | `warnings.nginx.name` | Name of nginx container | `nginx` |
 | `warnings.nginx.registry` | Registry to fetch nginx image | `registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend` |
 | `warnings.nginx.version` | Auth-backend image version | see default from `values.yaml` |
@@ -284,13 +314,16 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.awsDefaultRegion` | Region where your S3 bucket is located | |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |
 | `ingress.tls` | TLS configuration section for the ingress | |
-| `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | `nginx` |
-| `ingress.customAnnotations` | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations if set | |
+| `ingress.ingressClassName` | IngressClass for the Ingress. Empty uses the cluster's default IngressClass | `""` |
+| `ingress.annotations` | Annotations for your ingress controller, for example nginx rewrite or cert-manager annotations. See the upgrade notes for the previous nginx defaults | `{}` |
+| `ingress.enabled` | Create the Ingress | `true` |
+| `ingress.pathType` | Path type of the Ingress path. Use `ImplementationSpecific` with nginx regex paths | `Prefix` |
 
 # Chart versions
 
 | Chart version | warnings version |
 |---------------|------------------|
+| 3.0.0         | 4.1.0            |
 | 2.2.0         | 4.1.0            |
 | 2.1.2         | 4.1.0            |
 | 2.1.1         | 3.2.0            |

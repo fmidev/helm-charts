@@ -4,7 +4,7 @@ versions:
 warnings:
   name: warnings
   registry: registry.gitlab.com/opengeoweb/backend-services/warnings-backend/warnings-backend
-  path: /warnings-backend/(.*)
+  path: /warnings-backend
   svcPort: 80
   replicas: 1
   minPodsAvailable: 0
@@ -122,5 +122,11 @@ warnings:
   volumeSize: 100Mi
 
 ingress:
+  enabled: true
   name: nginx-ingress-controller
-  ingressClassName: nginx
+  # Empty uses the cluster's default IngressClass
+  ingressClassName: ""
+  # Use ImplementationSpecific with nginx regex paths
+  pathType: Prefix
+  # Annotations for your ingress controller, see README
+  annotations: {}
