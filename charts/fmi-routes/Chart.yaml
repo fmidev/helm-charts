@@ -2,7 +2,7 @@ apiVersion: v2
 name: fmi-routes
 description: Helm chart for defining multiple routes
 type: application
-version: 0.1.1
+version: 0.1.2
 keywords:
   - fmi
   - route
