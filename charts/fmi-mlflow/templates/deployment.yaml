@@ -1,0 +1,129 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mlflow.fullname" . }}
+  labels:
+    {{- include "mlflow.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.mlflow.replicas }}
+  # NOTE: mlflow version upgrades need the server stopped, see UPGRADE-3.17.md
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      {{- include "mlflow.selectorLabels" . | nindent 6 }}
+
+  template:
+    metadata:
+      labels:
+        {{- include "mlflow.labels" . | nindent 8 }}
+      annotations:
+        # restart the server when basic-auth.ini changes
+        checksum/auth-config: {{ include (print $.Template.BasePath "/auth-config.yaml") . | sha256sum }}
+    spec:
+      containers:
+        - name: {{ include "mlflow.fullname" . }}
+          image: {{ include "mlflow.image" . }}
+          imagePullPolicy: {{ .Values.mlflow.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.mlflow.containerPort }}
+
+          env:
+            {{- include "mlflow.dbEnv" . | nindent 12 }}
+
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.objectStorage.s3.secretName }}
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.objectStorage.s3.secretName }}
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: MLFLOW_S3_ENDPOINT_URL
+              value: {{ .Values.objectStorage.s3.endpointUrl | quote }}
+
+            # these are needed for the old s3
+            - name: AWS_REQUEST_CHECKSUM_CALCULATION
+              value: "WHEN_REQUIRED"
+            - name: AWS_RESPONSE_CHECKSUM_VALIDATION
+              value: "WHEN_REQUIRED"
+
+            - name: MLFLOW_FLASK_SERVER_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.auth.flaskSecret }}
+                  key: SECRET_KEY
+            - name: MLFLOW_AUTH_CONFIG_PATH
+              value: /etc/mlflow/basic-auth.ini
+            - name: MLFLOW_AUTH_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.auth.adminSecret }}
+                  key: password
+                  optional: true  # only needed on the first start
+
+            # openshift runs the image with a random uid, give it a writable home
+            - name: HOME
+              value: /tmp
+
+          command: ["mlflow", "server"]
+          args:
+            - --backend-store-uri=postgresql://{{ include "mlflow.dbHost" . }}/{{ .Values.postgresql.database }}
+            # PROXY artifacts to/from S3 through tracking server
+            # NOTE: don't change, existing runs refer to artifacts through this path
+            - --artifacts-destination=s3://{{ .Values.objectStorage.s3.bucketName }}/{{ .Values.objectStorage.s3.artifactPath }}/
+            - --serve-artifacts
+            - --host=0.0.0.0
+            - --port={{ .Values.mlflow.containerPort }}
+            - --app-name=basic-auth
+            - --allowed-hosts={{ include "mlflow.host" . }}
+            - --cors-allowed-origins=https://{{ include "mlflow.host" . }}
+            {{- if .Values.workspaces.enabled }}
+            - --enable-workspaces
+            {{- end }}
+
+          # /health is exempt from authentication and host validation
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          resources:
+            {{- toYaml .Values.mlflow.resources | nindent 12 }}
+
+          volumeMounts:
+            - name: auth-config
+              mountPath: /etc/mlflow
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+
+      volumes:
+        - name: auth-config
+          configMap:
+            name: {{ include "mlflow.fullname" . }}-auth
+        - name: tmp
+          emptyDir: {}

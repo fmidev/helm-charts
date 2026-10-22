@@ -1,0 +1,55 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: {{ include "mlflow.fullname" . }}-migrate
+  labels:
+    {{- include "mlflow.labels" . | nindent 4 }}
+  annotations:
+    description: Template to upgrade the mlflow databases. Run with the server stopped.
+objects:
+- apiVersion: batch/v1
+  kind: Job
+  metadata:
+    name: {{ include "mlflow.fullname" . }}-migrate-job
+    labels:
+      {{- include "mlflow.labels" . | nindent 6 }}
+  spec:
+    parallelism: 1
+    completions: 1
+    backoffLimit: 0
+    template:
+      spec:
+        restartPolicy: Never
+        containers:
+          - name: {{ include "mlflow.fullname" . }}-migrate
+            image: {{ include "mlflow.image" . }}
+            imagePullPolicy: {{ .Values.mlflow.image.pullPolicy }}
+            env:
+              {{- include "mlflow.dbEnv" . | nindent 14 }}
+              - name: HOME
+                value: /tmp
+
+            resources:
+              requests:
+                memory: "1Gi"
+              limits:
+                memory: "2Gi"
+
+            command: ["sh", "-c"]
+            args:
+              - |
+                set -e
+                # tracking database (experiments, runs, models, ...)
+                mlflow db upgrade postgresql://{{ include "mlflow.dbHost" . }}/{{ .Values.postgresql.database }}
+                # users database (basic-auth users and permissions)
+                # https://mlflow.org/docs/latest/self-hosting/security/basic-http-auth/
+                python -m mlflow.server.auth db upgrade --url postgresql://{{ include "mlflow.dbHost" . }}/users
+                echo "Migrations done"
+
+            volumeMounts:
+              - name: tmp
+                mountPath: /tmp
+
+        volumes:
+          - name: tmp
+            emptyDir: {}
