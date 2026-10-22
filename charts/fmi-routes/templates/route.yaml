@@ -37,32 +37,36 @@ spec:
 {{- end }}
 {{- end }}
 {{- end }}
+{{- $certs := list }}
 {{- range $name, $route := .Values.routes }}
 {{- if and $route.enabled $route.tls $route.tls.externalCertificate }}
+{{- $certs = append $certs $route.tls.externalCertificate }}
+{{- end }}
+{{- end }}
+{{- if $certs }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ $name }}-cert-reader
-  namespace: {{ $.Release.Namespace }}
+  name: {{ .Release.Name }}-cert-reader
+  namespace: {{ .Release.Namespace }}
 rules:
 - apiGroups: [""]
   resources: ["secrets"]
-  resourceNames: [{{ $route.tls.externalCertificate | quote }}]
+  resourceNames: {{ $certs | uniq | sortAlpha | toJson }}
   verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ $name }}-cert-reader
-  namespace: {{ $.Release.Namespace }}
+  name: {{ .Release.Name }}-cert-reader
+  namespace: {{ .Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: {{ $name }}-cert-reader
+  name: {{ .Release.Name }}-cert-reader
 subjects:
 - kind: ServiceAccount
   name: router
   namespace: openshift-ingress
-{{- end }}
 {{- end }}

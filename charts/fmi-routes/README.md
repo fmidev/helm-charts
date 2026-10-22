@@ -63,7 +63,7 @@ This setting configures what to do when the application gets HTTP traffic
 
 #### `tls.externalCertificate`
 
-Name of a `kubernetes.io/tls` secret in the same namespace to use as the route certificate. The chart also creates a Role and RoleBinding (`<route>-cert-reader`) so the router service account (`openshift-ingress/router`) can read the secret.
+Name of a `kubernetes.io/tls` secret in the same namespace to use as the route certificate. The chart also creates one Role and RoleBinding (`<release>-cert-reader`) covering all referenced secrets so the router service account (`openshift-ingress/router`) can read them.
 
 ### `type`
 
