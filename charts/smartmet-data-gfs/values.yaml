@@ -1,0 +1,42 @@
+smartmetDataGfs:
+  name: smartmet-data-gfs
+  image:
+    repository: fmidev/smartmet-data-gfs
+    tag: latest
+    imagePullPolicy: IfNotPresent
+
+pv:
+  enable: true
+  name: pv
+  path: /tmp/smartmet-data
+
+pvc:
+  name: pvc
+  accessModes: ReadWriteOnce
+  storageClass: hostpath-smartmet-data-gfs
+  storage: 1Gi
+
+cronJob:
+  name: cronjob
+  restartPolicy: Never
+  securityContext:
+    fsGroup: 1001
+  schedule: 15 15 * * *
+  timeZone: Etc/UTC
+
+gfsFileConfigMap:
+  name: gfs-cnf-file-cm
+  gfsCnf: |-
+    AREA="world"
+    TOP=90
+    BOTTOM=-90
+    LEFT=-180
+    RIGHT=180
+    # Default: ("0 3 126" "132 6 240")
+    # ("start step end")"
+    INTERVALS=("0 3 126" "132 6 240")
+    # Values 0p25 0p50
+    RESOLUTION=0p25
+    # GRIB_COPY_DEST=
+    # DRYRUN=1
+
