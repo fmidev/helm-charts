@@ -640,6 +640,17 @@ entries:
     version: 1.0.0
   geoweb-cnpg:
   - apiVersion: v2
+    created: "2026-10-27T13:05:40.901735222Z"
+    description: A CloudNativePG database chart for GeoWeb services
+    digest: cbbfa6ea8fa830a6f61bcd82c0600a1b2da86a185163b8be8b442a5c30b79dac
+    maintainers:
+    - name: FMI
+    name: geoweb-cnpg
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-cnpg-0.3.0/geoweb-cnpg-0.3.0.tgz
+    version: 0.3.0
+  - apiVersion: v2
     created: "2026-10-27T12:13:43.707819078Z"
     description: A CloudNativePG database chart for GeoWeb services
     digest: 88e3075a83cc6ee7fc4f56ff6ea0a451663bdcc5208dfa613b9d2c0f73591351
@@ -7038,4 +7049,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2026-10-27T12:13:43.708565267Z"
+generated: "2026-10-27T13:05:40.902276353Z"
