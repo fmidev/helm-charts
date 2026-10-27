@@ -113,7 +113,7 @@ The CNPG operator must have the [Barman Cloud plugin](https://cloudnative-pg.io/
 
 ### Native object store (deprecated)
 
-Use `barmanObjectStore` while the Barman Cloud plugin is not available. It is deprecated since CNPG 1.26 and remains available in [CNPG 1.30](https://cloudnative-pg.io/docs/1.30/appendixes/backup_barmanobjectstore/). Plan to [migrate to the plugin](#migrate-native-backups-to-the-plugin).
+Use `barmanObjectStore` while the Barman Cloud plugin is not available. It is deprecated since CNPG 1.26 and is removed in CNPG 1.32: [migrate to the plugin](#migrate-native-backups-to-the-plugin) before the operator is upgraded to 1.32.
 
 `backup.barmanObjectStore` is passed directly to `Cluster.spec.backup.barmanObjectStore`; see CNPG's [object-store configuration](https://cloudnative-pg.io/docs/1.30/appendixes/object_stores/). For S3 or an S3-compatible service:
 
@@ -146,6 +146,17 @@ backup:
 ```
 
 `backup.barmanObjectStore` and `backup.retentionPolicy` are accepted only with this method. Remove them with `null` in a values overlay, or by deleting them from the values file, when switching methods; `{}` does not clear an inherited map.
+
+Some S3-compatible services reject the default checksums of recent Barman S3 clients with `x-amz-content-sha256 must be UNSIGNED-PAYLOAD, ...`. Apply CNPG's documented workaround through `cluster.env`. Changing it restarts the instances:
+
+```yaml
+cluster:
+  env:
+    - name: AWS_REQUEST_CHECKSUM_CALCULATION
+      value: when_required
+    - name: AWS_RESPONSE_CHECKSUM_VALIDATION
+      value: when_required
+```
 
 ### Archive layout and server names
 
@@ -313,6 +324,7 @@ Follow the upstream [migration guide](https://cloudnative-pg.io/plugin-barman-cl
 | `backup.barmanObjectStore`, except `serverName` | `ObjectStore.spec.configuration` |
 | `backup.retentionPolicy` | `ObjectStore.spec.retentionPolicy` |
 | `backup.barmanObjectStore.serverName` | `backup.barmanCloud.serverName` |
+| S3 client variables in `cluster.env` | `ObjectStore.spec.instanceSidecarConfiguration.env` |
 
 The plugin requires `ObjectStore.spec.configuration.serverName` to be empty; set the server name through the chart instead. When native backups use the default server name, `backup.barmanCloud.serverName` can stay empty.
 
@@ -393,6 +405,7 @@ Deleting the `Cluster` can also delete its PVCs, depending on operator and stora
 | `cluster.affinity.podAntiAffinityType` | Instance anti-affinity mode _(preferred\|required)_ | `preferred` |
 | `cluster.affinity.topologyKey` | Node label defining the placement failure domain | `kubernetes.io/hostname` |
 | `cluster.imageName` | Full CNPG-compatible PostgreSQL image reference; empty uses the operator default | `""` |
+| `cluster.env` | Environment variables for the PostgreSQL containers (`Cluster.spec.env`) | `[]` |
 | `cluster.primaryUpdateStrategy` | Primary switchover policy during rolling updates _(unsupervised\|supervised)_ | `unsupervised` |
 | `cluster.bootstrap.mode` | Bootstrap mode _(initdb\|recovery)_ | `initdb` |
 | `cluster.bootstrap.initdb.database` | Initial application database; empty uses `name` | `""` |

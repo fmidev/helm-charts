@@ -73,6 +73,10 @@ spec:
   {{- if .Values.cluster.imageName }}
   imageName: {{ .Values.cluster.imageName | quote }}
   {{- end }}
+  {{- with .Values.cluster.env }}
+  env:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   bootstrap:
     {{- if eq $bootstrapMode "initdb" }}
     initdb:

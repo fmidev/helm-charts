@@ -96,6 +96,20 @@
         "imageName": {
           "type": "string"
         },
+        "env": {
+          "description": "Environment variables for the PostgreSQL containers, passed to Cluster.spec.env.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
         "primaryUpdateStrategy": {
           "type": "string",
           "enum": ["unsupervised", "supervised"]
