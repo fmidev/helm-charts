@@ -4,6 +4,51 @@
   "type": "object",
   "additionalProperties": false,
   "required": ["name", "helm", "cluster", "backup"],
+  "definitions": {
+    "barmanObjectStore": {
+      "description": "Native CNPG BarmanObjectStoreConfiguration, passed through to the Cluster. Deprecated in CNPG 1.26; requires barman-cli-cloud in the PostgreSQL image.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "destinationPath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "endpointURL": {
+          "type": "string"
+        },
+        "endpointCA": {
+          "type": "object"
+        },
+        "serverName": {
+          "type": "string"
+        },
+        "s3Credentials": {
+          "type": "object"
+        },
+        "azureCredentials": {
+          "type": "object"
+        },
+        "googleCredentials": {
+          "type": "object"
+        },
+        "data": {
+          "type": "object"
+        },
+        "wal": {
+          "type": "object"
+        },
+        "tags": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "historyTags": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    }
+  },
   "properties": {
     "name": {
       "description": "CloudNativePG Cluster name as a DNS-1035 label.",
@@ -113,6 +158,9 @@
                       "type": "string"
                     }
                   }
+                },
+                "barmanObjectStore": {
+                  "$ref": "#/definitions/barmanObjectStore"
                 }
               }
             }
@@ -140,11 +188,11 @@
     "backup": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["method", "target", "schedule", "immediate", "suspend", "backupOwnerReference", "volumeSnapshot", "barmanCloud"],
+      "required": ["method", "target", "schedule", "immediate", "suspend", "backupOwnerReference", "retentionPolicy", "volumeSnapshot", "barmanCloud"],
       "properties": {
         "method": {
           "type": "string",
-          "enum": ["none", "volumeSnapshot", "barmanCloud"]
+          "enum": ["none", "volumeSnapshot", "barmanCloud", "barmanObjectStore"]
         },
         "target": {
           "type": "string",
@@ -163,6 +211,11 @@
         "backupOwnerReference": {
           "type": "string",
           "enum": ["none", "self", "cluster"]
+        },
+        "retentionPolicy": {
+          "description": "Recovery window for native barmanObjectStore backups only; empty leaves retention unmanaged.",
+          "type": "string",
+          "pattern": "^([1-9][0-9]*[dwm])?$"
         },
         "volumeSnapshot": {
           "type": "object",
@@ -188,8 +241,15 @@
           "properties": {
             "objectStoreName": {
               "type": "string"
+            },
+            "serverName": {
+              "description": "Archive server name; preserve the native serverName when migrating. Empty uses the Cluster name.",
+              "type": "string"
             }
           }
+        },
+        "barmanObjectStore": {
+          "$ref": "#/definitions/barmanObjectStore"
         }
       }
     },

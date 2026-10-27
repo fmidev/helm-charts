@@ -10,7 +10,7 @@ spec:
   immediate: {{ .Values.backup.immediate }}
   suspend: {{ .Values.backup.suspend }}
   backupOwnerReference: {{ .Values.backup.backupOwnerReference }}
-  method: {{ ternary "plugin" "volumeSnapshot" (eq .Values.backup.method "barmanCloud") }}
+  method: {{ ternary "plugin" .Values.backup.method (eq .Values.backup.method "barmanCloud") }}
   target: {{ .Values.backup.target }}
   cluster:
     name: {{ include "geoweb-cnpg.name" . }}
