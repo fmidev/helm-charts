@@ -12,5 +12,5 @@ Scheduled backup method: {{ .Values.backup.method }}
   kubectl get --namespace {{ .Release.Namespace }} scheduledbackup,backup -l app.kubernetes.io/instance={{ .Release.Name }}
 {{- else }}
 
-WARNING: Backups are disabled. Set backup.method to volumeSnapshot or barmanCloud and configure that method.
+WARNING: Backups are disabled. Set backup.method to volumeSnapshot, barmanCloud, or the deprecated barmanObjectStore and configure that method.
 {{- end }}

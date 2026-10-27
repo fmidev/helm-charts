@@ -38,8 +38,16 @@ cluster:
       barmanCloud:
         # ObjectStore containing the source cluster's backups and WAL archive.
         objectStoreName: ""
-        # Source cluster name in the archive. Empty uses source.
+        # Source archive server name. Set explicitly when restoring under a new
+        # Cluster name; empty uses the restored Cluster name.
         serverName: ""
+      # Deprecated native object-store recovery configuration. Set this or
+      # barmanCloud.objectStoreName for source recovery, never both, and
+      # neither with backupName.
+      # Uses CNPG's barmanObjectStore fields, including destinationPath,
+      # credentials, and serverName (empty/omitted uses source).
+      # Set null in a values overlay to remove native recovery configuration.
+      barmanObjectStore: {}
   storage:
     size: 1Gi
     storageClass: ""
@@ -51,7 +59,7 @@ cluster:
       memory: 512Mi
 
 backup:
-  # Supported values: none, volumeSnapshot, barmanCloud
+  # Supported values: none, volumeSnapshot, barmanCloud, barmanObjectStore
   method: none
   target: prefer-standby
   schedule: "0 0 0 * * *"
@@ -59,6 +67,9 @@ backup:
   suspend: false
   # Keep backup resources independent from both the schedule and Cluster.
   backupOwnerReference: none
+  # Native barmanObjectStore only. Recovery window, e.g. 30d, 4w, or 2m.
+  # Empty leaves retention unmanaged by CNPG.
+  retentionPolicy: ""
   volumeSnapshot:
     className: ""
     online: true
@@ -66,3 +77,12 @@ backup:
   barmanCloud:
     # ObjectStore used for base backups and continuous WAL archiving.
     objectStoreName: ""
+    # Archive server name. Empty uses the Cluster name. Preserve a custom native
+    # barmanObjectStore.serverName here when migrating to the plugin.
+    serverName: ""
+  # Deprecated native integration, for clusters without the Barman plugin.
+  # Passed directly to spec.backup.barmanObjectStore. Requires destinationPath
+  # and a PostgreSQL image containing barman-cli-cloud. See README for S3 setup.
+  # Only allowed with method barmanObjectStore; set null in a values overlay to
+  # remove it when switching methods.
+  barmanObjectStore: {}

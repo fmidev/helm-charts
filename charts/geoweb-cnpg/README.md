@@ -4,7 +4,7 @@ Creates one CloudNativePG `Cluster` for one GeoWeb service. The CloudNativePG op
 
 Use a separate Helm release for every service and environment.
 
-## Presets example
+## Quick start
 
 Install the database first:
 
@@ -42,95 +42,169 @@ presets:
 
 The database and application must be deployed in the same namespace.
 
-## PostgreSQL image and version
+## Cluster settings
 
-`cluster.imageName` is the complete CNPG-compatible PostgreSQL container image reference, including its tag or digest. The image determines the PostgreSQL major and minor version. When empty, CloudNativePG uses the operator's default operand image.
+### PostgreSQL image and version
 
-For production, select an image published for the installed CNPG operator and pin it explicitly, preferably by digest. For example:
+`cluster.imageName` is the complete CNPG-compatible PostgreSQL image reference, including its tag or digest, and determines the PostgreSQL version. When empty, CloudNativePG uses the operator's default image.
+
+For production, pin an image published for the installed CNPG operator, preferably by digest:
 
 ```yaml
 cluster:
   imageName: ghcr.io/cloudnative-pg/postgresql:<major.minor>-standard-trixie@sha256:<digest>
 ```
 
-Use a tag that actually exists in the [CloudNativePG PostgreSQL container registry](https://github.com/cloudnative-pg/postgres-containers/pkgs/container/postgresql). Patch-level changes within one PostgreSQL major are normal rolling upgrades. Treat a change to another PostgreSQL major as a planned major upgrade and follow the CloudNativePG major-upgrade procedure; changing this value alone is not a general-purpose migration plan.
+Use a tag that exists in the [CloudNativePG PostgreSQL container registry](https://github.com/cloudnative-pg/postgres-containers/pkgs/container/postgresql). Patch changes within one major version are normal rolling upgrades. A change to another major version requires the CloudNativePG major-upgrade procedure.
 
-`cluster.primaryUpdateStrategy` controls the final primary switchover during a rolling update. `unsupervised` lets CNPG perform it automatically after updating the replicas. `supervised` pauses at that point until an operator promotes an updated replica, which is useful when production changes require a controlled maintenance window.
+`cluster.primaryUpdateStrategy` controls the final primary switchover during a rolling update. `unsupervised` lets CNPG perform it automatically. `supervised` waits for an operator to promote an updated replica, for changes that require a controlled maintenance window.
 
-## Initial database
+### Initial database
 
-With `cluster.bootstrap.mode: initdb`, CNPG initializes a new PostgreSQL cluster and creates one database for the consuming application. `cluster.bootstrap.initdb.database` is that database's name; when empty, this chart uses the Cluster `name`. `cluster.bootstrap.initdb.owner` is the login role that owns it and whose credentials CNPG exposes through the generated `<cluster>-app` Secret.
+With `cluster.bootstrap.mode: initdb`, CNPG initializes an empty cluster with one application database, `cluster.bootstrap.initdb.database` (default: the Cluster `name`), owned by the login role `cluster.bootstrap.initdb.owner`. CNPG exposes that role's credentials in the `<cluster>-app` Secret. These settings apply only when the Cluster is created; changing them later does not rename an existing database or role. Encoding and locale use CNPG's defaults, `UTF8` and `C`.
 
-Override the database when its established application name differs from the Cluster name, as in the presets example. These settings only initialize a new cluster; changing them later does not rename an existing database or role.
+### Instance placement
 
-The chart leaves encoding and locale settings to CNPG, whose `initdb` defaults are `UTF8` and `C`.
+Instances use preferred pod anti-affinity across nodes by default, so replicas are likely to survive a node failure without making a database unschedulable in small environments. Set `cluster.affinity.podAntiAffinityType: required` only when every environment has enough topology domains for all instances. Set `cluster.affinity.topologyKey` to use another failure domain, such as a zone label.
 
-## Data lifecycle
+### Data lifecycle
 
-Installing this chart with `bootstrap.initdb` creates an empty database.
+Treat `name` as immutable. Changing it creates a new, empty `Cluster` with new Services and Secrets rather than renaming the existing one. The values schema enforces CNPG's naming rules: a DNS-1035 label of at most 50 characters.
 
-Treat `name` as immutable after installation. Changing it does not rename the existing Cluster or database: Helm or Argo CD submits a new CNPG `Cluster` with new services and Secrets. With the default resource policy, the old Cluster is retained, so changing `name` requires an explicit migration and decommission plan.
-
-`name` must satisfy CNPG's Cluster-name validation: a DNS-1035 label of at most 50 lowercase alphanumeric or `-` characters, beginning with a letter and ending with an alphanumeric character. The values schema rejects invalid names before Helm submits any resources.
-
-By default, `helm.resourcePolicy: keep` adds `helm.sh/resource-policy: keep` to prevent Helm uninstall from deleting the `Cluster`. This can leave the Cluster orphaned from the release. Before a controlled decommission, verify an external backup and restore procedure, set `helm.resourcePolicy` to an empty string, upgrade the release, and only then uninstall it. Removing the CNPG `Cluster` can also remove its PVCs, depending on operator and storage configuration.
-
-For Argo CD, also enable application-level resource preservation. Do not rely on the Helm annotation as the only deletion safeguard because Argo CD deletion and pruning behavior depends on its configuration.
-
-## Instance placement
-
-CNPG instances use preferred pod anti-affinity across Kubernetes nodes by default. This gives replicas a better chance of surviving a node failure without making a database unschedulable in small or temporarily constrained environments.
-
-Set `cluster.affinity.podAntiAffinityType: required` only when the target environments always provide enough schedulable topology domains for every instance. Change `cluster.affinity.topologyKey` when the platform exposes a more appropriate failure-domain label, such as a zone label.
+By default, `helm.resourcePolicy: keep` prevents Helm uninstall from deleting the `Cluster`. With Argo CD, also enable application-level resource preservation, because Argo CD deletion and pruning do not depend only on the Helm annotation. See [decommission a database](#decommission-a-database) for intentional removal.
 
 ## Backups
 
-Backups are disabled by default.
+Backups are disabled by default. Set `backup.method` to one of:
+
+| Method | Provides | Requires | Retention |
+| --- | --- | --- | --- |
+| `volumeSnapshot` | Cluster-local snapshots of the data volume, without point-in-time recovery | CSI `VolumeSnapshotClass` | Managed outside the chart |
+| `barmanCloud` | Off-cluster base backups, continuous WAL archiving, and point-in-time recovery | Barman Cloud plugin, `ObjectStore`, and its credentials Secret | `ObjectStore.spec.retentionPolicy` |
+| `barmanObjectStore` | As `barmanCloud`, using CNPG's deprecated built-in integration | Image containing `barman-cli-cloud`, credentials Secret | `backup.retentionPolicy` |
+
+The chart references storage credentials, `ObjectStore` resources, and the plugin but does not create them. Create them before enabling backups.
+
+`backup.schedule` uses six cron fields, including seconds, in the operator's time zone (normally UTC). `backup.backupOwnerReference` and `backup.volumeSnapshot.snapshotOwnerReference` default to `none`, so deleting the schedule or Cluster never deletes backups. Use retention policies to bound storage growth.
 
 ### CSI volume snapshots
-
-Use this for cluster-local recovery when the storage platform supports `VolumeSnapshot`:
 
 ```yaml
 backup:
   method: volumeSnapshot
   schedule: "0 0 0 * * *"
-  immediate: true
   volumeSnapshot:
     className: ocs-storagecluster-rbdplugin-snapclass
 ```
 
-The schedule uses six fields, including seconds. The example runs daily at midnight. Volume snapshots alone cannot generally be considered backups.
+Snapshots stay on the same storage platform as the database, so they do not protect against losing that platform.
 
-### Barman Cloud object-store backups
-
-Use the Barman Cloud plugin for off-cluster backups, WAL archiving, and point-in-time recovery. The CNPG operator must have the plugin installed and configured.
+### Barman Cloud plugin
 
 ```yaml
 backup:
   method: barmanCloud
-  schedule: "0 0 0 * * 0"
+  schedule: "0 0 0 * * *"
   barmanCloud:
     objectStoreName: presets-db-backup
 ```
 
-The chart translates `barmanCloud` to the CNPG-I Barman Cloud plugin configuration. It references the plugin and `ObjectStore` but does not install them or own their credentials. Configure retention on the Barman `ObjectStore`; the CNPG in-tree retention field is deprecated.
+The CNPG operator must have the [Barman Cloud plugin](https://cloudnative-pg.io/plugin-barman-cloud/docs/installation/) installed.
 
-Backup and snapshot owner references default to `none`. This prevents deletion of the schedule or Cluster from cascading to recovery artifacts. Define independent object-store or snapshot retention and cleanup policies to avoid unbounded storage growth.
+### Native object store (deprecated)
 
-### Credentials during recovery
+Use `barmanObjectStore` while the Barman Cloud plugin is not available. It is deprecated since CNPG 1.26 and remains available in [CNPG 1.30](https://cloudnative-pg.io/docs/1.30/appendixes/backup_barmanobjectstore/). Plan to [migrate to the plugin](#migrate-native-backups-to-the-plugin).
 
-A physical PostgreSQL backup contains database roles and password hashes, so the restored database initially has the source users. It does not contain CNPG's Kubernetes Secrets or readable passwords. Object-store access credentials are also external to the backup.
+`backup.barmanObjectStore` is passed directly to `Cluster.spec.backup.barmanObjectStore`; see CNPG's [object-store configuration](https://cloudnative-pg.io/docs/1.30/appendixes/object_stores/). For S3 or an S3-compatible service:
 
-Treat these as separate disaster-recovery assets:
+```yaml
+backup:
+  method: barmanObjectStore
+  schedule: "0 0 0 * * *"
+  # Recovery window in days, weeks, or months; empty leaves retention unmanaged.
+  retentionPolicy: "30d"
+  barmanObjectStore:
+    destinationPath: s3://geoweb-backups/presets
+    # Omit for AWS S3; set for an S3-compatible service.
+    endpointURL: https://s3.example.com
+    # Optional, for an endpoint using a private CA.
+    # endpointCA:
+    #   name: presets-db-backup-s3-ca
+    #   key: ca.crt
+    s3Credentials:
+      accessKeyId:
+        name: presets-db-backup-s3
+        key: ACCESS_KEY_ID
+      secretAccessKey:
+        name: presets-db-backup-s3
+        key: ACCESS_SECRET_KEY
+    data:
+      compression: gzip
+    wal:
+      compression: gzip
+      maxParallel: 2
+```
 
-1. The database base backups and WAL archive, or retained volume snapshots.
-2. Credentials and configuration needed to read that backup storage.
-3. The application credential Secret, or an approved process for replacing it after recovery.
+`backup.barmanObjectStore` and `backup.retentionPolicy` are accepted only with this method. Remove them with `null` in a values overlay, or by deleting them from the values file, when switching methods; `{}` does not clear an inherited map.
 
-If the original `<cluster>-app` Secret is gone, bootstrap the recovered Cluster with the application database and owner and either provide a new `kubernetes.io/basic-auth` Secret or let CNPG generate a new one. After recovery reaches primary, CNPG updates the owner's password and creates the new Cluster's `<cluster>-app` connection Secret. Roll out the application to consume the new Secret. The old plaintext password cannot be extracted from the PostgreSQL password hash.
+### Archive layout and server names
 
-Recover from a retained `Backup` object in the same namespace:
+Object-store backups are written to `<destinationPath>/<server name>/`. The server name identifies one database's archive within a destination:
+
+| Setting | Default when empty |
+| --- | --- |
+| `backup.barmanObjectStore.serverName` | Cluster `name` |
+| `backup.barmanCloud.serverName` | Cluster `name` |
+| `cluster.bootstrap.recovery.barmanObjectStore.serverName` | `cluster.bootstrap.recovery.source` |
+| `cluster.bootstrap.recovery.barmanCloud.serverName` | Restored Cluster `name` |
+
+Each archive must have exactly one writer. A restored Cluster must therefore back up to a new server name or destination, never into the archive it was restored from. CNPG refuses to archive WAL into a non-empty archive when a Cluster is created, and WAL then accumulates on the data volume. For object-store recovery, the chart rejects a backup configuration using the same method and archive as the recovery source. It cannot check recovery from `backupName`.
+
+### Verifying backups
+
+`Ready` does not mean that backups work. After enabling or changing object-store backups, check WAL archiving and the first base backup:
+
+```bash
+kubectl get cluster presets-db --namespace geoweb \
+  -o jsonpath='{.status.conditions[?(@.type=="ContinuousArchiving")]}'
+kubectl cnpg status presets-db --namespace geoweb
+kubectl get scheduledbackups,backups --namespace geoweb
+```
+
+`kubectl cnpg status` should show working WAL archiving, a recent archived WAL, and a first point of recoverability. On a quiet database, a new WAL upload can take about five minutes. Failed WAL uploads keep WAL on the data volume until it fills and PostgreSQL stops, so alert on archiving failures and investigate them promptly.
+
+Start an on-demand backup with the CNPG CLI plugin:
+
+```bash
+kubectl cnpg backup presets-db --namespace geoweb --method=barmanObjectStore
+kubectl cnpg backup presets-db --namespace geoweb --method=plugin --plugin-name=barman-cloud.cloudnative-pg.io
+kubectl cnpg backup presets-db --namespace geoweb --method=volumeSnapshot
+```
+
+## Runbooks
+
+### Restore a database
+
+Recovery creates a new Cluster from a backup. The chart requires `database` and `owner` in recovery mode, so the restored application identity is explicit. Use the source application's database and owner role; CNPG creates or reconciles them if they are missing.
+
+#### Before you start
+
+Confirm that these are available:
+
+1. **A backup:** a retained `Backup` resource in the namespace, or a base backup and WAL archive in object storage.
+2. **Access to the backup:**
+   - Native object store: the storage credentials Secret, any CA Secret, and an image containing `barman-cli-cloud`.
+   - Plugin: the installed plugin, plus the `ObjectStore` and its credentials Secret recreated in the namespace.
+3. **Application credentials:** the backup contains database roles and password hashes, but not Kubernetes Secrets or readable passwords. Either let CNPG generate a new password (leave `secretName` empty), or create a `kubernetes.io/basic-auth` Secret whose `username` matches `owner` and set `cluster.bootstrap.recovery.secretName`.
+
+#### 1. Choose the Cluster name
+
+- **New name**, such as `presets-db-restored`: use this for test restores or while the original Cluster still exists. Applications must be pointed at `<new name>-app`.
+- **Original name**: only after the original Cluster and its PVCs are gone. Applications keep the same Service and Secret names but must be restarted to load the new Secret.
+
+#### 2. Configure the recovery source
+
+Set exactly one source. From a retained `Backup` resource:
 
 ```yaml
 name: presets-db-restored
@@ -144,7 +218,34 @@ cluster:
       owner: geoweb
 ```
 
-Recover when only the object-store backup and WAL archive remain:
+From a native object-store archive. Set `serverName` to the archive's server name, usually the original Cluster name:
+
+```yaml
+name: presets-db-restored
+
+cluster:
+  bootstrap:
+    mode: recovery
+    recovery:
+      source: presets-db-source
+      database: presets
+      owner: geoweb
+      barmanObjectStore:
+        destinationPath: s3://geoweb-backups/presets
+        endpointURL: https://s3.example.com
+        serverName: presets-db
+        s3Credentials:
+          accessKeyId:
+            name: presets-db-backup-s3
+            key: ACCESS_KEY_ID
+          secretAccessKey:
+            name: presets-db-backup-s3
+            key: ACCESS_SECRET_KEY
+        wal:
+          maxParallel: 2
+```
+
+From an archive through the plugin. Always set `serverName`, because the plugin otherwise uses the restored Cluster's name:
 
 ```yaml
 name: presets-db-restored
@@ -161,11 +262,126 @@ cluster:
         serverName: presets-db
 ```
 
-This chart requires `database` and `owner` in recovery mode so the post-recovery application identity is explicit and is not accidentally derived from the new Cluster name. They normally match the source application's database and role. If either does not exist in the recovered data, CNPG creates or reconciles it after recovery. `owner` defaults to `geoweb` to match this chart's initialization convention, but override it when the restored application uses another owner.
+To restore to a point in time instead of the latest archived WAL, add a [recovery target](https://cloudnative-pg.io/docs/1.30/recovery/#recovery-targets):
 
-Leave `secretName` empty to generate replacement application credentials. To select the password explicitly, first create a `kubernetes.io/basic-auth` Secret containing `username` and `password`, then set `cluster.bootstrap.recovery.secretName`. The Secret username must match `owner` for CNPG to apply its password after recovery.
+```yaml
+cluster:
+  bootstrap:
+    recovery:
+      recoveryTarget:
+        targetTime: "2026-10-27 08:00:00+00"
+```
 
-Object-store recovery requires the plugin, `ObjectStore`, and storage-access Secret to be recreated before the Cluster. Use a different writable object store or `serverName` for backups made by the restored Cluster so it cannot overwrite the source archive.
+#### 3. Configure backups for the restored Cluster
+
+Leave `backup.method: none` to enable backups later, or configure them now with a server name that differs from the source archive's (see [archive layout](#archive-layout-and-server-names)):
+
+```yaml
+backup:
+  method: barmanObjectStore
+  barmanObjectStore:
+    # Same settings as the source, with a new archive name.
+    serverName: presets-db-r1
+```
+
+#### 4. Deploy and verify
+
+1. Install or sync the release, then wait until the Cluster is ready:
+
+   ```bash
+   kubectl wait --namespace geoweb --for=condition=Ready cluster/presets-db-restored --timeout=30m
+   ```
+
+2. Check the application data, for example with `kubectl cnpg psql presets-db-restored --namespace geoweb -- -d presets`.
+3. Point the application at `<cluster>-app`, or restart it when the Cluster kept its original name.
+4. If backups are configured, [verify them](#verifying-backups) and start a base backup immediately.
+
+Keep the recovery settings in the release values. They take effect only when the Cluster is created.
+
+### Change the backup storage target
+
+1. Update `backup.barmanObjectStore`, or the `ObjectStore` referenced by `backup.barmanCloud.objectStoreName`, to the new destination, endpoint, and credentials.
+2. Apply the change and [verify backups](#verifying-backups). Start a base backup immediately: the new location cannot be used for recovery until one completes.
+3. Keep the previous location until its retention window has passed. The chart does not copy existing backups or WAL.
+
+### Migrate native backups to the plugin
+
+Follow the upstream [migration guide](https://cloudnative-pg.io/plugin-barman-cloud/docs/migration/). Migrate the existing Cluster in place, keeping its name, destination, and server name. Existing backups and WAL stay in place and remain usable.
+
+| Native setting | Plugin setting |
+| --- | --- |
+| `backup.barmanObjectStore`, except `serverName` | `ObjectStore.spec.configuration` |
+| `backup.retentionPolicy` | `ObjectStore.spec.retentionPolicy` |
+| `backup.barmanObjectStore.serverName` | `backup.barmanCloud.serverName` |
+
+The plugin requires `ObjectStore.spec.configuration.serverName` to be empty; set the server name through the chart instead. When native backups use the default server name, `backup.barmanCloud.serverName` can stay empty.
+
+1. Have the platform team [install and verify the plugin](https://cloudnative-pg.io/plugin-barman-cloud/docs/installation/).
+2. Create the `ObjectStore` in the database namespace, reusing the existing credentials Secret. For the native example above:
+
+   ```yaml
+   apiVersion: barmancloud.cnpg.io/v1
+   kind: ObjectStore
+   metadata:
+     name: presets-db-backup
+     namespace: geoweb
+   spec:
+     retentionPolicy: "30d"
+     configuration:
+       destinationPath: s3://geoweb-backups/presets
+       endpointURL: https://s3.example.com
+       s3Credentials:
+         accessKeyId:
+           name: presets-db-backup-s3
+           key: ACCESS_KEY_ID
+         secretAccessKey:
+           name: presets-db-backup-s3
+           key: ACCESS_SECRET_KEY
+       data:
+         compression: gzip
+       wal:
+         compression: gzip
+         maxParallel: 2
+   ```
+
+   Copy the actual configuration, including any CA reference, encryption, tags, or extra arguments.
+3. Set `backup.suspend: true`, apply it, and wait for running base backups to finish. WAL archiving continues.
+4. Switch the method in a single change, keeping the schedule suspended:
+
+   ```yaml
+   backup:
+     method: barmanCloud
+     suspend: true
+     retentionPolicy: ""
+     barmanObjectStore: null
+     barmanCloud:
+       objectStoreName: presets-db-backup
+       serverName: presets-db
+   ```
+
+   This replaces the native configuration with the plugin in one Cluster update, as upstream requires, and switches the schedule to the `plugin` method. With Argo CD, create the plugin and `ObjectStore` before syncing.
+5. After the rolling update, [verify](#verifying-backups) that the plugin archives new WAL. Set `backup.suspend: false`, confirm a successful base backup, and test restores from backups taken before and after the switch.
+6. Update dashboards and alerts to the [plugin metrics](https://cloudnative-pg.io/plugin-barman-cloud/docs/observability/) (`barman_cloud_cloudnative_pg_io` instead of `cnpg_collector`), and on-demand backup scripts to the plugin method.
+
+A restored release with native recovery settings can switch them to the plugin in the same way, keeping the archive's server name:
+
+```yaml
+cluster:
+  bootstrap:
+    recovery:
+      barmanObjectStore: null
+      barmanCloud:
+        objectStoreName: presets-db-backup
+        serverName: presets-db
+```
+
+### Decommission a database
+
+1. Stop the database's clients and verify a usable backup and restore procedure.
+2. Set `helm.resourcePolicy: ""` and upgrade the release.
+3. Uninstall the release. With Argo CD, follow the application's deletion procedure instead.
+
+Deleting the `Cluster` can also delete its PVCs, depending on operator and storage configuration. Backups with owner reference `none` and object-store archives remain until removed by retention or manually.
 
 ## Configuration
 
@@ -181,24 +397,28 @@ Object-store recovery requires the plugin, `ObjectStore`, and storage-access Sec
 | `cluster.bootstrap.mode` | Bootstrap mode _(initdb\|recovery)_ | `initdb` |
 | `cluster.bootstrap.initdb.database` | Initial application database; empty uses `name` | `""` |
 | `cluster.bootstrap.initdb.owner` | Login role that owns the initial application database | `geoweb` |
-| `cluster.bootstrap.recovery.source` | External cluster source name for Barman Cloud recovery | `""` |
+| `cluster.bootstrap.recovery.source` | External cluster name for object-store recovery | `""` |
 | `cluster.bootstrap.recovery.backupName` | Retained Backup resource used for recovery | `""` |
 | `cluster.bootstrap.recovery.database` | Post-recovery application database (required in recovery mode) | `""` |
 | `cluster.bootstrap.recovery.owner` | Post-recovery application owner (required in recovery mode) | `geoweb` |
 | `cluster.bootstrap.recovery.secretName` | Optional replacement basic-auth Secret | `""` |
-| `cluster.bootstrap.recovery.recoveryTarget` | Optional PITR target fields | `{}` |
-| `cluster.bootstrap.recovery.barmanCloud.objectStoreName` | Barman ObjectStore containing the source backup and WAL archive | `""` |
-| `cluster.bootstrap.recovery.barmanCloud.serverName` | Source cluster name in the archive; empty uses `source` | `""` |
+| `cluster.bootstrap.recovery.recoveryTarget` | Optional point-in-time recovery target | `{}` |
+| `cluster.bootstrap.recovery.barmanCloud.objectStoreName` | Plugin `ObjectStore` containing the source archive | `""` |
+| `cluster.bootstrap.recovery.barmanCloud.serverName` | Source archive server name; empty uses the restored Cluster name | `""` |
+| `cluster.bootstrap.recovery.barmanObjectStore` | Native object-store configuration of the source archive | `{}` |
 | `cluster.storage.size` | Data volume size | `1Gi` |
 | `cluster.storage.storageClass` | Optional storage class | `""` |
 | `cluster.resources` | PostgreSQL Pod requests and limits | See `values.yaml` |
-| `backup.method` | Backup method; `none` disables backups _(none\|volumeSnapshot\|barmanCloud)_ | `none` |
+| `backup.method` | Backup method _(none\|volumeSnapshot\|barmanCloud\|barmanObjectStore)_ | `none` |
 | `backup.target` | Preferred backup source instance | `prefer-standby` |
 | `backup.schedule` | Six-field backup cron schedule | `0 0 0 * * *` |
 | `backup.immediate` | Start a backup when the schedule is created | `true` |
 | `backup.suspend` | Suspend scheduled backup creation | `false` |
 | `backup.backupOwnerReference` | Owner reference for generated Backup resources | `none` |
+| `backup.retentionPolicy` | Native object-store recovery window; empty leaves retention unmanaged | `""` |
 | `backup.volumeSnapshot.className` | VolumeSnapshotClass for PGDATA | `""` |
 | `backup.volumeSnapshot.online` | Take online volume snapshots | `true` |
 | `backup.volumeSnapshot.snapshotOwnerReference` | Owner reference for generated VolumeSnapshots | `none` |
-| `backup.barmanCloud.objectStoreName` | Barman ObjectStore used for backups and WAL archiving | `""` |
+| `backup.barmanCloud.objectStoreName` | Plugin `ObjectStore` used for backups and WAL archiving | `""` |
+| `backup.barmanCloud.serverName` | Archive server name; empty uses `name` | `""` |
+| `backup.barmanObjectStore` | Native object-store configuration for backups and WAL archiving | `{}` |

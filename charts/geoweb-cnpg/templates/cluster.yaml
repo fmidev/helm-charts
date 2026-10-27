@@ -2,6 +2,9 @@
 {{- $initdb := .Values.cluster.bootstrap.initdb }}
 {{- $initdbDatabase := default (include "geoweb-cnpg.name" .) $initdb.database }}
 {{- $recovery := .Values.cluster.bootstrap.recovery }}
+{{- $recoveryObjectStore := default dict $recovery.barmanObjectStore }}
+{{- $barmanObjectStore := default dict .Values.backup.barmanObjectStore }}
+{{- $clusterName := include "geoweb-cnpg.name" . }}
 {{- if and (eq $bootstrapMode "recovery") (eq (empty $recovery.source) (empty $recovery.backupName)) }}
 {{- fail "exactly one of cluster.bootstrap.recovery.source or backupName is required in recovery mode" }}
 {{- end }}
@@ -11,11 +14,44 @@
 {{- if and (eq $bootstrapMode "recovery") (not $recovery.owner) }}
 {{- fail "cluster.bootstrap.recovery.owner is required in recovery mode" }}
 {{- end }}
-{{- if and (eq $bootstrapMode "recovery") $recovery.source (not $recovery.barmanCloud.objectStoreName) }}
-{{- fail "cluster.bootstrap.recovery.barmanCloud.objectStoreName is required for source recovery" }}
+{{- if and (eq $bootstrapMode "recovery") $recovery.source }}
+{{- if eq (empty $recovery.barmanCloud.objectStoreName) (empty $recoveryObjectStore) }}
+{{- fail "exactly one of cluster.bootstrap.recovery.barmanCloud.objectStoreName or barmanObjectStore is required for source recovery" }}
+{{- end }}
+{{- if and $recoveryObjectStore (not $recoveryObjectStore.destinationPath) }}
+{{- fail "cluster.bootstrap.recovery.barmanObjectStore.destinationPath is required for native source recovery" }}
+{{- end }}
+{{- end }}
+{{- if and (eq $bootstrapMode "recovery") $recovery.backupName (or $recovery.barmanCloud.objectStoreName $recoveryObjectStore) }}
+{{- fail "cluster.bootstrap.recovery.barmanCloud.objectStoreName and barmanObjectStore apply only to source recovery; clear them when using backupName" }}
 {{- end }}
 {{- if and (eq .Values.backup.method "barmanCloud") (not .Values.backup.barmanCloud.objectStoreName) }}
 {{- fail "backup.barmanCloud.objectStoreName is required when backup.method is barmanCloud" }}
+{{- end }}
+{{- if and (eq .Values.backup.method "barmanObjectStore") (not $barmanObjectStore.destinationPath) }}
+{{- fail "backup.barmanObjectStore.destinationPath is required when backup.method is barmanObjectStore" }}
+{{- end }}
+{{- if and $barmanObjectStore (ne .Values.backup.method "barmanObjectStore") }}
+{{- fail "backup.barmanObjectStore is only supported when backup.method is barmanObjectStore; set it to null in a values overlay when switching methods" }}
+{{- end }}
+{{- if and .Values.backup.retentionPolicy (ne .Values.backup.method "barmanObjectStore") }}
+{{- fail "backup.retentionPolicy is only supported when backup.method is barmanObjectStore; configure plugin retention on its ObjectStore" }}
+{{- end }}
+{{- /* Backups from a restored Cluster must not write into the archive it recovers from. */}}
+{{- if and (eq $bootstrapMode "recovery") $recovery.source }}
+{{- if and $recoveryObjectStore (eq .Values.backup.method "barmanObjectStore") }}
+{{- $sameDestination := eq (regexReplaceAll "/+$" $recoveryObjectStore.destinationPath "") (regexReplaceAll "/+$" $barmanObjectStore.destinationPath "") }}
+{{- $sameEndpoint := eq (default "" $recoveryObjectStore.endpointURL) (default "" $barmanObjectStore.endpointURL) }}
+{{- $sameServer := eq (default $recovery.source $recoveryObjectStore.serverName) (default $clusterName $barmanObjectStore.serverName) }}
+{{- if and $sameDestination $sameEndpoint $sameServer }}
+{{- fail "backup.barmanObjectStore must not write to the recovery source archive; change destinationPath or serverName" }}
+{{- end }}
+{{- end }}
+{{- if and $recovery.barmanCloud.objectStoreName (eq .Values.backup.method "barmanCloud") (eq $recovery.barmanCloud.objectStoreName .Values.backup.barmanCloud.objectStoreName) }}
+{{- if eq (default $clusterName $recovery.barmanCloud.serverName) (default $clusterName .Values.backup.barmanCloud.serverName) }}
+{{- fail "backup.barmanCloud must not write to the recovery source archive; change objectStoreName or serverName" }}
+{{- end }}
+{{- end }}
 {{- end }}
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
@@ -81,6 +117,13 @@ spec:
       className: {{ .Values.backup.volumeSnapshot.className | quote }}
       {{- end }}
     {{- end }}
+    {{- if eq .Values.backup.method "barmanObjectStore" }}
+    barmanObjectStore:
+      {{- toYaml $barmanObjectStore | nindent 6 }}
+    {{- with .Values.backup.retentionPolicy }}
+    retentionPolicy: {{ . | quote }}
+    {{- end }}
+    {{- end }}
   {{- end }}
   {{- if eq .Values.backup.method "barmanCloud" }}
   plugins:
@@ -89,10 +132,17 @@ spec:
       isWALArchiver: true
       parameters:
         barmanObjectName: {{ .Values.backup.barmanCloud.objectStoreName | quote }}
+        {{- with .Values.backup.barmanCloud.serverName }}
+        serverName: {{ . | quote }}
+        {{- end }}
   {{- end }}
   {{- if and (eq $bootstrapMode "recovery") $recovery.source }}
   externalClusters:
     - name: {{ $recovery.source }}
+      {{- if $recoveryObjectStore }}
+      barmanObjectStore:
+        {{- toYaml $recoveryObjectStore | nindent 8 }}
+      {{- else }}
       plugin:
         name: barman-cloud.cloudnative-pg.io
         parameters:
@@ -100,4 +150,5 @@ spec:
           {{- with $recovery.barmanCloud.serverName }}
           serverName: {{ . | quote }}
         {{- end }}
+      {{- end }}
   {{- end }}
