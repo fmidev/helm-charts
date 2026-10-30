@@ -66,6 +66,7 @@ metadata:
 spec:
   instances: {{ .Values.cluster.instances }}
   primaryUpdateStrategy: {{ .Values.cluster.primaryUpdateStrategy }}
+  primaryUpdateMethod: {{ .Values.cluster.primaryUpdateMethod }}
   enableSuperuserAccess: false
   affinity:
     podAntiAffinityType: {{ .Values.cluster.affinity.podAntiAffinityType }}

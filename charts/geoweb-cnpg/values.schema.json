@@ -72,7 +72,7 @@
     "cluster": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["instances", "affinity", "imageName", "primaryUpdateStrategy", "bootstrap", "storage", "resources"],
+      "required": ["instances", "affinity", "imageName", "primaryUpdateStrategy", "primaryUpdateMethod", "bootstrap", "storage", "resources"],
       "properties": {
         "instances": {
           "type": "integer",
@@ -113,6 +113,11 @@
         "primaryUpdateStrategy": {
           "type": "string",
           "enum": ["unsupervised", "supervised"]
+        },
+        "primaryUpdateMethod": {
+          "description": "Method used to update the primary during unsupervised rolling updates.",
+          "type": "string",
+          "enum": ["restart", "switchover"]
         },
         "bootstrap": {
           "type": "object",

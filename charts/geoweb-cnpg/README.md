@@ -57,7 +57,9 @@ cluster:
 
 Use a tag that exists in the [CloudNativePG PostgreSQL container registry](https://github.com/cloudnative-pg/postgres-containers/pkgs/container/postgresql). Patch changes within one major version are normal rolling upgrades. A change to another major version requires the CloudNativePG major-upgrade procedure.
 
-`cluster.primaryUpdateStrategy` controls the final primary switchover during a rolling update. `unsupervised` lets CNPG perform it automatically. `supervised` waits for an operator to promote an updated replica, for changes that require a controlled maintenance window.
+`cluster.primaryUpdateStrategy` controls whether the primary update is automatic (`unsupervised`, default) or manual (`supervised`). For automatic updates, `cluster.primaryUpdateMethod` selects `restart` (default) or `switchover`.
+
+See [CNPG rolling updates](https://cloudnative-pg.io/docs/current/rolling_update/) for the behavior and restrictions of each method.
 
 ### Initial database
 
@@ -178,18 +180,31 @@ Each archive must have exactly one writer. A restored Cluster must therefore bac
 ```bash
 kubectl get cluster presets-db --namespace geoweb \
   -o jsonpath='{.status.conditions[?(@.type=="ContinuousArchiving")]}'
-kubectl cnpg status presets-db --namespace geoweb
+primary=$(kubectl get cluster presets-db --namespace geoweb -o jsonpath='{.status.currentPrimary}')
+kubectl exec --namespace geoweb "$primary" --container postgres -- psql -U postgres -c \
+  'select last_archived_wal, last_archived_time, failed_count, last_failed_time from pg_stat_archiver'
 kubectl get scheduledbackups,backups --namespace geoweb
 ```
 
-`kubectl cnpg status` should show working WAL archiving, a recent archived WAL, and a first point of recoverability. On a quiet database, a new WAL upload can take about five minutes. Failed WAL uploads keep WAL on the data volume until it fills and PostgreSQL stops, so alert on archiving failures and investigate them promptly.
+`last_archived_time` should be after the backup configuration change and newer than `last_failed_time`. Before backups are configured, CNPG counts WAL as archived without uploading it. On a quiet database, a new WAL upload can take about five minutes. Failed WAL uploads keep WAL on the data volume until it fills and PostgreSQL stops, so alert on archiving failures and investigate them promptly.
 
-Start an on-demand backup with the CNPG CLI plugin:
+Start an on-demand backup by creating a `Backup` resource:
 
 ```bash
-kubectl cnpg backup presets-db --namespace geoweb --method=barmanObjectStore
-kubectl cnpg backup presets-db --namespace geoweb --method=plugin --plugin-name=barman-cloud.cloudnative-pg.io
-kubectl cnpg backup presets-db --namespace geoweb --method=volumeSnapshot
+kubectl create --namespace geoweb -f - <<'EOF'
+apiVersion: postgresql.cnpg.io/v1
+kind: Backup
+metadata:
+  generateName: presets-db-manual-
+spec:
+  cluster:
+    name: presets-db
+  # barmanObjectStore, volumeSnapshot, or plugin
+  method: barmanObjectStore
+  # Required with method: plugin
+  # pluginConfiguration:
+  #   name: barman-cloud.cloudnative-pg.io
+EOF
 ```
 
 ## Runbooks
@@ -303,7 +318,7 @@ backup:
    kubectl wait --namespace geoweb --for=condition=Ready cluster/presets-db-restored --timeout=30m
    ```
 
-2. Check the application data, for example with `kubectl cnpg psql presets-db-restored --namespace geoweb -- -d presets`.
+2. Check the application data, for example with `kubectl exec -it --namespace geoweb presets-db-restored-1 --container postgres -- psql -U postgres -d presets`.
 3. Point the application at `<cluster>-app`, or restart it when the Cluster kept its original name.
 4. If backups are configured, [verify them](#verifying-backups) and start a base backup immediately.
 
@@ -406,7 +421,8 @@ Deleting the `Cluster` can also delete its PVCs, depending on operator and stora
 | `cluster.affinity.topologyKey` | Node label defining the placement failure domain | `kubernetes.io/hostname` |
 | `cluster.imageName` | Full CNPG-compatible PostgreSQL image reference; empty uses the operator default | `""` |
 | `cluster.env` | Environment variables for the PostgreSQL containers (`Cluster.spec.env`) | `[]` |
-| `cluster.primaryUpdateStrategy` | Primary switchover policy during rolling updates _(unsupervised\|supervised)_ | `unsupervised` |
+| `cluster.primaryUpdateStrategy` | Automatic or manual primary updates _(unsupervised\|supervised)_ | `unsupervised` |
+| `cluster.primaryUpdateMethod` | Primary update method for automatic rolling updates _(restart\|switchover)_ | `restart` |
 | `cluster.bootstrap.mode` | Bootstrap mode _(initdb\|recovery)_ | `initdb` |
 | `cluster.bootstrap.initdb.database` | Initial application database; empty uses `name` | `""` |
 | `cluster.bootstrap.initdb.owner` | Login role that owns the initial application database | `geoweb` |
