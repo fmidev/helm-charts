@@ -16,9 +16,8 @@ cluster:
   # Environment variables for the PostgreSQL containers (Cluster.spec.env),
   # e.g. Barman Cloud S3 client settings. Changing them restarts the instances.
   env: []
-  # Use supervised to require an operator-triggered primary switchover during
-  # rolling updates after all replicas have been updated.
   primaryUpdateStrategy: unsupervised
+  primaryUpdateMethod: restart
   bootstrap:
     # Supported values: initdb, recovery
     mode: initdb
