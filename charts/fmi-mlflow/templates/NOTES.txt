@@ -1,0 +1,3 @@
+MLflow {{ .Chart.AppVersion }} tracking server installed: https://{{ include "mlflow.host" . }}
+Image: {{ include "mlflow.image" . }}
+PostgreSQL cluster: {{ .Values.postgresql.clusterName }}

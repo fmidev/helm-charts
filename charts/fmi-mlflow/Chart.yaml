@@ -1,0 +1,13 @@
+apiVersion: v2
+name: mlflow
+description: MLflow tracking server with basic-auth and a CloudNativePG PostgreSQL cluster for OpenShift
+type: application
+
+# Chart version, bump on every chart change.
+version: 0.2.0
+
+# MLflow version. The default image tag is derived from this (v<appVersion>-full).
+appVersion: "3.17.1"
+
+maintainers:
+- name: osmundi
