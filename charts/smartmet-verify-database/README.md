@@ -52,7 +52,7 @@ kubectl -n smartmet-verify get cluster verification-db -w
 | `ConfigMap` | `verification-db-sql-production` | `0001-production-schema.sql` — the schema |
 | `ConfigMap` | `verification-db-sql-post-ownership` | `0002-post-ownership.sql` — ownership transfer |
 | `ConfigMap` | `verification-db-sql-reference-data` | `0004-reference-data.sql` — rows the applications require |
-| `ConfigMap` | `verification-db-sql-extra` | operator-supplied `schema.extraSql` |
+| `ConfigMap` | `verification-db-sql-extra` | upstream `local-schema-upgrade/` scripts, then `schema.extraSql` |
 | `Secret` × 9 | `verification-db-<role>` | `kubernetes.io/basic-auth` role passwords |
 | `Service` | `verification-db` | alias for the primary (via CNPG `managed.services`) |
 | `Service` | `verification-db-external` | only when `externalAccess.enabled` |
@@ -118,20 +118,16 @@ Vendored files, applied in this order:
    at 400000.
 
    No `producers` rows — those are the models a particular SmartMet Server
-   serves, so they are discovered per deployment. What the file does set is what
-   a `producers` row must look like: `analysis_hours` gets a default of all 24
-   hours and `NOT NULL`, and `arrival_leadtime` a default of `0`. The runner's
-   `ProducerUtils.getAnalysisHours()` reads `analysis_hours` without a null
-   check, so one null row kills the weekly `used_model_*` refresh and leaves the
-   GUI menus it builds silently empty. The table is empty at `initdb`, so the
-   constraint is declared unconditionally rather than backfilled.
-
-   `locations` gets `wigos_id` (upstream `local-schema-upgrade/1001`), which the
-   applications validate. An existing database needs that script applied once.
+   serves, so they are discovered per deployment.
 
    Idempotent, so it is safe against a database that already has the rows.
-5. `verification-db-sql-extra` — anything from `schema.extraSql`. Last, so an
-   operator can override the reference data above.
+5. `verification-db-sql-extra` — upstream's `local-schema-upgrade/*.sql`
+   (vendored under `files/sql/local-schema-upgrade/`; `1001` `locations.wigos_id`,
+   `1002` producer and location constraints, `1003` `mast_metadata` and the new
+   `warning_rules`), then anything from `schema.extraSql`. Last, so an operator
+   can override the reference data above. Each upgrade is idempotent, so one the
+   vendored `0001` already contains is a no-op; an existing database gets them
+   by running the same files once.
 
 `0003-legacy-test-data.sql` is deliberately **not** vendored: it consists of
 `\COPY` meta-commands against ~176 MB of CSV fixtures, which CNPG cannot execute.
@@ -164,10 +160,9 @@ upstream revision is baked in:
 
 The pin tracks upstream, and upstream's `0001` is regenerated from the FMI
 production database, so moving it is how the chart stays on par with production.
-At `91dd2c2` the schema matches production except for the deliberate
-`0004-reference-data.sql` additions (the `producers.analysis_hours` NOT NULL and
-its default, `arrival_leadtime`'s default) and the extensions a deployment
-outside FMI does not get (`pg_partman`).
+It also vendors every upstream `local-schema-upgrade/*.sql`. With those applied
+the schema matches production, except for the extensions a deployment outside
+FMI does not get (`pg_partman`).
 
 `0004-reference-data.sql` is **not** among the files it fetches. Upstream has a
 file of that name, so syncing it looks reasonable and would overwrite:
