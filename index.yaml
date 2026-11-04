@@ -6272,6 +6272,37 @@ entries:
       artifacthub.io/category: database
       artifacthub.io/operator: "false"
       artifacthub.io/prerelease: "false"
+      fmi.fi/verification-sql-ref: 5d27c685427ca8d154af92c68162c3d07a2d7355
+      fmi.fi/verification-sql-repo: https://github.com/fmidev/fmi-verification-common-sql
+    apiVersion: v2
+    created: "2026-11-04T23:14:37.257165158Z"
+    description: PostgreSQL/PostGIS database for SmartMet Verify, managed by the CloudNativePG
+      operator
+    digest: 5fc975b3a2d91037c7e7831b72eb6edbabc5df694a3b118ca19f16cd19aeee08
+    home: https://github.com/fmidev/helm-charts
+    keywords:
+    - smartmet
+    - verify
+    - verification
+    - postgresql
+    - postgis
+    - cloudnative-pg
+    maintainers:
+    - email: admin@weatherproof.fi
+      name: fmi-build-bot
+      url: https://github.com/fmi-build-bot
+    name: smartmet-verify-database
+    sources:
+    - https://github.com/fmidev/helm-charts
+    - https://github.com/fmidev/fmi-verification-common-sql
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/smartmet-verify-database-0.8.0/smartmet-verify-database-0.8.0.tgz
+    version: 0.8.0
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/operator: "false"
+      artifacthub.io/prerelease: "false"
       fmi.fi/verification-sql-ref: 91dd2c2e696678de695b2c781143126b131e4e07
       fmi.fi/verification-sql-repo: https://github.com/fmidev/fmi-verification-common-sql
     apiVersion: v2
@@ -7110,4 +7141,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2026-11-04T21:55:37.630065945Z"
+generated: "2026-11-04T23:14:37.257990128Z"
