@@ -2025,19 +2025,9 @@ VALUES
        (300617, 617, 'obsBaseParameter', '617')
 ON CONFLICT DO NOTHING;
 
--- wis2box is the category the runner and GUI read when observation.source is
--- wis2box: a WMO WIS 2.0 node serving surface observations through wis2box's
--- OGC API - Features endpoint (fmi-verification-common's
--- Wis2boxObservationService). alternative_name is the wis2box property name,
--- alternative_id an ISO 8601 accumulation period the item's phenomenonTime
--- interval must have; without one only instantaneous values are used. The rows
--- are inert under the default SmartMet Server source, so every deployment gets
--- them.
---
--- Only properties wis2box decodes from synop BUFR and that mean what the
--- Verify parameter means are mapped. non_coordinate_pressure is station
--- pressure, and parameter 51 (Pressure) is mean sea-level pressure, so it is
--- deliberately left out; dew point, cloud cover and gusts are not published.
+-- wis2box: read when observation.source is wis2box. alternative_name is the
+-- property, alternative_id an optional accumulation period. Inert otherwise.
+-- non_coordinate_pressure (station pressure) is not parameter 51 (MSL).
 
 INSERT INTO public.parameter_map (id, parameter_id, category, alternative_id, alternative_name)
 VALUES
@@ -2506,13 +2496,8 @@ ALTER TABLE public.producers
 -- ---------------------------------------------------------------------------
 -- locations: WIGOS station identifier
 -- ---------------------------------------------------------------------------
--- Same as fmi-verification-common-sql's
--- local-schema-upgrade/1001-locations-wigos-id.sql, carried here until the
--- vendored 0001 includes it; every statement is idempotent, so applying both is
--- harmless. locations.fmisid stays the internal integer key (outside FMI it is
--- 1000000 + WMO index, which satisfies locations_fmisid_check); wigos_id is the
--- identity wis2box observations are queried and matched by, and the
--- applications' ddl-auto: validate requires the column.
+-- From fmi-verification-common-sql local-schema-upgrade/1001 until the vendored
+-- 0001 has it; idempotent. The applications validate the column.
 
 ALTER TABLE public.locations ADD COLUMN IF NOT EXISTS wigos_id text;
 

@@ -109,11 +109,8 @@ Vendored files, applied in this order:
    chart carry the same `parameter_map` ids. Nothing has a foreign key to
    `parameter_map.id`, so the ids are free to be chosen that way.
 
-   It also seeds the `wis2box` category (offset 500000, 5 rows), which the
-   applications read when `observation.source` is `wis2box`: temperature,
-   humidity, wind speed and direction, and 1-hour precipitation mapped to the
-   wis2box property names, precipitation with the `PT1H` accumulation period.
-   The rows are inert under the default SmartMet Server source.
+   It also seeds the `wis2box` category (offset 500000, 5 rows), read when
+   `observation.source` is `wis2box`.
 
    `localization_entries` is shared, so the seeded tables each own a
    100000-wide block of entry ids: estimators at offset 0 (1..110), parameters
@@ -129,14 +126,8 @@ Vendored files, applied in this order:
    GUI menus it builds silently empty. The table is empty at `initdb`, so the
    constraint is declared unconditionally rather than backfilled.
 
-   `locations` gets its `wigos_id` column (unique, format-checked), `locations_v`
-   exposes it and `set_location_wigos_id_f(fmisid, wigos_id)` sets it. This is
-   upstream's `local-schema-upgrade/1001-locations-wigos-id.sql`, carried here
-   until the vendored `0001` includes it, and the applications' Hibernate
-   validation needs the column. `fmisid` stays the integer key, `1000000 + WMO
-   index` outside FMI. A database bootstrapped by an earlier chart version does
-   not get it from `helm upgrade` (see below); apply that upstream script to it
-   once.
+   `locations` gets `wigos_id` (upstream `local-schema-upgrade/1001`), which the
+   applications validate. An existing database needs that script applied once.
 
    Idempotent, so it is safe against a database that already has the rows.
 5. `verification-db-sql-extra` — anything from `schema.extraSql`. Last, so an
