@@ -2501,6 +2501,20 @@ CREATE TABLE public.maisemasmartmet_results (
 
 ALTER TABLE public.maisemasmartmet_results OWNER TO verifadmin;
 
+CREATE TABLE public.mast_metadata (
+    location_id integer NOT NULL,
+    parameter_id integer NOT NULL,
+    parameter_name text NOT NULL,
+    sensor_no integer NOT NULL,
+    sensor_height numeric NOT NULL,
+    obstruction_direction_from numeric,
+    obstruction_direction_to numeric,
+    CONSTRAINT mast_metadata_obstruction_direction_from_check CHECK (((obstruction_direction_from IS NULL) OR ((obstruction_direction_from >= 0) AND (obstruction_direction_from < 360)))),
+    CONSTRAINT mast_metadata_obstruction_direction_to_check CHECK (((obstruction_direction_to IS NULL) OR ((obstruction_direction_to >= 0) AND (obstruction_direction_to < 360))))
+);
+
+ALTER TABLE public.mast_metadata OWNER TO verifadmin;
+
 CREATE TABLE public.meps_forecasts (
     producer_id integer NOT NULL,
     analysis_time timestamp with time zone NOT NULL,
@@ -3995,35 +4009,15 @@ CREATE TABLE public.warning_levels (
 
 ALTER TABLE public.warning_levels OWNER TO verifadmin;
 
-CREATE TABLE public.warning_rule_conditions (
-    id integer NOT NULL,
-    warning_rule_id integer NOT NULL,
-    parameter_id integer NOT NULL,
-    low_limit double precision,
-    upper_limit double precision,
-    low_inclusive boolean DEFAULT true NOT NULL,
-    upper_inclusive boolean DEFAULT false NOT NULL,
-    modified_by text,
-    modified_last timestamp with time zone,
-    CONSTRAINT warning_rule_conditions_at_least_one_limit_chk CHECK (((low_limit IS NOT NULL) OR (upper_limit IS NOT NULL))),
-    CONSTRAINT warning_rule_conditions_limit_order_chk CHECK (((low_limit IS NULL) OR (upper_limit IS NULL) OR (low_limit <= upper_limit)))
-);
-
-ALTER TABLE public.warning_rule_conditions OWNER TO verifadmin;
-
-ALTER TABLE public.warning_rule_conditions ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
-    SEQUENCE NAME public.warning_rule_conditions_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
-
 CREATE TABLE public.warning_rules (
     id integer NOT NULL,
     target_id integer NOT NULL,
     severity_id integer NOT NULL,
+    parameter_id integer NOT NULL,
+    low_limit double precision,
+    upper_limit double precision,
+    low_limit2 double precision,
+    upper_limit2 double precision,
     valid_from_month smallint DEFAULT 1 NOT NULL,
     valid_from_day smallint DEFAULT 1 NOT NULL,
     valid_to_month smallint DEFAULT 12 NOT NULL,
@@ -4033,6 +4027,8 @@ CREATE TABLE public.warning_rules (
     modified_last timestamp with time zone,
     CONSTRAINT warning_rules_from_day_chk CHECK (((valid_from_day >= 1) AND (valid_from_day <= 31))),
     CONSTRAINT warning_rules_from_month_chk CHECK (((valid_from_month >= 1) AND (valid_from_month <= 12))),
+    CONSTRAINT warning_rules_limit2_order_chk CHECK (((low_limit2 IS NULL) OR (upper_limit2 IS NULL) OR (low_limit2 <= upper_limit2))),
+    CONSTRAINT warning_rules_limit_order_chk CHECK (((low_limit IS NULL) OR (upper_limit IS NULL) OR (low_limit <= upper_limit))),
     CONSTRAINT warning_rules_to_day_chk CHECK (((valid_to_day >= 1) AND (valid_to_day <= 31))),
     CONSTRAINT warning_rules_to_month_chk CHECK (((valid_to_month >= 1) AND (valid_to_month <= 12)))
 );
@@ -4760,6 +4756,9 @@ ALTER TABLE ONLY public.maisemasmartmet_forecasts
 ALTER TABLE ONLY public.maisemasmartmet_results
     ADD CONSTRAINT maisemasmartmet_results_pkey PRIMARY KEY (producer_id, period_id, target_id, parameter_id, estimator_id, forecaster_id, analysis_hour, leadtime);
 
+ALTER TABLE ONLY public.mast_metadata
+    ADD CONSTRAINT mast_metadata_pkey PRIMARY KEY (location_id, parameter_id, sensor_no);
+
 ALTER TABLE ONLY public.meps_forecasts
     ADD CONSTRAINT meps_forecasts_pkey PRIMARY KEY (producer_id, analysis_time, target_id, parameter_id, leadtime);
 
@@ -5054,17 +5053,8 @@ ALTER TABLE ONLY public.virenwc_results
 ALTER TABLE ONLY public.warning_levels
     ADD CONSTRAINT warning_levels_pkey PRIMARY KEY (severity_id);
 
-ALTER TABLE ONLY public.warning_rule_conditions
-    ADD CONSTRAINT warning_rule_conditions_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY public.warning_rule_conditions
-    ADD CONSTRAINT warning_rule_conditions_unique_condition UNIQUE (warning_rule_id, parameter_id, low_limit, upper_limit, low_inclusive, upper_inclusive);
-
 ALTER TABLE ONLY public.warning_rules
     ADD CONSTRAINT warning_rules_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY public.warning_rules
-    ADD CONSTRAINT warning_rules_unique_rule UNIQUE (target_id, severity_id, valid_from_month, valid_from_day, valid_to_month, valid_to_day);
 
 ALTER TABLE ONLY public.wasp_forecasts
     ADD CONSTRAINT wasp_forecasts_pkey PRIMARY KEY (producer_id, analysis_time, target_id, parameter_id, leadtime);
@@ -5142,6 +5132,8 @@ CREATE UNIQUE INDEX ui_sort_order_ts_uniq_idx ON public.ui_sort_order USING btre
 CREATE UNIQUE INDEX warning_levels_severity_color_uniq_idx ON public.warning_levels USING btree (severity_color);
 
 CREATE UNIQUE INDEX warning_levels_severity_name_uniq_idx ON public.warning_levels USING btree (severity_name);
+
+CREATE UNIQUE INDEX warning_rules_unique_rule ON public.warning_rules USING btree (target_id, parameter_id, severity_id, low_limit, upper_limit, valid_from_month, valid_from_day, valid_to_month, valid_to_day) NULLS NOT DISTINCT;
 
 CREATE UNIQUE INDEX wind_correction_coefficients_ss_uniq_idx ON public.wind_correction_coefficients USING btree (set_id, angle);
 
@@ -5415,8 +5407,6 @@ CREATE TRIGGER targets_modified_last_trg BEFORE UPDATE ON public.targets FOR EAC
 
 CREATE TRIGGER warning_levels_modified_last_trg BEFORE UPDATE ON public.warning_levels FOR EACH ROW EXECUTE FUNCTION public.store_last_modified_f();
 
-CREATE TRIGGER warning_rule_conditions_modified_last_trg BEFORE UPDATE ON public.warning_rule_conditions FOR EACH ROW EXECUTE FUNCTION public.store_last_modified_f();
-
 CREATE TRIGGER warning_rules_modified_last_trg BEFORE UPDATE ON public.warning_rules FOR EACH ROW EXECUTE FUNCTION public.store_last_modified_f();
 
 ALTER TABLE ONLY public.airport_forecast_view_settings
@@ -5616,6 +5606,12 @@ ALTER TABLE ONLY public.locations
 
 ALTER TABLE ONLY public.locations
     ADD CONSTRAINT locations_name_id_fkey FOREIGN KEY (name_id) REFERENCES public.localization_entries(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY public.mast_metadata
+    ADD CONSTRAINT mast_metadata_location_id_fkey FOREIGN KEY (location_id) REFERENCES public.locations(fmisid);
+
+ALTER TABLE ONLY public.mast_metadata
+    ADD CONSTRAINT mast_metadata_parameter_id_fkey FOREIGN KEY (parameter_id) REFERENCES public.parameters(id);
 
 ALTER TABLE public.model_data
     ADD CONSTRAINT model_data_forecaster_id_fkey FOREIGN KEY (forecaster_id) REFERENCES public.forecasters(id);
@@ -5962,11 +5958,8 @@ ALTER TABLE ONLY public.used_zero_limit_results
 ALTER TABLE ONLY public.warning_levels
     ADD CONSTRAINT warning_levels_description_id_fkey FOREIGN KEY (description_id) REFERENCES public.localization_entries(id);
 
-ALTER TABLE ONLY public.warning_rule_conditions
-    ADD CONSTRAINT warning_rule_conditions_parameter_fkey FOREIGN KEY (parameter_id) REFERENCES public.parameters(id);
-
-ALTER TABLE ONLY public.warning_rule_conditions
-    ADD CONSTRAINT warning_rule_conditions_rule_fkey FOREIGN KEY (warning_rule_id) REFERENCES public.warning_rules(id) ON DELETE CASCADE;
+ALTER TABLE ONLY public.warning_rules
+    ADD CONSTRAINT warning_rules_parameter_fkey FOREIGN KEY (parameter_id) REFERENCES public.parameters(id);
 
 ALTER TABLE ONLY public.warning_rules
     ADD CONSTRAINT warning_rules_severity_fkey FOREIGN KEY (severity_id) REFERENCES public.warning_levels(severity_id);
@@ -8320,6 +8313,10 @@ GRANT INSERT,DELETE,UPDATE ON TABLE public.maisemasmartmet_forecasts TO verif_da
 GRANT SELECT ON TABLE public.maisemasmartmet_results TO verif_ro;
 GRANT INSERT,DELETE,UPDATE ON TABLE public.maisemasmartmet_results TO verif_data_rw;
 
+GRANT SELECT ON TABLE public.mast_metadata TO verif_ro;
+GRANT INSERT,DELETE,UPDATE ON TABLE public.mast_metadata TO verif_meta_rw;
+GRANT SELECT ON TABLE public.mast_metadata TO replicator;
+
 GRANT SELECT ON TABLE public.meps_forecasts TO verif_ro;
 GRANT INSERT,DELETE,UPDATE ON TABLE public.meps_forecasts TO verif_data_rw;
 GRANT SELECT ON TABLE public.meps_forecasts TO replicator;
@@ -8715,10 +8712,6 @@ GRANT SELECT ON TABLE public.warning_levels TO verif_ro;
 GRANT INSERT,DELETE,UPDATE ON TABLE public.warning_levels TO verif_data_rw;
 GRANT SELECT ON TABLE public.warning_levels TO replicator;
 GRANT INSERT,DELETE,UPDATE ON TABLE public.warning_levels TO verif_meta_rw;
-
-GRANT SELECT ON TABLE public.warning_rule_conditions TO verif_ro;
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.warning_rule_conditions TO verif_meta_rw;
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.warning_rule_conditions TO verif_data_rw;
 
 GRANT SELECT ON TABLE public.warning_rules TO verif_ro;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.warning_rules TO verif_meta_rw;

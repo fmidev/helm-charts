@@ -130,8 +130,7 @@ schema:
     postInitApplication: []
 
   # Extra SQL executed as superuser on the application database, after the
-  # vendored 0002-post-ownership.sql. Intended for the upstream
-  # `local-schema-upgrade/` scripts at initial bootstrap.
+  # reference data and the vendored upstream `local-schema-upgrade/` scripts.
   #
   # Plain SQL only -- psql meta-commands (\i, \copy, \echo) are NOT supported.
   #

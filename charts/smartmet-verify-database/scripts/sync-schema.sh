@@ -148,6 +148,17 @@ SHA="$(gh api "repos/${REPO}/commits/${REF}" --jq .sha)"
 echo "  -> ${SHA}"
 
 mkdir -p "${SQL_DIR}"
+
+# Upstream's incremental upgrades for databases built from an older 0001. All
+# of them are vendored (the placeholder 1000-todo.sql excepted) and applied at
+# initdb after the reference data; each is idempotent, so a dump that already
+# contains one is unaffected. Re-fetched from scratch so a removed one goes.
+rm -rf "${SQL_DIR}/local-schema-upgrade"
+mkdir -p "${SQL_DIR}/local-schema-upgrade"
+while read -r upgrade; do
+  FILES+=("local-schema-upgrade/${upgrade}")
+done < <(gh api "repos/${REPO}/contents/local-schema-upgrade?ref=${SHA}" \
+           --jq '.[].name | select(endswith(".sql") and . != "1000-todo.sql")')
 for f in "${FILES[@]}"; do
   echo "Fetching ${f} ..."
   # Use the raw media type rather than --jq .content: the Contents API refuses

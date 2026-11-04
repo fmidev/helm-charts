@@ -24,8 +24,14 @@ metadata:
   {{- end }}
 data:
   extra.sql: |
-    -- Generated from `schema.extraSql`. Entries are concatenated in sorted key
-    -- order. Empty by default, which is a valid no-op for CNPG.
+    -- Upstream local-schema-upgrade/ scripts (vendored, idempotent), then
+    -- `schema.extraSql` entries, each in sorted order.
+    {{- range $path, $_ := .Files.Glob "files/sql/local-schema-upgrade/*.sql" }}
+    --
+    -- {{ base $path }}
+    --
+    {{- $.Files.Get $path | nindent 4 }}
+    {{- end }}
     {{- range $name := (keys .Values.schema.extraSql | sortAlpha) }}
     --
     -- {{ $name }}
