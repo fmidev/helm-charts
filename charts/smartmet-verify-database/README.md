@@ -109,6 +109,9 @@ Vendored files, applied in this order:
    chart carry the same `parameter_map` ids. Nothing has a foreign key to
    `parameter_map.id`, so the ids are free to be chosen that way.
 
+   It also seeds the `wis2box` category (offset 500000, 5 rows), read when
+   `observation.source` is `wis2box`.
+
    `localization_entries` is shared, so the seeded tables each own a
    100000-wide block of entry ids: estimators at offset 0 (1..110), parameters
    at offset 100000 (100001..100865), period types at 300000 and location kinds
@@ -122,6 +125,9 @@ Vendored files, applied in this order:
    check, so one null row kills the weekly `used_model_*` refresh and leaves the
    GUI menus it builds silently empty. The table is empty at `initdb`, so the
    constraint is declared unconditionally rather than backfilled.
+
+   `locations` gets `wigos_id` (upstream `local-schema-upgrade/1001`), which the
+   applications validate. An existing database needs that script applied once.
 
    Idempotent, so it is safe against a database that already has the rows.
 5. `verification-db-sql-extra` — anything from `schema.extraSql`. Last, so an
