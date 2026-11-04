@@ -1715,12 +1715,14 @@ ON CONFLICT DO NOTHING;
 -- parameter_map
 -- ---------------------------------------------------------------------------
 -- How each parameter is addressed outside this database. The table is a set of
--- categories, and four of the fifteen FMI keeps are universal enough to seed:
+-- categories, and four of the fifteen FMI keeps are universal enough to seed, plus the
+-- wis2box category that FMI does not use:
 --
 --   estimators       which metrics may be computed for the parameter
 --   newbase          the id SmartMet Server knows the parameter by
 --   modelData        where a forecast value for it is stored
 --   obsBaseParameter the observed counterpart it is scored against
+--   wis2box          the WIS 2.0 / wis2box property it is observed as
 --
 -- The remaining eleven map parameters onto systems that exist only at FMI --
 -- CLDB names, METAR ids, an FMI producer id -- and every reader guards the
@@ -1733,6 +1735,7 @@ ON CONFLICT DO NOTHING;
 --   modelData        offset  200000
 --   obsBaseParameter offset  300000
 --   estimators       offset  400000
+--   wis2box          offset  500000
 --
 -- That is a different id space from the localization_entries blocks above; the
 -- two tables share no keys. The offsets match the ones the smartmet-rke2 role
@@ -1741,7 +1744,7 @@ ON CONFLICT DO NOTHING;
 -- parameter_map.id -- the table carries only its primary key, the
 -- (parameter_id, category) unique index and an outbound key to parameters --
 -- so the ids are free to be chosen this way. The setval at the end of this file
--- consequently leaves parameter_map_id_seq at 400357, past every block, so a
+-- consequently leaves parameter_map_id_seq at 500190, past every block, so a
 -- row inserted later without an explicit id cannot collide with one of these.
 --
 -- ON CONFLICT with no target covers both the primary key and the unique index,
@@ -2020,6 +2023,29 @@ VALUES
        (300615, 615, 'obsBaseParameter', '615'),
        (300616, 616, 'obsBaseParameter', '616'),
        (300617, 617, 'obsBaseParameter', '617')
+ON CONFLICT DO NOTHING;
+
+-- wis2box is the category the runner and GUI read when observation.source is
+-- wis2box: a WMO WIS 2.0 node serving surface observations through wis2box's
+-- OGC API - Features endpoint (fmi-verification-common's
+-- Wis2boxObservationService). alternative_name is the wis2box property name,
+-- alternative_id an ISO 8601 accumulation period the item's phenomenonTime
+-- interval must have; without one only instantaneous values are used. The rows
+-- are inert under the default SmartMet Server source, so every deployment gets
+-- them.
+--
+-- Only properties wis2box decodes from synop BUFR and that mean what the
+-- Verify parameter means are mapped. non_coordinate_pressure is station
+-- pressure, and parameter 51 (Pressure) is mean sea-level pressure, so it is
+-- deliberately left out; dew point, cloud cover and gusts are not published.
+
+INSERT INTO public.parameter_map (id, parameter_id, category, alternative_id, alternative_name)
+VALUES
+       (500001, 1, 'wis2box', NULL, 'air_temperature'),
+       (500003, 3, 'wis2box', NULL, 'wind_speed'),
+       (500005, 5, 'wis2box', 'PT1H', 'total_precipitation_or_total_water_equivalent'),
+       (500013, 13, 'wis2box', NULL, 'wind_direction'),
+       (500190, 190, 'wis2box', NULL, 'relative_humidity')
 ON CONFLICT DO NOTHING;
 
 -- ---------------------------------------------------------------------------
@@ -2476,6 +2502,60 @@ ALTER TABLE public.producers
     ALTER COLUMN analysis_hours SET NOT NULL;
 ALTER TABLE public.producers
     ALTER COLUMN arrival_leadtime SET DEFAULT 0;
+
+-- ---------------------------------------------------------------------------
+-- locations: WIGOS station identifier
+-- ---------------------------------------------------------------------------
+-- Same as fmi-verification-common-sql's
+-- local-schema-upgrade/1001-locations-wigos-id.sql, carried here until the
+-- vendored 0001 includes it; every statement is idempotent, so applying both is
+-- harmless. locations.fmisid stays the internal integer key (outside FMI it is
+-- 1000000 + WMO index, which satisfies locations_fmisid_check); wigos_id is the
+-- identity wis2box observations are queried and matched by, and the
+-- applications' ddl-auto: validate requires the column.
+
+ALTER TABLE public.locations ADD COLUMN IF NOT EXISTS wigos_id text;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'locations_wigos_id_format_check') THEN
+    ALTER TABLE public.locations ADD CONSTRAINT locations_wigos_id_format_check
+      CHECK (wigos_id IS NULL OR wigos_id ~ '^[0-9]+-[0-9]+-[0-9]+-[0-9A-Za-z]{1,16}$');
+  END IF;
+END
+$$;
+
+CREATE UNIQUE INDEX IF NOT EXISTS locations_wigos_id_uniq_idx ON public.locations (wigos_id);
+
+COMMENT ON COLUMN public.locations.wigos_id IS 'WIGOS station identifier, e.g. 0-231-0-63450. Used to query and match observations from WIS 2.0 sources.';
+
+CREATE OR REPLACE VIEW public.locations_v AS
+ SELECT l.fmisid,
+    ll.code AS language_code,
+    lt.translation AS name,
+    l.geom,
+    l.external_info,
+    l.wigos_id
+   FROM public.locations l,
+    public.localization_languages ll,
+    public.localization_entries le,
+    public.localization_translations lt
+  WHERE ((l.name_id = le.id) AND (lt.language_id = ll.id) AND (lt.entry_id = le.id));
+
+CREATE OR REPLACE FUNCTION public.set_location_wigos_id_f(_target_id integer, _wigos_id text) RETURNS boolean
+    LANGUAGE plpgsql SECURITY DEFINER
+    AS $$
+BEGIN
+  UPDATE public.locations SET wigos_id = _wigos_id WHERE fmisid = _target_id;
+  IF NOT FOUND THEN
+    RAISE NOTICE 'Location % does not exist', _target_id;
+    RETURN FALSE;
+  END IF;
+  RETURN TRUE;
+END;
+$$;
+
+ALTER FUNCTION public.set_location_wigos_id_f(_target_id integer, _wigos_id text) OWNER TO verifadmin;
 
 -- ---------------------------------------------------------------------------
 -- Deliberately not seeded
