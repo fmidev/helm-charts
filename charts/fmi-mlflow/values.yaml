@@ -13,7 +13,7 @@ mlflow:
   # NOTE: each of the 4 server workers has its own db connection pool,
   # keep 4 x (pool size + max overflow) x 2 pods (rolling update) below postgresql max_connections (100)
   extraEnv:
-    - name: MLFLOW_SQLALCHEMYSTORE_POOL_SIZE 
+    - name: MLFLOW_SQLALCHEMYSTORE_POOL_SIZE
       value: "3"
     - name: MLFLOW_SQLALCHEMYSTORE_MAX_OVERFLOW
       value: "5"
