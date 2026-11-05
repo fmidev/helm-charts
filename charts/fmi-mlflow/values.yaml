@@ -10,6 +10,23 @@ mlflow:
   containerPort: 5000
   servicePort: 5000
 
+  # NOTE: each of the 4 server workers has its own db connection pool,
+  # keep 4 x (pool size + max overflow) x 2 pods (rolling update) below postgresql max_connections (100)
+  extraEnv:
+    - name: MLFLOW_SQLALCHEMYSTORE_POOL_SIZE 
+      value: "3"
+    - name: MLFLOW_SQLALCHEMYSTORE_MAX_OVERFLOW
+      value: "5"
+    - name: MLFLOW_SQLALCHEMYSTORE_POOL_RECYCLE
+      value: "3600"
+    - name: MLFLOW_SQLALCHEMYSTORE_ECHO
+      value: "false"
+
+    # Disable job execution in production, see https://mlflow.org/docs/latest/tracking.html#job-execution
+    # This feature serve the GenAI features, which classical ML users do not need.
+    - name: MLFLOW_SERVER_ENABLE_JOB_EXECUTION
+      value: "false"
+
   resources:
     requests:
       memory: "1Gi"

@@ -32,7 +32,7 @@ oc create secret generic s3-credentials --from-env-file=env/s3-credentials
 oc create secret generic postgresql-mlflow-secret --from-env-file=env/postgresql-mlflow-secret
 oc create secret generic postgresql-superuser-secret --from-env-file=env/postgresql-superuser-secret
 oc create secret generic flask-secret --from-literal=SECRET_KEY=$(openssl rand -hex 32)
-oc create secret generic mlflow-admin-credentials --from-literal=password=<admin password>
+oc create secret generic mlflow-auth-config --from-file=basic-auth.ini=env/basic-auth.ini
 ```
 
 The basic-auth configuration (basic-auth.ini) is rendered by the chart into the `mlflow-auth` ConfigMap (templates/auth-config.yaml).

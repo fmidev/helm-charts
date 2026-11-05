@@ -72,6 +72,11 @@ spec:
             - name: HOME
               value: /tmp
 
+            {{- with .Values.mlflow.extraEnv }}
+            # extra environment variables from values (mlflow.extraEnv)
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+
           command: ["mlflow", "server"]
           args:
             - --backend-store-uri=postgresql://{{ include "mlflow.dbHost" . }}/{{ .Values.postgresql.database }}
