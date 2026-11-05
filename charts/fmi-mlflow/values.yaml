@@ -67,6 +67,23 @@ workspaces:
   # No effect while workspaces are disabled.
   grantDefaultAccess: true
 
+# Garbage collection (mlflow gc) as a CronJob, see templates/gc-cronjob.yaml
+# Permanently deletes runs/experiments/logged models users have deleted, including artifacts.
+# NOTE: doesn't check registered models, a model version whose run was deleted loses its artifacts.
+# Needs the admin password in auth.adminSecret (artifacts are deleted through the tracking server).
+garbageCollection:
+  enabled: false
+  # true: the CronJob exists but never runs on schedule, run it manually instead
+  suspend: true
+  schedule: "0 3 * * 0"  # Sundays 03:00 UTC
+  olderThan: 30d  # only resources deleted at least this long ago
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+
 route:
   # Router timeout, artifacts are proxied through the server so large uploads take time
   timeout: 5m
