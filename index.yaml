@@ -1974,6 +1974,18 @@ entries:
   geoweb-opmet-backend:
   - apiVersion: v2
     appVersion: v5.11.4
+    created: "2026-11-05T13:45:27.221610547Z"
+    description: A Helm chart for geoweb opmet backend resources in Kubernetes
+    digest: 15580003b9195755874275f3f7abeb2e61ad6c3edf9fbcf0036ed313bc64c1d7
+    maintainers:
+    - name: FMI
+    name: geoweb-opmet-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-opmet-backend-5.0.1/geoweb-opmet-backend-5.0.1.tgz
+    version: 5.0.1
+  - apiVersion: v2
+    appVersion: v5.11.4
     created: "2026-10-22T06:05:43.479235214Z"
     description: A Helm chart for geoweb opmet backend resources in Kubernetes
     digest: 82ff456f7f72ab94055eb2771ee2c6ec7f103d860086b4f51fe235a9b4ba005e
@@ -4212,6 +4224,18 @@ entries:
     - https://github.com/fmidev/helm-charts/releases/download/geoweb-secrets-provider-aws-1.3.0/geoweb-secrets-provider-aws-1.3.0.tgz
     version: 1.3.0
   geoweb-taf-backend:
+  - apiVersion: v2
+    appVersion: v4.2.5
+    created: "2026-11-05T13:45:27.442955611Z"
+    description: A Helm chart for geoweb taf backend resources in Kubernetes
+    digest: df080f13e5b2b4932df6b28927d311930107beb5e71f1dddba4a79b3d8e10dcd
+    maintainers:
+    - name: Jusaa
+    name: geoweb-taf-backend
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/geoweb-taf-backend-3.0.1/geoweb-taf-backend-3.0.1.tgz
+    version: 3.0.1
   - apiVersion: v2
     appVersion: v4.2.5
     created: "2026-10-22T06:05:43.823406777Z"
@@ -7141,4 +7165,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2026-11-04T23:14:37.257990128Z"
+generated: "2026-11-05T13:45:27.443600752Z"
