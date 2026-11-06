@@ -1,0 +1,66 @@
+{{- if .Values.garbageCollection.enabled }}
+# Permanently deletes runs, experiments and logged models that users have deleted
+# (lifecycle stage "deleted") at least garbageCollection.olderThan ago, including their artifacts.
+# Run it manually with:
+#   oc create job --from=cronjob/{{ include "mlflow.fullname" . }}-gc {{ include "mlflow.fullname" . }}-gc-manual
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "mlflow.fullname" . }}-gc
+  labels:
+    {{- include "mlflow.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.garbageCollection.schedule | quote }}
+  suspend: {{ .Values.garbageCollection.suspend }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      activeDeadlineSeconds: 3600
+      template:
+        metadata:
+          labels:
+            {{- include "mlflow.labels" . | nindent 12 }}
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: {{ include "mlflow.fullname" . }}-gc
+              image: {{ include "mlflow.image" . }}
+              imagePullPolicy: {{ .Values.mlflow.image.pullPolicy }}
+              env:
+                {{- include "mlflow.dbEnv" . | nindent 16 }}
+                # artifacts are proxied (mlflow-artifacts:/ uris), so they are deleted
+                # through the tracking server, as admin
+                - name: MLFLOW_TRACKING_URI
+                  value: https://{{ include "mlflow.host" . }}
+                - name: MLFLOW_TRACKING_USERNAME
+                  value: {{ .Values.auth.adminUsername | quote }}
+                - name: MLFLOW_TRACKING_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.auth.adminSecret }}
+                      key: password
+                - name: HOME
+                  value: /tmp
+              command: ["sh", "-c"]
+              args:
+                - |
+                  set -e
+                  mlflow gc \
+                    --backend-store-uri=postgresql://{{ include "mlflow.dbHost" . }}/{{ .Values.postgresql.database }} \
+                    {{- if .Values.workspaces.enabled }}
+                    --all-workspaces \
+                    {{- end }}
+                    --older-than={{ .Values.garbageCollection.olderThan | quote }}
+                  echo "Garbage collection done"
+              resources:
+                {{- toYaml .Values.garbageCollection.resources | nindent 16 }}
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: tmp
+              emptyDir: {}
+{{- end }}

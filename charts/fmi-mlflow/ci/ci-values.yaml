@@ -1,0 +1,30 @@
+# Values for chart-testing (ct install) in the GitHub Actions kind cluster.
+# The kind cluster has no CNPG operator, postgresql, S3 or secrets, so nothing that
+# would start a pod is enabled. This only checks that the manifests install.
+
+environment: test
+host: example.com
+
+mlflow:
+  replicas: 0  # the server needs the secrets and a running database
+
+garbageCollection:
+  enabled: false
+
+recovery:
+  enabled: false
+
+workspaces:
+  enabled: false
+
+objectStorage:
+  s3:
+    secretName: s3-credentials
+    bucketName: mlflow
+    endpointUrl: https://s3.example.com
+    artifactPath: ci
+    backupPath: backups/ci
+
+postgresql:
+  clusterName: pg-cluster-ci
+  instances: 1
