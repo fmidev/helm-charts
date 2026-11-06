@@ -127,7 +127,7 @@ NOTE: Native (in-tree) Barman Cloud support (spec.backup.barmanObjectStore, spec
 ### Recovery
 
 1. Change postgresql.clusterName in the `values.yaml` to a new name, e.g. pg-cluster-v2. 
-2. Change revocery.serverName to the current cluster name, e.g. pg-cluster-v1. The serverName is used to identify the backups to restore from.
+2. Set `recovery.enabled: true` and `recovery.ondemand: false`, then change `recovery.serverName` to the current cluster name, e.g. `pg-cluster-v1`, to select its object-store backups.
 3. Change mlflow.replicas to 0 to avoid connection issues during recovery. The old cluster is not deleted by helm (`helm.sh/resource-policy: keep`), delete it manually when no longer needed.
 4. Start the recovery by upgrading helm charts:
 ```
