@@ -27,6 +27,9 @@ metadata:
     app.kubernetes.io/instance: {{ $root.Release.Name }}
     app.kubernetes.io/managed-by: {{ $root.Chart.Name }}
     app.kubernetes.io/component: cronjob
+    {{- if $job.labels }}
+    {{ toYaml $job.labels | nindent 4 }}
+    {{- end }}
   {{- if $job.annotations }}
   annotations:
     {{- toYaml $job.annotations | nindent 4 }}
