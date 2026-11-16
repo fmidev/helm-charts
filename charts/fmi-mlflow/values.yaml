@@ -22,8 +22,8 @@ mlflow:
     - name: MLFLOW_SQLALCHEMYSTORE_ECHO
       value: "false"
 
-    # Disable job execution in production, see https://mlflow.org/docs/latest/tracking.html#job-execution
-    # This feature serve the GenAI features, which classical ML users do not need.
+    # Disable job execution in production. This feature serve the GenAI features, which classical ML users do not need.
+    # See: https://safeguard.sh/resources/blog/cve-2026-0545-mlflow-job-endpoints-no-auth
     - name: MLFLOW_SERVER_ENABLE_JOB_EXECUTION
       value: "false"
 
