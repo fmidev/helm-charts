@@ -359,6 +359,7 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.db.zalando.instances`                        | Zalando Postgres instance count                                                                                                                           | `1`                                                                         |
 | `presets.db.zalando.volumeSize`                       | Zalando Postgres data volume size                                                                                                                         | `100Mi`                                                                     |
 | `presets.db.zalando.enableLogicalBackup`              | Enable Zalando logical backups                                                                                                                            | `true`                                                                      |
+| `presets.db.zalando.env` | Kubernetes EnvVar entries passed to the PostgreSQL resource; override global operator environment settings | `[]` |
 | `presets.db.zalando.clone.enabled`                    | Restore Zalando cluster from backup instead of clean install                                                                                              | `false`                                                                     |
 | `presets.db.zalando.clone.timestamp`                  | Zalando clone timestamp; required when cloning is enabled                                                                                                 |                                                                             |
 | `presets.db.zalando.clone.backupBucket`               | Zalando clone backup bucket; required when cloning is enabled                                                                                             |                                                                             |
@@ -393,6 +394,7 @@ The following table lists the configurable parameters of the Presets backend cha
 
 | Chart version | presets version |
 | ------------- | --------------- |
+| 4.1.0         | 5.1.0           |
 | 4.0.0         | 5.1.0           |
 | 3.4.0         | 5.1.0           |
 | 3.3.2         | 5.1.0           |

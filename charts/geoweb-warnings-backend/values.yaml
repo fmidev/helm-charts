@@ -112,6 +112,7 @@ warnings:
       instances: 1
       volumeSize: 100Mi
       enableLogicalBackup: true
+      env: []
       clone:
         enabled: false
         timestamp: ""

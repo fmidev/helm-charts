@@ -301,6 +301,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.db.zalando.instances` | Zalando PostgreSQL instance count | `1` |
 | `warnings.db.zalando.volumeSize` | Zalando PostgreSQL volume size | `100Mi` |
 | `warnings.db.zalando.enableLogicalBackup` | Enable Zalando logical backups | `true` |
+| `warnings.db.zalando.env` | Kubernetes EnvVar entries passed to the PostgreSQL resource; override global operator environment settings | `[]` |
 | `warnings.db.zalando.clone.enabled` | Add the Zalando clone bootstrap stanza | `false` |
 | `warnings.db.zalando.clone.timestamp` | Zalando clone recovery timestamp; required when cloning is enabled | |
 | `warnings.db.zalando.clone.backupBucket` | Zalando clone WAL backup path; required when cloning is enabled | |
@@ -323,6 +324,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 
 | Chart version | warnings version |
 |---------------|------------------|
+| 3.1.0         | 4.1.0            |
 | 3.0.0         | 4.1.0            |
 | 2.2.0         | 4.1.0            |
 | 2.1.2         | 4.1.0            |

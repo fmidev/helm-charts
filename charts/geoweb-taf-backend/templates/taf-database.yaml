@@ -28,6 +28,10 @@ spec:
   volume:
     size: {{ .Values.taf.db.zalando.volumeSize }}
   numberOfInstances: {{ .Values.taf.db.zalando.instances }}
+  {{- with .Values.taf.db.zalando.env }}
+  env:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   users:
     {{ .Values.taf.db.username }}:
     - superuser

@@ -28,6 +28,10 @@ spec:
   volume:
     size: {{ .Values.warnings.db.zalando.volumeSize }}
   numberOfInstances: {{ .Values.warnings.db.zalando.instances }}
+  {{- with .Values.warnings.db.zalando.env }}
+  env:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   users:
     {{ .Values.warnings.db.username }}:
     - superuser
