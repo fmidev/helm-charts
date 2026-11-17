@@ -334,6 +334,7 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.db.zalando.instances` | Zalando database instance count | `1` |
 | `taf.db.zalando.volumeSize` | Zalando database volume size | `100Mi` |
 | `taf.db.zalando.enableLogicalBackup` | Enable Zalando logical backups | `true` |
+| `taf.db.zalando.env` | Kubernetes EnvVar entries passed to the PostgreSQL resource; override global operator environment settings | `[]` |
 | `taf.db.zalando.clone.enabled` | Restore a Zalando cluster from backup | `false` |
 | `taf.db.zalando.clone.timestamp` | Zalando restore timestamp; required when cloning is enabled | |
 | `taf.db.zalando.clone.backupBucket` | Zalando backup bucket; required when cloning is enabled | |
@@ -348,6 +349,7 @@ The following table lists the configurable parameters of the Taf backend chart a
 
 | Chart version | taf version |
 |---------------|-------------|
+| 3.1.0         | 4.2.5       |
 | 3.0.1         | 4.2.5       |
 | 3.0.0         | 4.2.5       |
 | 2.2.0         | 4.2.5       |

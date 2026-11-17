@@ -25,6 +25,10 @@ spec:
   volume:
     size: {{ .Values.opmet.db.zalando.volumeSize }}
   numberOfInstances: {{ .Values.opmet.db.zalando.instances }}
+  {{- with .Values.opmet.db.zalando.env }}
+  env:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   users:
     {{ .Values.opmet.db.username }}:
     - superuser
