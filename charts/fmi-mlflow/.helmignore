@@ -1,0 +1,9 @@
+# Files that are not part of the chart
+.git/
+.gitignore
+offical-helm-charts/
+env/
+values-*.yaml
+possu.yaml
+ondemand-backup-*.yaml
+UPGRADE-*.md
