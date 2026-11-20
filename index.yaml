@@ -5705,6 +5705,20 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/job-service-account-1.0.0/job-service-account-1.0.0.tgz
     version: 1.0.0
+  mlflow:
+  - apiVersion: v2
+    appVersion: 3.17.1
+    created: "2026-11-20T06:57:08.976954012Z"
+    description: MLflow tracking server with basic-auth and a CloudNativePG PostgreSQL
+      cluster for OpenShift
+    digest: 3e47762a93a0bd6682b163e2003c09f0ade81a53b6db70911e0936145b524969
+    maintainers:
+    - name: osmundi
+    name: mlflow
+    type: application
+    urls:
+    - https://github.com/fmidev/helm-charts/releases/download/mlflow-0.2.0/mlflow-0.2.0.tgz
+    version: 0.2.0
   nginx-ingress-controller:
   - apiVersion: v2
     appVersion: 1.5.1
@@ -7232,4 +7246,4 @@ entries:
     urls:
     - https://github.com/fmidev/helm-charts/releases/download/snwc-bc-1.0.0/snwc-bc-1.0.0.tgz
     version: 1.0.0
-generated: "2026-11-17T10:50:48.728507406Z"
+generated: "2026-11-20T06:57:08.977585789Z"
