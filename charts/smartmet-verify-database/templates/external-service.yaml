@@ -1,0 +1,42 @@
+{{/*
+Optional NodePort/LoadBalancer Service exposing the cluster primary outside
+Kubernetes, for clients that cannot reach the in-cluster service.
+
+The selector targets whichever pod CNPG currently labels as primary, so the
+Service follows a failover automatically.
+*/}}
+{{- if .Values.externalAccess.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "smartmet-verify-database.clusterName" . }}-external
+  labels:
+    {{- include "smartmet-verify-database.componentLabels" (list . "database") | nindent 4 }}
+  {{- $ann := merge (dict) (default (dict) .Values.externalAccess.annotations) (default (dict) .Values.commonAnnotations) }}
+  {{- with $ann }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.externalAccess.type }}
+  {{- if eq .Values.externalAccess.type "LoadBalancer" }}
+  {{- with .Values.externalAccess.loadBalancerIP }}
+  loadBalancerIP: {{ . }}
+  {{- end }}
+  {{- with .Values.externalAccess.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- end }}
+  selector:
+    cnpg.io/cluster: {{ include "smartmet-verify-database.clusterName" . }}
+    cnpg.io/instanceRole: primary
+  ports:
+    - name: postgresql
+      port: 5432
+      targetPort: 5432
+      protocol: TCP
+      {{- if and (eq .Values.externalAccess.type "NodePort") .Values.externalAccess.nodePort }}
+      nodePort: {{ .Values.externalAccess.nodePort }}
+      {{- end }}
+{{- end }}

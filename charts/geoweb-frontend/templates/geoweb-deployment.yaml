@@ -1,3 +1,27 @@
+{{- if hasKey .Values.frontend "customConfiguration" -}}
+{{- fail "frontend.customConfiguration was removed; use frontend.runtimeConfiguration" -}}
+{{- end -}}
+{{- $runtimeSource := default "none" .Values.frontend.runtimeConfiguration.source -}}
+{{- if not (has $runtimeSource (list "none" "inline" "existingConfigMap")) -}}
+{{- fail "frontend.runtimeConfiguration.source must be none, inline, or existingConfigMap" -}}
+{{- end -}}
+{{- if and .Values.frontend.useCustomConfigurationFiles (ne $runtimeSource "none") -}}
+{{- fail "frontend.useCustomConfigurationFiles cannot be combined with frontend.runtimeConfiguration.source" -}}
+{{- end -}}
+{{- if and (eq $runtimeSource "existingConfigMap") (or (empty .Values.frontend.runtimeConfiguration.existingConfigMap.name) (empty .Values.frontend.runtimeConfiguration.existingConfigMap.checksum)) -}}
+{{- fail "frontend.runtimeConfiguration.existingConfigMap.name and checksum are required" -}}
+{{- end -}}
+{{- if and (eq $runtimeSource "inline") (empty .Values.frontend.runtimeConfiguration.files) -}}
+{{- fail "frontend.runtimeConfiguration.files is required for inline source" -}}
+{{- end -}}
+{{- $nginx := default dict .Values.frontend.nginx -}}
+{{- $env := dict -}}
+{{- range $key, $value := .Values.frontend.env -}}
+{{- $_ := set $env (upper $key) $value -}}
+{{- end -}}
+{{- if .Values.frontend.client_id_secret -}}
+{{- $_ := unset $env "GW_AUTH_CLIENT_ID" -}}
+{{- end -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,6 +41,14 @@ spec:
         eks.amazonaws.com/compute-type: ec2
       {{- if .Values.frontend.commitHash }}
         commitHash: {{ .Values.frontend.commitHash }}
+      {{- end }}
+      {{- if eq $runtimeSource "inline" }}
+        checksum/runtime-configuration: {{ .Values.frontend.runtimeConfiguration.files | toJson | sha256sum | quote }}
+      {{- else if eq $runtimeSource "existingConfigMap" }}
+        checksum/runtime-configuration: {{ .Values.frontend.runtimeConfiguration.existingConfigMap.checksum | quote }}
+      {{- end }}
+      {{- with $nginx.headers }}
+        checksum/nginx-headers: {{ default "" .config | sha256sum | quote }}
       {{- end }}
     spec:
     {{- if eq .Values.secretProvider "aws" }}
@@ -58,18 +90,28 @@ spec:
       {{- if .Values.frontend.readinessProbe }}
         readinessProbe: {{ toYaml .Values.frontend.readinessProbe | nindent 10 }}
       {{- end }}
-        envFrom:
-        - configMapRef:
-            name: {{ .Values.frontend.name }}
-      {{- if .Values.frontend.client_id_secret }}
+      {{- if or $env .Values.frontend.client_id_secret }}
         env:
+      {{- end }}
+      {{- range $key, $value := $env }}
+        - name: {{ $key }}
+          value: {{ include "geoweb-frontend.envValue" $value }}
+      {{- end }}
+      {{- if .Values.frontend.client_id_secret }}
         - name: GW_AUTH_CLIENT_ID
           valueFrom:
             secretKeyRef:
               name: {{ .Values.frontend.client_id_secretName }}
               key: GW_AUTH_CLIENT_ID
       {{- end }}
+      {{- if or $nginx.headers .Values.secretProvider .Values.frontend.useCustomConfigurationFiles (ne $runtimeSource "none") .Values.frontend.extraVolumeMounts }}
         volumeMounts:
+      {{- with $nginx.headers }}
+        - name: nginx-headers
+          mountPath: {{ default "/etc/nginx/headers.conf" .mountPath | quote }}
+          subPath: headers.conf
+          readOnly: true
+      {{- end }}
       {{- if .Values.secretProvider }}
         - name: secrets-store-inline
           mountPath: "/mnt/secrets-store"
@@ -79,12 +121,23 @@ spec:
         - mountPath: {{ .Values.frontend.customConfigurationMountPath }}
           name: {{ .Values.frontend.name }}-volume
       {{- end }}
-      {{- if .Values.frontend.customConfiguration.enabled }}
+      {{- if ne $runtimeSource "none" }}
         - name: generated-configs
-          mountPath: {{ .Values.frontend.customConfigurationMountPath }}
+          mountPath: {{ .Values.frontend.runtimeConfiguration.mountPath }}
+          readOnly: true
       {{- end }}
+      {{- with .Values.frontend.extraVolumeMounts }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- end }}
+    {{- if or $nginx.headers .Values.secretProvider .Values.frontend.useCustomConfigurationFiles (ne $runtimeSource "none") .Values.frontend.extraVolumes }}
       volumes:
-    {{- if .Values.frontend.useCustomConfigurationFiles }}
+      {{- with $nginx.headers }}
+      - name: nginx-headers
+        configMap:
+          name: {{ $.Values.frontend.name }}-nginx-headers
+      {{- end }}
+      {{- if .Values.frontend.useCustomConfigurationFiles }}
       - name: {{ .Values.frontend.name }}-volume
       {{- if eq .Values.frontend.customConfigurationLocation "s3"}}
         emptyDir: {}
@@ -92,28 +145,24 @@ spec:
         persistentVolumeClaim:
           claimName: {{ .Values.frontend.name }}-claim
       {{- end }}
-    {{- end }}
-    {{- if .Values.frontend.customConfiguration.enabled }}
+      {{- end }}
+      {{- if ne $runtimeSource "none" }}
       - name: generated-configs
         configMap:
-          name: {{ .Values.frontend.name }}
-          items:
-          {{- range $filename, $content := .Values.frontend.customConfiguration.files }}
-          - key: {{ $filename }}
-            path: {{ $filename }}
-          {{- end }}
-    {{- end }}    
-      - name: secrets-store-inline
+          name: {{ ternary .Values.frontend.runtimeConfiguration.existingConfigMap.name (printf "%s-runtime-config" .Values.frontend.name) (eq $runtimeSource "existingConfigMap") }}
+      {{- end }}
       {{- if .Values.secretProvider }}
+      - name: secrets-store-inline
         csi:
           driver: secrets-store.csi.k8s.io
           readOnly: true
           volumeAttributes:
             secretProviderClass: {{ .Values.frontend.spcName | quote }}
-      {{ else }}
-        secret:
-          secretName: {{ .Values.frontend.client_id_secretName | quote }}
       {{- end }}
+      {{- with .Values.frontend.extraVolumes }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
+    {{- end }}
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -125,4 +174,4 @@ spec:
                   operator: In
                   values:
                   - {{ .Values.frontend.name }}
-              topologyKey: topology.kubernetes.io/zone
+              topologyKey: {{ .Values.frontend.podAntiAffinity.topologyKey | quote }}

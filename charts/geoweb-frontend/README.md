@@ -1,3 +1,63 @@
+# Upgrade notes for chart 5.0.0
+
+Chart `5.0.0` no longer assumes the nginx ingress controller. The Ingress defaults are neutral, so the chart works with any controller, including OpenShift:
+
+- `ingress.customAnnotations` is renamed to `ingress.annotations`, which defaults to `{}`. The chart no longer sets nginx annotations itself. Template rendering fails if `ingress.customAnnotations` is still set.
+- `ingress.ingressClassName` defaults to `""`, which uses the cluster's default IngressClass, instead of `nginx`.
+- `ingress.rules` is removed, so the chart no longer adds the nginx `configuration-snippet` with cache headers. Template rendering fails if `ingress.rules` is set.
+- `frontend.auth_secret` still creates the basic auth Secret, but no longer adds the nginx basic auth annotations. Template rendering fails if `frontend.auth_secret` is set unless `ingress.annotations` sets `nginx.ingress.kubernetes.io/auth-type` to `basic` (or `digest`) and `nginx.ingress.kubernetes.io/auth-secret` to a non-empty Secret name, or `ingress.basicAuthManagedElsewhere` is `true` for basic auth configured another way.
+- The new `ingress.enabled` (default `true`) leaves the Ingress out when set to `false`.
+
+To keep the previous nginx ingress controller setup, set the annotations the chart used to add. Leave out the auth annotations if you don't use `frontend.auth_secret`, and the snippet if your controller does not allow snippet annotations:
+
+```yaml
+ingress:
+  ingressClassName: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET"
+    # Previously added by frontend.auth_secret
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: geoweb-auth  # frontend.auth_secretName
+    # Previously the ingress.rules default
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      add_header Document-Policy "js-profiling" always;
+      if ($request_uri ~* \.(json)) {
+        add_header Cache-Control "no-cache";
+      }
+      if ($request_uri ~* \.(woff2|svg)) {
+        add_header Cache-Control "max-age=604800";
+      }
+      if ($request_uri ~* \.(webmanifest)) {
+        more_clear_headers 'Content-Type';
+        add_header Content-Type "application/manifest+json";
+        add_header Cache-Control "max-age=604800";
+      }
+```
+
+# Upgrade notes for chart 4.2.0
+
+Chart `4.2.0` sets the variables from `frontend.env` directly in the Deployment instead of in a ConfigMap.
+
+- Values files do not need changes.
+- Changing a variable now restarts the pods automatically, so `frontend.commitHash` is not needed for that.
+- Values are passed to the containers as is, like before: Kubernetes does not expand `$(NAME)` or `$$` in them.
+- When `frontend.client_id_secret` is set, `GW_AUTH_CLIENT_ID` still comes from the Secret, not from `frontend.env`.
+
+# Upgrade notes for chart 4.0.0
+
+Chart `4.0.0` removes `frontend.customConfiguration.enabled`. Set `frontend.runtimeConfiguration.source: inline` to keep generating files from `files`, or `source: none` to use the image defaults. `frontend.useCustomConfigurationFiles` remains available for existing local and S3 mounts; it cannot be combined with the ConfigMap source modes.
+
+Migration map:
+
+| Removed value                                | New value                                      |
+| -------------------------------------------- | ---------------------------------------------- |
+| `frontend.customConfiguration.enabled: true` | `frontend.runtimeConfiguration.source: inline` |
+| `frontend.customConfiguration.files`         | `frontend.runtimeConfiguration.files`          |
+
 # Install the chart repository
 
 ```bash
@@ -9,13 +69,13 @@ helm repo update
 
 Create your own values file for required variables:
 
-* Minimal setup
+- Minimal setup
 ```yaml
 frontend:
   url: geoweb.example.com
 ```
 
-* Using aws as the secret provider
+- Using aws as the secret provider
 ```yaml
 # Example envs: https://gitlab.com/opengeoweb/opengeoweb/-/blob/master/apps/geoweb/src/assets/config.example.json
 # Secret creation docs: https://kubernetes.github.io/ingress-nginx/examples/auth/basic/
@@ -37,7 +97,7 @@ secretProviderParameters:
   region: your-region
 ```
 
-* Using base64 encoded secrets
+- Using base64 encoded secrets
 ```yaml
 frontend:
   url: geoweb.example.com
@@ -52,7 +112,7 @@ frontend:
 
 ```
 
-* Using custom configuration files stored locally
+- Using custom configuration files stored locally
 ```yaml
 frontend:
   url: geoweb.example.com
@@ -60,7 +120,7 @@ frontend:
   customConfigurationFolderPath: /example/path/
 ```
 
-* Using custom configuration files stored in AWS S3
+- Using custom configuration files stored in AWS S3
 ```yaml
 frontend:
   url: geoweb.example.com
@@ -73,17 +133,30 @@ frontend:
   awsDefaultRegion: <AWS_DEFAULT_REGION>
 ```
 
-* Generate custom initialPresets.json from YAML values
-  * The configuration will be converted to JSON and mounted into the containers filesystem
-  * The structure of the JSON file should conform to the InitialAppPresetProps type, see https://opengeoweb.gitlab.io/opengeoweb/typescript-docs/core/interfaces/InitialAppPresetProps.html
-  * See also the default initialPresets.json file https://gitlab.com/opengeoweb/opengeoweb/-/blob/master/apps/geoweb/src/assets/initialPresets.json?ref_type=heads
+- Use initialPresets.json from an existing ConfigMap
+```yaml
+frontend:
+  env:
+    GW_INITIAL_PRESETS_FILENAME: custom/initialPresets.json
+  runtimeConfiguration:
+    source: existingConfigMap
+    existingConfigMap:
+      name: geoweb-initial-presets
+      checksum: <sha256-of-initialPresets.json>
+```
+The ConfigMap must contain the `initialPresets.json` key. The checksum must change with the file content. `useCustomConfigurationFiles` cannot be combined with the `inline` or `existingConfigMap` runtime configuration sources.
+
+- Generate custom initialPresets.json from YAML values
+  - The configuration will be converted to JSON and mounted into the containers filesystem
+  - The structure of the JSON file should conform to the InitialAppPresetProps type, see https://opengeoweb.gitlab.io/opengeoweb/typescript-docs/core/interfaces/InitialAppPresetProps.html
+  - See also the default initialPresets.json file https://gitlab.com/opengeoweb/opengeoweb/-/blob/master/apps/geoweb/src/assets/initialPresets.json?ref_type=heads
 ```yaml
 frontend:
   url: geoweb.example.com
   env:
     GW_INITIAL_PRESETS_FILENAME: custom/initialPresets.json  # Configure app to use the generated custom configuration JSON
-  customConfiguration:
-    enabled: true  # Enable initialPresets JSON generation from YAML values
+  runtimeConfiguration:
+    source: inline  # Generate a dedicated ConfigMap from YAML values
     files:
       "initialPresets.json":  # File will be available at /usr/share/nginx/html/assets/custom/
         # All the settings configured below will be included in the generated initialPresets JSON file
@@ -156,8 +229,9 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.svcPort` | Port used for service | `80` |
 | `frontend.containerPort` | Port used for container | `8080` |
 | `frontend.replicas` | Amount of replicas deployed | `1` |
+| `frontend.podAntiAffinity.topologyKey` | Prefer replicas on different workers (`kubernetes.io/hostname`) or in different zones (`topology.kubernetes.io/zone`). | `topology.kubernetes.io/zone` |
 | `frontend.minPodsAvailable` | Minimum available pods in pod disruption budget. Value `0` omits the pdb. | `0` |
-| `frontend.auth_secret` | Secret containing base64 encoded Basic auth secret | |
+| `frontend.auth_secret` | Secret containing base64 encoded Basic auth secret. Only creates the Secret: set the nginx basic auth annotations in `ingress.annotations`, or set `ingress.basicAuthManagedElsewhere` | |
 | `frontend.auth_secretName` | Name of auth secret | `geoweb-auth` |
 | `frontend.auth_secretType` | Type of auth secret | `secretsmanager` |
 | `frontend.auth_secretPath` | Path to auth secret | |
@@ -170,6 +244,8 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.iamRoleARN` | IAM Role with permissions to access secrets | |
 | `frontend.secretServiceAccount` | Service Account created for handling secrets | `geoweb-service-account` |
 | `frontend.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
+| `frontend.extraVolumes` | Additional volumes for the frontend pod, for example existing Secrets | `[]` |
+| `frontend.extraVolumeMounts` | Additional volume mounts for the frontend container | `[]` |
 | `frontend.startupProbe` | Configure startupProbe | see defaults from `values.yaml` |
 | `frontend.livenessProbe` | Configure livenessProbe | see defaults from `values.yaml` |
 | `frontend.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
@@ -191,7 +267,6 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.env.GW_AUTH_ROLE_CLAIM_VALUE_PRESETS_ADMIN` | The name of the security group required for the preset-admin role | |
 | `frontend.env.GW_INITIAL_PRESETS_FILENAME` | Filename to fetch initial presets | `initialPresets.json` |
 | `frontend.env.GW_CAP_CONFIGURATION_FILENAME` | Filename to fetch CAP Warnings configured feeds | `capWarningPresets.json` |
-| `frontend.env.GW_TIMESERIES_CONFIGURATION_FILENAME` | Filename to fetch TimeSeries preset locations | `timeSeriesPresetLocations.json` |
 | `frontend.env.GW_FEATURE_FORCE_AUTHENTICATION` | Force authentication (block Guest access) | `false` |
 | `frontend.env.GW_FEATURE_MODULE_SPACE_WEATHER` | Enable Space Weather module | `false` |
 | `frontend.env.GW_FEATURE_MENU_FEEDBACK` | Enable Feedback menu option | `false` |
@@ -208,10 +283,14 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.env.GW_VERSION_PROGRESS_NOTES_URL` | URL to release notes | |
 | `frontend.env.GW_TECHNICAL_RELEASE_NOTES_URL` | URL to technical changelog | |
 | `frontend.env.GW_INITIAL_WORKSPACE_PRESET` | Name of the workspace preset that is opened initially | |
-| `frontend.useCustomConfigurationFiles` | Use custom configurations | `false` |
+| `frontend.useCustomConfigurationFiles` | Mount custom application configuration files at `frontend.customConfigurationMountPath` | `false` |
 | `frontend.customConfigurationLocation` | Where custom configurations are located *(local\|s3)* | `local` |
-| `frontend.customConfiguration.files` | Map of filename to JSON content structured as YAML | `{}` |
-| `frontend.customConfiguration.files."initialPresets.json"` | Configuration for map presets, services, layers, etc. | See example in `values.yaml` |
+| `frontend.runtimeConfiguration.source` | Runtime files source: `none`, `inline`, or `existingConfigMap` | `none` |
+| `frontend.runtimeConfiguration.mountPath` | Directory where ConfigMap runtime files are mounted | `/usr/share/nginx/html/assets/custom` |
+| `frontend.runtimeConfiguration.existingConfigMap.name` | Name of an externally managed ConfigMap | `""` |
+| `frontend.runtimeConfiguration.existingConfigMap.checksum` | SHA-256 of published file content; used for restarting pods | `""` |
+| `frontend.runtimeConfiguration.files` | Map of filename to JSON content structured as YAML | `{}` |
+| `frontend.runtimeConfiguration.files."initialPresets.json"` | Configuration for map presets, services, layers, etc. | See example in `values.yaml` |
 | `frontend.volumeAccessMode` | Permissions of the application for the custom configurations PersistentVolume used | `ReadOnlyMany` |
 | `frontend.volumeSize` | Size of the custom configurations PersistentVolume | `100Mi` |
 | `frontend.customConfigurationFolderPath` | Path to the folder which contains custom configurations | |
@@ -220,16 +299,36 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.awsAccessKeyId` | AWS_ACCESS_KEY_ID for authenticating to S3 | |
 | `frontend.awsAccessKeySecret` | AWS_SECRET_ACCESS_KEY for authenticating to S3 | |
 | `frontend.awsDefaultRegion` | Region where your S3 bucket is located | |
+| `frontend.nginx.headers` | Optional nginx headers override. When omitted, the `/etc/nginx/headers.conf` file from the image is used | |
+| `frontend.nginx.headers.mountPath` | File path where the nginx headers configuration is mounted when `frontend.nginx.headers` is set | `/etc/nginx/headers.conf` |
+| `frontend.nginx.headers.config` | Contents of the nginx headers configuration file. Use this for global response headers such as security headers and CSP | |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |
-| `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | `nginx` |
+| `ingress.ingressClassName` | IngressClass for the Ingress. Empty uses the cluster's default IngressClass | `""` |
 | `ingress.tls` | TLS configuration section for the ingress | |
-| `ingress.rules` | Extra nginx configuration rules, like cache headers | See reference in `values.yaml` |
-| `ingress.customAnnotations` | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations and `frontend.auth_secret`, `frontend.auth_secretName` and `ingress.rules` can't be used if set | |
+| `ingress.annotations` | Annotations for your ingress controller, for example basic auth or cert-manager annotations. See the upgrade notes for the previous nginx defaults | `{}` |
+| `ingress.enabled` | Create the Ingress | `true` |
+| `ingress.basicAuthManagedElsewhere` | Set to `true` when `frontend.auth_secret` basic auth is configured without the nginx basic auth annotations, for example with a Traefik middleware | `false` |
 
 # Chart versions
 
 | Chart version | frontend version |
 |---------------|------------------|
+| 5.0.0         | 20.1.0           |
+| 4.3.0         | 20.1.0           |
+| 4.2.2         | 20.1.0           |
+| 4.2.1         | 19.6.0           |
+| 4.2.0         | 19.6.0           |
+| 4.1.0         | 19.6.0           |
+| 4.0.2         | 19.6.0           |
+| 4.0.1         | 19.6.0           |
+| 4.0.0         | 19.5.1           |
+| 3.22.1        | 19.5.1           |
+| 3.22.0        | 19.5.1           |
+| 3.21.2        | 19.1.0           |
+| 3.21.1        | 19.0.0           |
+| 3.21.0        | 18.0.0           |
+| 3.20.13       | 18.0.0           |
+| 3.20.12       | 17.0.1           |
 | 3.20.11       | 16.0.0           |
 | 3.20.10       | 15.2.0           |
 | 3.20.9        | 15.0.0           |

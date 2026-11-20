@@ -1,3 +1,34 @@
+{{- $configMapConfiguration := and .Values.presets.useCustomConfigurationFiles (eq .Values.presets.customConfigurationLocation "configMap") -}}
+{{- if and $configMapConfiguration (or (empty .Values.presets.customConfigurationConfigMap.name) (empty .Values.presets.customConfigurationConfigMap.checksum)) -}}
+{{- fail "presets.customConfigurationConfigMap.name and checksum are required for configMap configuration" -}}
+{{- end -}}
+{{- if and .Values.presets.useCustomConfigurationFiles (not (has .Values.presets.customConfigurationLocation (list "local" "s3" "configMap"))) -}}
+{{- fail "presets.customConfigurationLocation must be local, s3, or configMap" -}}
+{{- end -}}
+{{- $runtimeSource := default "none" .Values.presets.runtimeConfiguration.source -}}
+{{- if not (has $runtimeSource (list "none" "inline" "existingConfigMap")) -}}
+{{- fail "presets.runtimeConfiguration.source must be none, inline, or existingConfigMap" -}}
+{{- end -}}
+{{- if and (eq $runtimeSource "existingConfigMap") (or (empty .Values.presets.runtimeConfiguration.existingConfigMap.name) (empty .Values.presets.runtimeConfiguration.existingConfigMap.checksum)) -}}
+{{- fail "presets.runtimeConfiguration.existingConfigMap.name and checksum are required" -}}
+{{- end -}}
+{{- if and (eq $runtimeSource "inline") (empty .Values.presets.runtimeConfiguration.files) -}}
+{{- fail "presets.runtimeConfiguration.files is required for inline source" -}}
+{{- end -}}
+{{- $dbMode := default "sidecar" .Values.presets.db.mode }}
+{{- $usesExternalSecretProvider := and (eq $dbMode "external") (eq (default "inline" .Values.presets.db.external.source) "secretProvider") }}
+{{- $managedEnv := ternary (list "PG_PASS" "PG_USER" "PRESETS_BACKEND_DB") (list "PRESETS_BACKEND_DB") (eq $dbMode "zalando") }}
+{{- $backendEnv := dict "VERSION" (default .Chart.AppVersion .Values.versions.presets) }}
+{{- if .Values.presets.PRESETS_PORT_HTTP }}
+{{- $_ := set $backendEnv "PRESETS_PORT_HTTP" .Values.presets.PRESETS_PORT_HTTP }}
+{{- end }}
+{{- if .Values.presets.DEPLOY_ENVIRONMENT }}
+{{- $_ := set $backendEnv "DEPLOY_ENVIRONMENT" .Values.presets.DEPLOY_ENVIRONMENT }}
+{{- end }}
+{{- range $key, $value := .Values.presets.env }}
+{{- $_ := set $backendEnv (upper $key) $value }}
+{{- end }}
+{{- $nginx := .Values.presets.nginx }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,12 +46,22 @@ spec:
         app: {{ .Values.presets.name }}
       annotations:
         eks.amazonaws.com/compute-type: ec2
+      {{- if $configMapConfiguration }}
+        checksum/custom-configuration: {{ .Values.presets.customConfigurationConfigMap.checksum | quote }}
+      {{- end }}
       {{- if .Values.presets.commitHash }}
         commitHash: {{ .Values.presets.commitHash }}
       {{- end }}
+      {{- if eq $runtimeSource "inline" }}
+        checksum/runtime-configuration: {{ .Values.presets.runtimeConfiguration.files | toJson | sha256sum | quote }}
+      {{- else if eq $runtimeSource "existingConfigMap" }}
+        checksum/runtime-configuration: {{ .Values.presets.runtimeConfiguration.existingConfigMap.checksum | quote }}
+      {{- end }}
     spec:
-    {{- if eq .Values.secretProvider "aws" }}
+    {{- if and $usesExternalSecretProvider (eq .Values.presets.db.external.secretProvider.provider "aws") }}
       serviceAccountName: {{ .Values.presets.secretServiceAccount }}
+    {{- else }}
+      serviceAccountName: default
     {{- end }}
       initContainers:
       {{- if and .Values.presets.useCustomConfigurationFiles (eq .Values.presets.customConfigurationLocation "s3")}}
@@ -53,7 +94,7 @@ spec:
         - mountPath: "/custom-presets/"
           name: {{ .Values.presets.name }}-custom-presets-volume
       {{- end }}
-      {{- if .Values.presets.db.useZalandoOperatorDb }}
+      {{- if eq $dbMode "zalando" }}
       - name: wait-for-db
         image: busybox
         command: ['sh', '-c', "until nc -z -v -w30 {{ .Values.presets.db.name }} 5432; do echo 'Waiting for database...'; sleep 5; done"]
@@ -84,33 +125,39 @@ spec:
       {{- if .Values.presets.readinessProbe }}
         readinessProbe: {{ toYaml .Values.presets.readinessProbe | nindent 10 }}
       {{- end }}
-        envFrom:
-        - configMapRef:
-            name: {{ .Values.presets.name }}
         env:
-      {{- if .Values.presets.db.useZalandoOperatorDb }}
+      {{- range $key, $value := $backendEnv }}
+      {{- if not (has $key $managedEnv) }}
+        - name: {{ $key }}
+          value: {{ include "geoweb-presets-backend.envValue" $value }}
+      {{- end }}
+      {{- end }}
+      {{- if eq $dbMode "zalando" }}
         - name: PG_PASS
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.presets.db.POSTGRES_USER }}.{{ .Values.presets.db.name }}.credentials.postgresql.acid.zalan.do
+              name: {{ .Values.presets.db.username }}.{{ .Values.presets.db.name }}.credentials.postgresql.acid.zalan.do
               key: password
         - name: PG_USER
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.presets.db.POSTGRES_USER }}.{{ .Values.presets.db.name }}.credentials.postgresql.acid.zalan.do
+              name: {{ .Values.presets.db.username }}.{{ .Values.presets.db.name }}.credentials.postgresql.acid.zalan.do
               key: username
       {{- end }}
         - name: PRESETS_BACKEND_DB
-        {{- if .Values.presets.db.useZalandoOperatorDb }}
-          value: "postgresql://$(PG_USER):$(PG_PASS)@{{ .Values.presets.db.name }}:5432/{{ .Values.presets.db.POSTGRES_DB }}"
+        {{- if eq $dbMode "zalando" }}
+          value: "postgresql://$(PG_USER):$(PG_PASS)@{{ .Values.presets.db.name }}:5432/{{ .Values.presets.db.databaseName }}"
+        {{- else if eq $dbMode "sidecar" }}
+          value: "postgresql://{{ .Values.presets.db.username | urlquery | replace "+" "%20" }}:{{ .Values.presets.db.sidecar.password | urlquery | replace "+" "%20" }}@localhost:{{ .Values.presets.db.sidecar.port }}/{{ .Values.presets.db.databaseName | urlquery | replace "+" "%20" }}"
         {{- else }}
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.presets.db_secretName }}
-              key: PRESETS_BACKEND_DB
+              name: {{ .Values.presets.db.external.secretName }}
+              key: {{ .Values.presets.db.external.secretKey }}
         {{- end }}
+      {{- if or $usesExternalSecretProvider .Values.presets.useCustomConfigurationFiles .Values.presets.useCustomWorkspacePresets (ne $runtimeSource "none") }}
         volumeMounts:
-      {{- if not .Values.presets.db.useZalandoOperatorDb }}
+      {{- if $usesExternalSecretProvider }}
         - name: secrets-store-inline
           mountPath: "/mnt/secrets-store"
           readOnly: true
@@ -118,6 +165,17 @@ spec:
       {{- if .Values.presets.useCustomWorkspacePresets }}
         - mountPath: "/app/staticpresets"
           name: {{ .Values.presets.name }}-custom-presets-volume
+      {{- end }}
+      {{- if .Values.presets.useCustomConfigurationFiles }}
+        - mountPath: {{ .Values.presets.customConfigurationMountPath }}
+          name: {{ .Values.presets.name }}-volume
+          readOnly: true
+      {{- end }}
+      {{- if ne $runtimeSource "none" }}
+        - mountPath: {{ .Values.presets.runtimeConfiguration.mountPath }}
+          name: {{ .Values.presets.name }}-runtime-config
+          readOnly: true
+      {{- end }}
       {{- end }}
       - name: {{ .Values.presets.nginx.name }}
         image: {{ .Values.presets.nginx.registry }}:{{ .Values.presets.nginx.version }}
@@ -138,32 +196,54 @@ spec:
       {{- if .Values.presets.nginx.readinessProbe }}
         readinessProbe: {{ toYaml .Values.presets.nginx.readinessProbe | nindent 10 }}
       {{- end }}
-        envFrom:
-        - configMapRef:
-            name: {{ .Values.presets.nginx.name }}
-      {{- if and .Values.presets.useCustomConfigurationFiles }}
+        env:
+      {{- range $name := list "ENABLE_SSL" "OAUTH2_USERINFO" "JWKS_URI" "AUD_CLAIM" "AUD_CLAIM_VALUE" "ISS_CLAIM" "ISS_CLAIM_VALUE" "GEOWEB_USERNAME_CLAIM" "GEOWEB_REQUIRE_READ_PERMISSION" "GEOWEB_REQUIRE_WRITE_PERMISSION" "ALLOW_ANONYMOUS_ACCESS" "GEOWEB_ROLE_CLAIM_NAME" "GEOWEB_ROLE_CLAIM_VALUE_PRESETS_ADMIN" "BACKEND_HOST" "NGINX_PORT_HTTP" "NGINX_PORT_HTTPS" "ENV_VAR_STRICT_MODE" }}
+      {{- if index $nginx $name }}
+        - name: {{ $name }}
+          value: {{ include "geoweb-presets-backend.envValue" (index $nginx $name) }}
+      {{- end }}
+      {{- end }}
+      {{- range $name := list "NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE" "TRUST_FORWARDED_HEADERS" }}
+      {{- if hasKey $nginx $name }}
+        - name: {{ $name }}
+          value: {{ include "geoweb-presets-backend.envValue" (index $nginx $name) }}
+      {{- end }}
+      {{- end }}
         volumeMounts:
+        - name: nginx-run
+          mountPath: "/run"
+      {{- if and .Values.presets.useCustomConfigurationFiles }}
         - mountPath: "/nginx.conf"
           subPath: "nginx.conf"
           name: {{ .Values.presets.name }}-volume
       {{- end }}
-      {{- if .Values.presets.db.enableDefaultDb }}
+      {{- if eq $dbMode "sidecar" }}
       - name: {{ .Values.presets.db.name }}
-        image: {{ .Values.presets.db.image }}
+        image: {{ .Values.presets.db.sidecar.image }}
         ports:
-          - containerPort: {{ .Values.presets.db.port }}
+          - containerPort: {{ .Values.presets.db.sidecar.port }}
         env:
           - name: POSTGRES_DB
-            value: {{ .Values.presets.db.POSTGRES_DB }}
+            value: {{ .Values.presets.db.databaseName }}
           - name: POSTGRES_USER
-            value: {{ .Values.presets.db.POSTGRES_USER }}
+            value: {{ .Values.presets.db.username }}
           - name: POSTGRES_PASSWORD
-            value: {{ .Values.presets.db.POSTGRES_PASSWORD }}
+            value: {{ .Values.presets.db.sidecar.password }}
       {{- end }}
       volumes:
+      - name: nginx-run
+        emptyDir: {}
+    {{- if ne $runtimeSource "none" }}
+      - name: {{ .Values.presets.name }}-runtime-config
+        configMap:
+          name: {{ ternary .Values.presets.runtimeConfiguration.existingConfigMap.name (printf "%s-runtime-config" .Values.presets.name) (eq $runtimeSource "existingConfigMap") }}
+    {{- end }}
     {{- if .Values.presets.useCustomConfigurationFiles }}
       - name: {{ .Values.presets.name }}-volume
-      {{- if eq .Values.presets.customConfigurationLocation "s3"}}
+      {{- if $configMapConfiguration }}
+        configMap:
+          name: {{ .Values.presets.customConfigurationConfigMap.name }}
+      {{- else if eq .Values.presets.customConfigurationLocation "s3"}}
         emptyDir: {}
       {{- else if eq .Values.presets.customConfigurationLocation "local"}}
         persistentVolumeClaim:
@@ -179,18 +259,13 @@ spec:
           claimName: {{ .Values.presets.name }}-custom-presets-claim
       {{- end }}
     {{- end }}
-    {{- if not .Values.presets.db.useZalandoOperatorDb }}
+    {{- if $usesExternalSecretProvider }}
       - name: secrets-store-inline
-      {{- if .Values.secretProvider }}
         csi:
           driver: secrets-store.csi.k8s.io
           readOnly: true
           volumeAttributes:
-            secretProviderClass: {{ .Values.presets.spcName | quote }}
-      {{- else }}
-        secret:
-          secretName: {{ .Values.presets.db_secretName | quote }}
-      {{- end }}
+            secretProviderClass: {{ .Values.presets.db.external.secretProvider.className | quote }}
     {{- end }}
       affinity:
         podAntiAffinity:
@@ -203,4 +278,4 @@ spec:
                   operator: In
                   values:
                   - {{ .Values.presets.name }}
-              topologyKey: topology.kubernetes.io/zone
+              topologyKey: {{ .Values.presets.podAntiAffinity.topologyKey | quote }}

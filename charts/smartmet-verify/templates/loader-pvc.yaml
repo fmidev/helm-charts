@@ -1,0 +1,17 @@
+{{- if and .Values.loader.enabled .Values.loader.spool.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "smartmet-verify.componentFullname" (list . "loader") }}-spool
+  labels:
+    {{- include "smartmet-verify.componentLabels" (list . "loader") | nindent 4 }}
+spec:
+  accessModes:
+    {{- toYaml .Values.loader.spool.persistence.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.loader.spool.persistence.size }}
+  {{- if .Values.loader.spool.persistence.storageClassName }}
+  storageClassName: {{ .Values.loader.spool.persistence.storageClassName }}
+  {{- end }}
+{{- end }}

@@ -1,3 +1,100 @@
+# GeoWeb TAF Backend Helm Chart
+
+Deploys the GeoWeb TAF backend, placeholder, message converter, publisher, auth proxy, and optional development or Zalando PostgreSQL resources. CloudNativePG databases are managed separately with the `geoweb-cnpg` chart.
+
+# Upgrade notes for chart 3.0.0
+
+Chart `3.0.0` no longer assumes the nginx ingress controller. The Ingress defaults are neutral, so the chart works with any controller, including OpenShift:
+
+- `ingress.customAnnotations` is renamed to `ingress.annotations`, which defaults to `{}`. The chart no longer sets nginx annotations itself. Template rendering fails if `ingress.customAnnotations` is still set.
+- `ingress.ingressClassName` defaults to `""`, which uses the cluster's default IngressClass, instead of `nginx`.
+- `taf.path` defaults to the plain prefix `/taf-backend` instead of the nginx regex `/taf-backend/(.*)`.
+- The new `ingress.enabled` (default `true`) leaves the Ingress out when set to `false`.
+- The new `ingress.pathType` (default `Prefix`) sets the Ingress path type. Use `ImplementationSpecific` with nginx regex paths.
+
+With a plain prefix path the controller passes the prefix on, and FastAPI removes it based on `taf.env.APPLICATION_ROOT_PATH`, so keep that the same as `taf.path`.
+
+To keep the previous nginx ingress controller setup, set:
+
+```yaml
+taf:
+  path: /taf-backend/(.*)
+ingress:
+  ingressClassName: nginx
+  pathType: ImplementationSpecific
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "DELETE, PUT, GET, POST, OPTIONS, PATCH, HEAD"
+```
+
+**Custom auth proxy configuration:** the auth proxy's default `nginx.conf` requires a valid token on every path. A custom `nginx.conf` (`taf.useCustomConfigurationFiles`) with per-path `location` blocks expects paths without the prefix. If the ingress controller does not strip the prefix, add a rewrite to the start of the `server` block, for example `rewrite ^/taf-backend(?:/(.*))?$ /$1 last;`. Otherwise prefixed requests skip those `location` blocks and their permission checks.
+
+# Upgrade notes for chart 2.1.0
+
+Chart `2.1.0` sets the variables from `taf.env`, `taf.publisher` and `taf.nginx` directly in the Deployment instead of in ConfigMaps.
+
+- Values files do not need changes.
+- Changing a variable now restarts the pods automatically, so `taf.commitHash` is not needed for that.
+- Values are passed to the containers as is, like before: Kubernetes does not expand `$(NAME)` or `$$` in them.
+- Variables the chart sets itself (`AVIATION_TAF_BACKEND_DB`, and `PG_USER`/`PG_PASS` with Zalando) still take precedence over the same names in `taf.env`.
+
+# Upgrade notes for chart 2.0.0
+
+Chart `2.0.0` introduces a breaking database values cleanup. The old `taf.db.enableDefaultDb` and `taf.db.useZalandoOperatorDb` booleans are replaced by `taf.db.mode`, and database settings now live under common fields and mode-specific blocks. Removed 1.x database values cause template rendering to fail until they are migrated.
+
+Migration map:
+
+| Removed value | New value |
+| - | - |
+| `taf.db.enableDefaultDb: true` | `taf.db.mode: sidecar` |
+| `taf.db.enableDefaultDb: false` with `taf.db.useZalandoOperatorDb: false` | `taf.db.mode: external` |
+| `taf.db.useZalandoOperatorDb: true` | `taf.db.mode: zalando` |
+| `taf.db_secret` | `taf.db.external.encodedConnectionString` for `source: inline`, or `taf.db.external.secretProvider.objectName` for `source: secretProvider` |
+| `taf.db_secretName` | `taf.db.external.secretName` |
+| `taf.db_secretType` | `taf.db.external.secretProvider.objectType` |
+| `taf.db_secretPath` | `taf.db.external.secretProvider.path` |
+| `taf.db_secretKey` | `taf.db.external.secretProvider.key` |
+| `taf.iamRoleARN` | `taf.db.external.secretProvider.iamRoleARN` |
+| `taf.spcName` | `taf.db.external.secretProvider.className` |
+| `secretProvider` | `taf.db.external.secretProvider.provider` |
+| `secretProviderParameters` | `taf.db.external.secretProvider.parameters` |
+| `taf.db.POSTGRES_DB` | `taf.db.databaseName` |
+| `taf.db.POSTGRES_USER` | `taf.db.username` |
+| `taf.db.image` | `taf.db.sidecar.image` |
+| `taf.db.port` | `taf.db.sidecar.port` |
+| `taf.db.POSTGRES_PASSWORD` | `taf.db.sidecar.password` |
+| `taf.db.POSTGRES_VERSION` | `taf.db.zalando.postgresVersion` |
+| `taf.db.numberOfInstances` | `taf.db.zalando.instances` |
+| `taf.db.instanceSize` | `taf.db.zalando.volumeSize` |
+| `taf.db.zalandoTeamId` | `taf.db.zalando.teamId` |
+| `taf.db.enableLogicalBackup` | `taf.db.zalando.enableLogicalBackup` |
+| `taf.db.cleanInstall: false` | `taf.db.zalando.clone.enabled: true` |
+| `taf.db.backupTimestamp` | `taf.db.zalando.clone.timestamp` |
+| `taf.db.backupBucket` | `taf.db.zalando.clone.backupBucket` |
+
+For existing Zalando deployments, render old and migrated values before upgrading and compare the generated `postgresql` resource. Preserve the resource name, users, database name, team ID, instance count, PostgreSQL version, volume size, backup setting, and clone configuration.
+
+For existing external database deployments, verify that both the TAF API and placeholder containers still read `AVIATION_TAF_BACKEND_DB` from the intended Kubernetes Secret name and key. Publisher configuration is independent from database selection.
+
+An upgrade from 1.x does not require changing database technology. First migrate the values while retaining the existing database mode. Moving data to CloudNativePG is a separate operation and should not be combined with the chart values migration.
+
+## Migrating an existing database to CloudNativePG
+
+The `geoweb-cnpg` chart creates a new database lifecycle; this application chart does not adopt or copy a sidecar, Zalando, or other external database.
+
+1. Migrate and validate the 1.x values while retaining the existing database mode.
+2. Back up the source database and verify that the dump can be read.
+3. Install `geoweb-cnpg` as a separate release with a different resource name from the source database.
+4. Stop writes to TAF, take a final consistent dump, and restore it into the CNPG database.
+5. Verify schema, row counts, and representative TAF operations before changing the application release.
+6. Upgrade TAF with `mode: external`, `source: existingSecret`, and the CNPG-generated `<cluster-name>-app` Secret key `uri`.
+7. Keep the source database and backup until application validation and the rollback window are complete.
+
+Do not uninstall the source database release as part of the application upgrade. Rehearse the exact dump and restore procedure on a copy before production migration.
+
 # Install the chart repository
 
 ```bash
@@ -7,27 +104,63 @@ helm repo update
 
 # Create required dependencies
 
-Create your own values file for required variables:
-* Using aws as the secret provider
-```yaml
-taf: 
-  url: geoweb.example.com
-  db_secret: secretName # Secret should contain postgresql database connection string
-  iamRoleARN: arn:aws:iam::123456789012:role/example-iam-role-with-permissions-to-secret
+Create your own values file for required variables.
 
-secretProvider: aws
-secretProviderParameters:
-  region: your-region
-```
+- Minimal setup
 
-* Using base64 encoded secret
 ```yaml
 taf:
   url: geoweb.example.com
-  db_secret: base64_encoded_postgresql_connection_string
 ```
 
-* Using custom configuration files stored locally
+- Using AWS Secrets Manager for an external database connection string
+
+```yaml
+taf:
+  url: geoweb.example.com
+  db:
+    mode: external
+    external:
+      source: secretProvider
+      secretName: taf-db
+      secretKey: AVIATION_TAF_BACKEND_DB
+      secretProvider:
+        provider: aws
+        className: taf-spc
+        objectName: secretName
+        iamRoleARN: arn:aws:iam::123456789012:role/example-iam-role-with-permissions-to-secret
+        parameters:
+          region: your-region
+```
+
+- Creating a Secret from an inline base64-encoded connection string
+
+```yaml
+taf:
+  url: geoweb.example.com
+  db:
+    mode: external
+    external:
+      source: inline
+      secretName: taf-db
+      secretKey: AVIATION_TAF_BACKEND_DB
+      encodedConnectionString: base64_encoded_postgresql_connection_string
+```
+
+- Using an existing Secret, including one generated by `geoweb-cnpg`
+
+```yaml
+taf:
+  url: geoweb.example.com
+  db:
+    mode: external
+    external:
+      source: existingSecret
+      secretName: taf-db-app
+      secretKey: uri
+```
+
+- Using custom configuration files stored locally
 ```yaml
 taf:
   url: geoweb.example.com
@@ -35,7 +168,7 @@ taf:
   customConfigurationFolderPath: /example/path/
 ```
 
-* Using custom configuration files stored in AWS S3
+- Using custom configuration files stored in AWS S3
 ```yaml
 taf:
   url: geoweb.example.com
@@ -48,16 +181,27 @@ taf:
   awsDefaultRegion: <AWS_DEFAULT_REGION>
 ```
 
-* Using Zalando Operator Database
+- Using Zalando Operator Database
+
 ```yaml
 taf:
   url: geoweb.example.com
   db:
-    enableDefaultDb: false
-    useZalandoOperatorDb: true
-    cleanInstall: false # Add this line only after first install
-    backupBucket: s3://<S3-bucket-name>/
+    mode: zalando
+    name: taf-db
+    databaseName: taf
+    username: geoweb
+    zalando:
+      teamId: geoweb
+      postgresVersion: 15
+      instances: 2
+      volumeSize: 1Gi
+      enableLogicalBackup: true
+      clone:
+        enabled: false
 ```
+
+To create a new Zalando database, keep `clone.enabled: false`. Enable cloning only when restoring an existing cluster and provide both a valid recovery timestamp and backup bucket.
 
 # Testing the Chart
 Execute the following for testing the chart:
@@ -95,27 +239,20 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.commitHash` | Adds commitHash annotation to the deployment | |
 | `taf.imagePullPolicy` | Adds option to modify imagePullPolicy | |
 | `taf.url` | Url which the application can be accessed | |
-| `taf.path` | Path suffix added to url | `/taf-backend/(.*)` |
+| `taf.path` | Path prefix of the service in the Ingress | `/taf-backend` |
 | `taf.svcPort` | Port used for service | `80` |
 | `taf.replicas` | Amount of replicas deployed | `1` |
-| `taf.minPodsAvailable` | Minimum available pods in pod disruption budget. Value `0` omits the pdb. | `0` | 
-| `taf.db_secret` | Secret containing base64 encoded Postgresql database connection string | |
-| `taf.db_secretName` | Name of db secret | `taf-db` |
-| `taf.db_secretType` | Type to db secret | `secretsmanager` |
-| `taf.db_secretPath` | Path to db secret | |
-| `taf.db_secretKey` | Key of db secret | |
-| `taf.iamRoleARN` | IAM Role with permissions to access db_secret secret | |
+| `taf.podAntiAffinity.topologyKey` | Prefer replicas on different workers (`kubernetes.io/hostname`) or in different zones (`topology.kubernetes.io/zone`). | `topology.kubernetes.io/zone` |
+| `taf.minPodsAvailable` | Minimum available pods in pod disruption budget. Value `0` omits the pdb. | `0` |
 | `taf.secretServiceAccount` | Service Account created for handling secrets | `taf-service-account` |
 | `taf.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `taf.startupProbe` | Configure main container startupProbe | see defaults from `values.yaml` |
 | `taf.livenessProbe` | Configure main container livenessProbe | see defaults from `values.yaml` |
 | `taf.readinessProbe` | Configure main container readinessProbe | see defaults from `values.yaml` |
-| `secretProvider` | Option to use secret provider instead of passing base64 encoded database connection string as taf.db_secret *(aws\|azure\|gcp\|vault)* | |
-| `secretProviderParameters` | Option to add custom parameters to the secretProvider, for example with aws you can specify region | |
 | `taf.env.AVIATION_TAF_PORT_HTTP` | Port used for container | `8000` |
 | `taf.env.GEOWEB_KNMI_AVI_MESSAGESERVICES_HOST` | - | `"localhost:8081"` |
 | `taf.env.AVIATION_TAF_PUBLISH_HOST` | - | `"localhost:8090"` |
-| `taf.env.APPLICATION_ROOT_PATH` | Application root path for FastAPI. Generally same as `taf.path` without the wildcard. | `/taf-backend`
+| `taf.env.APPLICATION_ROOT_PATH` | Application root path for FastAPI. Generally the same as `taf.path`, without any regex part | `/taf-backend` |
 | `taf.useCustomConfigurationFiles` | Use custom configurations | `false` |
 | `taf.customConfigurationLocation` | Where custom configurations are located *(local\|s3)* | `local` |
 | `taf.volumeAccessMode` | Permissions of the application for the custom configurations PersistentVolume used | `ReadOnlyMany` |
@@ -129,14 +266,14 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.messageconverter.name` | Name of messageconverter container | `taf-messageconverter` |
 | `taf.messageconverter.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/avi-msgconverter/geoweb-knmi-avi-messageservices` |
 | `taf.messageconverter.version` | Possibility to override application version | see default from `values.yaml` |
-| `taf.messageconverter.port` | Port used for messageconverter | `8080` |
+| `taf.messageconverter.port` | Port used for messageconverter | `8081` |
 | `taf.messageconverter.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `taf.messageconverter.startupProbe` | Configure message converter startupProbe | see defaults from `values.yaml` |
 | `taf.messageconverter.livenessProbe` | Configure message converter livenessProbe | see defaults from `values.yaml` |
 | `taf.messageconverter.readinessProbe` | Configure message converter readinessProbe | see defaults from `values.yaml` |
 | `taf.nginx.name` | Name of nginx container | `taf-nginx` |
 | `taf.nginx.registry` | Registry to fetch nginx image | `registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend` |
-| `taf.nginx.version` | Possibility to override Nginx version | see default from `values.yaml` |
+| `taf.nginx.version` | Auth-backend image version | see default from `values.yaml` |
 | `taf.nginx.ENABLE_SSL` | Toggle SSL termination | `"FALSE"` |
 | `taf.nginx.OAUTH2_USERINFO` | Userinfo endpoint to retrieve consented claims, or assertions, about the logged in end-user | |
 | `taf.nginx.GEOWEB_USERNAME_CLAIM` | Claim name used as a user identifier in the taf-backend | `"email"` |
@@ -148,9 +285,11 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.nginx.GEOWEB_REQUIRE_READ_PERMISSION` | Required OAUTH claim name and value to be present in the userinfo response for read operations | `"FALSE"` |
 | `taf.nginx.GEOWEB_REQUIRE_WRITE_PERMISSION` | Required OAUTH claim name and value to be present in the userinfo response for write operations | `"FALSE"` |
 | `taf.nginx.ALLOW_ANONYMOUS_ACCESS` | Allow/disallow anonymous access. Note that if an access token has been passed, it is checked even if anonymous access is allowed. | `"FALSE"` |
-| `taf.nginx.BACKEND_HOST` | Taf-backend container address where Nginx reverse proxy forwards the requests | `0.0.0.0:8080` |
+| `taf.nginx.BACKEND_HOST` | TAF-backend container address where Nginx reverse proxy forwards the requests | `localhost:8000` |
 | `taf.nginx.NGINX_PORT_HTTP` | Port used for Nginx reverse proxy | `80` |
 | `taf.nginx.NGINX_PORT_HTTPS` | Port used for Nginx reverse proxy when SSL is enabled | `443` |
+| `taf.nginx.NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE` | Tune Nginx worker processes to the container CPU limit when supported by the auth-backend image | Auth backend default |
+| `taf.nginx.TRUST_FORWARDED_HEADERS` | Preserve incoming `X-Forwarded-*` headers only behind a trusted proxy that sanitizes them | Auth backend default |
 | `taf.nginx.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
 | `taf.nginx.startupProbe` | Configure nginx container startupProbe | see defaults from `values.yaml` |
 | `taf.nginx.livenessProbe` | Configure nginx container livenessProbe | see defaults from `values.yaml` |
@@ -162,7 +301,7 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.publisher.PUBLISH_DIR` | Folder inside publisher container where TACs are stored | `/app/output` |
 | `taf.publisher.volumeOptions` | yaml including the definition of the volume where TACs are published to, for example: <pre>hostPath:<br>&nbsp;&nbsp; path: /test/path</pre> or <pre>emptyDir:<br>&nbsp;&nbsp;</pre>| `emptyDir:` |
 | `taf.publisher.resources` | Configure resource limits & requests | see defaults from `values.yaml` |
-| `taf.publisher.livenessProbe` | Configure libenessProbe | see defaults from `values.yaml` |
+| `taf.publisher.livenessProbe` | Configure livenessProbe | see defaults from `values.yaml` |
 | `taf.publisher.readinessProbe` | Configure readinessProbe | see defaults from `values.yaml` |
 | `taf.placeholder.name` | Name of publisher container  | `taf-placeholder` |
 | `taf.placeholder.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/aviation-taf-backend/tafplaceholder-aviation-taf-backend` |
@@ -171,22 +310,60 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.placeholder.startupProbe` | Configure placeholder container startupProbe | see defaults from `values.yaml` |
 | `taf.placeholder.livenessProbe` | Configure placeholder container livenessProbe | see defaults from `values.yaml` |
 | `taf.placeholder.readinessProbe` | Configure placeholder container readinessProbe | see defaults from `values.yaml` |
-| `taf.db.enableDefaultDb` | Enable default postgres database | `true` |
-| `taf.db.name` | Default postgres database container name | `postgres` |
-| `taf.db.image` | Default postgres database image | `postgres` |
-| `taf.db.port` | Default postgres database port | `5432` |
-| `taf.db.POSTGRES_DB` | Default postgres database name | `taf` |
-| `taf.db.POSTGRES_USER` | Default postgres database user | `postgres` |
-| `taf.db.POSTGRES_PASSWORD` | Default postgres database password | `postgres` |
+| `taf.db.mode` | Database mode *(sidecar\|external\|zalando)* | `sidecar` |
+| `taf.db.name` | Sidecar container or Zalando database resource name | `taf-db` |
+| `taf.db.databaseName` | Application database name | `taf` |
+| `taf.db.username` | Application database owner/login | `geoweb` |
+| `taf.db.sidecar.image` | Development PostgreSQL image | `postgres` |
+| `taf.db.sidecar.port` | Development PostgreSQL port | `5432` |
+| `taf.db.sidecar.password` | Development PostgreSQL password | `postgres` |
+| `taf.db.external.source` | Connection Secret source *(inline\|secretProvider\|existingSecret)* | `inline` |
+| `taf.db.external.secretName` | Kubernetes Secret containing the connection string | `taf-db` |
+| `taf.db.external.secretKey` | Connection-string key in the Kubernetes Secret | `AVIATION_TAF_BACKEND_DB` |
+| `taf.db.external.encodedConnectionString` | Base64 connection string; required when `source: inline` | |
+| `taf.db.external.secretProvider.provider` | CSI provider *(aws\|azure\|gcp\|vault)* | |
+| `taf.db.external.secretProvider.className` | Database SecretProviderClass name | `taf-spc` |
+| `taf.db.external.secretProvider.objectName` | External database-secret object identifier (resource name for GCP) | |
+| `taf.db.external.secretProvider.objectType` | External object type; defaults to `secretsmanager` for AWS and `secret` for Azure | `""` |
+| `taf.db.external.secretProvider.path` | Required GCP mounted filename or Vault secret path | |
+| `taf.db.external.secretProvider.key` | Required Vault secret key | |
+| `taf.db.external.secretProvider.iamRoleARN` | IAM role for AWS database-secret access | |
+| `taf.db.external.secretProvider.parameters` | Additional provider parameters | `{}` |
+| `taf.db.zalando.teamId` | Zalando team ID | `geoweb` |
+| `taf.db.zalando.postgresVersion` | Zalando PostgreSQL major version | `15` |
+| `taf.db.zalando.instances` | Zalando database instance count | `1` |
+| `taf.db.zalando.volumeSize` | Zalando database volume size | `100Mi` |
+| `taf.db.zalando.enableLogicalBackup` | Enable Zalando logical backups | `true` |
+| `taf.db.zalando.env` | Kubernetes EnvVar entries passed to the PostgreSQL resource; override global operator environment settings | `[]` |
+| `taf.db.zalando.clone.enabled` | Restore a Zalando cluster from backup | `false` |
+| `taf.db.zalando.clone.timestamp` | Zalando restore timestamp; required when cloning is enabled | |
+| `taf.db.zalando.clone.backupBucket` | Zalando backup bucket; required when cloning is enabled | |
 | `ingress.name` | Name of the ingress controller in use | `nginx-ingress-controller` |
 | `ingress.tls` | TLS configuration section for the ingress | |
-| `ingress.ingressClassName` | Set ingressClassName parameter to not use default ingressClass | |
-| `ingress.customAnnotations` | Custom annotations for ingress, for example <pre>customAnnotations:<br>  traefik.annotation: exampleValue</pre> Overrides default nginx annotations if set | |
+| `ingress.ingressClassName` | IngressClass for the Ingress. Empty uses the cluster's default IngressClass | `""` |
+| `ingress.annotations` | Annotations for your ingress controller, for example nginx rewrite or cert-manager annotations. See the upgrade notes for the previous nginx defaults | `{}` |
+| `ingress.enabled` | Create the Ingress | `true` |
+| `ingress.pathType` | Path type of the Ingress path. Use `ImplementationSpecific` with nginx regex paths | `Prefix` |
 
 # Chart versions
 
 | Chart version | taf version |
 |---------------|-------------|
+| 3.1.0         | 4.2.5       |
+| 3.0.1         | 4.2.5       |
+| 3.0.0         | 4.2.5       |
+| 2.2.0         | 4.2.5       |
+| 2.1.2         | 4.2.5       |
+| 2.1.1         | 4.2.2       |
+| 2.1.0         | 4.2.2       |
+| 2.0.2         | 4.2.2       |
+| 2.0.1         | 4.2.1       |
+| 2.0.0         | 4.2.1       |
+| 1.2.12        | 4.2.1       |
+| 1.2.11        | 4.1.0       |
+| 1.2.10        | 3.1.11      |
+| 1.2.9         | 3.1.10      |
+| 1.2.8         | 3.1.8       |
 | 1.2.7         | 3.1.6       |
 | 1.2.6         | 3.1.6       |
 | 1.2.5         | 3.1.4       |

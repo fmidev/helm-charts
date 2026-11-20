@@ -4,14 +4,12 @@ versions:
 taf:
   name: taf
   registry: registry.gitlab.com/opengeoweb/backend-services/aviation-taf-backend/aviation-taf-backend
-  path: /taf-backend/(.*)
+  path: /taf-backend
   svcPort: 80
   replicas: 1
   minPodsAvailable: 0
-  db_secret: cG9zdGdyZXNxbDovL2dlb3dlYjpwb3N0Z3Jlc0Bsb2NhbGhvc3Q6NTQzMi90YWY=
-  db_secretName: taf-db
-  db_secretType: secretsmanager
-  spcName: taf-spc
+  podAntiAffinity:
+    topologyKey: topology.kubernetes.io/zone
   postStartCommand: bin/admin.sh
   secretServiceAccount: taf-service-account
   resources:
@@ -49,7 +47,7 @@ taf:
   messageconverter:
     name: taf-messageconverter
     registry: registry.gitlab.com/opengeoweb/avi-msgconverter/geoweb-knmi-avi-messageservices
-    version: "v2.0.1"
+    version: "v2.1.1"
     port: 8081
     resources:
       requests:
@@ -113,7 +111,7 @@ taf:
   nginx:
     name: taf-nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend
-    version: "v0.6.0"
+    version: "v1.0.3"
     ENABLE_SSL: "FALSE"
     NGINX_PORT_HTTP: 80
     NGINX_PORT_HTTPS: 443
@@ -182,21 +180,42 @@ taf:
       periodSeconds: 5
       failureThreshold: 1
   db:
-    enableDefaultDb: true
-    useZalandoOperatorDb: false
+    # Supported values: sidecar, external, zalando.
+    mode: sidecar
     name: taf-db
-    image: postgres
-    port: 5432
-    POSTGRES_DB: taf
-    POSTGRES_USER: geoweb
-    POSTGRES_PASSWORD: postgres
-    POSTGRES_VERSION: 15
-    numberOfInstances: 1
-    instanceSize: 100Mi
-    zalandoTeamId: geoweb
-    enableLogicalBackup: true
-    cleanInstall: true
-    backupTimestamp: "2030-01-01T00:00:00+00:00"
+    databaseName: taf
+    username: geoweb
+    sidecar:
+      image: postgres
+      port: 5432
+      password: postgres
+    external:
+      # Supported values: inline, secretProvider, existingSecret.
+      source: inline
+      secretName: taf-db
+      secretKey: AVIATION_TAF_BACKEND_DB
+      encodedConnectionString: ""
+      secretProvider:
+        provider: ""
+        className: taf-spc
+        objectName: ""
+        # Defaults to secretsmanager for AWS and secret for Azure.
+        objectType: ""
+        path: ""
+        key: ""
+        iamRoleARN: ""
+        parameters: {}
+    zalando:
+      teamId: geoweb
+      postgresVersion: 15
+      instances: 1
+      volumeSize: 100Mi
+      enableLogicalBackup: true
+      env: []
+      clone:
+        enabled: false
+        timestamp: ""
+        backupBucket: ""
   useCustomConfigurationFiles: false
   customConfigurationLocation: local
   customConfigurationMountPath: /app/custom
@@ -204,5 +223,11 @@ taf:
   volumeSize: 100Mi
 
 ingress:
+  enabled: true
   name: nginx-ingress-controller
-  ingressClassName: nginx
+  # Empty uses the cluster's default IngressClass
+  ingressClassName: ""
+  # Use ImplementationSpecific with nginx regex paths
+  pathType: Prefix
+  # Annotations for your ingress controller, see README
+  annotations: {}

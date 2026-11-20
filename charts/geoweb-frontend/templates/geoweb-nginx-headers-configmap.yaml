@@ -1,0 +1,14 @@
+{{- $nginx := default dict .Values.frontend.nginx -}}
+{{- with $nginx.headers }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $.Values.frontend.name }}-nginx-headers
+{{- if $.Values.frontend.commitHash }}
+  annotations:
+    commitHash: {{ $.Values.frontend.commitHash }}
+{{- end }}
+data:
+  headers.conf: |
+{{- default "" .config | nindent 4 }}
+{{- end }}
