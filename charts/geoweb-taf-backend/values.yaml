@@ -217,7 +217,9 @@ taf:
         timestamp: ""
         backupBucket: ""
   useCustomConfigurationFiles: false
-  customConfigurationLocation: local
+  customConfigurationLocation: local  # local, s3, inline
+  # Plain-text files, including nginx.conf, for the inline configuration source.
+  customConfigurationFiles: {}
   customConfigurationMountPath: /app/custom
   volumeAccessMode: ReadOnlyMany
   volumeSize: 100Mi

@@ -1,9 +1,10 @@
 {{- $configMapConfiguration := and .Values.presets.useCustomConfigurationFiles (eq .Values.presets.customConfigurationLocation "configMap") -}}
+{{- $inlineConfiguration := and .Values.presets.useCustomConfigurationFiles (eq .Values.presets.customConfigurationLocation "inline") -}}
 {{- if and $configMapConfiguration (or (empty .Values.presets.customConfigurationConfigMap.name) (empty .Values.presets.customConfigurationConfigMap.checksum)) -}}
 {{- fail "presets.customConfigurationConfigMap.name and checksum are required for configMap configuration" -}}
 {{- end -}}
-{{- if and .Values.presets.useCustomConfigurationFiles (not (has .Values.presets.customConfigurationLocation (list "local" "s3" "configMap"))) -}}
-{{- fail "presets.customConfigurationLocation must be local, s3, or configMap" -}}
+{{- if and .Values.presets.useCustomConfigurationFiles (not (has .Values.presets.customConfigurationLocation (list "local" "s3" "configMap" "inline"))) -}}
+{{- fail "presets.customConfigurationLocation must be local, s3, configMap, or inline" -}}
 {{- end -}}
 {{- $runtimeSource := default "none" .Values.presets.runtimeConfiguration.source -}}
 {{- if not (has $runtimeSource (list "none" "inline" "existingConfigMap")) -}}
@@ -48,6 +49,8 @@ spec:
         eks.amazonaws.com/compute-type: ec2
       {{- if $configMapConfiguration }}
         checksum/custom-configuration: {{ .Values.presets.customConfigurationConfigMap.checksum | quote }}
+      {{- else if $inlineConfiguration }}
+        checksum/custom-configuration: {{ .Values.presets.customConfigurationFiles | toJson | sha256sum | quote }}
       {{- end }}
       {{- if .Values.presets.commitHash }}
         commitHash: {{ .Values.presets.commitHash }}
@@ -243,6 +246,9 @@ spec:
       {{- if $configMapConfiguration }}
         configMap:
           name: {{ .Values.presets.customConfigurationConfigMap.name }}
+      {{- else if $inlineConfiguration }}
+        configMap:
+          name: {{ .Values.presets.name }}-configuration
       {{- else if eq .Values.presets.customConfigurationLocation "s3"}}
         emptyDir: {}
       {{- else if eq .Values.presets.customConfigurationLocation "local"}}

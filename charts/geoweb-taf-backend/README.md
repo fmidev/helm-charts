@@ -181,6 +181,21 @@ taf:
   awsDefaultRegion: <AWS_DEFAULT_REGION>
 ```
 
+- Using custom configuration files stored inline in values
+
+```yaml
+taf:
+  useCustomConfigurationFiles: true
+  customConfigurationLocation: inline
+  customConfigurationFiles:
+    nginx.conf: |
+      # nginx configuration
+```
+
+The chart stores the files in a ConfigMap. It mounts `nginx.conf` at `/nginx.conf` in
+the nginx container and all files at `taf.customConfigurationMountPath` in the
+backend. File contents are used as-is, and changing a file restarts the Pods.
+
 - Using Zalando Operator Database
 
 ```yaml
@@ -254,7 +269,8 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.env.AVIATION_TAF_PUBLISH_HOST` | - | `"localhost:8090"` |
 | `taf.env.APPLICATION_ROOT_PATH` | Application root path for FastAPI. Generally the same as `taf.path`, without any regex part | `/taf-backend` |
 | `taf.useCustomConfigurationFiles` | Use custom configurations | `false` |
-| `taf.customConfigurationLocation` | Where custom configurations are located *(local\|s3)* | `local` |
+| `taf.customConfigurationLocation` | Where custom configurations are located *(local\|s3\|inline)* | `local` |
+| `taf.customConfigurationFiles` | Files for the `inline` location, as filename to content | `{}` |
 | `taf.volumeAccessMode` | Permissions of the application for the custom configurations PersistentVolume used | `ReadOnlyMany` |
 | `taf.volumeSize` | Size of the custom configurations PersistentVolume | `100Mi` |
 | `taf.customConfigurationFolderPath` | Path to the folder which contains custom configurations | |
@@ -349,6 +365,7 @@ The following table lists the configurable parameters of the Taf backend chart a
 
 | Chart version | taf version |
 |---------------|-------------|
+| 3.2.0         | 4.2.5       |
 | 3.1.0         | 4.2.5       |
 | 3.0.1         | 4.2.5       |
 | 3.0.0         | 4.2.5       |

@@ -263,11 +263,26 @@ and leave `provider` empty. SSH keys use `ssh-privatekey`; passphrases use
 
 ## Custom configuration files
 
-Set `opmet.useCustomConfigurationFiles` and choose `local`, `s3`, or `configMap`
-with `opmet.customConfigurationLocation`. For `configMap`, set
+Set `opmet.useCustomConfigurationFiles` and choose `local`, `s3`, `configMap` or
+`inline` with `opmet.customConfigurationLocation`. For `configMap`, set
 `opmet.customConfigurationConfigMap.name`. The existing ConfigMap must contain all configured runtime files. Update
 `opmet.customConfigurationConfigMap.checksum` when its data changes to trigger
 a pod rollout.
+
+For `inline`, put the files in `opmet.customConfigurationFiles`:
+
+```yaml
+opmet:
+  useCustomConfigurationFiles: true
+  customConfigurationLocation: inline
+  customConfigurationFiles:
+    nginx.conf: |
+      # nginx configuration
+```
+
+The chart stores the files in a ConfigMap. It mounts `nginx.conf` at `/nginx.conf` in
+the nginx container and all files at `opmet.customConfigurationMountPath` in the
+backend. File contents are used as-is, and changing a file restarts the Pods.
 
 ## OpenShift runtime
 
@@ -326,7 +341,8 @@ The following table lists the configurable parameters of the Opmet backend chart
 | `opmet.awsDefaultRegion`                      | Region where your S3 bucket is located |                                                                                              |
 | `opmet.commitHash`                            | Adds commitHash annotation to the deployment |                                                                                              |
 | `opmet.customConfigurationFolderPath`         | Path to the folder which contains custom configurations |                                                                                              |
-| `opmet.customConfigurationLocation`           | Where custom configurations are located *(local\|s3\|configMap)* | `local`                                                                                      |
+| `opmet.customConfigurationLocation`           | Where custom configurations are located *(local\|s3\|configMap\|inline)* | `local`                                                                                      |
+| `opmet.customConfigurationFiles` | Files for the `inline` location, as filename to content | `{}` |
 | `opmet.customConfigurationConfigMap.name` | Existing ConfigMap containing runtime files and `nginx.conf` | `""` |
 | `opmet.customConfigurationConfigMap.checksum` | ConfigMap data checksum. Changes trigger a pod rollout | `""` |
 | `opmet.customConfigurationMountPath`          | Folder used to mount custom configurations | `/app/configuration_files/custom`                                                            |
@@ -443,6 +459,7 @@ The following table lists the configurable parameters of the Opmet backend chart
 
 | Chart version | opmet version |
 |---------------|---------------|
+| 5.2.0         | 5.11.4        |
 | 5.1.0         | 5.11.4        |
 | 5.0.1         | 5.11.4        |
 | 5.0.0         | 5.11.4        |
