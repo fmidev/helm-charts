@@ -1,9 +1,10 @@
 {{- $configMapConfiguration := and .Values.opmet.useCustomConfigurationFiles (eq .Values.opmet.customConfigurationLocation "configMap") }}
+{{- $inlineConfiguration := and .Values.opmet.useCustomConfigurationFiles (eq .Values.opmet.customConfigurationLocation "inline") }}
 {{- if and $configMapConfiguration (or (empty .Values.opmet.customConfigurationConfigMap.name) (empty .Values.opmet.customConfigurationConfigMap.checksum)) }}
 {{- fail "opmet.customConfigurationConfigMap.name and checksum are required for configMap configuration" }}
 {{- end }}
-{{- if and .Values.opmet.useCustomConfigurationFiles (not (has .Values.opmet.customConfigurationLocation (list "local" "s3" "configMap"))) }}
-{{- fail "opmet.customConfigurationLocation must be local, s3, or configMap" }}
+{{- if and .Values.opmet.useCustomConfigurationFiles (not (has .Values.opmet.customConfigurationLocation (list "local" "s3" "configMap" "inline"))) }}
+{{- fail "opmet.customConfigurationLocation must be local, s3, configMap, or inline" }}
 {{- end }}
 {{- $dbMode := default "sidecar" .Values.opmet.db.mode }}
 {{- $databaseUsesSecretProvider := and (eq $dbMode "external") (eq (default "inline" .Values.opmet.db.external.source) "secretProvider") }}
@@ -33,6 +34,8 @@ spec:
         checksum/publisher-env: {{ include (print $.Template.BasePath "/opmet-publisher-configmap.yaml") . | sha256sum | quote }}
       {{- if $configMapConfiguration }}
         checksum/custom-configuration: {{ .Values.opmet.customConfigurationConfigMap.checksum | quote }}
+      {{- else if $inlineConfiguration }}
+        checksum/custom-configuration: {{ .Values.opmet.customConfigurationFiles | toJson | sha256sum | quote }}
       {{- end }}
       {{- if .Values.opmet.commitHash }}
         commitHash: {{ .Values.opmet.commitHash }}
@@ -249,6 +252,9 @@ spec:
       {{- if $configMapConfiguration }}
         configMap:
           name: {{ .Values.opmet.customConfigurationConfigMap.name }}
+      {{- else if $inlineConfiguration }}
+        configMap:
+          name: {{ .Values.opmet.name }}-configuration
       {{- else if eq .Values.opmet.customConfigurationLocation "s3"}}
         emptyDir: {}
       {{- else if eq .Values.opmet.customConfigurationLocation "local"}}

@@ -1,3 +1,7 @@
+{{- $inlineConfiguration := and .Values.warnings.useCustomConfigurationFiles (eq .Values.warnings.customConfigurationLocation "inline") }}
+{{- if and .Values.warnings.useCustomConfigurationFiles (not (has .Values.warnings.customConfigurationLocation (list "local" "s3" "inline"))) }}
+{{- fail "warnings.customConfigurationLocation must be local, s3, or inline" }}
+{{- end }}
 {{- $dbMode := default "sidecar" .Values.warnings.db.mode }}
 {{- $usesExternalSecretProvider := and (eq $dbMode "external") (eq (default "inline" .Values.warnings.db.external.source) "secretProvider") }}
 {{- $managedEnv := ternary (list "PG_PASS" "PG_USER" "WARNINGS_BACKEND_DB") (list "WARNINGS_BACKEND_DB") (eq $dbMode "zalando") }}
@@ -23,6 +27,9 @@ spec:
         app: {{ .Values.warnings.name }}
       annotations:
         eks.amazonaws.com/compute-type: ec2
+      {{- if $inlineConfiguration }}
+        checksum/custom-configuration: {{ .Values.warnings.customConfigurationFiles | toJson | sha256sum | quote }}
+      {{- end }}
       {{- if .Values.warnings.commitHash }}
         commitHash: {{ .Values.warnings.commitHash }}
       {{- end }}
@@ -175,7 +182,10 @@ spec:
         emptyDir: {}
     {{- if .Values.warnings.useCustomConfigurationFiles }}
       - name: {{ .Values.warnings.name }}-volume
-      {{- if eq .Values.warnings.customConfigurationLocation "s3"}}
+      {{- if $inlineConfiguration }}
+        configMap:
+          name: {{ .Values.warnings.name }}-configuration
+      {{- else if eq .Values.warnings.customConfigurationLocation "s3"}}
         emptyDir: {}
       {{- else if eq .Values.warnings.customConfigurationLocation "local"}}
         persistentVolumeClaim:

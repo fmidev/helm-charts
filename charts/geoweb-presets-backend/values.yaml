@@ -127,7 +127,9 @@ presets:
         timestamp: ""
         backupBucket: ""
   useCustomConfigurationFiles: false
-  customConfigurationLocation: local  # local, s3, configMap
+  customConfigurationLocation: local  # local, s3, configMap, inline
+  # Plain-text files, including nginx.conf, for the inline configuration source.
+  customConfigurationFiles: {}
   customConfigurationConfigMap:
     name: ""
     checksum: ""

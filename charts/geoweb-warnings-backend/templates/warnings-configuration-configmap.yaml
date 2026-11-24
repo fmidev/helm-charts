@@ -1,0 +1,20 @@
+{{- if and .Values.warnings.useCustomConfigurationFiles (eq .Values.warnings.customConfigurationLocation "inline") }}
+{{- $files := .Values.warnings.customConfigurationFiles -}}
+{{- if not (kindIs "map" $files) -}}
+{{- fail "warnings.customConfigurationFiles must map filenames to plain-text strings" -}}
+{{- end -}}
+{{- if empty (get $files "nginx.conf") -}}
+{{- fail "warnings.customConfigurationFiles.nginx.conf is required for inline configuration" -}}
+{{- end -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.warnings.name }}-configuration
+data:
+{{- range $filename, $content := $files }}
+  {{- if or (not (regexMatch "^[A-Za-z0-9._-]+$" $filename)) (not (kindIs "string" $content)) -}}
+  {{- fail "warnings.customConfigurationFiles must map valid ConfigMap keys to plain-text strings" -}}
+  {{- end }}
+  {{ $filename | quote }}: {{ $content | quote }}
+{{- end }}
+{{- end }}

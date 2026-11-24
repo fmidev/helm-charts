@@ -1,3 +1,7 @@
+{{- $inlineConfiguration := and .Values.taf.useCustomConfigurationFiles (eq .Values.taf.customConfigurationLocation "inline") }}
+{{- if and .Values.taf.useCustomConfigurationFiles (not (has .Values.taf.customConfigurationLocation (list "local" "s3" "inline"))) }}
+{{- fail "taf.customConfigurationLocation must be local, s3, or inline" }}
+{{- end }}
 {{- $dbMode := default "sidecar" .Values.taf.db.mode }}
 {{- $usesExternalSecretProvider := and (eq $dbMode "external") (eq (default "inline" .Values.taf.db.external.source) "secretProvider") }}
 {{- $managedEnv := ternary (list "PG_PASS" "PG_USER" "AVIATION_TAF_BACKEND_DB") (list "AVIATION_TAF_BACKEND_DB") (eq $dbMode "zalando") }}
@@ -19,6 +23,9 @@ spec:
         app: {{ .Values.taf.name }}
       annotations:
         eks.amazonaws.com/compute-type: ec2
+      {{- if $inlineConfiguration }}
+        checksum/custom-configuration: {{ .Values.taf.customConfigurationFiles | toJson | sha256sum | quote }}
+      {{- end }}
       {{- if .Values.taf.commitHash }}
         commitHash: {{ .Values.taf.commitHash }}
       {{- end }}
@@ -277,7 +284,10 @@ spec:
         emptyDir: {}
     {{- if .Values.taf.useCustomConfigurationFiles }}
       - name: {{ .Values.taf.name }}-volume
-      {{- if eq .Values.taf.customConfigurationLocation "s3"}}
+      {{- if $inlineConfiguration }}
+        configMap:
+          name: {{ .Values.taf.name }}-configuration
+      {{- else if eq .Values.taf.customConfigurationLocation "s3"}}
         emptyDir: {}
       {{- else if eq .Values.taf.customConfigurationLocation "local"}}
         persistentVolumeClaim:

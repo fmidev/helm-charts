@@ -171,6 +171,21 @@ warnings:
   awsDefaultRegion: <AWS_DEFAULT_REGION>
 ```
 
+- Using custom configuration files stored inline in values
+
+```yaml
+warnings:
+  useCustomConfigurationFiles: true
+  customConfigurationLocation: inline
+  customConfigurationFiles:
+    nginx.conf: |
+      # nginx configuration
+```
+
+The chart stores the files in a ConfigMap and mounts `nginx.conf` at `/nginx.conf`
+in the nginx container. File contents are used as-is, and changing a file restarts
+the Pods.
+
 - Using a Zalando Operator database
 
 Database selection is controlled by `warnings.db.mode`.
@@ -306,7 +321,8 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.db.zalando.clone.timestamp` | Zalando clone recovery timestamp; required when cloning is enabled | |
 | `warnings.db.zalando.clone.backupBucket` | Zalando clone WAL backup path; required when cloning is enabled | |
 | `warnings.useCustomConfigurationFiles` | Use custom configurations | `false` |
-| `warnings.customConfigurationLocation` | Where custom configurations are located *(local\|s3)* | `local` |
+| `warnings.customConfigurationLocation` | Where custom configurations are located *(local\|s3\|inline)* | `local` |
+| `warnings.customConfigurationFiles` | Files for the `inline` location, as filename to content | `{}` |
 | `warnings.customConfigurationFolderPath` | Path to the folder which contains custom configurations | |
 | `warnings.volumeAccessMode` | Permissions of the application for the custom configurations and custom warnings PersistentVolume used | `ReadOnlyMany` |
 | `warnings.volumeSize` | Size of the custom configuration and warnings PersistentVolume | `100Mi` |
@@ -324,6 +340,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 
 | Chart version | warnings version |
 |---------------|------------------|
+| 3.2.0         | 4.1.0            |
 | 3.1.0         | 4.1.0            |
 | 3.0.0         | 4.1.0            |
 | 2.2.0         | 4.1.0            |

@@ -171,6 +171,21 @@ presets:
   awsDefaultRegion: <AWS_DEFAULT_REGION>
 ```
 
+- Using custom configuration files stored inline in values
+
+```yaml
+presets:
+  useCustomConfigurationFiles: true
+  customConfigurationLocation: inline
+  customConfigurationFiles:
+    nginx.conf: |
+      # nginx configuration
+```
+
+The chart stores the files in a ConfigMap. It mounts `nginx.conf` at `/nginx.conf` in
+the nginx container and all files at `presets.customConfigurationMountPath` in the
+backend. File contents are used as-is, and changing a file restarts the Pods.
+
 - Using an existing ConfigMap containing backend configuration files such as `nginx.conf`
 
 ```yaml
@@ -369,7 +384,8 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.runtimeConfiguration.existingConfigMap.name` | Name of an externally managed ConfigMap | `""` |
 | `presets.runtimeConfiguration.existingConfigMap.checksum` | SHA-256 of published file content; changes restart backend pods | `""` |
 | `presets.useCustomConfigurationFiles`                 | Use custom configurations                                                                                                                                 | `false`                                                                     |
-| `presets.customConfigurationLocation`                 | Where custom configurations are located _(local\|s3\|configMap)_                                                                                           | `local`                                                                     |
+| `presets.customConfigurationLocation`                 | Where custom configurations are located _(local\|s3\|configMap\|inline)_                                                                                   | `local`                                                                     |
+| `presets.customConfigurationFiles` | Files for the `inline` location, as filename to content | `{}` |
 | `presets.customConfigurationConfigMap.name` | Existing ConfigMap containing `nginx.conf` and any backend configuration files | `""` |
 | `presets.customConfigurationConfigMap.checksum` | ConfigMap data checksum; changes trigger a pod rollout | `""` |
 | `presets.customConfigurationMountPath` | Directory where custom configuration files are mounted in the backend | `/app/configuration_files/custom` |
@@ -394,6 +410,7 @@ The following table lists the configurable parameters of the Presets backend cha
 
 | Chart version | presets version |
 | ------------- | --------------- |
+| 4.2.0         | 5.1.0           |
 | 4.1.0         | 5.1.0           |
 | 4.0.0         | 5.1.0           |
 | 3.4.0         | 5.1.0           |
