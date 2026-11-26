@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fmi-redis.fullname" . }}
+  labels:
+    app: {{ include "fmi-redis.fullname" . }}
+spec:
+  replicas: 1
+  strategy:
+    type: {{ .Values.persistence.enabled | ternary "Recreate" "RollingUpdate" }}
+  selector:
+    matchLabels:
+      app: {{ include "fmi-redis.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "fmi-redis.fullname" . }}
+    spec:
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: redis
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - redis-server
+            {{- if .Values.config.enabled }}
+            - /usr/local/etc/redis/redis.conf
+            {{- end }}
+            {{- if .Values.auth.enabled }}
+            - --requirepass
+            - $(REDIS_PASSWORD)
+            {{- end }}
+          {{- if .Values.auth.enabled }}
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.auth.existingSecret | default (include "fmi-redis.fullname" .) }}
+                  key: redis-password
+          {{- end }}
+          ports:
+            - containerPort: 6379
+              name: redis
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            {{- if .Values.config.enabled }}
+            - name: config
+              mountPath: /usr/local/etc/redis/redis.conf
+              subPath: redis.conf
+              readOnly: true
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                {{- if .Values.auth.enabled }}
+                - REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli --no-auth-warning ping
+                {{- else }}
+                - redis-cli ping
+                {{- end }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                {{- if .Values.auth.enabled }}
+                - redis-cli -a "$REDIS_PASSWORD" --no-auth-warning ping
+                {{- else }}
+                - redis-cli ping
+                {{- end }}
+            initialDelaySeconds: 15
+            periodSeconds: 20
+      volumes:
+        - name: data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "fmi-redis.fullname" . }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        {{- if .Values.config.enabled }}
+        - name: config
+          configMap:
+            name: {{ .Values.config.existingConfigMap | default (include "fmi-redis.fullname" .) }}
+        {{- end }}

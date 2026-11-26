@@ -8,6 +8,8 @@ frontend:
   containerPort: 8080
   replicas: 1
   minPodsAvailable: 0
+  podAntiAffinity:
+    topologyKey: topology.kubernetes.io/zone
   auth_secretName: geoweb-auth
   auth_secretType: secretsmanager
   client_id_secretName: geoweb-client-id
@@ -20,6 +22,8 @@ frontend:
       cpu: "15m"
     limits:
       memory: "256Mi"
+  extraVolumes: []
+  extraVolumeMounts: []
   startupProbe:
     httpGet:
       path: /assets/config.json?startup=true
@@ -56,8 +60,12 @@ frontend:
   customConfigurationMountPath: /usr/share/nginx/html/assets/custom
   volumeAccessMode: ReadOnlyMany
   volumeSize: 100Mi
-  customConfiguration:
-    enabled: false  # Set to true to generate the custom initialPresets JSON file
+  runtimeConfiguration:
+    mountPath: /usr/share/nginx/html/assets/custom
+    source: none  # none, inline, existingConfigMap
+    existingConfigMap:
+      name: ""
+      checksum: ""  # SHA-256 of the published file content
     files:
       "initialPresets.json":  # This file will be generated and available at /usr/share/nginx/html/assets/custom/
         # Configure all the settings below you want to be included in the custom initialPresets JSON file
@@ -90,20 +98,23 @@ frontend:
           # services:
           # baseServices:
           # layers:
+  nginx:
+    # To override the /etc/nginx/headers.conf file from the image, configure:
+    # headers:
+    #   mountPath: /etc/nginx/headers.conf
+    #   config: |
+    #     add_header Referrer-Policy "no-referrer" always;
+    #     add_header X-Content-Type-Options "nosniff" always;
+    #     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    #     add_header Content-Security-Policy "default-src 'self'; base-uri 'self'; img-src * data:; connect-src *; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' *; worker-src 'self' blob:; child-src 'self' blob:;" always;
 
 ingress:
+  enabled: true
   name: nginx-ingress-controller
-  rules: |
-    add_header Document-Policy "js-profiling" always;
-    if ($request_uri ~* \.(json)) {
-      add_header Cache-Control "no-cache";
-    }
-    if ($request_uri ~* \.(woff2|svg)) {
-      add_header Cache-Control "max-age=604800";
-    }
-    if ($request_uri ~* \.(webmanifest)) {
-      more_clear_headers 'Content-Type';
-      add_header Content-Type "application/manifest+json";
-      add_header Cache-Control "max-age=604800";
-    }
-  ingressClassName: nginx
+  # Empty uses the cluster's default IngressClass
+  ingressClassName: ""
+  # Annotations for your ingress controller, see README
+  annotations: {}
+  # Set to true when frontend.auth_secret basic auth is configured without
+  # the nginx basic auth annotations, for example with a Traefik middleware
+  basicAuthManagedElsewhere: false

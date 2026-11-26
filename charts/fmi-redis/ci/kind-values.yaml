@@ -1,0 +1,7 @@
+# Used by `ct install`/`ct lint` (repo's CI is running against a plain
+# kind cluster with no OpenShift-style SCC to auto-assign a non-root uid).
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 999
+  runAsGroup: 1000
+  fsGroup: 1000

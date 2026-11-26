@@ -1,0 +1,10 @@
+{{- if eq (default "none" .Values.presets.runtimeConfiguration.source) "inline" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.presets.name }}-runtime-config
+data:
+{{- range $filename, $content := .Values.presets.runtimeConfiguration.files }}
+  {{ $filename | quote }}: {{ $content | toJson | quote }}
+{{- end }}
+{{- end }}

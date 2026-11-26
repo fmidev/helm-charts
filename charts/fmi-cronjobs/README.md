@@ -10,7 +10,7 @@ Install standalone or add as a dependency to another chart:
 # Chart.yaml
 dependencies:
   - name: fmi-cronjobs
-    version: "0.1.0"
+    version: "0.3.0"
     repository: "https://fmidev.github.io/helm-charts"
 ```
 
@@ -44,11 +44,33 @@ Optional shared defaults applied to every job. Per-job settings always take prec
 | `pullPolicy` | Image pull policy | `IfNotPresent` |
 | `timeZone` | IANA timezone for schedules | `Europe/Helsinki` |
 | `backoffLimit` | Retries before marking the job failed | `5` |
+| `activeDeadlineSeconds` | Wall-clock seconds before the Job is terminated with `DeadlineExceeded`; unset means no limit. The kill is terminal: it is not retried regardless of `backoffLimit`. | — |
 | `concurrencyPolicy` | `Allow`, `Forbid`, or `Replace` | `Forbid` |
 | `restartPolicy` | Pod restart policy | `Never` |
 | `successfulJobsHistoryLimit` | Successful job records to keep | `1` |
 | `failedJobsHistoryLimit` | Failed job records to keep | `3` |
 | `resourcePreset` | Default resource preset (`minimal`, `normal`, `custom`) | — |
+
+### `pvcs`
+
+Optional list of PersistentVolumeClaims to create. Once created, any job can reference them by `claimName` in its `pvcMounts`. 
+
+| Field | Description | Required |
+|-------|-------------|----------|
+| `name` | PVC name | Yes |
+| `accessModes` | List of access modes (e.g. `[ReadWriteMany]`) | Yes |
+| `size` | Storage request (e.g. `10Gi`) | Yes |
+| `storageClassName` | Storage class to use; omit to use `ocs-storagecluster-cephfs` as default | No |
+| `annotations` | Extra annotations on the PVC metadata | No |
+| `volumeName` | Bind to a specific PersistentVolume by name | No |
+
+```yaml
+pvcs:
+  - name: my-cronjob-pvc
+    accessModes: [ReadWriteMany]
+    size: 10Gi
+    storageClassName: ocs-storagecluster-cephfs
+```
 
 ### `jobs`
 
@@ -61,6 +83,7 @@ List of CronJob definitions. Each entry supports the following fields:
 | `schedule` | Cron schedule expression (required) | — |
 | `timeZone` | IANA timezone; overrides `defaults.timeZone` | `Europe/Helsinki` |
 | `backoffLimit` | Retries before marking the job failed; overrides `defaults.backoffLimit` | `5` |
+| `activeDeadlineSeconds` | Wall-clock seconds before the Job is terminated with `DeadlineExceeded`; unset means no limit. The kill is terminal: it is not retried regardless of `backoffLimit`. Overrides `defaults.activeDeadlineSeconds`. | — |
 | `concurrencyPolicy` | `Allow`, `Forbid`, or `Replace`; overrides `defaults.concurrencyPolicy` | `Forbid` |
 | `restartPolicy` | Pod restart policy; overrides `defaults.restartPolicy` | `Never` |
 | `successfulJobsHistoryLimit` | Successful job records to keep; overrides `defaults.successfulJobsHistoryLimit` | `1` |
@@ -154,6 +177,33 @@ mounts:
     subPath: subdir
 ```
 
+### `pvcMounts`
+
+List of PersistentVolumeClaim volume mounts. Reference a PVC by its `claimName`. Volumes default to read-write unless `readOnly: true` is set explicitly.
+
+| Field | Description | Required |
+|-------|-------------|----------|
+| `name` | Volume name | Yes |
+| `claimName` | Name of the PersistentVolumeClaim to mount | Yes |
+| `mountPath` | Path inside the container | Yes |
+| `readOnly` | Mount as read-only | No (default: `false`) |
+| `subPath` | Sub-path within the volume to mount | No |
+
+```yaml
+pvcMounts:
+  - name: shared-data
+    claimName: my-cronjob-pvc
+    mountPath: /data
+  - name: config-volume
+    claimName: config-pvc
+    mountPath: /config
+    readOnly: true
+  - name: partitioned
+    claimName: my-cronjob-pvc
+    mountPath: /data/subset
+    subPath: subset
+```
+
 ### `tmp`
 
 Mount an `emptyDir` volume as a writable scratch space:
@@ -177,6 +227,12 @@ fmi-cronjobs:
     backoffLimit: 2
     resourcePreset: minimal
 
+  pvcs:
+    - name: my-batch-job-pvc
+      accessModes: [ReadWriteMany]
+      size: 10Gi
+      storageClassName: ocs-storagecluster-cephfs
+
   jobs:
     - name: my-batch-job
       enabled: true
@@ -199,6 +255,10 @@ fmi-cronjobs:
           mountPath: /input
           server: nfs.example.com
           serverPath: /exports/input
+      pvcMounts:
+        - name: output
+          claimName: my-batch-job-pvc
+          mountPath: /output
       tmp:
         enabled: true
         mountPath: /tmp

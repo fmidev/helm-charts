@@ -1,3 +1,15 @@
+{{- $inlineConfiguration := and .Values.warnings.useCustomConfigurationFiles (eq .Values.warnings.customConfigurationLocation "inline") }}
+{{- if and .Values.warnings.useCustomConfigurationFiles (not (has .Values.warnings.customConfigurationLocation (list "local" "s3" "inline"))) }}
+{{- fail "warnings.customConfigurationLocation must be local, s3, or inline" }}
+{{- end }}
+{{- $dbMode := default "sidecar" .Values.warnings.db.mode }}
+{{- $usesExternalSecretProvider := and (eq $dbMode "external") (eq (default "inline" .Values.warnings.db.external.source) "secretProvider") }}
+{{- $managedEnv := ternary (list "PG_PASS" "PG_USER" "WARNINGS_BACKEND_DB") (list "WARNINGS_BACKEND_DB") (eq $dbMode "zalando") }}
+{{- $backendEnv := dict "VERSION" (default .Chart.AppVersion .Values.versions.warnings) }}
+{{- range $key, $value := .Values.warnings.env }}
+{{- $_ := set $backendEnv (upper $key) $value }}
+{{- end }}
+{{- $nginx := .Values.warnings.nginx }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,12 +27,17 @@ spec:
         app: {{ .Values.warnings.name }}
       annotations:
         eks.amazonaws.com/compute-type: ec2
+      {{- if $inlineConfiguration }}
+        checksum/custom-configuration: {{ .Values.warnings.customConfigurationFiles | toJson | sha256sum | quote }}
+      {{- end }}
       {{- if .Values.warnings.commitHash }}
         commitHash: {{ .Values.warnings.commitHash }}
       {{- end }}
     spec:
-    {{- if eq .Values.secretProvider "aws" }}
+    {{- if and $usesExternalSecretProvider (eq .Values.warnings.db.external.secretProvider.provider "aws") }}
       serviceAccountName: {{ .Values.warnings.secretServiceAccount }}
+    {{- else }}
+      serviceAccountName: default
     {{- end }}
       initContainers:
     {{- if and .Values.warnings.useCustomConfigurationFiles (eq .Values.warnings.customConfigurationLocation "s3")}}
@@ -71,32 +88,37 @@ spec:
       {{- if .Values.warnings.readinessProbe }}
         readinessProbe: {{ toYaml .Values.warnings.readinessProbe | nindent 10 }}
       {{- end }}
-        envFrom:
-        - configMapRef:
-            name: {{ .Values.warnings.name }}
         env:
-      {{- if .Values.warnings.db.useZalandoOperatorDb }}
+      {{- range $key, $value := $backendEnv }}
+      {{- if not (has $key $managedEnv) }}
+        - name: {{ $key }}
+          value: {{ include "geoweb-warnings-backend.envValue" $value }}
+      {{- end }}
+      {{- end }}
+      {{- if eq $dbMode "zalando" }}
         - name: PG_PASS
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.warnings.db.POSTGRES_USER }}.{{ .Values.warnings.db.name }}.credentials.postgresql.acid.zalan.do
+              name: {{ .Values.warnings.db.username }}.{{ .Values.warnings.db.name }}.credentials.postgresql.acid.zalan.do
               key: password
         - name: PG_USER
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.warnings.db.POSTGRES_USER }}.{{ .Values.warnings.db.name }}.credentials.postgresql.acid.zalan.do
+              name: {{ .Values.warnings.db.username }}.{{ .Values.warnings.db.name }}.credentials.postgresql.acid.zalan.do
               key: username
       {{- end }}
         - name: WARNINGS_BACKEND_DB
-        {{- if .Values.warnings.db.useZalandoOperatorDb }}
-          value: "postgresql://$(PG_USER):$(PG_PASS)@{{ .Values.warnings.db.name }}:5432/{{ .Values.warnings.db.POSTGRES_DB }}"
+        {{- if eq $dbMode "zalando" }}
+          value: "postgresql://$(PG_USER):$(PG_PASS)@{{ .Values.warnings.db.name }}:5432/{{ .Values.warnings.db.databaseName }}"
+        {{- else if eq $dbMode "sidecar" }}
+          value: "postgresql://{{ .Values.warnings.db.username | urlquery | replace "+" "%20" }}:{{ .Values.warnings.db.sidecar.password | urlquery | replace "+" "%20" }}@localhost:{{ .Values.warnings.db.sidecar.port }}/{{ .Values.warnings.db.databaseName | urlquery | replace "+" "%20" }}"
         {{- else }}
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.warnings.db_secretName }}
-              key: WARNINGS_BACKEND_DB
+              name: {{ .Values.warnings.db.external.secretName }}
+              key: {{ .Values.warnings.db.external.secretKey }}
         {{- end }}
-      {{- if not .Values.warnings.db.useZalandoOperatorDb }}
+      {{- if $usesExternalSecretProvider }}
         volumeMounts:
         - name: secrets-store-inline
           mountPath: "/mnt/secrets-store"
@@ -121,50 +143,62 @@ spec:
       {{- if .Values.warnings.nginx.readinessProbe }}
         readinessProbe: {{ toYaml .Values.warnings.nginx.readinessProbe | nindent 10 }}
       {{- end }}
-        envFrom:
-        - configMapRef:
-            name: {{ .Values.warnings.nginx.name }}
-      {{- if and .Values.warnings.useCustomConfigurationFiles }}
+        env:
+      {{- range $name := list "ENABLE_SSL" "OAUTH2_USERINFO" "JWKS_URI" "AUD_CLAIM" "AUD_CLAIM_VALUE" "ISS_CLAIM" "ISS_CLAIM_VALUE" "GEOWEB_USERNAME_CLAIM" "GEOWEB_REQUIRE_READ_PERMISSION" "GEOWEB_REQUIRE_WRITE_PERMISSION" "ALLOW_ANONYMOUS_ACCESS" "BACKEND_HOST" "NGINX_PORT_HTTP" "NGINX_PORT_HTTPS" "ENV_VAR_STRICT_MODE" }}
+      {{- if index $nginx $name }}
+        - name: {{ $name }}
+          value: {{ include "geoweb-warnings-backend.envValue" (index $nginx $name) }}
+      {{- end }}
+      {{- end }}
+      {{- range $name := list "NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE" "TRUST_FORWARDED_HEADERS" }}
+      {{- if hasKey $nginx $name }}
+        - name: {{ $name }}
+          value: {{ include "geoweb-warnings-backend.envValue" (index $nginx $name) }}
+      {{- end }}
+      {{- end }}
         volumeMounts:
+        - name: nginx-run
+          mountPath: "/run"
+      {{- if and .Values.warnings.useCustomConfigurationFiles }}
         - mountPath: "/nginx.conf"
           subPath: "nginx.conf"
           name: {{ .Values.warnings.name }}-volume
       {{- end }}
-      {{- if .Values.warnings.db.enableDefaultDb }}
+      {{- if eq $dbMode "sidecar" }}
       - name: {{ .Values.warnings.db.name }}
-        image: {{ .Values.warnings.db.image }}
+        image: {{ .Values.warnings.db.sidecar.image }}
         ports:
-          - containerPort: {{ .Values.warnings.db.port }}
+          - containerPort: {{ .Values.warnings.db.sidecar.port }}
         env:
           - name: POSTGRES_DB
-            value: {{ .Values.warnings.db.POSTGRES_DB }}
+            value: {{ .Values.warnings.db.databaseName }}
           - name: POSTGRES_USER
-            value: {{ .Values.warnings.db.POSTGRES_USER }}
+            value: {{ .Values.warnings.db.username }}
           - name: POSTGRES_PASSWORD
-            value: {{ .Values.warnings.db.POSTGRES_PASSWORD }}
+            value: {{ .Values.warnings.db.sidecar.password }}
       {{- end }}
       volumes:
+      - name: nginx-run
+        emptyDir: {}
     {{- if .Values.warnings.useCustomConfigurationFiles }}
       - name: {{ .Values.warnings.name }}-volume
-      {{- if eq .Values.warnings.customConfigurationLocation "s3"}}
+      {{- if $inlineConfiguration }}
+        configMap:
+          name: {{ .Values.warnings.name }}-configuration
+      {{- else if eq .Values.warnings.customConfigurationLocation "s3"}}
         emptyDir: {}
       {{- else if eq .Values.warnings.customConfigurationLocation "local"}}
         persistentVolumeClaim:
           claimName: {{ .Values.warnings.name }}-claim
       {{- end }}
     {{- end }}
-    {{- if not .Values.warnings.db.useZalandoOperatorDb }}
+    {{- if $usesExternalSecretProvider }}
       - name: secrets-store-inline
-      {{- if .Values.secretProvider }}
         csi:
           driver: secrets-store.csi.k8s.io
           readOnly: true
           volumeAttributes:
-            secretProviderClass: {{ .Values.warnings.spcName | quote }}
-      {{- else }}
-        secret:
-          secretName: {{ .Values.warnings.db_secretName | quote }}
-      {{- end }}
+            secretProviderClass: {{ .Values.warnings.db.external.secretProvider.className | quote }}
     {{- end }}
       affinity:
         podAntiAffinity:
@@ -177,4 +211,4 @@ spec:
                   operator: In
                   values:
                   - {{ .Values.warnings.name }}
-              topologyKey: topology.kubernetes.io/zone
+              topologyKey: {{ .Values.warnings.podAntiAffinity.topologyKey | quote }}

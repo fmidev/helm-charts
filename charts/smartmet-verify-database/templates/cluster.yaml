@@ -1,0 +1,167 @@
+{{/*
+The CloudNativePG Cluster.
+
+The `bootstrap` block below is rendered identically on install and upgrade. Do
+NOT make it conditional on .Release.IsInstall: CNPG treats bootstrap as
+immutable once the cluster is initialised, and REMOVING the block counts as a
+change too, so a conditional would break `helm upgrade` rather than help.
+*/}}
+{{- $cm := printf "%s-sql" (include "smartmet-verify-database.clusterName" .) -}}
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ include "smartmet-verify-database.clusterName" . }}
+  labels:
+    {{- include "smartmet-verify-database.componentLabels" (list . "database") | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  instances: {{ .Values.cluster.instances }}
+  imageName: {{ .Values.cluster.imageName }}
+  {{- with .Values.cluster.imagePullPolicy }}
+  imagePullPolicy: {{ . }}
+  {{- end }}
+  {{- with .Values.cluster.imagePullSecrets }}
+  imagePullSecrets:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  primaryUpdateStrategy: {{ .Values.cluster.primaryUpdateStrategy }}
+
+  {{- with .Values.cluster.env }}
+  env:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+  {{- with .Values.cluster.resources }}
+  resources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+  postgresql:
+    {{- with .Values.cluster.postgresql.parameters }}
+    parameters:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.cluster.postgresql.pg_hba }}
+    pg_hba:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+
+  storage:
+    size: {{ .Values.cluster.storage.size }}
+    {{- with .Values.cluster.storage.storageClass }}
+    storageClass: {{ . }}
+    {{- end }}
+
+  {{- if .Values.cluster.walStorage.enabled }}
+  walStorage:
+    size: {{ .Values.cluster.walStorage.size }}
+    {{- with .Values.cluster.walStorage.storageClass }}
+    storageClass: {{ . }}
+    {{- end }}
+  {{- end }}
+
+  {{- with .Values.cluster.nodeSelector }}
+  nodeSelector:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.cluster.tolerations }}
+  tolerations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.cluster.affinity }}
+  affinity:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.cluster.priorityClassName }}
+  priorityClassName: {{ . }}
+  {{- end }}
+
+  bootstrap:
+    initdb:
+      database: {{ .Values.cluster.database }}
+      owner: {{ .Values.cluster.owner }}
+      {{- if .Values.schema.enabled }}
+      # Roles first, as superuser on the `postgres` database.
+      postInitSQLRefs:
+        configMapRefs:
+          - name: {{ $cm }}-pre-init
+            key: 0000-pre-init.sql
+      # Then, as superuser on {{ .Values.cluster.database }}: schema, then
+      # ownership transfer, then the reference rows the applications require,
+      # then any operator-supplied SQL. Order is load-bearing.
+      postInitApplicationSQLRefs:
+        configMapRefs:
+          - name: {{ $cm }}-production
+            key: 0001-production-schema.sql
+          - name: {{ $cm }}-post-ownership
+            key: 0002-post-ownership.sql
+          - name: {{ $cm }}-reference-data
+            key: 0004-reference-data.sql
+          - name: {{ $cm }}-extra
+            key: extra.sql
+          {{- with .Values.schema.extraPostInitApplicationRefs.configMapRefs }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+        {{- with .Values.schema.extraPostInitApplicationRefs.secretRefs }}
+        secretRefs:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- else }}
+      {{- $ext := .Values.schema.extraPostInitApplicationRefs }}
+      {{- $appCms := concat (default (list) .Values.schema.existingConfigMaps.postInitApplication) (default (list) $ext.configMapRefs) }}
+      {{- with .Values.schema.existingConfigMaps.postInit }}
+      postInitSQLRefs:
+        configMapRefs:
+          {{- toYaml . | nindent 10 }}
+      {{- end }}
+      {{- if or $appCms $ext.secretRefs }}
+      postInitApplicationSQLRefs:
+        {{- with $appCms }}
+        configMapRefs:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with $ext.secretRefs }}
+        secretRefs:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+
+  managed:
+    roles:
+      {{- range $role := .Values.roles }}
+      {{- if $role.enabled }}
+      - name: {{ $role.name | quote }}
+        ensure: present
+        login: true
+        inherit: true
+        {{- if $role.replication }}
+        replication: true
+        {{- end }}
+        {{- with $role.inRoles }}
+        # Repeated from the vendored SQL on purpose: CNPG revokes any membership
+        # it did not declare itself on the next reconcile.
+        inRoles:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        passwordSecret:
+          name: {{ include "smartmet-verify-database.rolePasswordSecret" (list $ $role) }}
+      {{- end }}
+      {{- end }}
+    {{- if .Values.serviceAlias.enabled }}
+    services:
+      additional:
+        # Publishes the primary under a stable hostname so application configs
+        # can use the bare name instead of the CNPG `-rw` name.
+        - selectorType: rw
+          serviceTemplate:
+            metadata:
+              name: {{ default (include "smartmet-verify-database.clusterName" .) .Values.serviceAlias.name }}
+    {{- end }}
+
+  {{- with .Values.cluster.extraSpec }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
