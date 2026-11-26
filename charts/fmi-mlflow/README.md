@@ -85,6 +85,10 @@ By default the tag is derived from `appVersion` in Chart.yaml. Images can be fou
 | postgresql.storageSize | string | "3Gi" | Size of the storage. Note that the actual size used is the multiple of intances |
 | postgresql.secrets.admin | string | "" | Postgresql admin credentials |
 | postgresql.secrets.mlflow | string | "" | Postgresql credentials for the user defined in postgresql.owner |
+| postgresql.pooler.enabled | bool | `false` | Put pgbouncer (CNPG Pooler) between mlflow and the cluster, see Connection pooling |
+| postgresql.pooler.instances | int | 2 | Number of pgbouncer instances |
+| postgresql.pooler.parameters | map | see values.yaml | pgbouncer parameters (max_client_conn, default_pool_size, query_wait_timeout, ...) |
+| postgresql.pooler.resources | map | see values.yaml | Resources of the pgbouncer pods |
 
 
 ### Upgrading mlflow version
@@ -116,6 +120,20 @@ NOTE:
 * MLflow tracking server works with the older version of the SDK (client), up to one major version difference (e.g., 2.x to 3.x).
 * MLflow tracking server may not work with the newer version of the SDK (client).
 
+
+## Connection pooling
+
+By default every mlflow server worker keeps its own SQLAlchemy connection pool (`MLFLOW_SQLALCHEMYSTORE_POOL_SIZE`,
+`MLFLOW_SQLALCHEMYSTORE_MAX_OVERFLOW`). When a burst of requests (e.g. from HPC jobs) exceeds it, requests wait 30 s and
+fail with `400 BAD_REQUEST: QueuePool limit of size ... reached`.
+
+With `postgresql.pooler.enabled: true` the chart deploys pgbouncer (CNPG `Pooler`, session mode) and the server uses
+`NullPool`: every request opens a short connection to pgbouncer, which queues bursts (`query_wait_timeout`) and
+limits the connections to postgresql (`default_pool_size` per database). Notes:
+
+* Remove `MLFLOW_SQLALCHEMYSTORE_POOL_SIZE` and `MLFLOW_SQLALCHEMYSTORE_MAX_OVERFLOW` from `mlflow.extraEnv`, they don't work with `NullPool` (the chart refuses to render).
+* The database migrations (`mlflow-migrate`) connect to the cluster directly, not through pgbouncer.
+* Database users are looked up automatically by CNPG (`cnpg_pooler_pgbouncer`), no extra setup is needed.
 
 ## Backups
 
