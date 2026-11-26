@@ -1,0 +1,279 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "GeoWeb CloudNativePG chart values",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "helm", "cluster", "backup"],
+  "definitions": {
+    "barmanObjectStore": {
+      "description": "Native CNPG BarmanObjectStoreConfiguration, passed through to the Cluster. Deprecated in CNPG 1.26; requires barman-cli-cloud in the PostgreSQL image.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "destinationPath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "endpointURL": {
+          "type": "string"
+        },
+        "endpointCA": {
+          "type": "object"
+        },
+        "serverName": {
+          "type": "string"
+        },
+        "s3Credentials": {
+          "type": "object"
+        },
+        "azureCredentials": {
+          "type": "object"
+        },
+        "googleCredentials": {
+          "type": "object"
+        },
+        "data": {
+          "type": "object"
+        },
+        "wal": {
+          "type": "object"
+        },
+        "tags": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "historyTags": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    }
+  },
+  "properties": {
+    "name": {
+      "description": "CloudNativePG Cluster name as a DNS-1035 label.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50,
+      "pattern": "^[a-z]([-a-z0-9]*[a-z0-9])?$"
+    },
+    "helm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resourcePolicy"],
+      "properties": {
+        "resourcePolicy": {
+          "description": "Helm resource policy annotation value; empty omits the annotation.",
+          "type": "string",
+          "enum": ["", "keep"]
+        }
+      }
+    },
+    "cluster": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["instances", "affinity", "imageName", "primaryUpdateStrategy", "primaryUpdateMethod", "bootstrap", "storage", "resources"],
+      "properties": {
+        "instances": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "affinity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["podAntiAffinityType", "topologyKey"],
+          "properties": {
+            "podAntiAffinityType": {
+              "type": "string",
+              "enum": ["preferred", "required"]
+            },
+            "topologyKey": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "imageName": {
+          "type": "string"
+        },
+        "env": {
+          "description": "Environment variables for the PostgreSQL containers, passed to Cluster.spec.env.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "primaryUpdateStrategy": {
+          "type": "string",
+          "enum": ["unsupervised", "supervised"]
+        },
+        "primaryUpdateMethod": {
+          "description": "Method used to update the primary during unsupervised rolling updates.",
+          "type": "string",
+          "enum": ["restart", "switchover"]
+        },
+        "bootstrap": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "initdb", "recovery"],
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": ["initdb", "recovery"]
+            },
+            "initdb": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["database", "owner"],
+              "properties": {
+                "database": {
+                  "type": "string"
+                },
+                "owner": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "recovery": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["source", "backupName", "database", "owner", "secretName", "recoveryTarget", "barmanCloud"],
+              "properties": {
+                "source": {
+                  "type": "string"
+                },
+                "backupName": {
+                  "type": "string"
+                },
+                "database": {
+                  "type": "string"
+                },
+                "owner": {
+                  "type": "string"
+                },
+                "secretName": {
+                  "type": "string"
+                },
+                "recoveryTarget": {
+                  "type": "object"
+                },
+                "barmanCloud": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["objectStoreName", "serverName"],
+                  "properties": {
+                    "objectStoreName": {
+                      "type": "string"
+                    },
+                    "serverName": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "barmanObjectStore": {
+                  "$ref": "#/definitions/barmanObjectStore"
+                }
+              }
+            }
+          }
+        },
+        "storage": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["size", "storageClass"],
+          "properties": {
+            "size": {
+              "type": "string",
+              "minLength": 1
+            },
+            "storageClass": {
+              "type": "string"
+            }
+          }
+        },
+        "resources": {
+          "type": "object"
+        }
+      }
+    },
+    "backup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "target", "schedule", "immediate", "suspend", "backupOwnerReference", "retentionPolicy", "volumeSnapshot", "barmanCloud"],
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["none", "volumeSnapshot", "barmanCloud", "barmanObjectStore"]
+        },
+        "target": {
+          "type": "string",
+          "enum": ["primary", "prefer-standby"]
+        },
+        "schedule": {
+          "type": "string",
+          "minLength": 1
+        },
+        "immediate": {
+          "type": "boolean"
+        },
+        "suspend": {
+          "type": "boolean"
+        },
+        "backupOwnerReference": {
+          "type": "string",
+          "enum": ["none", "self", "cluster"]
+        },
+        "retentionPolicy": {
+          "description": "Recovery window for native barmanObjectStore backups only; empty leaves retention unmanaged.",
+          "type": "string",
+          "pattern": "^([1-9][0-9]*[dwm])?$"
+        },
+        "volumeSnapshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["className", "online", "snapshotOwnerReference"],
+          "properties": {
+            "className": {
+              "type": "string"
+            },
+            "online": {
+              "type": "boolean"
+            },
+            "snapshotOwnerReference": {
+              "type": "string",
+              "enum": ["none", "backup", "cluster"]
+            }
+          }
+        },
+        "barmanCloud": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["objectStoreName"],
+          "properties": {
+            "objectStoreName": {
+              "type": "string"
+            },
+            "serverName": {
+              "description": "Archive server name; preserve the native serverName when migrating. Empty uses the Cluster name.",
+              "type": "string"
+            }
+          }
+        },
+        "barmanObjectStore": {
+          "$ref": "#/definitions/barmanObjectStore"
+        }
+      }
+    },
+    "global": {
+      "type": "object"
+    }
+  }
+}

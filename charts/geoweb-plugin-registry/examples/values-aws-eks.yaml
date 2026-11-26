@@ -1,0 +1,35 @@
+# Replace all angle-bracket placeholders before using this file.
+publicUrl: https://plugins.example.com
+
+storage:
+  backend: s3
+  s3:
+    bucket: "<globally-unique-s3-bucket-name>"
+    prefix: verdaccio
+    region: "<aws-region>"
+    endpoint: ""
+    pathStyle: false
+
+serviceAccount:
+  create: true
+  name: plugin-registry
+  annotations:
+    eks.amazonaws.com/role-arn: "arn:aws:iam::<aws-account-id>:role/plugin-registry"
+    eks.amazonaws.com/sts-regional-endpoints: "true"
+
+auth:
+  secretName: plugin-registry-oidc
+  scope: openid email read_api
+  secretProviderClass:
+    enabled: true
+    name: plugin-registry-oidc
+    region: "<aws-region>"
+    objectName: plugin-registry/oidc
+
+ingress:
+  enabled: true
+  className: ""
+  host: plugins.example.com
+
+route:
+  enabled: false

@@ -1,0 +1,16 @@
+{{- if .Values.smartmetConf.edrConf }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "smartmetserver.fullname" . }}-edr-config
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "smartmetserver.labels.component" (merge (dict "component" "configuration") .) | nindent 4 }}
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Name }}
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
+type: Opaque
+stringData:
+  edr.conf: |
+    {{- .Values.smartmetConf.edrConf | nindent 4 }}
+{{- end }}

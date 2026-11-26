@@ -4,14 +4,12 @@ versions:
 warnings:
   name: warnings
   registry: registry.gitlab.com/opengeoweb/backend-services/warnings-backend/warnings-backend
-  path: /warnings-backend/(.*)
+  path: /warnings-backend
   svcPort: 80
   replicas: 1
   minPodsAvailable: 0
-  db_secret: cG9zdGdyZXNxbDovL2dlb3dlYjpwb3N0Z3Jlc0Bsb2NhbGhvc3Q6NTQzMi93YXJuaW5ncw==
-  db_secretName: warnings-db
-  db_secretType: secretsmanager
-  spcName: warnings-spc
+  podAntiAffinity:
+    topologyKey: topology.kubernetes.io/zone
   secretServiceAccount: warnings-service-account
   resources:
     requests:
@@ -46,7 +44,7 @@ warnings:
   nginx:
     name: warnings-nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend
-    version: "v0.6.0"
+    version: "v1.0.3"
     ENABLE_SSL: "FALSE"
     BACKEND_HOST: 0.0.0.0:8080
     NGINX_PORT_HTTP: 80
@@ -80,26 +78,58 @@ warnings:
       timeoutSeconds: 3
       failureThreshold: 1
   db:
-    enableDefaultDb: true
-    useZalandoOperatorDb: false
+    # Database mode. Supported values:
+    # - sidecar: run the default postgres container in the warnings pod
+    # - external: read WARNINGS_BACKEND_DB from an externally managed connection string Secret
+    # - zalando: create/use a Zalando Postgres operator database
+    mode: sidecar
     name: warnings-db
-    image: postgres
-    port: 5432
-    POSTGRES_DB: warnings
-    POSTGRES_USER: geoweb
-    POSTGRES_PASSWORD: postgres
-    POSTGRES_VERSION: 15
-    numberOfInstances: 1
-    instanceSize: 100Mi
-    zalandoTeamId: geoweb
-    enableLogicalBackup: true
-    cleanInstall: true
-    backupTimestamp: "2030-01-01T00:00:00+00:00"
+    databaseName: warnings
+    username: geoweb
+    sidecar:
+      image: postgres
+      port: 5432
+      password: postgres
+    external:
+      # Supported values: inline, secretProvider, existingSecret
+      source: inline
+      secretName: warnings-db
+      secretKey: WARNINGS_BACKEND_DB
+      encodedConnectionString: ""
+      secretProvider:
+        provider: ""
+        className: warnings-spc
+        objectName: ""
+        # Defaults to secretsmanager for AWS and secret for Azure.
+        objectType: ""
+        path: ""
+        key: ""
+        iamRoleARN: ""
+        parameters: {}
+    zalando:
+      teamId: geoweb
+      postgresVersion: 15
+      instances: 1
+      volumeSize: 100Mi
+      enableLogicalBackup: true
+      env: []
+      clone:
+        enabled: false
+        timestamp: ""
+        backupBucket: ""
   useCustomConfigurationFiles: false
-  customConfigurationLocation: local
+  customConfigurationLocation: local  # local, s3, inline
+  # Plain-text files, including nginx.conf, for the inline configuration source.
+  customConfigurationFiles: {}
   volumeAccessMode: ReadOnlyMany
   volumeSize: 100Mi
 
 ingress:
+  enabled: true
   name: nginx-ingress-controller
-  ingressClassName: nginx
+  # Empty uses the cluster's default IngressClass
+  ingressClassName: ""
+  # Use ImplementationSpecific with nginx regex paths
+  pathType: Prefix
+  # Annotations for your ingress controller, see README
+  annotations: {}

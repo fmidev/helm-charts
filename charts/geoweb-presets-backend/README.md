@@ -1,3 +1,100 @@
+# GeoWeb Presets Backend Helm Chart
+
+Deploys the GeoWeb presets backend, auth proxy sidecar, and optional development or Zalando PostgreSQL resources. CloudNativePG databases are managed separately with the `geoweb-cnpg` chart.
+
+# Upgrade notes for chart 4.0.0
+
+Chart `4.0.0` no longer assumes the nginx ingress controller. The Ingress defaults are neutral, so the chart works with any controller, including OpenShift:
+
+- `ingress.customAnnotations` is renamed to `ingress.annotations`, which defaults to `{}`. The chart no longer sets nginx annotations itself. Template rendering fails if `ingress.customAnnotations` is still set.
+- `ingress.ingressClassName` defaults to `""`, which uses the cluster's default IngressClass, instead of `nginx`.
+- `presets.path` defaults to the plain prefix `/presets` instead of the nginx regex `/presets/(.*)`.
+- The new `ingress.enabled` (default `true`) leaves the Ingress out when set to `false`.
+- The new `ingress.pathType` (default `Prefix`) sets the Ingress path type. Use `ImplementationSpecific` with nginx regex paths.
+
+With a plain prefix path the controller passes the prefix on, and FastAPI removes it based on `presets.env.APPLICATION_ROOT_PATH`, so keep that the same as `presets.path`.
+
+To keep the previous nginx ingress controller setup, set:
+
+```yaml
+presets:
+  path: /presets/(.*)
+ingress:
+  ingressClassName: nginx
+  pathType: ImplementationSpecific
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "DELETE, PUT, GET, POST, OPTIONS, PATCH, HEAD"
+```
+
+**Custom auth proxy configuration:** the auth proxy's default `nginx.conf` requires a valid token on every path. A custom `nginx.conf` (`presets.useCustomConfigurationFiles`) with per-path `location` blocks expects paths without the prefix. If the ingress controller does not strip the prefix, add a rewrite to the start of the `server` block, for example `rewrite ^/presets(?:/(.*))?$ /$1 last;`. Otherwise prefixed requests skip those `location` blocks and their permission checks.
+
+# Upgrade notes for chart 3.3.0
+
+Chart `3.3.0` sets the variables from `presets.env` and `presets.nginx` directly in the Deployment instead of in ConfigMaps.
+
+- Values files do not need changes.
+- Changing a variable now restarts the pods automatically, so `presets.commitHash` is not needed for that.
+- Values are passed to the containers as is, like before: Kubernetes does not expand `$(NAME)` or `$$` in them.
+- Variables the chart sets itself (`PRESETS_BACKEND_DB`, and `PG_USER`/`PG_PASS` with Zalando) still take precedence over the same names in `presets.env`.
+
+# Upgrade notes for chart 3.0.0
+
+Chart `3.0.0` introduces a breaking database values cleanup. The old `presets.db.enableDefaultDb` and `presets.db.useZalandoOperatorDb` booleans are replaced by the new `presets.db.mode` value, and database settings now live under common fields and mode-specific blocks. Removed 2.x database values cause template rendering to fail until they are migrated.
+
+Migration map:
+
+| Removed value                                                                     | New value                                                                                                                                         |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `presets.db.enableDefaultDb: true`                                                | `presets.db.mode: sidecar`                                                                                                                        |
+| `presets.db.enableDefaultDb: false` with `presets.db.useZalandoOperatorDb: false` | `presets.db.mode: external`                                                                                                                       |
+| `presets.db.useZalandoOperatorDb: true`                                           | `presets.db.mode: zalando`                                                                                                                        |
+| `presets.db_secret`                                                               | `presets.db.external.encodedConnectionString` for `source: inline`, or `presets.db.external.secretProvider.objectName` for `source: secretProvider` |
+| `presets.db_secretName`                                                           | `presets.db.external.secretName`                                                                                                                  |
+| `presets.db_secretType`                                                           | `presets.db.external.secretProvider.objectType`                                                                                                   |
+| `presets.db_secretPath`                                                           | `presets.db.external.secretProvider.path`                                                                                                         |
+| `presets.db_secretKey`                                                            | `presets.db.external.secretProvider.key`                                                                                                          |
+| `presets.iamRoleARN`                                                              | `presets.db.external.secretProvider.iamRoleARN`                                                                                                   |
+| `presets.spcName`                                                                 | `presets.db.external.secretProvider.className`                                                                                                    |
+| `secretProvider`                                                                  | `presets.db.external.secretProvider.provider`                                                                                                     |
+| `secretProviderParameters`                                                        | `presets.db.external.secretProvider.parameters`                                                                                                   |
+| `presets.db.POSTGRES_DB`                                                          | `presets.db.databaseName`                                                                                                                         |
+| `presets.db.POSTGRES_USER`                                                        | `presets.db.username`                                                                                                                             |
+| `presets.db.image`                                                                | `presets.db.sidecar.image`                                                                                                                        |
+| `presets.db.port`                                                                 | `presets.db.sidecar.port`                                                                                                                         |
+| `presets.db.POSTGRES_PASSWORD`                                                    | `presets.db.sidecar.password`                                                                                                                       |
+| `presets.db.POSTGRES_VERSION`                                                     | `presets.db.zalando.postgresVersion`                                                                                                              |
+| `presets.db.numberOfInstances`                                                    | `presets.db.zalando.instances`                                                                                                                    |
+| `presets.db.instanceSize`                                                         | `presets.db.zalando.volumeSize`                                                                                                                   |
+| `presets.db.zalandoTeamId`                                                        | `presets.db.zalando.teamId`                                                                                                                       |
+| `presets.db.enableLogicalBackup`                                                  | `presets.db.zalando.enableLogicalBackup`                                                                                                          |
+| `presets.db.cleanInstall: false`                                                  | `presets.db.zalando.clone.enabled: true`                                                                                                          |
+| `presets.db.backupTimestamp`                                                      | `presets.db.zalando.clone.timestamp`                                                                                                              |
+| `presets.db.backupBucket`                                                         | `presets.db.zalando.clone.backupBucket`                                                                                                           |
+
+For existing Zalando deployments, render old and migrated values before upgrading and compare the generated `postgresql` resource. The resource name, users, database name, team ID, instance count, and volume size should stay unchanged.
+
+For existing external database deployments, verify that the rendered Deployment still reads `PRESETS_BACKEND_DB` from the intended Kubernetes Secret name and key.
+
+An upgrade from 2.x does not require changing database technology. First migrate the values to `mode: sidecar`, `mode: zalando`, or the corresponding external source and verify the rendered resources. Moving the data to CloudNativePG is a separate operation and should not be combined with the chart values migration.
+
+## Migrating an existing database to CloudNativePG
+
+The `geoweb-cnpg` chart creates a new, empty database. It does not adopt or copy a 2.x sidecar, Zalando, or external database.
+
+1. Migrate and validate the 2.x values while retaining the existing database mode.
+2. Back up the source database and verify that the dump can be read.
+3. Install `geoweb-cnpg` as a separate release with a different resource name from the source database.
+4. Stop writes to presets, take a final consistent dump, and restore it into the CNPG database.
+5. Verify schema, row counts, and required presets before changing the application release.
+6. Upgrade presets with `mode: external`, `source: existingSecret`, and the CNPG-generated `<cluster-name>-app` Secret key `uri`.
+7. Keep the source database and backup until application validation and the rollback window are complete.
+
+Do not uninstall the source database release as part of the application upgrade. The exact dump and restore commands depend on the source mode and environment; rehearse the procedure on a copy before production migration.
+
 # Install the chart repository
 
 ```bash
@@ -5,21 +102,36 @@ helm repo add fmi https://fmidev.github.io/helm-charts/
 helm repo update
 ```
 
-# Create requried dependencies
+# Create required dependencies
 
 Create values.yaml file for required variables:
 
-- Using aws as the secret provider
+- Minimal setup
 
 ```yaml
 presets:
   url: geoweb.example.com
-  db_secret: secretName # Secret should contain postgresql database connection string
-  iamRoleARN: arn:aws:iam::123456789012:role/example-iam-role-with-permissions-to-secret
+```
 
-secretProvider: aws
-secretProviderParameters:
-  region: your-region
+- Using an external database connection string from AWS Secrets Manager
+
+```yaml
+presets:
+  url: geoweb.example.com
+  db:
+    mode: external
+    external:
+      source: secretProvider
+      secretName: presets-db
+      secretKey: PRESETS_BACKEND_DB
+      secretProvider:
+        provider: aws
+        className: presets-spc
+        objectName: secretName # Secret should contain the PostgreSQL database connection string
+        objectType: secretsmanager
+        iamRoleARN: arn:aws:iam::123456789012:role/example-iam-role-with-permissions-to-secret
+        parameters:
+          region: your-region
 ```
 
 - Using base64 encoded secret
@@ -27,7 +139,13 @@ secretProviderParameters:
 ```yaml
 presets:
   url: geoweb.example.com
-  db_secret: base64_encoded_postgresql_connection_string
+  db:
+    mode: external
+    external:
+      source: inline
+      secretName: presets-db
+      secretKey: PRESETS_BACKEND_DB
+      encodedConnectionString: base64_encoded_postgresql_connection_string
 ```
 
 - Using custom configuration files stored locally
@@ -53,6 +171,33 @@ presets:
   awsDefaultRegion: <AWS_DEFAULT_REGION>
 ```
 
+- Using custom configuration files stored inline in values
+
+```yaml
+presets:
+  useCustomConfigurationFiles: true
+  customConfigurationLocation: inline
+  customConfigurationFiles:
+    nginx.conf: |
+      # nginx configuration
+```
+
+The chart stores the files in a ConfigMap. It mounts `nginx.conf` at `/nginx.conf` in
+the nginx container and all files at `presets.customConfigurationMountPath` in the
+backend. File contents are used as-is, and changing a file restarts the Pods.
+
+- Using an existing ConfigMap containing backend configuration files such as `nginx.conf`
+
+```yaml
+presets:
+  useCustomConfigurationFiles: true
+  customConfigurationLocation: configMap
+  customConfigurationMountPath: /app/configuration_files/custom
+  customConfigurationConfigMap:
+    name: presets-configuration
+    checksum: "<SHA-256 of ConfigMap data>"
+```
+
 - Using custom presets stored locally
 
 ```yaml
@@ -76,17 +221,55 @@ presets:
   awsDefaultRegion: <AWS_DEFAULT_REGION>
 ```
 
-- Using Zalando Operator Database
+## Using workspace labels from an existing ConfigMap
+
+```yaml
+presets:
+  env:
+    PRESETS_WORKSPACE_LABEL_CONFIG: /app/runtime-config/workspaceLabelsConfig.json
+  runtimeConfiguration:
+    source: existingConfigMap
+    existingConfigMap:
+      name: presets-runtime-config
+      checksum: <sha256-of-workspaceLabelsConfig.json>
+```
+
+The ConfigMap must contain `workspaceLabelsConfig.json`. The chart mounts it at `/app/runtime-config`; set `PRESETS_WORKSPACE_LABEL_CONFIG` to the mounted file in `presets.env`. Update the checksum whenever the file changes so the backend reloads it at startup.
+
+
+- Using Zalando Operator database
+
+Database selection is controlled by `presets.db.mode`.
 
 ```yaml
 presets:
   url: geoweb.example.com
   db:
-    enableDefaultDb: false
-    useZalandoOperatorDb: true
-    cleanInstall: false # Add this line only after first install
-    backupBucket: s3://<S3-bucket-name>/
+    mode: zalando
+    name: presets-db
+    databaseName: presets
+    username: geoweb
+    zalando:
+      clone:
+        enabled: true
+        timestamp: "2030-01-01T00:00:00+00:00"
+        backupBucket: s3://<S3-bucket-name>/
 ```
+
+- Using a separately managed CloudNativePG database
+
+```yaml
+presets:
+  url: geoweb.example.com
+  db:
+    mode: external
+    external:
+      source: existingSecret
+      secretName: presets-db-app
+      secretKey: uri
+```
+
+Install the database separately using `charts/geoweb-cnpg` and wait for the CNPG `Cluster` to become ready before deploying presets. Both releases must use the same namespace for this configuration. Set `secretName` to `<geoweb-cnpg name>-app`; CNPG's backup method does not change this application Secret contract.
 
 # Testing the Chart
 
@@ -127,30 +310,23 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.commitHash`                                  | Adds commitHash annotation to the deployment                                                                                                              |                                                                             |
 | `presets.imagePullPolicy`                             | Adds option to modify imagePullPolicy                                                                                                                     |                                                                             |
 | `presets.url`                                         | Url which the application can be accessed                                                                                                                 |                                                                             |
-| `presets.path`                                        | Path suffix added to url                                                                                                                                  | `/presets/(.*)`                                                             |
+| `presets.path` | Path prefix of the service in the Ingress | `/presets` |
 | `presets.svcPort`                                     | Port used for service                                                                                                                                     | `80`                                                                        |
 | `presets.PRESETS_PORT_HTTP`                           | Port used for presets-backend container                                                                                                                   | `8080`                                                                      |
 | `presets.replicas`                                    | Amount of replicas deployed                                                                                                                               | `1`                                                                         |
+| `presets.podAntiAffinity.topologyKey` | Prefer replicas on different workers (`kubernetes.io/hostname`) or in different zones (`topology.kubernetes.io/zone`). | `topology.kubernetes.io/zone` |
 | `presets.minPodsAvailable`                            | Minimum available pods in pod disruption budget. Value `0` omits the pdb.                                                                                 | `0`                                                                         |
 | `presets.DEPLOY_ENVIRONMENT`                          | Environment which presets should be seeded to the database                                                                                                | `open`                                                                      |
 | `presets.postStartCommand`                            | Command to run after presets-backend is started                                                                                                           | `bin/admin.sh`                                                              |
-| `presets.db_secret`                                   | Secret containing base64 encoded Postgresql database connection string                                                                                    |                                                                             |
-| `presets.db_secretName`                               | Name of db secret                                                                                                                                         | `presets-db`                                                                |
-| `presets.db_secretType`                               | Type to db secret                                                                                                                                         | `secretsmanager`                                                            |
-| `presets.db_secretPath`                               | Path to db secret                                                                                                                                         |                                                                             |
-| `presets.db_secretKey`                                | Key of db secret                                                                                                                                          |                                                                             |
-| `presets.iamRoleARN`                                  | IAM Role with permissions to access db_secret secret                                                                                                      |                                                                             |
 | `presets.livenessProbe`                               | Configure main container livenessProbe                                                                                                                    | see defaults from `values.yaml`                                             |
 | `presets.readinessProbe`                              | Configure main container readinessProbe                                                                                                                   | see defaults from `values.yaml`                                             |
 | `presets.resources`                                   | Configure resource limits & requests                                                                                                                      | see defaults from `values.yaml`                                             |
 | `presets.secretServiceAccount`                        | Service Account created for handling secrets                                                                                                              | `presets-service-account`                                                   |
 | `presets.startupProbe`                                | Configure main container startupProbe                                                                                                                     | see defaults from `values.yaml`                                             |
-| `presets.env.APPLICATION_ROOT_PATH`                   | Application root path for FastAPI. Generally same as `presets.path` without the wildcard.                                                                 | `/presets`                                                                  |
-| `secretProvider`                                      | Option to use secret provider instead of passing base64 encoded database connection string as presets.db_secret _(aws\|azure\|gcp\|vault)_                |                                                                             |
-| `secretProviderParameters`                            | Option to add custom parameters to the secretProvider, for example with aws you can specify region                                                        |                                                                             |
+| `presets.env.APPLICATION_ROOT_PATH` | Application root path for FastAPI. Generally the same as `presets.path`, without any regex part | `/presets` |
 | `presets.nginx.name`                                  | Name of nginx container                                                                                                                                   | `nginx`                                                                     |
 | `presets.nginx.registry`                              | Registry to fetch nginx image                                                                                                                             | `registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend` |
-| `presets.nginx.version`                               | Possibility to override Nginx version                                                                                                                     | see default from `values.yaml`                                              |
+| `presets.nginx.version`                               | Auth-backend image version                                                                                                                                | see default from `values.yaml`                                              |
 | `presets.nginx.ENABLE_SSL`                            | Toggle SSL termination                                                                                                                                    | `"FALSE"`                                                                   |
 | `presets.nginx.OAUTH2_USERINFO`                       | Userinfo endpoint to retrieve consented claims, or assertions, about the logged in end-user                                                               | -                                                                           |
 | `presets.nginx.GEOWEB_USERNAME_CLAIM`                 | Claim name used as a user identifier in the presets-backend                                                                                               | `"email"`                                                                   |
@@ -167,20 +343,52 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.nginx.BACKEND_HOST`                          | Presets-backend container address where Nginx reverse proxy forwards the requests                                                                         | `0.0.0.0:8080`                                                              |
 | `presets.nginx.NGINX_PORT_HTTP`                       | Port used for Nginx reverse proxy                                                                                                                         | `80`                                                                        |
 | `presets.nginx.NGINX_PORT_HTTPS`                      | Port used for Nginx reverse proxy when SSL is enabled                                                                                                     | `443`                                                                       |
+| `presets.nginx.NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE` | Tune Nginx worker processes to the container CPU limit when supported by the auth-backend image                                                       | Auth backend default                                                        |
+| `presets.nginx.TRUST_FORWARDED_HEADERS`               | Preserve incoming `X-Forwarded-*` headers only behind a trusted proxy that sanitizes them                                                                  | Auth backend default                                                        |
 | `presets.nginx.livenessProbe`                         | Configure nginx container livenessProbe                                                                                                                   | see defaults from `values.yaml`                                             |
 | `presets.nginx.readinessProbe`                        | Configure nginx container readinessProbe                                                                                                                  | see defaults from `values.yaml`                                             |
 | `presets.nginx.resources`                             | Configure resource limits & requests                                                                                                                      | see defaults from `values.yaml`                                             |
 | `presets.nginx.startupProbe`                          | Configure nginx container startupProbe                                                                                                                    | see defaults from `values.yaml`                                             |
 | `presets.nginx.ENV_VAR_STRICT_MODE`                   | Enable check if all necessary variables for authentication and authorization are set                                                                      | `false`                                                                     |
-| `presets.db.enableDefaultDb`                          | Enable default postgres database                                                                                                                          | `true`                                                                      |
-| `presets.db.name`                                     | Default postgres database container name                                                                                                                  | `postgres`                                                                  |
-| `presets.db.image`                                    | Default postgres database image                                                                                                                           | `postgres`                                                                  |
-| `presets.db.port`                                     | Default postgres database port                                                                                                                            | `5432`                                                                      |
-| `presets.db.POSTGRES_DB`                              | Default postgres database name                                                                                                                            | `presets`                                                                   |
-| `presets.db.POSTGRES_USER`                            | Default postgres database user                                                                                                                            | `postgres`                                                                  |
-| `presets.db.POSTGRES_PASSWORD`                        | Default postgres database password                                                                                                                        | `postgres`                                                                  |
+| `presets.db.mode`                                     | Database mode _(sidecar\|external\|zalando)_                                                                                                             | `sidecar`                                                                   |
+| `presets.db.name`                                     | Database resource/container name                                                                                                                          | `presets-db`                                                                |
+| `presets.db.databaseName`                             | PostgreSQL database name                                                                                                                                  | `presets`                                                                   |
+| `presets.db.username`                                 | PostgreSQL application user                                                                                                                               | `geoweb`                                                                    |
+| `presets.db.sidecar.image`                            | Sidecar PostgreSQL image                                                                                                                                  | `postgres`                                                                  |
+| `presets.db.sidecar.port`                             | Sidecar PostgreSQL port                                                                                                                                   | `5432`                                                                      |
+| `presets.db.sidecar.password`                         | Sidecar PostgreSQL password                                                                                                                               | `postgres`                                                                  |
+| `presets.db.external.secretName`                      | Kubernetes Secret name containing the external PostgreSQL connection string                                                                               | `presets-db`                                                                |
+| `presets.db.external.secretKey`                       | Kubernetes Secret key containing the external PostgreSQL connection string                                                                                | `PRESETS_BACKEND_DB`                                                        |
+| `presets.db.external.source`                          | External Secret source _(inline\|secretProvider\|existingSecret)_                                                                                        | `inline`                                                                    |
+| `presets.db.external.encodedConnectionString`         | Base64 encoded external PostgreSQL connection string; required when `source: inline`                                                                        |                                                                             |
+| `presets.db.external.secretProvider.provider`         | External secret provider for database connection string _(aws\|azure\|gcp\|vault)_                                                                        |                                                                             |
+| `presets.db.external.secretProvider.className`        | SecretProviderClass name for the database connection string                                                                                               | `presets-spc`                                                               |
+| `presets.db.external.secretProvider.objectName`       | External database-secret object identifier (resource name for GCP)                                                                                        |                                                                             |
+| `presets.db.external.secretProvider.objectType`       | External object type; defaults to `secretsmanager` for AWS and `secret` for Azure                                                                          | `""`                                                                        |
+| `presets.db.external.secretProvider.path`             | Required GCP mounted filename or Vault secret path                                                                                                         |                                                                             |
+| `presets.db.external.secretProvider.key`              | Required Vault secret key                                                                                                                                  |                                                                             |
+| `presets.db.external.secretProvider.iamRoleARN`       | IAM Role with permissions to access the external secret provider object                                                                                   |                                                                             |
+| `presets.db.external.secretProvider.parameters`       | Extra parameters for the SecretProviderClass                                                                                                              | `{}`                                                                        |
+| `presets.db.zalando.teamId`                           | Zalando Postgres operator team ID                                                                                                                         | `geoweb`                                                                    |
+| `presets.db.zalando.postgresVersion`                  | Zalando Postgres version                                                                                                                                  | `15`                                                                        |
+| `presets.db.zalando.instances`                        | Zalando Postgres instance count                                                                                                                           | `1`                                                                         |
+| `presets.db.zalando.volumeSize`                       | Zalando Postgres data volume size                                                                                                                         | `100Mi`                                                                     |
+| `presets.db.zalando.enableLogicalBackup`              | Enable Zalando logical backups                                                                                                                            | `true`                                                                      |
+| `presets.db.zalando.env` | Kubernetes EnvVar entries passed to the PostgreSQL resource; override global operator environment settings | `[]` |
+| `presets.db.zalando.clone.enabled`                    | Restore Zalando cluster from backup instead of clean install                                                                                              | `false`                                                                     |
+| `presets.db.zalando.clone.timestamp`                  | Zalando clone timestamp; required when cloning is enabled                                                                                                 |                                                                             |
+| `presets.db.zalando.clone.backupBucket`               | Zalando clone backup bucket; required when cloning is enabled                                                                                             |                                                                             |
+| `presets.runtimeConfiguration.source` | Workspace labels source: `none`, `inline`, or `existingConfigMap` | `none` |
+| `presets.runtimeConfiguration.files` | Map of filename to JSON content structured as YAML | `{}` |
+| `presets.runtimeConfiguration.mountPath` | Directory where runtime files are mounted | `/app/runtime-config` |
+| `presets.runtimeConfiguration.existingConfigMap.name` | Name of an externally managed ConfigMap | `""` |
+| `presets.runtimeConfiguration.existingConfigMap.checksum` | SHA-256 of published file content; changes restart backend pods | `""` |
 | `presets.useCustomConfigurationFiles`                 | Use custom configurations                                                                                                                                 | `false`                                                                     |
-| `presets.customConfigurationLocation`                 | Where custom configurations are located _(local\|s3)_                                                                                                     | `local`                                                                     |
+| `presets.customConfigurationLocation`                 | Where custom configurations are located _(local\|s3\|configMap\|inline)_                                                                                   | `local`                                                                     |
+| `presets.customConfigurationFiles` | Files for the `inline` location, as filename to content | `{}` |
+| `presets.customConfigurationConfigMap.name` | Existing ConfigMap containing `nginx.conf` and any backend configuration files | `""` |
+| `presets.customConfigurationConfigMap.checksum` | ConfigMap data checksum; changes trigger a pod rollout | `""` |
+| `presets.customConfigurationMountPath` | Directory where custom configuration files are mounted in the backend | `/app/configuration_files/custom` |
 | `presets.customConfigurationFolderPath`               | Path to the folder which contains custom configurations                                                                                                   |                                                                             |
 | `presets.useCustomWorkspacePresets`                   | Use custom presets                                                                                                                                        | `false`                                                                     |
 | `presets.customWorkspacePresetLocation`               | Where custom presets are located _(local\|s3)_                                                                                                            | `local`                                                                     |
@@ -193,13 +401,32 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.awsDefaultRegion`                            | Region where your S3 bucket is located                                                                                                                    |                                                                             |
 | `ingress.name`                                        | Name of the ingress controller in use                                                                                                                     | `nginx-ingress-controller`                                                  |
 | `ingress.tls`                                         | TLS configuration section for the ingress                                                                                                                 |                                                                             |
-| `ingress.ingressClassName`                            | Set ingressClassName parameter to not use default ingressClass                                                                                            | `nginx`                                                                     |
-| `ingress.customAnnotations`                           | Custom annotations for ingress, for example <pre>customAnnotations:<br> traefik.annotation: exampleValue</pre> Overrides default nginx annotations if set |                                                                             |
+| `ingress.ingressClassName` | IngressClass for the Ingress. Empty uses the cluster's default IngressClass | `""` |
+| `ingress.annotations` | Annotations for your ingress controller, for example nginx rewrite or cert-manager annotations. See the upgrade notes for the previous nginx defaults | `{}` |
+| `ingress.enabled` | Create the Ingress | `true` |
+| `ingress.pathType` | Path type of the Ingress path. Use `ImplementationSpecific` with nginx regex paths | `Prefix` |
 
 # Chart versions
 
 | Chart version | presets version |
 | ------------- | --------------- |
+| 4.2.0         | 5.1.0           |
+| 4.1.0         | 5.1.0           |
+| 4.0.0         | 5.1.0           |
+| 3.4.0         | 5.1.0           |
+| 3.3.2         | 5.1.0           |
+| 3.3.1         | 4.2.2           |
+| 3.3.0         | 4.2.2           |
+| 3.2.0         | 4.2.2           |
+| 3.1.1         | 4.2.2           |
+| 3.1.0         | 4.2.1           |
+| 3.0.1         | 4.2.1           |
+| 3.0.0         | 4.2.1           |
+| 2.15.16       | 4.2.1           |
+| 2.15.15       | 4.1.4           |
+| 2.15.14       | 4.1.3           |
+| 2.15.13       | 4.1.2           |
+| 2.15.12       | 4.1.0           |
 | 2.15.11       | 4.0.0           |
 | 2.15.10       | 3.37.2          |
 | 2.15.9        | 3.37.0          |

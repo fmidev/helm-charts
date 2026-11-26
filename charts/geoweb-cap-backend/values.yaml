@@ -4,11 +4,13 @@ versions:
 cap:
   name: cap
   registry: registry.gitlab.com/opengeoweb/backend-services/cap-backend/cap-backend
-  path: /cap/(.*)
+  path: /cap
   svcPort: 80
   containerPort: 8080
   replicas: 1
   minPodsAvailable: 0
+  podAntiAffinity:
+    topologyKey: topology.kubernetes.io/zone
   resources:
     requests:
       memory: "768Mi"
@@ -40,5 +42,11 @@ cap:
     APPLICATION_ROOT_PATH: "/cap"
 
 ingress:
+  enabled: true
   name: nginx-ingress-controller
-  ingressClassName: nginx
+  # Empty uses the cluster's default IngressClass
+  ingressClassName: ""
+  # Use ImplementationSpecific with nginx regex paths
+  pathType: Prefix
+  # Annotations for your ingress controller, see README
+  annotations: {}

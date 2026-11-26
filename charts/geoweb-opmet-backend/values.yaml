@@ -4,15 +4,14 @@ versions:
 opmet:
   name: opmet
   registry: registry.gitlab.com/opengeoweb/backend-services/opmet-backend/opmet-backend
-  path: /opmet/(.*)
+  path: /opmet
   svcPort: 80
   replicas: 1
   minPodsAvailable: 0
-  db_secret: cG9zdGdyZXNxbDovL2dlb3dlYjpwb3N0Z3Jlc0Bsb2NhbGhvc3Q6NTQzMi9vcG1ldA==
-  db_secretName: opmet-db
-  db_secretType: secretsmanager
-  spcName: opmet-spc
+  podAntiAffinity:
+    topologyKey: topology.kubernetes.io/zone
   secretServiceAccount: opmet-service-account
+  iamRoleARN: ""
   resources:
     requests:
       memory: "256Mi"
@@ -48,7 +47,7 @@ opmet:
   messageconverter:
     name: opmet-messageconverter
     registry: registry.gitlab.com/opengeoweb/avi-msgconverter/geoweb-knmi-avi-messageservices
-    version: "v2.0.1"
+    version: "v2.1.1"
     port: 8080
     resources:
       requests:
@@ -89,6 +88,22 @@ opmet:
         cpu: "50m"
       limits:
         memory: "128Mi"
+    environmentSecret: ""  # existing Secret with SFTP destination environment variables
+    secrets:
+      source: inline  # inline, secretProvider, existingSecret; provider also selects secretProvider
+      # Leave provider empty to create Secrets from encodedValue. Set a
+      # provider to fetch objectName values through the Secrets Store CSI
+      # driver. Publisher secrets are independent from database credentials.
+      provider: ""
+      className: opmet-publisher-spc
+      parameters: {}
+      # SSH keys require a unique Kubernetes secretName. Inline keys are
+      # mounted at /mnt/secrets-store/<secretName>; provider-backed keys use
+      # the filename produced by that provider.
+      sshKeys: []
+      # Passphrases require separate secretName and envName fields. Reference
+      # envName as $(ENV_NAME) in publisher.SERVERS.
+      sshPassphrases: []
     startupProbe:
       httpGet:
         path: /healthcheck?startup=true
@@ -113,7 +128,7 @@ opmet:
   nginx:
     name: opmet-nginx
     registry: registry.gitlab.com/opengeoweb/backend-services/auth-backend/auth-backend
-    version: "v0.7.0"
+    version: "v1.0.3"
     ENV_VAR_STRICT_MODE: "FALSE"
     ENABLE_SSL: "FALSE"
     NGINX_PORT_HTTP: 80
@@ -147,27 +162,58 @@ opmet:
       timeoutSeconds: 3
       failureThreshold: 1
   db:
-    enableDefaultDb: true
-    useZalandoOperatorDb: false
+    # Supported values: sidecar, external, zalando.
+    mode: sidecar
     name: opmet-db
-    image: postgres
-    port: 5432
-    POSTGRES_DB: opmet
-    POSTGRES_USER: geoweb
-    POSTGRES_PASSWORD: postgres
-    POSTGRES_VERSION: 15
-    numberOfInstances: 1
-    instanceSize: 100Mi
-    zalandoTeamId: geoweb
-    enableLogicalBackup: true
-    cleanInstall: true
-    backupTimestamp: "2030-01-01T00:00:00+00:00"
+    databaseName: opmet
+    username: geoweb
+    sidecar:
+      image: postgres
+      port: 5432
+      password: postgres
+    external:
+      # Supported values: inline, secretProvider, existingSecret.
+      source: inline
+      secretName: opmet-db
+      secretKey: OPMET_BACKEND_DB
+      encodedConnectionString: ""
+      secretProvider:
+        provider: ""
+        className: opmet-db-spc
+        objectName: ""
+        # Defaults to secretsmanager for AWS and secret for Azure.
+        objectType: ""
+        path: ""
+        key: ""
+        parameters: {}
+    zalando:
+      teamId: geoweb
+      postgresVersion: 15
+      instances: 1
+      volumeSize: 100Mi
+      enableLogicalBackup: true
+      env: []
+      clone:
+        enabled: false
+        timestamp: ""
+        backupBucket: ""
   useCustomConfigurationFiles: false
-  customConfigurationLocation: local
+  customConfigurationLocation: local  # local, s3, configMap, inline
+  # Plain-text files, including nginx.conf, for the inline configuration source.
+  customConfigurationFiles: {}
+  customConfigurationConfigMap:
+    name: ""
+    checksum: ""
   customConfigurationMountPath: /app/configuration_files/custom
   volumeAccessMode: ReadOnlyMany
   volumeSize: 100Mi
 
 ingress:
+  enabled: true
   name: nginx-ingress-controller
-  ingressClassName: nginx
+  # Empty uses the cluster's default IngressClass
+  ingressClassName: ""
+  # Use ImplementationSpecific with nginx regex paths
+  pathType: Prefix
+  # Annotations for your ingress controller, see README
+  annotations: {}

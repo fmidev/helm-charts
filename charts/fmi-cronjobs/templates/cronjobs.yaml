@@ -7,6 +7,8 @@
 {{- $concurrencyPolicy := $job.concurrencyPolicy | default $defaults.concurrencyPolicy | default "Forbid" -}}
 {{- $restartPolicy := $job.restartPolicy | default $defaults.restartPolicy | default "Never" -}}
 {{- $backoffLimit := $job.backoffLimit | default $defaults.backoffLimit | default 5 -}}
+{{- /* No built-in fallback: unset means no deadline. */ -}}
+{{- $activeDeadlineSeconds := $job.activeDeadlineSeconds | default $defaults.activeDeadlineSeconds -}}
 {{- $successfulJobsHistoryLimit := $job.successfulJobsHistoryLimit | default $defaults.successfulJobsHistoryLimit | default 1 -}}
 {{- $failedJobsHistoryLimit := $job.failedJobsHistoryLimit | default $defaults.failedJobsHistoryLimit | default 3 -}}
 {{- $pullPolicy := $job.image.pullPolicy | default $defaults.pullPolicy | default "IfNotPresent" -}}
@@ -25,6 +27,9 @@ metadata:
     app.kubernetes.io/instance: {{ $root.Release.Name }}
     app.kubernetes.io/managed-by: {{ $root.Chart.Name }}
     app.kubernetes.io/component: cronjob
+    {{- if $job.labels }}
+    {{ toYaml $job.labels | nindent 4 }}
+    {{- end }}
   {{- if $job.annotations }}
   annotations:
     {{- toYaml $job.annotations | nindent 4 }}
@@ -38,6 +43,9 @@ spec:
   jobTemplate:
     spec:
       backoffLimit: {{ $backoffLimit }}
+      {{- if $activeDeadlineSeconds }}
+      activeDeadlineSeconds: {{ $activeDeadlineSeconds }}
+      {{- end }}
       template:
         spec:
           restartPolicy: {{ $restartPolicy }}
@@ -57,7 +65,7 @@ spec:
               {{- end }}
               {{ include "fmi-cronjobs.renderEnv" $job.env | nindent 14 }}
               {{ include "fmi-cronjobs.renderResources" (dict "job" $job "defaults" $defaults) | nindent 14 }}
-              {{ include "fmi-cronjobs.renderVolumeMounts" (dict "mounts" ($job.mounts | default (list)) "tmp" ($job.tmp | default (dict))) | nindent 14 }}
-          {{ include "fmi-cronjobs.renderVolumes" (dict "mounts" ($job.mounts | default (list)) "tmp" ($job.tmp | default (dict))) | nindent 10 }}
+              {{ include "fmi-cronjobs.renderVolumeMounts" (dict "mounts" ($job.mounts | default (list)) "pvcMounts" ($job.pvcMounts | default (list)) "tmp" ($job.tmp | default (dict))) | nindent 14 }}
+          {{ include "fmi-cronjobs.renderVolumes" (dict "mounts" ($job.mounts | default (list)) "pvcMounts" ($job.pvcMounts | default (list)) "tmp" ($job.tmp | default (dict))) | nindent 10 }}
 {{- end -}}
 {{- end -}}

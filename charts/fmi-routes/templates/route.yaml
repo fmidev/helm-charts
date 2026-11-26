@@ -29,7 +29,44 @@ spec:
   tls:
     termination: {{ $route.tls.termination }}
     insecureEdgeTerminationPolicy: {{ $route.tls.insecureEdgeTerminationPolicy }}
+    {{- with $route.tls.externalCertificate }}
+    externalCertificate:
+      name: {{ . }}
+    {{- end }}
   {{- end }}
 {{- end }}
 {{- end }}
+{{- end }}
+{{- $certs := list }}
+{{- range $name, $route := .Values.routes }}
+{{- if and $route.enabled $route.tls $route.tls.externalCertificate }}
+{{- $certs = append $certs $route.tls.externalCertificate }}
+{{- end }}
+{{- end }}
+{{- if $certs }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Release.Name }}-cert-reader
+  namespace: {{ .Release.Namespace }}
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  resourceNames: {{ $certs | uniq | sortAlpha | toJson }}
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Release.Name }}-cert-reader
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ .Release.Name }}-cert-reader
+subjects:
+- kind: ServiceAccount
+  name: router
+  namespace: openshift-ingress
 {{- end }}
