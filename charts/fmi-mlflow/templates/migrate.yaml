@@ -40,10 +40,10 @@ objects:
               - |
                 set -e
                 # tracking database (experiments, runs, models, ...)
-                mlflow db upgrade postgresql://{{ include "mlflow.dbHost" . }}/{{ .Values.postgresql.database }}
+                mlflow db upgrade postgresql://{{ include "mlflow.dbDirectHost" . }}/{{ .Values.postgresql.database }}
                 # users database (basic-auth users and permissions)
                 # https://mlflow.org/docs/latest/self-hosting/security/basic-http-auth/
-                python -m mlflow.server.auth db upgrade --url postgresql://{{ include "mlflow.dbHost" . }}/users
+                python -m mlflow.server.auth db upgrade --url postgresql://{{ include "mlflow.dbDirectHost" . }}/users
                 echo "Migrations done"
 
             volumeMounts:

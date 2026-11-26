@@ -70,9 +70,28 @@ Public hostname of the route
 {{- end -}}
 
 {{/*
-Read-write service of the postgresql cluster
+Name of the pgbouncer pooler (also the name of its service)
+*/}}
+{{- define "mlflow.poolerName" -}}
+{{ .Values.postgresql.clusterName }}-pooler-rw
+{{- end -}}
+
+{{/*
+Database host used by the mlflow server and the garbage collection:
+the pgbouncer pooler when enabled, otherwise the read-write service of the cluster
 */}}
 {{- define "mlflow.dbHost" -}}
+{{- if .Values.postgresql.pooler.enabled -}}
+{{ include "mlflow.poolerName" . }}.{{ .Release.Namespace }}:5432
+{{- else -}}
+{{ include "mlflow.dbDirectHost" . }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Read-write service of the postgresql cluster, bypassing the pooler (used by the migrations)
+*/}}
+{{- define "mlflow.dbDirectHost" -}}
 {{ .Values.postgresql.clusterName }}-rw.{{ .Release.Namespace }}:5432
 {{- end -}}
 

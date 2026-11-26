@@ -133,3 +133,22 @@ postgresql:
   secrets:
     admin: postgresql-superuser-secret
     mlflow: postgresql-mlflow-secret
+
+  # pgbouncer (CNPG Pooler) between mlflow and the cluster, see templates/pooler.yaml
+  # When enabled the mlflow server uses NullPool, so bursts queue in pgbouncer instead of
+  # failing with "QueuePool limit ... reached". Don't set MLFLOW_SQLALCHEMYSTORE_POOL_SIZE or
+  # MLFLOW_SQLALCHEMYSTORE_MAX_OVERFLOW in mlflow.extraEnv then. Migrations bypass the pooler.
+  pooler:
+    enabled: false
+    instances: 2
+    # https://cloudnative-pg.io/documentation/1.27/connection_pooling/
+    parameters:
+      max_client_conn: "500"    # client connections from mlflow, one per request in flight
+      default_pool_size: "20"   # server connections per database+user (app, users), max 40 in total
+      query_wait_timeout: "60"  # how long a request may queue, below the client's 120 s http timeout
+    resources:
+      requests:
+        cpu: 100m
+        memory: 64Mi
+      limits:
+        memory: 256Mi

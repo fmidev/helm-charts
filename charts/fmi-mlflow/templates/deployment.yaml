@@ -72,6 +72,17 @@ spec:
             - name: HOME
               value: /tmp
 
+            {{- if .Values.postgresql.pooler.enabled }}
+            {{- range .Values.mlflow.extraEnv }}
+            {{- if has .name (list "MLFLOW_SQLALCHEMYSTORE_POOL_SIZE" "MLFLOW_SQLALCHEMYSTORE_MAX_OVERFLOW") }}
+            {{- fail (printf "remove %s from mlflow.extraEnv: it can't be used with postgresql.pooler.enabled (NullPool)" .name) }}
+            {{- end }}
+            {{- end }}
+            # pgbouncer does the pooling, no connection pool (and no pool size limit) in the server
+            - name: MLFLOW_SQLALCHEMYSTORE_POOLCLASS
+              value: NullPool
+            {{- end }}
+
             {{- with .Values.mlflow.extraEnv }}
             # extra environment variables from values (mlflow.extraEnv)
             {{- toYaml . | nindent 12 }}
@@ -106,15 +117,15 @@ spec:
               path: /health
               port: http
             periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 3
+            timeoutSeconds: 10
+            failureThreshold: 6
           livenessProbe:
             httpGet:
               path: /health
               port: http
-            periodSeconds: 20
-            timeoutSeconds: 5
-            failureThreshold: 3
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 10
 
           resources:
             {{- toYaml .Values.mlflow.resources | nindent 12 }}
