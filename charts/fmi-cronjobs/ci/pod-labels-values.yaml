@@ -1,0 +1,26 @@
+# chart-testing values: exercises defaults.podLabels and the per-job overrides.
+defaults:
+  podLabels:
+    fmi-elk: ci-test
+    team: ci
+jobs:
+  - name: ci-defaults
+    enabled: true
+    schedule: "0 0 1 1 *"
+    image:
+      repository: registry.access.redhat.com/ubi9/ubi-minimal
+      tag: latest
+    command: ["/bin/true"]
+  - name: ci-overrides
+    enabled: true
+    schedule: "0 0 1 1 *"
+    labels:
+      purpose: ci
+    podLabels:
+      fmi-elk: ci-override
+      team: null
+      numeric: 123
+    image:
+      repository: registry.access.redhat.com/ubi9/ubi-minimal
+      tag: latest
+    command: ["/bin/true"]

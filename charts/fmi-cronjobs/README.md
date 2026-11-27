@@ -10,7 +10,7 @@ Install standalone or add as a dependency to another chart:
 # Chart.yaml
 dependencies:
   - name: fmi-cronjobs
-    version: "0.3.0"
+    version: "0.5.0"
     repository: "https://fmidev.github.io/helm-charts"
 ```
 
@@ -50,6 +50,7 @@ Optional shared defaults applied to every job. Per-job settings always take prec
 | `successfulJobsHistoryLimit` | Successful job records to keep | `1` |
 | `failedJobsHistoryLimit` | Failed job records to keep | `3` |
 | `resourcePreset` | Default resource preset (`minimal`, `normal`, `custom`) | — |
+| `podLabels` | Labels added to the Pods of every job, e.g. `fmi-elk: <value>` to forward the logs to ELK. Merged with the per-job `podLabels`. | `{}` |
 
 ### `pvcs`
 
@@ -89,6 +90,8 @@ List of CronJob definitions. Each entry supports the following fields:
 | `successfulJobsHistoryLimit` | Successful job records to keep; overrides `defaults.successfulJobsHistoryLimit` | `1` |
 | `failedJobsHistoryLimit` | Failed job records to keep; overrides `defaults.failedJobsHistoryLimit` | `3` |
 | `annotations` | Extra annotations on the CronJob metadata | `{}` |
+| `labels` | Extra labels on the CronJob metadata. These do **not** reach the Pods; use `podLabels` for that. | `{}` |
+| `podLabels` | Extra labels on the Pods created by the job (pod template metadata). Merged with `defaults.podLabels`; the per-job value wins on a shared key, and a per-job `null` removes a default label from that job. Values are rendered as quoted strings. | `{}` |
 
 ### `image`
 

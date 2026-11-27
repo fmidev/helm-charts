@@ -11,6 +11,8 @@ defaults: {}
 #   successfulJobsHistoryLimit: 1
 #   failedJobsHistoryLimit: 3
 #   resourcePreset: minimal
+#   podLabels:                    # labels for the Pods of every job; merged with per-job podLabels
+#     fmi-elk: my-elk-datastream
 
 
 # List of PersistentVolumeClaims to be created by the chart. These can be used by all of the defined jobs.
