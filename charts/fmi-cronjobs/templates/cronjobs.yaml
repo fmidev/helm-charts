@@ -16,8 +16,18 @@
 {{- if and (not $pullSecrets) $defaults.pullSecret -}}
 {{- $pullSecrets = list (dict "name" $defaults.pullSecret) -}}
 {{- end }}
-{{- /* Pod labels: defaults.podLabels merged with per-job podLabels; the job wins on a shared key. */ -}}
-{{- $podLabels := merge (dict) ($job.podLabels | default (dict)) ($defaults.podLabels | default (dict)) }}
+{{- /* Pod labels: defaults.podLabels overlaid with the per-job podLabels. A per-job null removes a default label. */ -}}
+{{- $podLabels := dict -}}
+{{- range $k, $v := ($defaults.podLabels | default (dict)) -}}
+{{- $_ := set $podLabels $k $v -}}
+{{- end -}}
+{{- range $k, $v := ($job.podLabels | default (dict)) -}}
+{{- if kindIs "invalid" $v -}}
+{{- $_ := unset $podLabels $k -}}
+{{- else -}}
+{{- $_ := set $podLabels $k $v -}}
+{{- end -}}
+{{- end }}
 ---
 apiVersion: batch/v1
 kind: CronJob
@@ -30,7 +40,7 @@ metadata:
     app.kubernetes.io/managed-by: {{ $root.Chart.Name }}
     app.kubernetes.io/component: cronjob
     {{- if $job.labels }}
-    {{ toYaml $job.labels | nindent 4 }}
+    {{- toYaml $job.labels | nindent 4 }}
     {{- end }}
   {{- if $job.annotations }}
   annotations:
@@ -52,7 +62,9 @@ spec:
         {{- if $podLabels }}
         metadata:
           labels:
-            {{- toYaml $podLabels | nindent 12 }}
+            {{- range $k, $v := $podLabels }}
+            {{ $k }}: {{ $v | toString | quote }}
+            {{- end }}
         {{- end }}
         spec:
           restartPolicy: {{ $restartPolicy }}

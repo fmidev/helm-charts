@@ -91,7 +91,7 @@ List of CronJob definitions. Each entry supports the following fields:
 | `failedJobsHistoryLimit` | Failed job records to keep; overrides `defaults.failedJobsHistoryLimit` | `3` |
 | `annotations` | Extra annotations on the CronJob metadata | `{}` |
 | `labels` | Extra labels on the CronJob metadata. These do **not** reach the Pods; use `podLabels` for that. | `{}` |
-| `podLabels` | Extra labels on the Pods created by the job (pod template metadata). Merged with `defaults.podLabels`; the per-job value wins on a shared key. | `{}` |
+| `podLabels` | Extra labels on the Pods created by the job (pod template metadata). Merged with `defaults.podLabels`; the per-job value wins on a shared key, and a per-job `null` removes a default label from that job. Values are rendered as quoted strings. | `{}` |
 
 ### `image`
 
