@@ -16,6 +16,8 @@
 {{- if and (not $pullSecrets) $defaults.pullSecret -}}
 {{- $pullSecrets = list (dict "name" $defaults.pullSecret) -}}
 {{- end }}
+{{- /* Pod labels: defaults.podLabels merged with per-job podLabels; the job wins on a shared key. */ -}}
+{{- $podLabels := merge (dict) ($job.podLabels | default (dict)) ($defaults.podLabels | default (dict)) }}
 ---
 apiVersion: batch/v1
 kind: CronJob
@@ -47,6 +49,11 @@ spec:
       activeDeadlineSeconds: {{ $activeDeadlineSeconds }}
       {{- end }}
       template:
+        {{- if $podLabels }}
+        metadata:
+          labels:
+            {{- toYaml $podLabels | nindent 12 }}
+        {{- end }}
         spec:
           restartPolicy: {{ $restartPolicy }}
           {{- if $pullSecrets }}
