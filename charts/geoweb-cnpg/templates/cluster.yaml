@@ -74,6 +74,10 @@ spec:
   {{- if .Values.cluster.imageName }}
   imageName: {{ .Values.cluster.imageName | quote }}
   {{- end }}
+  {{- with .Values.cluster.inheritedMetadata }}
+  inheritedMetadata:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with .Values.cluster.env }}
   env:
     {{- toYaml . | nindent 4 }}

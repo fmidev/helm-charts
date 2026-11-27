@@ -86,6 +86,7 @@ The following table lists the configurable parameters of the location backend ch
 | `location.name` | Name of backend | `location` |
 | `location.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/location-backend` |
 | `location.commitHash` | Adds commitHash annotation to the deployment | |
+| `location.podLabels` | Extra labels for the pods, e.g. for log collection. Must not set `app` | `{}` |
 | `location.imagePullPolicy` | Adds option to modify imagePullPolicy | |
 | `location.url` | Url which the application can be accessed | |
 | `location.path` | Path prefix of the service in the Ingress | `/location-backend` |
@@ -120,6 +121,7 @@ The following table lists the configurable parameters of the location backend ch
 
 | Chart version | location version |
 |---------------|------------------|
+| 2.1.0         | 0.4.0            |
 | 2.0.0         | 0.4.0            |
 | 1.3.0         | 0.4.0            |
 | 1.2.2         | 0.4.0            |

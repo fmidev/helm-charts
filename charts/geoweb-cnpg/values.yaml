@@ -16,6 +16,10 @@ cluster:
   # Environment variables for the PostgreSQL containers (Cluster.spec.env),
   # e.g. Barman Cloud S3 client settings. Changing them restarts the instances.
   env: []
+  # Labels and annotations CNPG copies to every object it creates for the
+  # Cluster, including the instance pods (Cluster.spec.inheritedMetadata),
+  # e.g. labels for log collection.
+  inheritedMetadata: {}
   primaryUpdateStrategy: unsupervised
   primaryUpdateMethod: restart
   bootstrap:

@@ -224,6 +224,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 | `frontend.name` | Name of frontend | `geoweb` |
 | `frontend.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/opengeoweb` |
 | `frontend.commitHash` | Adds commitHash annotation to the deployment | |
+| `frontend.podLabels` | Extra labels for the pods, e.g. for log collection. Must not set `app` | `{}` |
 | `frontend.imagePullPolicy` | Adds option to modify imagePullPolicy | |
 | `frontend.url` | Url which the application can be accessed | |
 | `frontend.svcPort` | Port used for service | `80` |
@@ -313,6 +314,7 @@ The following table lists the configurable parameters of the GeoWeb frontend cha
 
 | Chart version | frontend version |
 |---------------|------------------|
+| 5.1.0         | 20.1.0           |
 | 5.0.0         | 20.1.0           |
 | 4.3.0         | 20.1.0           |
 | 4.2.2         | 20.1.0           |

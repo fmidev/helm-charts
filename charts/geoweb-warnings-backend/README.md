@@ -254,6 +254,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 | `warnings.name` | Name of backend | `warnings` |
 | `warnings.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/warnings-backend/warnings-backend` |
 | `warnings.commitHash` | Adds commitHash annotation to the deployment | |
+| `warnings.podLabels` | Extra labels for the pods, e.g. for log collection. Must not set `app` | `{}` |
 | `warnings.imagePullPolicy` | Adds option to modify imagePullPolicy | |
 | `warnings.url` | Url which the application can be accessed | |
 | `warnings.path` | Path prefix of the service in the Ingress | `/warnings-backend` |
@@ -340,6 +341,7 @@ The following table lists the configurable parameters of the Warnings backend ch
 
 | Chart version | warnings version |
 |---------------|------------------|
+| 3.3.0         | 4.1.0            |
 | 3.2.0         | 4.1.0            |
 | 3.1.0         | 4.1.0            |
 | 3.0.0         | 4.1.0            |

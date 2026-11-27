@@ -4,6 +4,8 @@ versions:
 
 # Optional deployment marker used to force a rollout for mutable image tags.
 commitHash: ""
+# Extra labels for the pod, e.g. for log collection.
+podLabels: {}
 
 # Canonical externally accessible registry URL. Leave empty to let Verdaccio
 # derive it from the request headers.

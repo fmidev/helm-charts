@@ -86,6 +86,7 @@ The following table lists the configurable parameters of the CAP backend chart a
 | `cap.name` | Name of backend | `cap` |
 | `cap.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/cap-backend/cap-backend` |
 | `cap.commitHash` | Adds commitHash annotation to the deployment | |
+| `cap.podLabels` | Extra labels for the pods, e.g. for log collection. Must not set `app` | `{}` |
 | `cap.imagePullPolicy` | Adds option to modify imagePullPolicy | |
 | `cap.url` | Url which the application can be accessed | |
 | `cap.path` | Path prefix of the service in the Ingress | `/cap` |
@@ -110,6 +111,7 @@ The following table lists the configurable parameters of the CAP backend chart a
 
 | Chart version | cap version |
 |---------------|-------------|
+| 2.1.0         | 0.11.0      |
 | 2.0.0         | 0.11.0      |
 | 1.10.0        | 0.11.0      |
 | 1.9.1         | 0.11.0      |

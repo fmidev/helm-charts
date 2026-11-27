@@ -22,6 +22,15 @@ spec:
         {{- end }}
       labels:
         {{- include "geoweb-plugin-registry.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- $chartLabels := include "geoweb-plugin-registry.labels" $ | fromYaml }}
+        {{- range $key, $_ := . }}
+        {{- if hasKey $chartLabels $key }}
+        {{- fail (printf "podLabels must not set %s; the chart already sets it" $key) }}
+        {{- end }}
+        {{- end }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       {{- if .Values.serviceAccount.create }}
       serviceAccountName: {{ include "geoweb-plugin-registry.serviceAccountName" . }}

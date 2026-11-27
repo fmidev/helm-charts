@@ -308,6 +308,7 @@ The following table lists the configurable parameters of the Presets backend cha
 | `presets.name`                                        | Name of backend                                                                                                                                           | `presets`                                                                   |
 | `presets.registry`                                    | Registry to fetch image                                                                                                                                   | `registry.gitlab.com/opengeoweb/backend-services/presets-backend`           |
 | `presets.commitHash`                                  | Adds commitHash annotation to the deployment                                                                                                              |                                                                             |
+| `presets.podLabels` | Extra labels for the pods, e.g. for log collection. Must not set `app` | `{}` |
 | `presets.imagePullPolicy`                             | Adds option to modify imagePullPolicy                                                                                                                     |                                                                             |
 | `presets.url`                                         | Url which the application can be accessed                                                                                                                 |                                                                             |
 | `presets.path` | Path prefix of the service in the Ingress | `/presets` |
@@ -410,6 +411,7 @@ The following table lists the configurable parameters of the Presets backend cha
 
 | Chart version | presets version |
 | ------------- | --------------- |
+| 4.3.0         | 5.1.0           |
 | 4.2.0         | 5.1.0           |
 | 4.1.0         | 5.1.0           |
 | 4.0.0         | 5.1.0           |
