@@ -421,6 +421,7 @@ Deleting the `Cluster` can also delete its PVCs, depending on operator and stora
 | `cluster.affinity.topologyKey` | Node label defining the placement failure domain | `kubernetes.io/hostname` |
 | `cluster.imageName` | Full CNPG-compatible PostgreSQL image reference; empty uses the operator default | `""` |
 | `cluster.env` | Environment variables for the PostgreSQL containers (`Cluster.spec.env`) | `[]` |
+| `cluster.inheritedMetadata` | Labels and annotations copied to every object CNPG creates for the Cluster, including the instance pods (`Cluster.spec.inheritedMetadata`), e.g. labels for log collection | `{}` |
 | `cluster.primaryUpdateStrategy` | Automatic or manual primary updates _(unsupervised\|supervised)_ | `unsupervised` |
 | `cluster.primaryUpdateMethod` | Primary update method for automatic rolling updates _(restart\|switchover)_ | `restart` |
 | `cluster.bootstrap.mode` | Bootstrap mode _(initdb\|recovery)_ | `initdb` |

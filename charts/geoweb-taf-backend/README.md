@@ -252,6 +252,7 @@ The following table lists the configurable parameters of the Taf backend chart a
 | `taf.name` | Name of backend | `taf` |
 | `taf.registry` | Registry to fetch image | `registry.gitlab.com/opengeoweb/backend-services/aviation-taf-backend/aviation-taf-backend` |
 | `taf.commitHash` | Adds commitHash annotation to the deployment | |
+| `taf.podLabels` | Extra labels for the pods, e.g. for log collection. Must not set `app` | `{}` |
 | `taf.imagePullPolicy` | Adds option to modify imagePullPolicy | |
 | `taf.url` | Url which the application can be accessed | |
 | `taf.path` | Path prefix of the service in the Ingress | `/taf-backend` |
@@ -365,6 +366,7 @@ The following table lists the configurable parameters of the Taf backend chart a
 
 | Chart version | taf version |
 |---------------|-------------|
+| 3.3.0         | 4.2.5       |
 | 3.2.0         | 4.2.5       |
 | 3.1.0         | 4.2.5       |
 | 3.0.1         | 4.2.5       |

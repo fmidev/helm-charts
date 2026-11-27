@@ -110,6 +110,21 @@
             }
           }
         },
+        "inheritedMetadata": {
+          "description": "Labels and annotations CNPG copies to every object it creates for the Cluster, passed to Cluster.spec.inheritedMetadata.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "labels": {
+              "type": "object",
+              "additionalProperties": {"type": "string"}
+            },
+            "annotations": {
+              "type": "object",
+              "additionalProperties": {"type": "string"}
+            }
+          }
+        },
         "primaryUpdateStrategy": {
           "type": "string",
           "enum": ["unsupervised", "supervised"]

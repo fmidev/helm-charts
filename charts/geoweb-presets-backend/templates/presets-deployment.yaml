@@ -45,6 +45,12 @@ spec:
     metadata:
       labels:
         app: {{ .Values.presets.name }}
+      {{- with .Values.presets.podLabels }}
+      {{- if hasKey . "app" }}
+      {{- fail "presets.podLabels must not set app; it is the Deployment selector label" }}
+      {{- end }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       annotations:
         eks.amazonaws.com/compute-type: ec2
       {{- if $configMapConfiguration }}

@@ -37,6 +37,12 @@ spec:
     metadata:
       labels:
         app: {{ .Values.frontend.name }}
+      {{- with .Values.frontend.podLabels }}
+      {{- if hasKey . "app" }}
+      {{- fail "frontend.podLabels must not set app; it is the Deployment selector label" }}
+      {{- end }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       annotations:
         eks.amazonaws.com/compute-type: ec2
       {{- if .Values.frontend.commitHash }}

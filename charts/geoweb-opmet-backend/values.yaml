@@ -7,6 +7,8 @@ opmet:
   path: /opmet
   svcPort: 80
   replicas: 1
+  # Extra labels for the pods, e.g. for log collection.
+  podLabels: {}
   minPodsAvailable: 0
   podAntiAffinity:
     topologyKey: topology.kubernetes.io/zone

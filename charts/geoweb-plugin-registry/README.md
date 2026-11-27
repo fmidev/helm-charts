@@ -47,6 +47,7 @@ sanitized values file is available at
 |---|---|---|
 | `versions.pluginRegistry` | Optional application version override | `""` |
 | `commitHash` | Optional deployment marker used to force a rollout for mutable image tags | `""` |
+| `podLabels` | Extra labels for the pod, e.g. for log collection. Must not set labels the chart already sets (`helm.sh/chart` and `app.kubernetes.io/` `name`, `instance`, `version`, `managed-by`) | `{}` |
 | `publicUrl` | Canonical external registry URL used for UI assets and package metadata | `""` |
 | `image.repository` | Container image repository | `registry.gitlab.com/opengeoweb/backend-services/plugin-registry-backend/plugin-registry-backend` |
 | `image.tag` | Container image tag | `v0.5.2` |
@@ -91,6 +92,7 @@ sanitized values file is available at
 
 | Chart version | plugin-registry-backend version |
 |---------------|---------------------------------|
+| 0.4.0         | v0.5.2                          |
 | 0.3.2         | v0.5.2                          |
 | 0.3.1         | v0.5.1                          |
 | 0.3.0         | v0.5.1                          |

@@ -21,6 +21,12 @@ spec:
     metadata:
       labels:
         app: {{ .Values.taf.name }}
+      {{- with .Values.taf.podLabels }}
+      {{- if hasKey . "app" }}
+      {{- fail "taf.podLabels must not set app; it is the Deployment selector label" }}
+      {{- end }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       annotations:
         eks.amazonaws.com/compute-type: ec2
       {{- if $inlineConfiguration }}

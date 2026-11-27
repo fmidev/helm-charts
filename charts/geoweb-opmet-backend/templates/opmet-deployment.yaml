@@ -29,6 +29,12 @@ spec:
     metadata:
       labels:
         app: {{ .Values.opmet.name }}
+      {{- with .Values.opmet.podLabels }}
+      {{- if hasKey . "app" }}
+      {{- fail "opmet.podLabels must not set app; it is the Deployment selector label" }}
+      {{- end }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       annotations:
         eks.amazonaws.com/compute-type: ec2
         checksum/publisher-env: {{ include (print $.Template.BasePath "/opmet-publisher-configmap.yaml") . | sha256sum | quote }}
